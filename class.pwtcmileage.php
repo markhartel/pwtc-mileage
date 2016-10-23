@@ -86,6 +86,10 @@ class PwtcMileage {
 		error_log( 'PWTC Mileage plugin deactivated' );
 	}
 
+	public static function plugin_uninstall() {
+		error_log( 'PWTC Mileage plugin uninstall' );		
+	}
+
 	private static function bail_on_activation( $message, $deactivate = true ) {
 ?>
 <!doctype html>

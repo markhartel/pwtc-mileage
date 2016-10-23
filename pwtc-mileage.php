@@ -20,6 +20,7 @@ define( 'PWTC_MILEAGE__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
 register_activation_hook( __FILE__, array( 'PwtcMileage', 'plugin_activation' ) );
 register_deactivation_hook( __FILE__, array( 'PwtcMileage', 'plugin_deactivation' ) );
+register_uninstall_hook( __FILE__, array( 'PwtcMileage', 'plugin_uninstall' ) );
 
 require_once( PWTC_MILEAGE__PLUGIN_DIR . 'class.pwtcmileage.php' );
 
