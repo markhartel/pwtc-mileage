@@ -33,7 +33,15 @@ class PwtcMileage {
 	private static function init_hooks() {
 		self::$initiated = true;
 		add_action( 'admin_menu', array( 'PwtcMileage', 'plugin_menu' ) );
-		add_shortcode('pwtc_mileage_report', array( 'PwtcMileage', 'report_shortcode'));
+		/*
+		[pwtc_mileage_year_to_date orderby="mileage/name" minmiles="500"]
+		[pwtc_mileage_lifetime orderby="mileage/name" minmiles="500"]
+		[pwtc_mileage_last_year orderby="mileage/name" minmiles="500"]
+		[pwtc_rides_led_year_to_date orderby="number/name" minnumber="12"]
+		[pwtc_rides_led_last_year orderby="number/name" minnumber="12"]
+		[pwtc_achievement_last_year]
+		*/
+		add_shortcode('pwtc_achievement_last_year', array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
     }
 
 	public static function plugin_menu() {
@@ -58,9 +66,30 @@ class PwtcMileage {
     	<?php
 	}
 
-	public static function report_shortcode() {
-		$out = '<div>Output from pwtc_mileage_report shortcode</div>';
+	public static function shortcode_ly_lt_achvmnt() {
+		$out = '';
+		$thisyear = date('Y');
+    	$lastyear = intval($thisyear) - 1;
+		$results = self::fetch_ly_lt_achvmnt();
+		$out .= '<div><table>';
+		$out .= '<caption>Accumulative Mileage Achievement for ' . $lastyear . '</caption>';
+		$out .= '<tr><th>Name</th><th>Mileage</th><th>Achievement</th></tr>';
+		foreach( $results as $row ):
+			$out .= '<tr>';
+			$out .= '<td>' . $row['first_name'] . ' ' . $row['last_name'] . '</td>';
+			$out .= '<td>' . $row['mileage'] . '</td>';
+			$out .= '<td>' . $row['achievement'] . '</td>';
+			$out .= '</tr>';
+		endforeach;
+		$out .= '</table></div>';
 		return $out;
+	}
+
+	public static function fetch_ly_lt_achvmnt() {
+    	global $wpdb;
+    	$results = $wpdb->get_results('select * from ' . self::LY_LT_ACHVMNT_VIEW . 
+			' order by mileage', ARRAY_A);
+		return $results;
 	}
 
 	public static function plugin_activation() {
