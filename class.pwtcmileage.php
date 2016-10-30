@@ -34,21 +34,38 @@ class PwtcMileage {
 		self::$initiated = true;
 		add_action( 'admin_menu', array( 'PwtcMileage', 'plugin_menu' ) );
 		/*
-		[pwtc_mileage_year_to_date orderby="mileage/name" minmiles="500"]
-		[pwtc_mileage_lifetime orderby="mileage/name" minmiles="500"]
-		[pwtc_mileage_last_year orderby="mileage/name" minmiles="500"]
-		[pwtc_rides_led_year_to_date orderby="number/name" minnumber="12"]
-		[pwtc_rides_led_last_year orderby="number/name" minnumber="12"]
+		[pwtc_mileage_year_to_date orderby="mileage/name" minimum="500"]
+		[pwtc_mileage_lifetime orderby="mileage/name" minimum="500"]
+		[pwtc_mileage_last_year orderby="mileage/name" minimum="500"]
+		[pwtc_rides_led_year_to_date orderby="number/name" minimum="12"]
+		[pwtc_rides_led_last_year orderby="number/name" minimum="12"]
 		[pwtc_achievement_last_year]
 		*/
 		add_shortcode('pwtc_achievement_last_year', array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
+		/*
+		add_shortcode('pwtc_mileage_year_to_date', array( 'PwtcMileage', 'shortcode_ytd_mileage'));
+		*/
+		add_action( 'wp_ajax_pwtc_mileage_lookup_rides', array( 'PwtcMileage', 'lookup_rides_callback') );
     }
+
+	public static function lookup_rides_callback() {
+		$startdate = $_POST['startdate'];	
+		$caption = "Rides on " . date("D M j, Y", strtotime($startdate));
+		$rides = array();
+		$results = self::fetch_club_rides($startdate);
+		foreach( $results as $row ):
+			array_push($rides, array('title' => $row['title'], 'rideid' => $row['ID']));
+		endforeach;
+		$response = array('caption' => $caption, 'rides' => $rides);
+    	echo wp_json_encode($response);
+		wp_die();
+	}
 
 	public static function plugin_menu() {
 		add_menu_page('PWTC Mileage', 'PWTC Mileage', 'manage_options', 'pwtc_mileage_menu', array( 'PwtcMileage', 'plugin_menu_page'));
 		add_submenu_page('pwtc_mileage_menu', 'Generate Reports', 'Generate Reports', 'manage_options', 'pwtc_mileage_generate_reports', array('PwtcMileage', 'plugin_menu_page'));
 		add_submenu_page('pwtc_mileage_menu', 'Manage Riders', 'Manage Riders', 'manage_options', 'pwtc_mileage_manage_riders', array('PwtcMileage', 'plugin_menu_page'));
-		add_submenu_page('pwtc_mileage_menu', 'Manage Ride Sheets', 'Manage Ride Sheets', 'manage_options', 'pwtc_mileage_manage_ride_sheets', array('PwtcMileage', 'plugin_menu_page'));
+		add_submenu_page('pwtc_mileage_menu', 'Manage Ride Sheets', 'Manage Ride Sheets', 'manage_options', 'pwtc_mileage_manage_ride_sheets', array('PwtcMileage', 'page_manage_ride_sheets'));
 
 		remove_submenu_page('pwtc_mileage_menu', 'pwtc_mileage_menu');
 		add_submenu_page('pwtc_mileage_menu', 'Settings', 'Settings', 'manage_options', 'pwtc_mileage_settings', array( 'PwtcMileage', 'plugin_menu_page'));
@@ -66,14 +83,57 @@ class PwtcMileage {
     	<?php
 	}
 
+	public static function page_manage_ride_sheets() {
+    	if (!current_user_can('manage_options')) {
+        	return;
+    	}
+    	?>
+		<script type="text/javascript" >
+			jQuery(document).ready(function($) {       
+        		$('#ride-lookup-form').on('submit', function(evt) {
+            		evt.preventDefault();
+					$('#ride-lookup-table caption').remove();
+					$('#ride-lookup-table tr').remove();
+            		var action = $('#ride-lookup-form').attr('action');
+            		var data = {
+			    		'action': 'pwtc_mileage_lookup_rides',
+			    		'startdate': $('#ride-lookup-date').val()
+		    		};
+					$.post(action, data, function(response) {
+                		var res = JSON.parse(response);
+						$('#ride-lookup-table').append('<caption>' + res.caption + '</caption>');
+                		res.rides.forEach(function(item) {
+                    		$('#ride-lookup-table').append('<tr rideid="' + item.rideid + '"><td>' + item.title + '</td><td><button>Edit</button></td></tr>');    
+                		});
+						$('#ride-lookup-table button').on('click', function(evt) {
+                 		});
+		    		});
+        		});
+			});
+		</script>
+    	<div class="wrap">
+			<h1><?= esc_html(get_admin_page_title()); ?></h1>
+			<form id="ride-lookup-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+    			<label>Start Date:</label>
+				<input id="ride-lookup-date" type="date" name="date" required/>
+				<input id="ride-lookup-submit" type="submit" value="Find Rides"/>
+			</form>
+			<table id="ride-lookup-table">
+			</table>
+    	</div>
+    	<?php
+	}
+
 	public static function shortcode_ly_lt_achvmnt() {
 		$out = '';
 		$thisyear = date('Y');
     	$lastyear = intval($thisyear) - 1;
 		$results = self::fetch_ly_lt_achvmnt();
-		$out .= '<div><table>';
-		$out .= '<caption>Accumulative Mileage Achievement for ' . $lastyear . '</caption>';
-		$out .= '<tr><th>Name</th><th>Mileage</th><th>Achievement</th></tr>';
+		$out .= '<div><table><tr>';
+		$out .= '<th>Name</th>';
+		$out .= '<th>' . $lastyear . ' Lifetime Mileage</th>';
+		$out .= '<th>' . $lastyear . ' Achievement</th>';
+		$out .= '</tr>';
 		foreach( $results as $row ):
 			$out .= '<tr>';
 			$out .= '<td>' . $row['first_name'] . ' ' . $row['last_name'] . '</td>';
@@ -85,12 +145,61 @@ class PwtcMileage {
 		return $out;
 	}
 
+/*
+	public static function shortcode_ytd_mileage($atts = [], $content = null, $tag = '') {
+		$my_atts = convert_mileage_atts($atts, $tag);
+		$out = '';
+		$thisyear = date('Y');
+		$results = self::fetch_ytd_mileage($my_atts['orderby'], $my_atts['minimum']);
+		$out .= '<div><table><tr>';
+		$out .= '<th>Name</th>';
+		$out .= '<th>' . $thisyear . ' YTD Mileage</th>';
+		$out .= '</tr>';
+		foreach( $results as $row ):
+			$out .= '<tr>';
+			$out .= '<td>' . $row['first_name'] . ' ' . $row['last_name'] . '</td>';
+			$out .= '<td>' . $row['mileage'] . '</td>';
+			$out .= '</tr>';
+		endforeach;
+		$out .= '</table></div>';
+		return $out;
+	}
+
+	public static function fetch_ytd_mileage($orderby, $minimum) {
+    	global $wpdb;
+    	$results = $wpdb->get_results('select * from ' . self::YTD_MILES_VIEW . 
+			' where mileage >= ' . $minimum . ' order by ' . $orderby, ARRAY_A);
+		return $results;
+	}
+
+*/
 	public static function fetch_ly_lt_achvmnt() {
     	global $wpdb;
     	$results = $wpdb->get_results('select * from ' . self::LY_LT_ACHVMNT_VIEW . 
 			' order by mileage', ARRAY_A);
 		return $results;
 	}
+
+	public static function fetch_club_rides($date) {
+    	global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+    	$results = $wpdb->get_results($wpdb->prepare('select * from ' . $ride_table . 
+			' where date = %s', $date), ARRAY_A);
+		return $results;
+	}
+
+/*
+	public static function convert_mileage_atts($atts, $tag) {
+    	// normalize attribute keys, lowercase
+    	$atts = array_change_key_case((array)$atts, CASE_LOWER);
+ 
+    	// override default attributes with user attributes
+    	$atts = shortcode_atts([
+        	'orderby' => 'mileage',
+			'minimum' => '1'], $atts, $tag);
+
+	}
+*/
 
 	public static function plugin_activation() {
 		error_log( 'PWTC Mileage plugin activated' );
