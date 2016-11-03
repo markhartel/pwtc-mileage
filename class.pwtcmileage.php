@@ -63,65 +63,31 @@ class PwtcMileage {
 
 	public static function plugin_menu() {
 		add_menu_page('PWTC Mileage', 'PWTC Mileage', 'manage_options', 'pwtc_mileage_menu', array( 'PwtcMileage', 'plugin_menu_page'));
-		add_submenu_page('pwtc_mileage_menu', 'Generate Reports', 'Generate Reports', 'manage_options', 'pwtc_mileage_generate_reports', array('PwtcMileage', 'plugin_menu_page'));
-		add_submenu_page('pwtc_mileage_menu', 'Manage Riders', 'Manage Riders', 'manage_options', 'pwtc_mileage_manage_riders', array('PwtcMileage', 'plugin_menu_page'));
+		add_submenu_page('pwtc_mileage_menu', 'Generate Reports', 'Generate Reports', 'manage_options', 'pwtc_mileage_generate_reports', array('PwtcMileage', 'page_generate_reports'));
+		add_submenu_page('pwtc_mileage_menu', 'Manage Riders', 'Manage Riders', 'manage_options', 'pwtc_mileage_manage_riders', array('PwtcMileage', 'page_manage_riders'));
 		add_submenu_page('pwtc_mileage_menu', 'Manage Ride Sheets', 'Manage Ride Sheets', 'manage_options', 'pwtc_mileage_manage_ride_sheets', array('PwtcMileage', 'page_manage_ride_sheets'));
 
 		remove_submenu_page('pwtc_mileage_menu', 'pwtc_mileage_menu');
-		add_submenu_page('pwtc_mileage_menu', 'Settings', 'Settings', 'manage_options', 'pwtc_mileage_settings', array( 'PwtcMileage', 'plugin_menu_page'));
+		add_submenu_page('pwtc_mileage_menu', 'Settings', 'Settings', 'manage_options', 'pwtc_mileage_settings', array( 'PwtcMileage', 'page_manage_settings'));
 	}
 
 	public static function plugin_menu_page() {
-    	if (!current_user_can('manage_options')) {
-        	return;
-    	}
-    	?>
-    	<div class="wrap">
-			<h1><?= esc_html(get_admin_page_title()); ?></h1>
-			<p>This is a test.</p>
-    	</div>
-    	<?php
 	}
 
 	public static function page_manage_ride_sheets() {
-    	if (!current_user_can('manage_options')) {
-        	return;
-    	}
-    	?>
-		<script type="text/javascript" >
-			jQuery(document).ready(function($) {       
-        		$('#ride-lookup-form').on('submit', function(evt) {
-            		evt.preventDefault();
-					$('#ride-lookup-table caption').remove();
-					$('#ride-lookup-table tr').remove();
-            		var action = $('#ride-lookup-form').attr('action');
-            		var data = {
-			    		'action': 'pwtc_mileage_lookup_rides',
-			    		'startdate': $('#ride-lookup-date').val()
-		    		};
-					$.post(action, data, function(response) {
-                		var res = JSON.parse(response);
-						$('#ride-lookup-table').append('<caption>' + res.caption + '</caption>');
-                		res.rides.forEach(function(item) {
-                    		$('#ride-lookup-table').append('<tr rideid="' + item.rideid + '"><td>' + item.title + '</td><td><button>Edit</button></td></tr>');    
-                		});
-						$('#ride-lookup-table button').on('click', function(evt) {
-                 		});
-		    		});
-        		});
-			});
-		</script>
-    	<div class="wrap">
-			<h1><?= esc_html(get_admin_page_title()); ?></h1>
-			<form id="ride-lookup-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-    			<label>Start Date:</label>
-				<input id="ride-lookup-date" type="date" name="date" required/>
-				<input id="ride-lookup-submit" type="submit" value="Find Rides"/>
-			</form>
-			<table id="ride-lookup-table">
-			</table>
-    	</div>
-    	<?php
+		include('admin-man-ridesheets.php');
+	}
+
+	public static function page_generate_reports() {
+		include('admin-gen-reports.php');
+	}
+
+	public static function page_manage_riders() {
+		include('admin-man-riders.php');
+	}
+
+	public static function page_manage_settings() {
+		include('admin-man-settings.php');
 	}
 
 	public static function shortcode_ly_lt_achvmnt() {
@@ -185,6 +151,28 @@ class PwtcMileage {
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
     	$results = $wpdb->get_results($wpdb->prepare('select * from ' . $ride_table . 
 			' where date = %s', $date), ARRAY_A);
+		return $results;
+	}
+
+	public static function fetch_ride_mileage($rideid) {
+    	global $wpdb;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+    	$results = $wpdb->get_results($wpdb->prepare('select' . 
+			' c.member_id, c.first_name, c.last_name, m.mileage' . 
+			' from ' . $member_table . ' as c inner join ' . $mileage_table . ' as m' . 
+			' on c.member_id = m.member_id where m.ride_id = %d', $rideid), ARRAY_A);
+		return $results;
+	}
+
+	public static function fetch_ride_leaders($rideid) {
+    	global $wpdb;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+    	$results = $wpdb->get_results($wpdb->prepare('select' . 
+			' c.member_id, c.first_name, c.last_name' . 
+			' from ' . $member_table . ' as c inner join ' . $leader_table . ' as l' . 
+			' on c.member_id = l.member_id where l.ride_id = %d', $rideid), ARRAY_A);
 		return $results;
 	}
 
