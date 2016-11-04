@@ -66,7 +66,7 @@ class PwtcMileage {
 		add_submenu_page('pwtc_mileage_menu', 'Generate Reports', 'Generate Reports', 'manage_options', 'pwtc_mileage_generate_reports', array('PwtcMileage', 'page_generate_reports'));
 		add_submenu_page('pwtc_mileage_menu', 'Manage Riders', 'Manage Riders', 'manage_options', 'pwtc_mileage_manage_riders', array('PwtcMileage', 'page_manage_riders'));
 		add_submenu_page('pwtc_mileage_menu', 'Manage Ride Sheets', 'Manage Ride Sheets', 'manage_options', 'pwtc_mileage_manage_ride_sheets', array('PwtcMileage', 'page_manage_ride_sheets'));
-
+		add_submenu_page('pwtc_mileage_menu', 'Manage Year End', 'Manage Year End', 'manage_options', 'pwtc_mileage_manage_year_end', array('PwtcMileage', 'page_manage_year_end'));
 		remove_submenu_page('pwtc_mileage_menu', 'pwtc_mileage_menu');
 		add_submenu_page('pwtc_mileage_menu', 'Settings', 'Settings', 'manage_options', 'pwtc_mileage_settings', array( 'PwtcMileage', 'page_manage_settings'));
 	}
@@ -84,6 +84,10 @@ class PwtcMileage {
 
 	public static function page_manage_riders() {
 		include('admin-man-riders.php');
+	}
+
+	public static function page_manage_year_end() {
+		include('admin-man-yearend.php');
 	}
 
 	public static function page_manage_settings() {

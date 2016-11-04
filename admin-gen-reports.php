@@ -27,6 +27,7 @@ jQuery(document).ready(function($) {
         </select>
     </p>
     <p id='reports-club-wide'>
+        <a href='#' report-id='0'>Missing ride sheets</a>,
         <a href='#' report-id='1'>Year-to-date mileage</a>,
         <a href='#' report-id='2'>Last year's mileage</a>,
         <a href='#' report-id='3'>Lifetime mileage</a>,
