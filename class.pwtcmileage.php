@@ -46,17 +46,34 @@ class PwtcMileage {
 		add_shortcode('pwtc_mileage_year_to_date', array( 'PwtcMileage', 'shortcode_ytd_mileage'));
 		*/
 		add_action( 'wp_ajax_pwtc_mileage_lookup_rides', array( 'PwtcMileage', 'lookup_rides_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_lookup_ridesheet', array( 'PwtcMileage', 'lookup_ridesheet_callback') );
     }
 
 	public static function lookup_rides_callback() {
 		$startdate = $_POST['startdate'];	
-		$caption = "Rides on " . date("D M j, Y", strtotime($startdate));
+		$date = date("D M j, Y", strtotime($startdate));
 		$rides = array();
 		$results = self::fetch_club_rides($startdate);
 		foreach( $results as $row ):
 			array_push($rides, array('title' => $row['title'], 'rideid' => $row['ID']));
 		endforeach;
-		$response = array('caption' => $caption, 'rides' => $rides);
+		$response = array('date' => $date, 'rides' => $rides);
+    	echo wp_json_encode($response);
+		wp_die();
+	}
+
+	public static function lookup_ridesheet_callback() {
+		$rideid = $_POST['ride_id'];
+		$date = $_POST['date'];
+		$title = $_POST['title'];
+		$leaders = self::fetch_ride_leaders(intval($rideid));
+		$mileage = self::fetch_ride_mileage(intval($rideid));
+		$response = array(
+			'date' => $date,
+			'ride_id' => $rideid,
+			'title' => $title,
+			'leaders' => $leaders,
+			'mileage' => $mileage);
     	echo wp_json_encode($response);
 		wp_die();
 	}
