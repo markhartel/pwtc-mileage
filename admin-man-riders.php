@@ -5,6 +5,24 @@ if (!current_user_can('manage_options')) {
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
+	function populate_riders_table(members) {
+		$('#rider-inspect-section table tr').remove();
+		$('#rider-inspect-section table').append(
+			'<tr><th>Rider ID</th><th>Name</th><th>Expiration Date</th></tr>');
+        members.forEach(function(item) {
+            $('#rider-inspect-section table').append(
+				'<tr memberid="' + item.member_id + '">' + 
+				'<td>' + item.member_id + '</td>' +
+				'<td>' + item.first_name + ' ' + item.last_name + '</td>' + 
+				'<td>' + item.expir_date + '</td></tr>');    
+		});
+    }
+
+	function lookup_riders_cb(response) {
+        var res = JSON.parse(response);
+		populate_riders_table(res.members);
+	}   
+
     $('#rider-update-button').on('click', function(evt) {
         evt.preventDefault();
         alert('Update Riders button pressed');
@@ -24,14 +42,13 @@ jQuery(document).ready(function($) {
 
     $('#rider-inspect-section form').on('submit', function(evt) {
         evt.preventDefault();
-		$('#rider-inspect-section table tr').remove();
         var action = $('#rider-inspect-section form').attr('action');
         var data = {
-			'action': '???',
+			'action': 'pwtc_mileage_lookup_riders',
 			'lastname': $('#rider-lookup-last').val(),
             'firstname': $('#rider-lookup-first').val()
 		};
-        alert('Lookup button pressed');
+        $.post(action, data, lookup_riders_cb);
     });
 
 	$('#rider-inspect-section').hide();

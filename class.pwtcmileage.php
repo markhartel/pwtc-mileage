@@ -47,6 +47,7 @@ class PwtcMileage {
 		*/
 		add_action( 'wp_ajax_pwtc_mileage_lookup_rides', array( 'PwtcMileage', 'lookup_rides_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_ridesheet', array( 'PwtcMileage', 'lookup_ridesheet_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_lookup_riders', array( 'PwtcMileage', 'lookup_riders_callback') );
     }
 
 	public static function lookup_rides_callback() {
@@ -77,6 +78,19 @@ class PwtcMileage {
     	echo wp_json_encode($response);
 		wp_die();
 	}
+
+	public static function lookup_riders_callback() {
+		$lastname = $_POST['lastname'];	
+		$firstname = $_POST['firstname'];
+		$members = self::fetch_riders($lastname, $firstname);	
+		$response = array(
+			'lastname' => $lastname,
+			'firstname' => $firstname,
+			'members' => $members);
+    	echo wp_json_encode($response);
+		wp_die();
+	}
+
 
 	public static function plugin_menu() {
 		add_menu_page('PWTC Mileage', 'PWTC Mileage', 'manage_options', 'pwtc_mileage_menu', array( 'PwtcMileage', 'plugin_menu_page'));
@@ -194,6 +208,15 @@ class PwtcMileage {
 			' c.member_id, c.first_name, c.last_name' . 
 			' from ' . $member_table . ' as c inner join ' . $leader_table . ' as l' . 
 			' on c.member_id = l.member_id where l.ride_id = %d', $rideid), ARRAY_A);
+		return $results;
+	}
+
+	public static function fetch_riders($lastname, $firstname) {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+    	$results = $wpdb->get_results($wpdb->prepare('select * from ' . $member_table . 
+			' where first_name like %s and last_name like %s order by last_name, first_name', 
+            $firstname . "%", $lastname . "%"), ARRAY_A);
 		return $results;
 	}
 
