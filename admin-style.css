@@ -1,0 +1,17 @@
+.riders-popup {
+  border: 2px solid black;
+  background: white;
+  padding: 10px;
+  /*position: absolute;*/
+  display: none;
+  max-width: 400px;
+}
+
+.riders-popup div {
+  overflow: auto;
+  height: 100px;
+}
+
+.riders-popup table tr {
+  cursor: pointer;
+}

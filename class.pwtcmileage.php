@@ -33,6 +33,7 @@ class PwtcMileage {
 	private static function init_hooks() {
 		self::$initiated = true;
 		add_action( 'admin_menu', array( 'PwtcMileage', 'plugin_menu' ) );
+		add_action( 'admin_enqueue_scripts', array( 'PwtcMileage', 'load_admin_style' ) );
 		/*
 		[pwtc_mileage_year_to_date orderby="mileage/name" minimum="500"]
 		[pwtc_mileage_lifetime orderby="mileage/name" minimum="500"]
@@ -49,6 +50,13 @@ class PwtcMileage {
 		add_action( 'wp_ajax_pwtc_mileage_lookup_ridesheet', array( 'PwtcMileage', 'lookup_ridesheet_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_riders', array( 'PwtcMileage', 'lookup_riders_callback') );
     }
+
+	public static function load_admin_style($hook) {
+		if (!strpos($hook, "pwtc_mileage")) {
+            return;
+        }
+        wp_enqueue_style( 'pwtc_mileage_admin_css', PWTC_MILEAGE__PLUGIN_URL . 'admin-style.css' );
+	}
 
 	public static function lookup_rides_callback() {
 		$startdate = $_POST['startdate'];	

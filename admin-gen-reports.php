@@ -5,16 +5,60 @@ if (!current_user_can('manage_options')) {
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
+
+    function populate_riders_table(members) {
+		$('#rider-lookup-results table tr').remove();
+        members.forEach(function(item) {
+            $('#rider-lookup-results table').append(
+				'<tr memberid="' + item.member_id + '">' + 
+				'<td>' + item.member_id + '</td>' +
+				'<td>' + item.first_name + ' ' + item.last_name + '</td></tr>');    
+		});
+        $('#rider-lookup-results table tr').on('click', function(evt) {
+            $('#report-riderid').val($(this).attr('memberid'));
+            $("#rider-lookup-results").hide(400);
+        });
+        return members.length;
+    }
+
+	function lookup_riders_cb(response) {
+        var res = JSON.parse(response);
+		var num_riders = populate_riders_table(res.members);
+        if (num_riders == 1) {
+            $('#report-riderid').val(res.members[0].member_id);
+        }
+        else if (num_riders > 0) {
+            $("#rider-lookup-results").show(400);
+        }
+	}   
+
     $('#reports-club-wide a').on('click', function(evt) {
         evt.preventDefault();
         var reportid = $(this).attr('report-id');
         alert('Report ' + reportid + ' selected');
     });
+
     $('#reports-rider-specific a').on('click', function(evt) {
         evt.preventDefault();
         var reportid = $(this).attr('report-id');
         alert('Report ' + reportid + ' selected');
     });
+
+    $('#report-dialog-close').on('click', function(evt) {
+        $("#rider-lookup-results").hide(400);
+    });
+
+    $('#rider-lookup-form').on('submit', function(evt) {
+        evt.preventDefault();
+        var action = $('#rider-lookup-form').attr('action');
+        var data = {
+			'action': 'pwtc_mileage_lookup_riders',
+			'lastname': $('#rider-lookup-last').val(),
+            'firstname': $('#rider-lookup-first').val()
+		};
+        $.post(action, data, lookup_riders_cb);
+    });
+
 });
 </script>
 <div class="wrap">
@@ -36,9 +80,20 @@ jQuery(document).ready(function($) {
         <a href='#' report-id='6'>Last year's ride leaders</a>
     </p>
     <h3>Rider-specific Reports</h3>
+    <div>
+	<form id="rider-lookup-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+        <input id="rider-lookup-first" type="text" name="firstname" placeholder="Enter first name"/>        
+        <input id="rider-lookup-last" type="text" name="lastname" placeholder="Enter last name"/> 
+        <input type="submit" value="Lookup"/>       
+    </form>
+    <div class="riders-popup" id="rider-lookup-results">
+        <div>
+             <table></table>
+        </div>
+    </div>
+    </div>
     <p>Rider ID:
         <input id="report-riderid" type="text" pattern="[0-9]{5}"/>
-        <button id="report-lookup-button">Lookup Rider</button>
     </p>
     <p id='reports-rider-specific'>
         <a href='#' report-id='7'>Year-to-date rides</a>,
