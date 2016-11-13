@@ -116,5 +116,8 @@ jQuery(document).ready(function($) {
 			<table></table>
 		</div>
 	</div>
+<?php
+    include('admin-rider-lookup.php');
+?>
 </div>
 <?php
