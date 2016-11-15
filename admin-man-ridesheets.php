@@ -79,14 +79,36 @@ jQuery(document).ready(function($) {
 		$.post(action, data, lookup_rides_cb);
     });
 
-    $('#ride-sheet-section button').on('click', function(evt) {
+    $('#ride-sheet-back-btn').on('click', function(evt) {
         evt.preventDefault();
+		$('#leader-add-btn').hide();
+		$('#mileage-add-btn').hide();
 		$('#ride-sheet-section').hide();
 		$('#ride-lookup-section').show();
     });
 
+	$('#leader-lookup-btn').on('click', function(evt) {
+        lookup_pwtc_riders(function(riderid, name) {
+            $('#leader-riderid').html(riderid);
+            $('#leader-ridername').html(name); 
+			$('#leader-add-btn').show();           
+        });
+    });
+
+	$('#rider-lookup-btn').on('click', function(evt) {
+        lookup_pwtc_riders(function(riderid, name) {
+            $('#mileage-riderid').html(riderid);
+            $('#mileage-ridername').html(name); 
+			$('#mileage-amount').val(''); 
+			$('#mileage-add-btn').show();           
+        });
+    });
+
+
 	$('#ride-sheet-section').hide();
 	$('#ride-lookup-section').show();
+	$('#leader-add-btn').hide(); 
+	$('#mileage-add-btn').hide(); 
 });
 </script>
 <div class="wrap">
@@ -101,17 +123,30 @@ jQuery(document).ready(function($) {
 		<table></table>
 	</div>
 	<div id='ride-sheet-section'>
-		<button>Back to Rides</button>
+		<button id='ride-sheet-back-btn'>Back to Rides</button>
 		<h2></h2>
 		<div id="ride-leader-section">
 			<h3>Ride Leaders</h3>
 			<form action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+				<input id="leader-lookup-btn" type="button" value="Lookup Leader"/>
+				<span id="leader-add-btn">
+					<label id="leader-riderid"/></label>
+            		<label id="leader-ridername"></label>
+					<input type="submit" value="Add Leader"/>
+				</span>
 			</form>
 			<table></table>
 		</div>
 		<div id="ride-mileage-section">
 			<h3>Rider Mileage</h3>
 			<form action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+				<input id="rider-lookup-btn" type="button" value="Lookup Rider"/>
+				<span id="mileage-add-btn">
+					<label id="mileage-riderid"/></label>
+            		<label id="mileage-ridername"></label>
+					<input id="mileage-amount" type="number" min="1" step="1" placeholder="Enter mileage" required/>
+					<input type="submit" value="Add Mileage"/>
+				</span>
 			</form>
 			<table></table>
 		</div>
