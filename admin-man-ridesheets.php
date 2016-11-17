@@ -36,6 +36,16 @@ jQuery(document).ready(function($) {
 				'<td>' + item.first_name + ' ' + item.last_name + '</td>' + 
 				'<td><button>Remove</button></td></tr>');    
 		});
+		$('#ride-leader-section table button').on('click', function(evt) {
+            evt.preventDefault();
+            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+            var data = {
+			    'action': 'pwtc_mileage_remove_leader',
+                'ride_id': $(this).parent().parent().attr('rideid'),
+				'member_id': $(this).parent().parent().attr('memberid')
+		    };
+			$.post(action, data, remove_leader_cb);
+		});
 	}
 
 	function populate_ride_mileage_table(ride_id, mileage) {
@@ -50,6 +60,16 @@ jQuery(document).ready(function($) {
 				'<td>' + item.mileage + '</td>' +
 				'<td><button>Remove</button></td></tr>');    
 		});
+		$('#ride-mileage-section table button').on('click', function(evt) {
+            evt.preventDefault();
+            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+            var data = {
+			    'action': 'pwtc_mileage_remove_mileage',
+                'ride_id': $(this).parent().parent().attr('rideid'),
+				'member_id': $(this).parent().parent().attr('memberid')
+		    };
+			$.post(action, data, remove_mileage_cb);
+		});
 	}
 
 	function lookup_rides_cb(response) {
@@ -63,10 +83,53 @@ jQuery(document).ready(function($) {
 		$('#ride-lookup-section').hide();
         var res = JSON.parse(response);
 		$('#ride-sheet-section h2').html(res.title + ' (' + res.date + ')');
+		$('#leader-rideid').val(res.ride_id); 
+		$('#mileage-rideid').val(res.ride_id); 
 		populate_ride_leader_table(res.ride_id, res.leaders);
 		populate_ride_mileage_table(res.ride_id, res.mileage);
-
 	}   
+
+	function remove_leader_cb(response) {
+		var res = JSON.parse(response);
+		if (res.error) {
+			alert(res.error);
+		}
+		else {
+			populate_ride_leader_table(res.ride_id, res.leaders);
+		}
+	}
+
+	function remove_mileage_cb(response) {
+		var res = JSON.parse(response);
+		if (res.error) {
+			alert(res.error);
+		}
+		else {
+			populate_ride_mileage_table(res.ride_id, res.mileage);
+		}
+	}
+
+	function add_leader_cb(response) {
+		var res = JSON.parse(response);
+		if (res.error) {
+			alert(res.error);
+		}
+		else {
+			$('#leader-add-btn').hide();
+			populate_ride_leader_table(res.ride_id, res.leaders);
+		}
+	}
+
+	function add_mileage_cb(response) {
+		var res = JSON.parse(response);
+		if (res.error) {
+			alert(res.error);
+		}
+		else {
+			$('#mileage-add-btn').hide();
+			populate_ride_mileage_table(res.ride_id, res.mileage);
+		}
+	}
 
     $('#ride-lookup-section form').on('submit', function(evt) {
         evt.preventDefault();
@@ -77,6 +140,29 @@ jQuery(document).ready(function($) {
 			'startdate': $('#ride-lookup-date').val()
 		};
 		$.post(action, data, lookup_rides_cb);
+    });
+
+    $('#ride-leader-section form').on('submit', function(evt) {
+        evt.preventDefault();
+        var action = $('#ride-leader-section form').attr('action');
+        var data = {
+			'action': 'pwtc_mileage_add_leader',
+			'member_id': $('#leader-riderid').html(),
+			'ride_id': $('#leader-rideid').val()
+		};
+		$.post(action, data, add_leader_cb);
+    });
+
+    $('#ride-mileage-section form').on('submit', function(evt) {
+        evt.preventDefault();
+        var action = $('#ride-mileage-section form').attr('action');
+        var data = {
+			'action': 'pwtc_mileage_add_mileage',
+			'member_id': $('#mileage-riderid').html(),
+			'ride_id': $('#mileage-rideid').val(),
+			'mileage': $('#mileage-amount').val()
+		};
+		$.post(action, data, add_mileage_cb);
     });
 
     $('#ride-sheet-back-btn').on('click', function(evt) {
@@ -132,6 +218,7 @@ jQuery(document).ready(function($) {
 				<span id="leader-add-btn">
 					<label id="leader-riderid"/></label>
             		<label id="leader-ridername"></label>
+					<input id="leader-rideid" type="hidden"/>
 					<input type="submit" value="Add Leader"/>
 				</span>
 			</form>
@@ -145,6 +232,7 @@ jQuery(document).ready(function($) {
 					<label id="mileage-riderid"/></label>
             		<label id="mileage-ridername"></label>
 					<input id="mileage-amount" type="number" min="1" step="1" placeholder="Enter mileage" required/>
+					<input id="mileage-rideid" type="hidden"/>
 					<input type="submit" value="Add Mileage"/>
 				</span>
 			</form>
