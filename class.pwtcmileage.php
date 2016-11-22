@@ -47,6 +47,9 @@ class PwtcMileage {
 		add_shortcode('pwtc_mileage_year_to_date', array( 'PwtcMileage', 'shortcode_ytd_mileage'));
 		*/
 		add_action( 'wp_ajax_pwtc_mileage_lookup_rides', array( 'PwtcMileage', 'lookup_rides_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_create_ride', array( 'PwtcMileage', 'create_ride_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_create_ride_from_event', array( 'PwtcMileage', 'create_ride_from_event_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_remove_ride', array( 'PwtcMileage', 'remove_ride_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_ridesheet', array( 'PwtcMileage', 'lookup_ridesheet_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_riders', array( 'PwtcMileage', 'lookup_riders_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_leader', array( 'PwtcMileage', 'remove_leader_callback') );
@@ -66,23 +69,105 @@ class PwtcMileage {
 	public static function lookup_rides_callback() {
 		$startdate = $_POST['startdate'];	
 		$date = date("D M j, Y", strtotime($startdate));
-		$rides = array();
-		$results = self::fetch_club_rides($startdate);
-		foreach( $results as $row ):
-			array_push($rides, array('title' => $row['title'], 'rideid' => $row['ID']));
-		endforeach;
-		$response = array('date' => $date, 'rides' => $rides);
+		$rides = self::fetch_club_rides($startdate);
+		$ridecal = self::fetch_sched_rides($startdate);
+		$response = array(
+			'startdate' => $startdate, 
+			'date' => $date, 
+			'rides' => $rides,
+			'ridecal' => $ridecal);
     	echo wp_json_encode($response);
 		wp_die();
 	}
 
+	public static function create_ride_callback() {
+		$startdate = $_POST['startdate'];	
+		$title = $_POST['title'];	
+		$status = self::insert_ride($title, $startdate);
+		if (false === $status) {
+			$response = array(
+				'error' => 'Could not insert ride into database.'
+			);
+    		echo wp_json_encode($response);
+		}
+		else {
+			$rides = self::fetch_club_rides($startdate);
+			$ridecal = self::fetch_sched_rides($startdate);
+			$response = array(
+				'startdate' => $startdate, 
+				'rides' => $rides,
+				'ridecal' => $ridecal);
+    		echo wp_json_encode($response);
+		}
+		wp_die();
+	}
+
+	public static function create_ride_from_event_callback() {
+		$startdate = $_POST['startdate'];	
+		$title = $_POST['title'];	
+		$postid = $_POST['post_id'];	
+		$status = self::insert_ride_with_postid($title, $startdate, intval($postid));
+		if (false === $status) {
+			$response = array(
+				'error' => 'Could not insert ride into database.'
+			);
+    		echo wp_json_encode($response);
+		}
+		else {
+			$rides = self::fetch_club_rides($startdate);
+			$ridecal = self::fetch_sched_rides($startdate);
+			$response = array(
+				'startdate' => $startdate, 
+				'rides' => $rides,
+				'ridecal' => $ridecal);
+    		echo wp_json_encode($response);
+		}
+		wp_die();
+	}
+
+	public static function remove_ride_callback() {
+		$startdate = $_POST['startdate'];
+		$date = date("D M j, Y", strtotime($startdate));
+		$rideid = $_POST['ride_id'];
+		$mcnt = self::fetch_ride_has_mileage(intval($rideid));
+		$lcnt = self::fetch_ride_has_leaders(intval($rideid));
+		if ($mcnt > 0 or $lcnt > 0) {
+			$response = array(
+				'error' => 'Cannot remove a ride with a ride sheet.'
+			);
+    		echo wp_json_encode($response);
+		}
+		else {
+			$status = self::delete_ride(intval($rideid));
+			if (false === $status) {
+				$response = array(
+					'error' => 'Could not delete ride from database.'
+				);
+    			echo wp_json_encode($response);
+			}
+			else {
+				$rides = self::fetch_club_rides($startdate);
+				$ridecal = self::fetch_sched_rides($startdate);
+				$response = array(
+					'startdate' => $startdate, 
+					'date' => $date, 
+					'rides' => $rides,
+					'ridecal' => $ridecal);
+    			echo wp_json_encode($response);
+			}
+		}
+		wp_die();	
+	}
+
 	public static function lookup_ridesheet_callback() {
 		$rideid = $_POST['ride_id'];
-		$date = $_POST['date'];
+		$startdate = $_POST['startdate'];
+		$date = date("D M j, Y", strtotime($startdate));
 		$title = $_POST['title'];
 		$leaders = self::fetch_ride_leaders(intval($rideid));
 		$mileage = self::fetch_ride_mileage(intval($rideid));
 		$response = array(
+			'startdate' => $startdate,
 			'date' => $date,
 			'ride_id' => $rideid,
 			'title' => $title,
@@ -286,6 +371,17 @@ class PwtcMileage {
 		return $results;
 	}
 
+	public static function fetch_sched_rides($date) {
+    	global $wpdb;
+    	$results = $wpdb->get_results($wpdb->prepare('select p.ID, p.post_title' . 
+			' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
+			' as m on p.ID = m.post_id' . 
+			' where p.post_type = %s and p.post_status = \'publish\'' . 
+			' and m.meta_key = %s and cast(m.meta_value as date) = %s', 
+			'rideevent', 'start_date', $date), ARRAY_A);
+		return $results;
+	}
+
 	public static function fetch_ride_mileage($rideid) {
     	global $wpdb;
 		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
@@ -308,6 +404,46 @@ class PwtcMileage {
 		return $results;
 	}
 
+	public static function fetch_ride_has_mileage($rideid) {
+    	global $wpdb;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		$results = $wpdb->get_var($wpdb->prepare('select count(*) from ' . $mileage_table . 
+			' where ride_id = %d', $rideid));
+		return $results;
+	}
+
+	public static function fetch_ride_has_leaders($rideid) {
+    	global $wpdb;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$results = $wpdb->get_var($wpdb->prepare('select count(*) from ' . $leader_table . 
+			' where ride_id = %d', $rideid));
+		return $results;
+	}
+
+	public static function fetch_member_has_mileage($memberid) {
+    	global $wpdb;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		$results = $wpdb->get_var($wpdb->prepare('select count(*) from ' . $mileage_table . 
+			' where member_id = %s', $memberid));
+		return $results;
+	}
+
+	public static function fetch_member_has_leaders($memberid) {
+    	global $wpdb;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$results = $wpdb->get_var($wpdb->prepare('select count(*) from ' . $leader_table . 
+			' where member_id = %s', $memberid));
+		return $results;
+	}
+
+	public static function delete_ride($rideid) {
+    	global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$status = $wpdb->query($wpdb->prepare('delete from ' . $ride_table . 
+			' where ID = %d', $rideid));
+		return $status;
+	}
+
 	public static function delete_ride_leader($rideid, $memberid) {
     	global $wpdb;
 		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
@@ -321,6 +457,22 @@ class PwtcMileage {
 		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
 		$status = $wpdb->query($wpdb->prepare('delete from ' . $mileage_table . 
 			' where member_id = %s and ride_id = %d', $memberid, $rideid));
+		return $status;
+	}
+
+	public static function insert_ride($title, $startdate) {
+    	global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$status = $wpdb->query($wpdb->prepare('insert into ' . $ride_table .
+			' (title, date) values (%s, %s)', $title, $startdate));
+		return $status;
+	}
+
+	public static function insert_ride_with_postid($title, $startdate, $postid) {
+    	global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$status = $wpdb->query($wpdb->prepare('insert into ' . $ride_table .
+			' (title, date, post_id) values (%s, %s, %d)', $title, $startdate, $postid));
 		return $status;
 	}
 

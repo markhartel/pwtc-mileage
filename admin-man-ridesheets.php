@@ -5,23 +5,52 @@ if (!current_user_can('manage_options')) {
 ?>
 <script type="text/javascript" >
 jQuery(document).ready(function($) {   
-	function populate_rides_table(date, rides) {
+	function populate_rides_table(startdate, rides, ridecal) {
 		$('#ride-lookup-section table tr').remove();
+        ridecal.forEach(function(item) {
+            $('#ride-lookup-section table').append(
+				'<tr postid="' + item.ID + '" ridedate="' + startdate + '"><td>' +
+				item.post_title + '</td><td><button class="create_btn">Create Sheet</button></td>' + 
+				'<td></td></tr>');    
+        });
         rides.forEach(function(item) {
             $('#ride-lookup-section table').append(
-				'<tr rideid="' + item.rideid + '" ridedate="' + date + '"><td>' +
-				item.title + '</td><td><button>Edit Sheet</button></td></tr>');    
+				'<tr rideid="' + item.ID + '" ridedate="' + startdate + '"><td>' +
+				item.title + '</td><td><button class="edit_btn">Edit Sheet</button></td>' + 
+				'<td><button class="remove_btn">Remove Ride</button></td></tr>');    
         });
-		$('#ride-lookup-section table button').on('click', function(evt) {
+		$('#ride-lookup-section table .create_btn').on('click', function(evt) {
+            evt.preventDefault();
+            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+            var data = {
+			    'action': 'pwtc_mileage_create_ride_from_event',
+                'post_id': $(this).parent().parent().attr('postid'),
+				'startdate': $(this).parent().parent().attr('ridedate'),
+				'title': $(this).parent().parent().find('td').first().html()
+		    };
+			$.post(action, data, create_ride_from_event_cb);
+		});
+		$('#ride-lookup-section table .edit_btn').on('click', function(evt) {
             evt.preventDefault();
             var action = '<?php echo admin_url('admin-ajax.php'); ?>';
             var data = {
 			    'action': 'pwtc_mileage_lookup_ridesheet',
                 'ride_id': $(this).parent().parent().attr('rideid'),
-				'date': $(this).parent().parent().attr('ridedate'),
+				'startdate': $(this).parent().parent().attr('ridedate'),
 				'title': $(this).parent().parent().find('td').first().html()
 		    };
 			$.post(action, data, lookup_ridesheet_cb);
+		});
+		$('#ride-lookup-section table .remove_btn').on('click', function(evt) {
+            evt.preventDefault();
+            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+            var data = {
+			    'action': 'pwtc_mileage_remove_ride',
+                'ride_id': $(this).parent().parent().attr('rideid'),
+				'startdate': $(this).parent().parent().attr('ridedate'),
+				'title': $(this).parent().parent().find('td').first().html()
+		    };
+			$.post(action, data, remove_ride_cb);
 		});
 	}
 
@@ -75,7 +104,30 @@ jQuery(document).ready(function($) {
 	function lookup_rides_cb(response) {
         var res = JSON.parse(response);
 		$('#ride-lookup-section h3').html('Rides on ' + res.date);
-		populate_rides_table(res.date, res.rides);
+		populate_rides_table(res.startdate, res.rides, res.ridecal);
+		$('#ride-create-date').val(res.startdate);
+		$('#ride-create-form').show();
+	}   
+
+	function create_ride_cb(response) {
+        var res = JSON.parse(response);
+		if (res.error) {
+			alert(res.error);
+		}
+		else {
+			populate_rides_table(res.startdate, res.rides, res.ridecal);
+			$('#ride-create-title').val('');
+		}
+	}   
+
+	function create_ride_from_event_cb(response) {
+        var res = JSON.parse(response);
+		if (res.error) {
+			alert(res.error);
+		}
+		else {
+			populate_rides_table(res.startdate, res.rides, res.ridecal);
+		}
 	}   
 
 	function lookup_ridesheet_cb(response) {
@@ -88,6 +140,16 @@ jQuery(document).ready(function($) {
 		populate_ride_leader_table(res.ride_id, res.leaders);
 		populate_ride_mileage_table(res.ride_id, res.mileage);
 	}   
+
+	function remove_ride_cb(response) {
+		var res = JSON.parse(response);
+		if (res.error) {
+			alert(res.error);
+		}
+		else {
+			populate_rides_table(res.startdate, res.rides, res.ridecal);
+		}
+	}
 
 	function remove_leader_cb(response) {
 		var res = JSON.parse(response);
@@ -131,15 +193,27 @@ jQuery(document).ready(function($) {
 		}
 	}
 
-    $('#ride-lookup-section form').on('submit', function(evt) {
+    $('#ride-lookup-form').on('submit', function(evt) {
         evt.preventDefault();
 		$('#ride-lookup-section h3').html('');
-        var action = $('#ride-lookup-section form').attr('action');
+		$('#ride-create-form').hide();
+        var action = $('#ride-lookup-form').attr('action');
         var data = {
 			'action': 'pwtc_mileage_lookup_rides',
 			'startdate': $('#ride-lookup-date').val()
 		};
 		$.post(action, data, lookup_rides_cb);
+    });
+
+    $('#ride-create-form').on('submit', function(evt) {
+        evt.preventDefault();
+        var action = $('#ride-create-form').attr('action');
+        var data = {
+			'action': 'pwtc_mileage_create_ride',
+			'startdate': $('#ride-create-date').val(),
+			'title': $('#ride-create-title').val()
+		};
+		$.post(action, data, create_ride_cb);
     });
 
     $('#ride-leader-section form').on('submit', function(evt) {
@@ -193,6 +267,7 @@ jQuery(document).ready(function($) {
 
 	$('#ride-sheet-section').hide();
 	$('#ride-lookup-section').show();
+	$('#ride-create-form').hide();
 	$('#leader-add-btn').hide(); 
 	$('#mileage-add-btn').hide(); 
 });
@@ -200,12 +275,17 @@ jQuery(document).ready(function($) {
 <div class="wrap">
 	<h1><?= esc_html(get_admin_page_title()); ?></h1>
 	<div id="ride-lookup-section">
-		<form action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+		<form id="ride-lookup-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
     		<label>Start Date:</label>
 			<input id="ride-lookup-date" type="date" name="date" required/>
 			<input type="submit" value="Find Rides"/>
 		</form>
 		<h3></h3>
+		<form id="ride-create-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+            <input id="ride-create-title" type="text" name="title" placeholder="Enter ride title" required/> 
+			<input id="ride-create-date" type="hidden"/>
+			<input type="submit" value="Create Ride"/>
+		</form>
 		<table></table>
 	</div>
 	<div id='ride-sheet-section'>
