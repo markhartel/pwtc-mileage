@@ -58,6 +58,7 @@ class PwtcMileage {
 		add_action( 'wp_ajax_pwtc_mileage_remove_mileage', array( 'PwtcMileage', 'remove_mileage_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_add_leader', array( 'PwtcMileage', 'add_leader_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_add_mileage', array( 'PwtcMileage', 'add_mileage_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_generate_report', array( 'PwtcMileage', 'generate_report_callback') );
     }
 
 	public static function load_admin_scripts($hook) {
@@ -344,6 +345,42 @@ class PwtcMileage {
 		wp_die();
 	}
 
+	public static function generate_report_callback() {
+		$reportid = $_POST['report_id'];
+		switch ($reportid) {
+			case "ytd_miles":
+				$sort = $_POST['sort'];
+				$header = self::get_ytd_miles_header();
+				$data = self::fetch_ytd_miles(ARRAY_N, $sort);
+				$response = array(
+					'title' => 'Year-to-date Rider Mileage',
+					'header' => $header,
+					'data' => $data
+				);
+				echo wp_json_encode($response);
+				break;
+			case "ytd_led":
+				$sort = $_POST['sort'];
+				$header = self::get_ytd_led_header();
+				$data = self::fetch_ytd_led(ARRAY_N, $sort);
+				$response = array(
+					'title' => 'Year-to-date Number of Rides Led',
+					'header' => $header,
+					'data' => $data
+				);
+				echo wp_json_encode($response);
+				break;
+			case "tbd":
+				break;
+			default:
+				$response = array(
+					'error' => 'Report type ' . $reportid . ' not found.'
+				);
+				echo wp_json_encode($response);
+		}
+		wp_die();
+	}
+
 	public static function plugin_menu() {
 		add_menu_page('PWTC Mileage', 'PWTC Mileage', 'manage_options', 'pwtc_mileage_menu', array( 'PwtcMileage', 'plugin_menu_page'));
 		add_submenu_page('pwtc_mileage_menu', 'Generate Reports', 'Generate Reports', 'manage_options', 'pwtc_mileage_generate_reports', array('PwtcMileage', 'page_generate_reports'));
@@ -431,6 +468,32 @@ class PwtcMileage {
     	$results = $wpdb->get_results('select * from ' . self::LY_LT_ACHVMNT_VIEW . 
 			' order by mileage', ARRAY_A);
 		return $results;
+	}
+
+	public static function fetch_ytd_miles($outtype, $sort) {
+    	global $wpdb;
+    	$results = $wpdb->get_results(
+			'select member_id, concat(first_name, \' \', last_name), mileage from ' . 
+			self::YTD_MILES_VIEW . ' order by ' . $sort , $outtype);
+		return $results;
+	}
+
+	public static function get_ytd_miles_header() {
+		$header = array('Member ID', 'Name', 'Mileage');
+		return $header;
+	}
+
+	public static function fetch_ytd_led($outtype, $sort) {
+    	global $wpdb;
+    	$results = $wpdb->get_results(
+			'select member_id, concat(first_name, \' \', last_name), rides_led from ' . 
+			self::YTD_LED_VIEW . ' order by ' . $sort , $outtype);
+		return $results;
+	}
+
+	public static function get_ytd_led_header() {
+		$header = array('Member ID', 'Name', 'Rides Led');
+		return $header;
 	}
 
 	public static function fetch_club_rides($date) {
