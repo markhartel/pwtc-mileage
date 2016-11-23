@@ -7,11 +7,21 @@ if (!current_user_can('manage_options')) {
 jQuery(document).ready(function($) {   
 	function populate_rides_table(startdate, rides, ridecal) {
 		$('#ride-lookup-section table tr').remove();
+		//console.log(rides);
+		//console.log(ridecal);
         ridecal.forEach(function(item) {
-            $('#ride-lookup-section table').append(
-				'<tr postid="' + item.ID + '" ridedate="' + startdate + '"><td>' +
-				item.post_title + '</td><td><button class="create_btn">Create Sheet</button></td>' + 
-				'<td></td></tr>');    
+			var found = false;
+			rides.forEach(function(ride) {
+				if (ride.post_id === item.ID) {
+					found = true;
+				}
+			});
+			if (!found) {
+            	$('#ride-lookup-section table').append(
+					'<tr postid="' + item.ID + '" ridedate="' + startdate + '"><td>' +
+					item.post_title + '</td><td><button class="create_btn">Create Sheet</button></td>' + 
+					'<td></td></tr>'); 
+			}   
         });
         rides.forEach(function(item) {
             $('#ride-lookup-section table').append(
@@ -302,7 +312,7 @@ jQuery(document).ready(function($) {
 					<input type="submit" value="Add Leader"/>
 				</span>
 			</form>
-			<table></table>
+			<table class="pretty"></table>
 		</div>
 		<div id="ride-mileage-section">
 			<h3>Rider Mileage</h3>
@@ -316,7 +326,7 @@ jQuery(document).ready(function($) {
 					<input type="submit" value="Add Mileage"/>
 				</span>
 			</form>
-			<table></table>
+			<table class="pretty"></table>
 		</div>
 	</div>
 <?php

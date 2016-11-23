@@ -52,6 +52,8 @@ class PwtcMileage {
 		add_action( 'wp_ajax_pwtc_mileage_remove_ride', array( 'PwtcMileage', 'remove_ride_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_ridesheet', array( 'PwtcMileage', 'lookup_ridesheet_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_riders', array( 'PwtcMileage', 'lookup_riders_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_create_rider', array( 'PwtcMileage', 'create_rider_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_remove_rider', array( 'PwtcMileage', 'remove_rider_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_leader', array( 'PwtcMileage', 'remove_leader_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_mileage', array( 'PwtcMileage', 'remove_mileage_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_add_leader', array( 'PwtcMileage', 'add_leader_callback') );
@@ -186,6 +188,74 @@ class PwtcMileage {
 			'firstname' => $firstname,
 			'members' => $members);
     	echo wp_json_encode($response);
+		wp_die();
+	}
+
+	public static function create_rider_callback() {
+		$memberid = $_POST['member_id'];	
+		$lastname = $_POST['lastname'];	
+		$firstname = $_POST['firstname'];
+		$lookupfirst = $_POST['lookup_first'];
+		$lookuplast = $_POST['lookup_last'];
+		$status = self::insert_rider($memberid, $lastname, $firstname);	
+		if (false === $status) {
+			$response = array(
+				'error' => 'Could not insert rider into database.'
+			);
+    		echo wp_json_encode($response);
+		}
+		else if (0 === $status) {
+			$response = array(
+				'error' => 'Could not insert rider into database.'
+			);
+    		echo wp_json_encode($response);
+		}
+		else {
+			$members = self::fetch_riders($lookuplast, $lookupfirst);
+			$response = array(
+				'lastname' => $lookuplast,
+				'firstname' => $lookupfirst,
+				'members' => $members);
+    		echo wp_json_encode($response);
+		}
+		wp_die();
+	}
+
+	public static function remove_rider_callback() {
+		$memberid = $_POST['member_id'];	
+		$lastname = $_POST['lastname'];	
+		$firstname = $_POST['firstname'];
+		$mcnt = self::fetch_member_has_mileage($memberid);
+		$lcnt = self::fetch_member_has_leaders($memberid);
+		if ($mcnt > 0 or $lcnt > 0) {
+			$response = array(
+				'error' => 'Cannot remove a rider with a ride sheet.'
+			);
+    		echo wp_json_encode($response);
+		}
+		else {
+			$status = self::delete_rider($memberid);	
+			if (false === $status) {
+				$response = array(
+					'error' => 'Could not delete rider from database.'
+				);
+    			echo wp_json_encode($response);
+			}
+			else if (0 === $status) {
+				$response = array(
+					'error' => 'Could not delete rider from database.'
+				);
+    			echo wp_json_encode($response);
+			}
+			else {
+				$members = self::fetch_riders($lastname, $firstname);	
+				$response = array(
+					'lastname' => $lastname,
+					'firstname' => $firstname,
+					'members' => $members);
+   				echo wp_json_encode($response);
+			}
+		}
 		wp_die();
 	}
 
@@ -502,6 +572,29 @@ class PwtcMileage {
 			' where first_name like %s and last_name like %s order by last_name, first_name', 
             $firstname . "%", $lastname . "%"), ARRAY_A);
 		return $results;
+	}
+
+	public static function insert_rider($memberid, $lastname, $firstname) {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		/*
+		$status = $wpdb->query($wpdb->prepare('insert into ' . $member_table .
+			' (member_id, last_name, first_name, expir_date) values (%s, %s, %s, curdate())', 
+			$memberid, $lastname, $firstname));
+		*/
+		$status = $wpdb->query($wpdb->prepare('insert into ' . $member_table .
+			' (member_id, last_name, first_name, expir_date) values (%s, %s, %s, curdate())' . 
+			' on duplicate key update last_name = %s, first_name = %s, expir_date = curdate()',
+			$memberid, $lastname, $firstname, $lastname, $firstname));
+		return $status;
+	}
+
+	public static function delete_rider($memberid) {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		$status = $wpdb->query($wpdb->prepare('delete from ' . $member_table . 
+			' where member_id = %s', $memberid));
+		return $status;
 	}
 
 /*
