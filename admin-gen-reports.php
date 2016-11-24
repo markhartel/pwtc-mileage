@@ -108,7 +108,7 @@ jQuery(document).ready(function($) {
             <a href='#' report-id='ytd_miles'>Year-to-date mileage</a>,
             <a href='#' report-id='2'>Last year's mileage</a>,
             <a href='#' report-id='3'>Lifetime mileage</a>,
-            <a href='#' report-id='4'>Last year's achievement awards</a>
+            <a href='#' report-id='ly_lt_achvmnt'>Last year's achievement awards</a>
         </p>
         <h3>Ride Leader Reports</h3>
         <p>Sort by: 
@@ -128,7 +128,7 @@ jQuery(document).ready(function($) {
             <label id="report-ridername"></label>
         </p>
         <p id='reports-specific-rider'>
-            <a href='#' report-id='7'>Year-to-date rides</a>,
+            <a href='#' report-id='ytd_rides'>Year-to-date rides</a>,
             <a href='#' report-id='8'>Last year's rides</a>,
             <a href='#' report-id='9'>Year-to-date rides led</a>,
             <a href='#' report-id='10'>Last year's rides led</a>

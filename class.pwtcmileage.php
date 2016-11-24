@@ -349,11 +349,25 @@ class PwtcMileage {
 		$reportid = $_POST['report_id'];
 		switch ($reportid) {
 			case "ytd_miles":
+			case "ly_lt_achvmnt":
 				$sort = $_POST['sort'];
-				$header = self::get_ytd_miles_header();
-				$data = self::fetch_ytd_miles(ARRAY_N, $sort);
+				$title = null;
+				$header = null;
+				$data = null;
+				switch ($reportid) {			
+					case "ytd_miles":
+						$title = self::get_ytd_miles_title();
+						$header = self::get_ytd_miles_header();
+						$data = self::fetch_ytd_miles(ARRAY_N, $sort);
+						break;
+					case "ly_lt_achvmnt":
+						$title = self::get_ly_lt_achvmnt_title();
+						$header = self::get_ly_lt_achvmnt_header();
+						$data = self::fetch_ly_lt_achvmnt(ARRAY_N, $sort);
+						break;
+				}
 				$response = array(
-					'title' => 'Year-to-date Rider Mileage',
+					'title' => $title,
 					'header' => $header,
 					'data' => $data
 				);
@@ -361,16 +375,28 @@ class PwtcMileage {
 				break;
 			case "ytd_led":
 				$sort = $_POST['sort'];
+				$title = self::get_ytd_led_title();
 				$header = self::get_ytd_led_header();
 				$data = self::fetch_ytd_led(ARRAY_N, $sort);
 				$response = array(
-					'title' => 'Year-to-date Number of Rides Led',
+					'title' => $title,
 					'header' => $header,
 					'data' => $data
 				);
 				echo wp_json_encode($response);
 				break;
-			case "tbd":
+			case "ytd_rides":
+				$memberid = $_POST['member_id'];
+				$name = $_POST['name'];
+				$title = self::get_ytd_rides_title($name);
+				$header = self::get_ytd_rides_header();
+				$data = self::fetch_ytd_rides(ARRAY_N, $memberid);
+				$response = array(
+					'title' => $title,
+					'header' => $header,
+					'data' => $data
+				);
+				echo wp_json_encode($response);
 				break;
 			default:
 				$response = array(
@@ -414,24 +440,33 @@ class PwtcMileage {
 		include('admin-man-settings.php');
 	}
 
-	public static function shortcode_ly_lt_achvmnt() {
+	public static function shortcode_build_table($header, $data) {
 		$out = '';
-		$thisyear = date('Y');
-    	$lastyear = intval($thisyear) - 1;
-		$results = self::fetch_ly_lt_achvmnt();
-		$out .= '<div><table><tr>';
-		$out .= '<th>Name</th>';
-		$out .= '<th>' . $lastyear . ' Lifetime Mileage</th>';
-		$out .= '<th>' . $lastyear . ' Achievement</th>';
+		$out .= '<table><tr>';
+		foreach( $header as $item ):
+			$out .= '<th>' . $item . '</th>';
+		endforeach;	
 		$out .= '</tr>';
-		foreach( $results as $row ):
+		foreach( $data as $row ):
 			$out .= '<tr>';
-			$out .= '<td>' . $row['first_name'] . ' ' . $row['last_name'] . '</td>';
-			$out .= '<td>' . $row['mileage'] . '</td>';
-			$out .= '<td>' . $row['achievement'] . '</td>';
+			foreach( $row as $item ):
+				$out .= '<td>' . $item . '</td>';
+			endforeach;	
 			$out .= '</tr>';
 		endforeach;
-		$out .= '</table></div>';
+		$out .= '</table>';
+		return $out;
+	}
+
+	public static function shortcode_ly_lt_achvmnt() {
+		$out = '';
+		$header = self::get_ly_lt_achvmnt_header();
+		$data = self::fetch_ly_lt_achvmnt(ARRAY_N, 'mileage');
+		$out .= '<div><h3>';
+		$out .= self::get_ly_lt_achvmnt_title();
+		$out .= '</h3>';
+		$out .= self::shortcode_build_table($header, $data);
+		$out .= '</div>';	
 		return $out;
 	}
 
@@ -463,11 +498,24 @@ class PwtcMileage {
 	}
 
 */
-	public static function fetch_ly_lt_achvmnt() {
+	public static function fetch_ly_lt_achvmnt($outtype, $sort) {
     	global $wpdb;
-    	$results = $wpdb->get_results('select * from ' . self::LY_LT_ACHVMNT_VIEW . 
-			' order by mileage', ARRAY_A);
+    	$results = $wpdb->get_results(
+			'select member_id, concat(first_name, \' \', last_name), mileage, achievement from ' . 
+			self::LY_LT_ACHVMNT_VIEW . ' order by ' . $sort, $outtype);
 		return $results;
+	}
+
+	public static function get_ly_lt_achvmnt_header() {
+		$header = array('Member ID', 'Name', 'Mileage', 'Achievement');
+		return $header;
+	}
+
+	public static function get_ly_lt_achvmnt_title() {
+		$thisyear = date('Y');
+    	$lastyear = intval($thisyear) - 1;
+		$title = '' . $lastyear . ' Lifetime Mileage Achievement';
+		return $title;
 	}
 
 	public static function fetch_ytd_miles($outtype, $sort) {
@@ -483,6 +531,11 @@ class PwtcMileage {
 		return $header;
 	}
 
+	public static function get_ytd_miles_title() {
+		$title = 'Year-to-date Rider Mileage';
+		return $title;
+	}
+
 	public static function fetch_ytd_led($outtype, $sort) {
     	global $wpdb;
     	$results = $wpdb->get_results(
@@ -494,6 +547,34 @@ class PwtcMileage {
 	public static function get_ytd_led_header() {
 		$header = array('Member ID', 'Name', 'Rides Led');
 		return $header;
+	}
+
+	public static function get_ytd_led_title() {
+		$title = 'Year-to-date Number of Rides Led';
+		return $title;
+	}
+
+	public static function fetch_ytd_rides($outtype, $memberid) {
+    	global $wpdb;
+    	$results = $wpdb->get_results($wpdb->prepare(
+			'select title, date, mileage from ' . 
+			self::YTD_RIDES_VIEW . ' where member_id = %s', $memberid), $outtype);
+		/*
+    	$results = $wpdb->get_results($wpdb->prepare(
+			'select title, DATE_FORMAT(CURDATE(), \'%a %b %e %Y\'), mileage from ' . 
+			self::YTD_RIDES_VIEW . ' where member_id = %s', $memberid), $outtype);
+		*/
+		return $results;
+	}
+
+	public static function get_ytd_rides_header() {
+		$header = array('Title', 'Date', 'Mileage');
+		return $header;
+	}
+
+	public static function get_ytd_rides_title($name) {
+		$title = 'Year-to-date Rides by ' . $name;
+		return $title;
 	}
 
 	public static function fetch_club_rides($date) {
