@@ -20,6 +20,10 @@
   cursor: pointer;
 }
 
+#rider-lookup-results table tr {
+  cursor: pointer;
+}
+
 table.pretty {
   color: #333;
   font-family: Helvetica, Arial, sans-serif;

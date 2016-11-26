@@ -4,7 +4,11 @@ if (!current_user_can('manage_options')) {
 }
 ?>
 <script type="text/javascript" >
-jQuery(document).ready(function($) {   
+jQuery(document).ready(function($) {  
+	function populate_posts_table(posts) {
+		console.log(posts);
+	}
+
 	function populate_rides_table(startdate, rides, ridecal) {
 		$('#ride-lookup-section table tr').remove();
 		//console.log(rides);
@@ -111,6 +115,11 @@ jQuery(document).ready(function($) {
 		});
 	}
 
+	function lookup_posts_cb(response) {
+        var res = JSON.parse(response);
+		populate_posts_table(res.posts);
+	}   
+
 	function lookup_rides_cb(response) {
         var res = JSON.parse(response);
 		$('#ride-lookup-section h3').html('Rides on ' + res.date);
@@ -203,6 +212,14 @@ jQuery(document).ready(function($) {
 		}
 	}
 
+	function load_posts_without_rides() {
+        var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+        var data = {
+			'action': 'pwtc_mileage_lookup_posts'
+		};
+		$.post(action, data, lookup_posts_cb);
+	}	
+	
     $('#ride-lookup-form').on('submit', function(evt) {
         evt.preventDefault();
 		$('#ride-lookup-section h3').html('');
@@ -274,12 +291,16 @@ jQuery(document).ready(function($) {
         });
     });
 
+	$("#ride-lookup-date").datepicker({
+  		dateFormat: "yy-mm-dd"
+	});
 
 	$('#ride-sheet-section').hide();
 	$('#ride-lookup-section').show();
 	$('#ride-create-form').hide();
 	$('#leader-add-btn').hide(); 
 	$('#mileage-add-btn').hide(); 
+	load_posts_without_rides();
 });
 </script>
 <div class="wrap">
@@ -287,7 +308,7 @@ jQuery(document).ready(function($) {
 	<div id="ride-lookup-section">
 		<form id="ride-lookup-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
     		<label>Start Date:</label>
-			<input id="ride-lookup-date" type="date" name="date" required/>
+			<input id="ride-lookup-date" type="text" name="date" required/>
 			<input type="submit" value="Find Rides"/>
 		</form>
 		<h3></h3>

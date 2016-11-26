@@ -80,7 +80,7 @@ jQuery(document).ready(function($) {
         lookup_pwtc_riders(function(riderid, name) {
             $('#report-riderid').html(riderid);
             $('#report-ridername').html(name);            
-        });
+        });       
     });
 
     $('#report-back-button').on('click', function(evt) {

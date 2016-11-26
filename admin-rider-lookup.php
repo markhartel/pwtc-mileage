@@ -2,6 +2,7 @@
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
+
     $('#rider-lookup-form').on('submit', function(evt) {
         evt.preventDefault();
         var action = $('#rider-lookup-form').attr('action');
@@ -12,14 +13,22 @@ jQuery(document).ready(function($) {
 		};
         $.post(action, data, lookup_riders_cb);
     });
+
+    $( "#rider-lookup-results" ).dialog({
+        autoOpen: false,
+        height: 400,
+        width: 350,
+        modal: true
+    });
+
 });
 </script>
-<div class="riders-popup" id="rider-lookup-results">
-	    <form id="rider-lookup-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-            <input id="rider-lookup-first" type="text" name="firstname" placeholder="Enter first name"/>        
-            <input id="rider-lookup-last" type="text" name="lastname" placeholder="Enter last name"/> 
-            <input type="submit" value="Lookup"/>       
-        </form>
-        <div><table></table></div>
+<div id="rider-lookup-results" title="Lookup Riders">
+	<form id="rider-lookup-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+        <input id="rider-lookup-first" type="text" name="firstname" placeholder="Enter first name"/>   
+        <input id="rider-lookup-last" type="text" name="lastname" placeholder="Enter last name"/> 
+        <input type="submit" value="Lookup"/>       
+    </form>
+    <table></table>
 </div>
 <?php

@@ -46,6 +46,7 @@ class PwtcMileage {
 		/*
 		add_shortcode('pwtc_mileage_year_to_date', array( 'PwtcMileage', 'shortcode_ytd_mileage'));
 		*/
+		add_action( 'wp_ajax_pwtc_mileage_lookup_posts', array( 'PwtcMileage', 'lookup_posts_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_rides', array( 'PwtcMileage', 'lookup_rides_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_create_ride', array( 'PwtcMileage', 'create_ride_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_create_ride_from_event', array( 'PwtcMileage', 'create_ride_from_event_callback') );
@@ -59,14 +60,27 @@ class PwtcMileage {
 		add_action( 'wp_ajax_pwtc_mileage_add_leader', array( 'PwtcMileage', 'add_leader_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_add_mileage', array( 'PwtcMileage', 'add_mileage_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_generate_report', array( 'PwtcMileage', 'generate_report_callback') );
-    }
+		add_action( 'wp_ajax_pwtc_mileage_consolidate', array( 'PwtcMileage', 'consolidate_callback') ); 
+
+		add_action( 'pwtc_mileage_consolidation', array( 'PwtcMileage', 'consolidation_callback') );  
+	}
 
 	public static function load_admin_scripts($hook) {
 		if (!strpos($hook, "pwtc_mileage")) {
             return;
         }
-        wp_enqueue_style( 'pwtc_mileage_admin_css', PWTC_MILEAGE__PLUGIN_URL . 'admin-style.css' );
-		wp_enqueue_script( 'pwtc_mileage_admin_js', PWTC_MILEAGE__PLUGIN_URL . 'admin-scripts.js', array('jquery'), 1.1, true);
+        wp_enqueue_style('pwtc_mileage_admin_css', PWTC_MILEAGE__PLUGIN_URL . 'admin-style.css' );
+		wp_enqueue_style ('wp-jquery-ui-dialog');
+  		wp_register_style('jquery-ui', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css');
+  		wp_enqueue_style('jquery-ui');   
+		wp_enqueue_script('pwtc_mileage_admin_js', PWTC_MILEAGE__PLUGIN_URL . 'admin-scripts.js', array('jquery-ui-dialog', 'jquery-ui-datepicker'), 1.1, true);
+	}
+
+	public static function lookup_posts_callback() {
+		$posts = self::fetch_posts_without_rides();
+		$response = array('posts' => $posts);
+    	echo wp_json_encode($response);
+		wp_die();
 	}
 
 	public static function lookup_rides_callback() {
@@ -407,6 +421,19 @@ class PwtcMileage {
 		wp_die();
 	}
 
+	public static function consolidation_callback() {
+		error_log( 'Consolidation process triggered.');	
+	}
+
+	public static function consolidate_callback() {
+		wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
+		$response = array(
+			'message' => 'Consolidation process initiated.'
+		);
+		echo wp_json_encode($response);
+		wp_die();
+	}
+
 	public static function plugin_menu() {
 		add_menu_page('PWTC Mileage', 'PWTC Mileage', 'manage_options', 'pwtc_mileage_menu', array( 'PwtcMileage', 'plugin_menu_page'));
 		add_submenu_page('pwtc_mileage_menu', 'Generate Reports', 'Generate Reports', 'manage_options', 'pwtc_mileage_generate_reports', array('PwtcMileage', 'page_generate_reports'));
@@ -593,6 +620,19 @@ class PwtcMileage {
 			' where p.post_type = %s and p.post_status = \'publish\'' . 
 			' and m.meta_key = %s and cast(m.meta_value as date) = %s', 
 			'rideevent', 'start_date', $date), ARRAY_A);
+		return $results;
+	}
+
+	public static function fetch_posts_without_rides() {
+    	global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+    	$results = $wpdb->get_results($wpdb->prepare(
+			'select p.ID, p.post_title, m.meta_value as start_date' . 
+			' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
+			' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
+			' and m.meta_key = %s and (cast(m.meta_value as date) < curdate())' . 
+			' and p.ID not in (select post_id from ' . $ride_table . ' where post_id is not null)', 
+			'rideevent', 'start_date'), ARRAY_A);
 		return $results;
 	}
 
