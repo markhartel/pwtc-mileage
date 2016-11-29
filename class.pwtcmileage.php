@@ -70,10 +70,11 @@ class PwtcMileage {
             return;
         }
         wp_enqueue_style('pwtc_mileage_admin_css', PWTC_MILEAGE__PLUGIN_URL . 'admin-style.css' );
-		wp_enqueue_style ('wp-jquery-ui-dialog');
-  		wp_register_style('jquery-ui', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css');
-  		wp_enqueue_style('jquery-ui');   
-		wp_enqueue_script('pwtc_mileage_admin_js', PWTC_MILEAGE__PLUGIN_URL . 'admin-scripts.js', array('jquery-ui-dialog', 'jquery-ui-datepicker'), 1.1, true);
+        wp_enqueue_style('pwtc_mileage_datepicker_css', PWTC_MILEAGE__PLUGIN_URL . 'datepicker.css' );
+		wp_enqueue_style('wp-jquery-ui-dialog');
+		wp_enqueue_script('jquery-ui-datepicker');   
+		wp_enqueue_script('pwtc_mileage_admin_js', PWTC_MILEAGE__PLUGIN_URL . 'admin-scripts.js', array('jquery-ui-dialog'), 1.1, true);
+		wp_enqueue_script('pwtc_mileage_dateformatter_js', PWTC_MILEAGE__PLUGIN_URL . 'php-date-formatter.min.js', array('jquery'), 1.1, true);
 	}
 
 	public static function lookup_posts_callback() {
@@ -435,13 +436,44 @@ class PwtcMileage {
 	}
 
 	public static function plugin_menu() {
-		add_menu_page('PWTC Mileage', 'PWTC Mileage', 'manage_options', 'pwtc_mileage_menu', array( 'PwtcMileage', 'plugin_menu_page'));
-		add_submenu_page('pwtc_mileage_menu', 'Generate Reports', 'Generate Reports', 'manage_options', 'pwtc_mileage_generate_reports', array('PwtcMileage', 'page_generate_reports'));
-		add_submenu_page('pwtc_mileage_menu', 'Manage Riders', 'Manage Riders', 'manage_options', 'pwtc_mileage_manage_riders', array('PwtcMileage', 'page_manage_riders'));
-		add_submenu_page('pwtc_mileage_menu', 'Manage Ride Sheets', 'Manage Ride Sheets', 'manage_options', 'pwtc_mileage_manage_ride_sheets', array('PwtcMileage', 'page_manage_ride_sheets'));
-		add_submenu_page('pwtc_mileage_menu', 'Manage Year End', 'Manage Year End', 'manage_options', 'pwtc_mileage_manage_year_end', array('PwtcMileage', 'page_manage_year_end'));
-		remove_submenu_page('pwtc_mileage_menu', 'pwtc_mileage_menu');
-		add_submenu_page('pwtc_mileage_menu', 'Settings', 'Settings', 'manage_options', 'pwtc_mileage_settings', array( 'PwtcMileage', 'page_manage_settings'));
+    	$page_title = 'PWTC Mileage';
+    	$menu_title = 'PWTC Mileage';
+    	$capability = 'manage_options';
+    	$parent_menu_slug = 'pwtc_mileage_menu';
+    	$function = array( 'PwtcMileage', 'plugin_menu_page');
+		add_menu_page($page_title, $menu_title, $capability, $parent_menu_slug, $function);
+
+    	$page_title = 'PWTC Mileage Generate Reports';
+    	$menu_title = 'Generate Reports';
+    	$menu_slug = 'pwtc_mileage_generate_reports';
+    	$function = array( 'PwtcMileage', 'page_generate_reports');
+		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+
+    	$page_title = 'PWTC Mileage Manage Riders';
+    	$menu_title = 'Manage Riders';
+    	$menu_slug = 'pwtc_mileage_manage_riders';
+    	$function = array( 'PwtcMileage', 'page_manage_riders');
+		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+
+    	$page_title = 'PWTC Mileage Manage Ride Sheets';
+    	$menu_title = 'Manage Ride Sheets';
+    	$menu_slug = 'pwtc_mileage_manage_ride_sheets';
+    	$function = array( 'PwtcMileage', 'page_manage_ride_sheets');
+		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+
+    	$page_title = 'PWTC Mileage Manage Year End Operations';
+    	$menu_title = 'Manage Year-End';
+    	$menu_slug = 'pwtc_mileage_manage_year_end';
+    	$function = array( 'PwtcMileage', 'page_manage_year_end');
+		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+
+		remove_submenu_page($parent_menu_slug, $parent_menu_slug);
+
+		$page_title = 'PWTC Mileage Plugin Settings';
+    	$menu_title = 'Settings';
+    	$menu_slug = 'pwtc_mileage_settings';
+    	$function = array( 'PwtcMileage', 'page_manage_settings');
+		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 	}
 
 	public static function plugin_menu_page() {

@@ -6,13 +6,16 @@ if (!current_user_can('manage_options')) {
 <script type="text/javascript" >
 jQuery(document).ready(function($) {  
 	function populate_posts_table(posts) {
+		var fmt = new DateFormatter();
+		posts.forEach(function(post) {
+			var d = fmt.parseDate(post.start_date, 'Y-m-d');
+			post.fmtdate = fmt.formatDate(d, 'D M j Y');
+		});
 		console.log(posts);
 	}
 
 	function populate_rides_table(startdate, rides, ridecal) {
 		$('#ride-lookup-section table tr').remove();
-		//console.log(rides);
-		//console.log(ridecal);
         ridecal.forEach(function(item) {
 			var found = false;
 			rides.forEach(function(ride) {
@@ -227,7 +230,7 @@ jQuery(document).ready(function($) {
         var action = $('#ride-lookup-form').attr('action');
         var data = {
 			'action': 'pwtc_mileage_lookup_rides',
-			'startdate': $('#ride-lookup-date').val()
+			'startdate': $('#ride-lookup-date2').val()
 		};
 		$.post(action, data, lookup_rides_cb);
     });
@@ -292,7 +295,9 @@ jQuery(document).ready(function($) {
     });
 
 	$("#ride-lookup-date").datepicker({
-  		dateFormat: "yy-mm-dd"
+  		dateFormat: 'D M d yy',
+		altField: '#ride-lookup-date2',
+		altFormat: 'yy-mm-dd'
 	});
 
 	$('#ride-sheet-section').hide();
@@ -309,6 +314,7 @@ jQuery(document).ready(function($) {
 		<form id="ride-lookup-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
     		<label>Start Date:</label>
 			<input id="ride-lookup-date" type="text" name="date" required/>
+			<input id="ride-lookup-date2" type="hidden"/>
 			<input type="submit" value="Find Rides"/>
 		</form>
 		<h3></h3>

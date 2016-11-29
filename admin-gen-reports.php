@@ -28,6 +28,7 @@ jQuery(document).ready(function($) {
         var res = JSON.parse(response);
         if (res.error) {
             alert(res.error);
+            //show_error_msg('#report-msg', res.error);
         }
         else {
             $('#report-results-section h2').html(res.title);
@@ -69,7 +70,9 @@ jQuery(document).ready(function($) {
             'name': $('#report-ridername').html()
 		};
         if (data.member_id === '') {
-            alert('Select a rider.')
+            alert('Select a rider.');
+            //show_error_msg('#report-msg', 
+            //    'You must first select a rider before choosing this report.');
         }
         else {
             $.post(action, data, generate_report_cb);

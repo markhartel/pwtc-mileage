@@ -36,3 +36,25 @@ function lookup_pwtc_riders(mycb) {
     jQuery("#rider-lookup-results").dialog('open');
     window.pwtc_rider_cb = mycb;
 } 
+
+/*
+function show_error_msg(selector, msg) {
+    jQuery(selector).html('<div class="notice notice-error is-dismissible">' +
+        '<p><strong>' + msg + '</strong></p></div>');
+}
+
+function show_warning_msg(selector, msg) {
+    jQuery(selector).html('<div class="notice notice-warning is-dismissible">' +
+        '<p><strong>' + msg + '</strong></p></div>');
+}
+
+function show_success_msg(selector, msg) {
+    jQuery(selector).html('<div class="notice notice-success is-dismissible">' +
+        '<p><strong>' + msg + '</strong></p></div>');
+}
+
+function show_info_msg(selector, msg) {
+    jQuery(selector).html('<div class="notice notice-info is-dismissible">' +
+        '<p><strong>' + msg + '</strong></p></div>');
+}
+*/
