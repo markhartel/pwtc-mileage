@@ -32,8 +32,10 @@ class PwtcMileage {
 	 */
 	private static function init_hooks() {
 		self::$initiated = true;
-		add_action( 'admin_menu', array( 'PwtcMileage', 'plugin_menu' ) );
-		add_action( 'admin_enqueue_scripts', array( 'PwtcMileage', 'load_admin_scripts' ) );
+		add_action( 'admin_menu', 
+			array( 'PwtcMileage', 'plugin_menu' ) );
+		add_action( 'admin_enqueue_scripts', 
+			array( 'PwtcMileage', 'load_admin_scripts' ) );
 		/*
 		[pwtc_mileage_year_to_date orderby="mileage/name" minimum="500"]
 		[pwtc_mileage_lifetime orderby="mileage/name" minimum="500"]
@@ -42,27 +44,44 @@ class PwtcMileage {
 		[pwtc_rides_led_last_year orderby="number/name" minimum="12"]
 		[pwtc_achievement_last_year]
 		*/
-		add_shortcode('pwtc_achievement_last_year', array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
+		add_shortcode('pwtc_achievement_last_year', 
+			array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
 		/*
 		add_shortcode('pwtc_mileage_year_to_date', array( 'PwtcMileage', 'shortcode_ytd_mileage'));
 		*/
-		add_action( 'wp_ajax_pwtc_mileage_lookup_posts', array( 'PwtcMileage', 'lookup_posts_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_lookup_rides', array( 'PwtcMileage', 'lookup_rides_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_create_ride', array( 'PwtcMileage', 'create_ride_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_create_ride_from_event', array( 'PwtcMileage', 'create_ride_from_event_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_remove_ride', array( 'PwtcMileage', 'remove_ride_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_lookup_ridesheet', array( 'PwtcMileage', 'lookup_ridesheet_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_lookup_riders', array( 'PwtcMileage', 'lookup_riders_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_create_rider', array( 'PwtcMileage', 'create_rider_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_remove_rider', array( 'PwtcMileage', 'remove_rider_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_remove_leader', array( 'PwtcMileage', 'remove_leader_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_remove_mileage', array( 'PwtcMileage', 'remove_mileage_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_add_leader', array( 'PwtcMileage', 'add_leader_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_add_mileage', array( 'PwtcMileage', 'add_mileage_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_generate_report', array( 'PwtcMileage', 'generate_report_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_consolidate', array( 'PwtcMileage', 'consolidate_callback') ); 
+		add_action( 'wp_ajax_pwtc_mileage_lookup_posts', 
+			array( 'PwtcMileage', 'lookup_posts_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_lookup_rides', 
+			array( 'PwtcMileage', 'lookup_rides_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_create_ride', 
+			array( 'PwtcMileage', 'create_ride_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_create_ride_from_event', 
+			array( 'PwtcMileage', 'create_ride_from_event_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_remove_ride', 
+			array( 'PwtcMileage', 'remove_ride_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_lookup_ridesheet', 
+			array( 'PwtcMileage', 'lookup_ridesheet_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_lookup_riders', 
+			array( 'PwtcMileage', 'lookup_riders_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_create_rider', 
+			array( 'PwtcMileage', 'create_rider_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_remove_rider', 
+			array( 'PwtcMileage', 'remove_rider_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_remove_leader', 
+			array( 'PwtcMileage', 'remove_leader_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_remove_mileage', 
+			array( 'PwtcMileage', 'remove_mileage_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_add_leader', 
+			array( 'PwtcMileage', 'add_leader_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_add_mileage', 
+			array( 'PwtcMileage', 'add_mileage_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_generate_report', 
+			array( 'PwtcMileage', 'generate_report_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_consolidate', 
+			array( 'PwtcMileage', 'consolidate_callback') ); 
 
-		add_action( 'pwtc_mileage_consolidation', array( 'PwtcMileage', 'consolidation_callback') );  
+		add_action( 'pwtc_mileage_consolidation', 
+			array( 'PwtcMileage', 'consolidation_callback') );  
 	}
 
 	public static function load_admin_scripts($hook) {
@@ -436,32 +455,36 @@ class PwtcMileage {
 	}
 
 	public static function plugin_menu() {
-    	$page_title = 'PWTC Mileage';
-    	$menu_title = 'PWTC Mileage';
+		$plugin_options = self::get_plugin_options();
+
+    	$page_title = $plugin_options['plugin_menu_label'];
+    	$menu_title = $plugin_options['plugin_menu_label'];
     	$capability = 'manage_options';
     	$parent_menu_slug = 'pwtc_mileage_menu';
     	$function = array( 'PwtcMileage', 'plugin_menu_page');
-		add_menu_page($page_title, $menu_title, $capability, $parent_menu_slug, $function);
+    	$icon_url = '';
+    	$position = $plugin_options['plugin_menu_location'];
+		add_menu_page($page_title, $menu_title, $capability, $parent_menu_slug, $function, $icon_url, $position);
 
-    	$page_title = 'PWTC Mileage Generate Reports';
+    	$page_title = 'Generate Reports';
     	$menu_title = 'Generate Reports';
     	$menu_slug = 'pwtc_mileage_generate_reports';
     	$function = array( 'PwtcMileage', 'page_generate_reports');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
-    	$page_title = 'PWTC Mileage Manage Riders';
+    	$page_title = 'Manage Riders';
     	$menu_title = 'Manage Riders';
     	$menu_slug = 'pwtc_mileage_manage_riders';
     	$function = array( 'PwtcMileage', 'page_manage_riders');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
-    	$page_title = 'PWTC Mileage Manage Ride Sheets';
+    	$page_title = 'Manage Ride Sheets';
     	$menu_title = 'Manage Ride Sheets';
     	$menu_slug = 'pwtc_mileage_manage_ride_sheets';
     	$function = array( 'PwtcMileage', 'page_manage_ride_sheets');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
-    	$page_title = 'PWTC Mileage Manage Year End Operations';
+    	$page_title = ' Manage Year-End Operations';
     	$menu_title = 'Manage Year-End';
     	$menu_slug = 'pwtc_mileage_manage_year_end';
     	$function = array( 'PwtcMileage', 'page_manage_year_end');
@@ -469,7 +492,7 @@ class PwtcMileage {
 
 		remove_submenu_page($parent_menu_slug, $parent_menu_slug);
 
-		$page_title = 'PWTC Mileage Plugin Settings';
+		$page_title = 'Plugin Settings';
     	$menu_title = 'Settings';
     	$menu_slug = 'pwtc_mileage_settings';
     	$function = array( 'PwtcMileage', 'page_manage_settings');
@@ -480,22 +503,66 @@ class PwtcMileage {
 	}
 
 	public static function page_manage_ride_sheets() {
+		$plugin_options = self::get_plugin_options();
 		include('admin-man-ridesheets.php');
 	}
 
 	public static function page_generate_reports() {
+		$plugin_options = self::get_plugin_options();
 		include('admin-gen-reports.php');
 	}
 
 	public static function page_manage_riders() {
+		$plugin_options = self::get_plugin_options();
 		include('admin-man-riders.php');
 	}
 
 	public static function page_manage_year_end() {
+		$plugin_options = self::get_plugin_options();
 		include('admin-man-yearend.php');
 	}
 
 	public static function page_manage_settings() {
+		$plugin_options = self::get_plugin_options();
+		$form_submitted = false;
+    	if (isset($_POST['ride_post_type'])) {
+			$plugin_options['ride_post_type'] = $_POST['ride_post_type'];
+			$form_submitted = true;
+    	} 
+    	if (isset($_POST['ride_date_metakey'])) {
+			$plugin_options['ride_date_metakey'] = $_POST['ride_date_metakey'];
+			$form_submitted = true;
+    	} 
+    	if (isset($_POST['ride_date_format'])) {
+			$plugin_options['ride_date_format'] = $_POST['ride_date_format'];
+			$form_submitted = true;
+    	} 
+    	if (isset($_POST['date_display_format'])) {
+			$plugin_options['date_display_format'] = $_POST['date_display_format'];
+ 			$form_submitted = true;
+	   	} 
+    	if (isset($_POST['db_backup_location'])) {
+			$plugin_options['db_backup_location'] = $_POST['db_backup_location'];
+			$form_submitted = true;
+    	} 
+    	if (isset($_POST['plugin_menu_label'])) {
+			$plugin_options['plugin_menu_label'] = $_POST['plugin_menu_label'];
+			$form_submitted = true;
+    	} 
+    	if (isset($_POST['plugin_menu_location'])) {
+			$plugin_options['plugin_menu_location'] = intval($_POST['plugin_menu_location']);
+			$form_submitted = true;
+    	} 
+		if ($form_submitted) {
+			if (isset($_POST['drop_db_on_delete'])) {
+				$plugin_options['drop_db_on_delete'] = true;
+			}
+			else {
+				$plugin_options['drop_db_on_delete'] = false;
+			}
+			self::update_plugin_options($plugin_options);
+			$plugin_options = self::get_plugin_options();			
+		}
 		include('admin-man-settings.php');
 	}
 
@@ -646,17 +713,19 @@ class PwtcMileage {
 
 	public static function fetch_sched_rides($date) {
     	global $wpdb;
+		$plugin_options = self::get_plugin_options();
     	$results = $wpdb->get_results($wpdb->prepare('select p.ID, p.post_title' . 
 			' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
 			' as m on p.ID = m.post_id' . 
 			' where p.post_type = %s and p.post_status = \'publish\'' . 
 			' and m.meta_key = %s and cast(m.meta_value as date) = %s', 
-			'rideevent', 'start_date', $date), ARRAY_A);
+			$plugin_options['ride_post_type'], $plugin_options['ride_date_metakey'], $date), ARRAY_A);
 		return $results;
 	}
 
 	public static function fetch_posts_without_rides() {
     	global $wpdb;
+		$plugin_options = self::get_plugin_options();
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
     	$results = $wpdb->get_results($wpdb->prepare(
 			'select p.ID, p.post_title, m.meta_value as start_date' . 
@@ -664,7 +733,7 @@ class PwtcMileage {
 			' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
 			' and m.meta_key = %s and (cast(m.meta_value as date) < curdate())' . 
 			' and p.ID not in (select post_id from ' . $ride_table . ' where post_id is not null)', 
-			'rideevent', 'start_date'), ARRAY_A);
+			$plugin_options['ride_post_type'], $plugin_options['ride_date_metakey']), ARRAY_A);
 		return $results;
 	}
 
@@ -813,6 +882,31 @@ class PwtcMileage {
 		return $status;
 	}
 
+	public static function create_default_plugin_options() {
+		$data = array(
+			'ride_post_type' => 'ride',
+			'ride_date_metakey' => 'date',
+			'ride_date_format' => 'Y-m-d',
+			'date_display_format' => 'D M j, Y',
+			'drop_db_on_delete' => false,
+			'db_backup_location' => '',
+			'plugin_menu_label' => 'Rider Mileage',
+			'plugin_menu_location' => 50);
+		add_option('pwtc_mileage_options', $data);
+	}
+
+	public static function get_plugin_options() {
+		return get_option('pwtc_mileage_options');
+	}
+
+	public static function delete_plugin_options() {
+		delete_option('pwtc_mileage_options');
+	}
+
+	public static function update_plugin_options($data) {
+		update_option('pwtc_mileage_options', $data);
+	}
+
 /*
 	public static function convert_mileage_atts($atts, $tag) {
     	// normalize attribute keys, lowercase
@@ -833,6 +927,9 @@ class PwtcMileage {
 		}
 		self::create_db_tables();
 		self::create_db_views();
+		if (self::get_plugin_options() === false) {
+			self::create_default_plugin_options();
+		}
 	}
 
 	public static function plugin_deactivation( ) {
@@ -841,8 +938,12 @@ class PwtcMileage {
 
 	public static function plugin_uninstall() {
 		error_log( 'PWTC Mileage plugin uninstall' );	
-		self::drop_db_views();	
-		self::drop_db_tables();	
+		$plugin_options = self::get_plugin_options();
+		if ($plugin_options['drop_db_on_delete']) {
+			self::drop_db_views();	
+			self::drop_db_tables();				
+		}
+		self::delete_plugin_options();
 	}
 
 	public static function create_db_tables( ) {

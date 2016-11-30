@@ -9,7 +9,7 @@ jQuery(document).ready(function($) {
 		var fmt = new DateFormatter();
 		posts.forEach(function(post) {
 			var d = fmt.parseDate(post.start_date, 'Y-m-d');
-			post.fmtdate = fmt.formatDate(d, 'D M j Y');
+			post.fmtdate = fmt.formatDate(d, '<?php echo $plugin_options['date_display_format']; ?>');
 		});
 		console.log(posts);
 	}
