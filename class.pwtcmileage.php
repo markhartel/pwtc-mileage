@@ -5,6 +5,7 @@ class PwtcMileage {
 	const RIDE_TABLE = 'pwtc_club_rides';
 	const MILEAGE_TABLE = 'pwtc_ride_mileage';
 	const LEADER_TABLE = 'pwtc_ride_leaders';
+	const JOBS_TABLE = 'pwtc_running_jobs';
 
 	const LT_MILES_VIEW = 'pwtc_lt_miles_vw';
 	const YTD_MILES_VIEW = 'pwtc_ytd_miles_vw';
@@ -77,8 +78,6 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'add_mileage_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_generate_report', 
 			array( 'PwtcMileage', 'generate_report_callback') );
-		add_action( 'wp_ajax_pwtc_mileage_consolidate', 
-			array( 'PwtcMileage', 'consolidate_callback') ); 
 
 		add_action( 'pwtc_mileage_consolidation', 
 			array( 'PwtcMileage', 'consolidation_callback') );  
@@ -381,6 +380,7 @@ class PwtcMileage {
 
 	public static function generate_report_callback() {
 		$reportid = $_POST['report_id'];
+		$plugin_options = self::get_plugin_options();
 		switch ($reportid) {
 			case "ytd_miles":
 			case "ly_lt_achvmnt":
@@ -425,6 +425,10 @@ class PwtcMileage {
 				$title = self::get_ytd_rides_title($name);
 				$header = self::get_ytd_rides_header();
 				$data = self::fetch_ytd_rides(ARRAY_N, $memberid);
+				//self::format_date_in_array(1, $data, $plugin_options['date_display_format']);
+				foreach( $data as $key => $row ):
+					$data[$key][1] = date($plugin_options['date_display_format'], strtotime($row[1]));
+				endforeach;	
 				$response = array(
 					'title' => $title,
 					'header' => $header,
@@ -442,16 +446,10 @@ class PwtcMileage {
 	}
 
 	public static function consolidation_callback() {
-		error_log( 'Consolidation process triggered.');	
-	}
-
-	public static function consolidate_callback() {
-		wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
-		$response = array(
-			'message' => 'Consolidation process initiated.'
-		);
-		echo wp_json_encode($response);
-		wp_die();
+		error_log( 'Consolidation process triggered.');
+		self::job_set_status('consolidation', 'started');
+		sleep(60);
+		self::job_remove('consolidation');	
 	}
 
 	public static function plugin_menu() {
@@ -519,6 +517,11 @@ class PwtcMileage {
 
 	public static function page_manage_year_end() {
 		$plugin_options = self::get_plugin_options();
+    	if (isset($_POST['consolidate'])) {
+			self::job_set_status('consolidation', 'triggered');
+			wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
+		}
+		$job_status = self::job_get_status('consolidation');
 		include('admin-man-yearend.php');
 	}
 
@@ -583,6 +586,14 @@ class PwtcMileage {
 		$out .= '</table>';
 		return $out;
 	}
+
+/*  This does not work!
+	public static function format_date_in_array($index, $data, $fmtstr) {
+		foreach( $data as $key => $row ):
+			$data[$key][$index] = date($fmtstr, strtotime($row[$index]));
+		endforeach;	
+	}
+*/
 
 	public static function shortcode_ly_lt_achvmnt() {
 		$out = '';
@@ -882,6 +893,32 @@ class PwtcMileage {
 		return $status;
 	}
 
+	public static function job_get_status($jobid) {
+    	global $wpdb;
+		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
+		$result = $wpdb->get_row($wpdb->prepare('select * from ' . $jobs_table . 
+			' where job_id = %s', $jobid), ARRAY_A);
+		return $result;
+	}
+
+	public static function job_set_status($jobid, $status) {
+    	global $wpdb;
+		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
+		$status = $wpdb->query($wpdb->prepare('insert into ' . $jobs_table .
+			' (job_id, status, timestamp) values (%s, %s, now())' . 
+			' on duplicate key update status = %s, timestamp = now()',
+			$jobid, $status, $status));
+		return $status;
+	}
+
+	public static function job_remove($jobid) {
+    	global $wpdb;
+		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
+		$status = $wpdb->query($wpdb->prepare('delete from ' . $jobs_table . 
+			' where job_id = %s', $jobid));
+		return $status;
+	}
+
 	public static function create_default_plugin_options() {
 		$data = array(
 			'ride_post_type' => 'ride',
@@ -952,6 +989,7 @@ class PwtcMileage {
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
 		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
 		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
 		
 		$result = $wpdb->query('create table if not exists ' . $member_table . 
 			' (member_id VARCHAR(5) NOT NULL,' .
@@ -994,6 +1032,16 @@ class PwtcMileage {
 			$ride_table . ' (ID))');
 		if (false === $result) {
 			error_log( 'Could not create table ' . $leader_table . ': ' . $wpdb->last_error);
+		}
+
+		$result = $wpdb->query('create table if not exists ' . $jobs_table . 
+			' (job_id VARCHAR(20) NOT NULL,' .
+			' status TEXT NOT NULL,' . 
+			' timestamp DATETIME NOT NULL,' . 
+			' error_msg TEXT,' . 
+			' constraint pk_' . $jobs_table . ' PRIMARY KEY (job_id))');
+		if (false === $result) {
+			error_log( 'Could not create table ' . $jobs_table . ': ' . $wpdb->last_error);
 		}
 	}
 
@@ -1139,8 +1187,9 @@ class PwtcMileage {
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
 		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
 		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
 
-		$result = $wpdb->query('drop table if exists ' . $leader_table . ', ' . $mileage_table . ', ' . $ride_table . ', ' . $member_table);
+		$result = $wpdb->query('drop table if exists ' . $leader_table . ', ' . $mileage_table . ', ' . $ride_table . ', ' . $member_table . ', ' . $jobs_table);
 		if (false === $result) {
 			error_log( 'Could not drop tables: ' . $wpdb->last_error);
 		}
