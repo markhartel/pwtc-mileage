@@ -104,14 +104,10 @@ class PwtcMileage {
 
 	public static function lookup_rides_callback() {
 		$startdate = $_POST['startdate'];	
-		$date = date("D M j, Y", strtotime($startdate));
 		$rides = self::fetch_club_rides($startdate);
-		$ridecal = self::fetch_sched_rides($startdate);
 		$response = array(
-			'startdate' => $startdate, 
-			'date' => $date, 
-			'rides' => $rides,
-			'ridecal' => $ridecal);
+			'startdate' => $startdate,
+			'rides' => $rides);
     	echo wp_json_encode($response);
 		wp_die();
 	}
@@ -128,17 +124,16 @@ class PwtcMileage {
 		}
 		else {
 			$rides = self::fetch_club_rides($startdate);
-			$ridecal = self::fetch_sched_rides($startdate);
 			$response = array(
 				'startdate' => $startdate, 
-				'rides' => $rides,
-				'ridecal' => $ridecal);
+				'rides' => $rides);
     		echo wp_json_encode($response);
 		}
 		wp_die();
 	}
 
 	public static function create_ride_from_event_callback() {
+    	global $wpdb;
 		$startdate = $_POST['startdate'];	
 		$title = $_POST['title'];	
 		$postid = $_POST['post_id'];	
@@ -150,12 +145,15 @@ class PwtcMileage {
     		echo wp_json_encode($response);
 		}
 		else {
-			$rides = self::fetch_club_rides($startdate);
-			$ridecal = self::fetch_sched_rides($startdate);
+			$ride_id = $wpdb->insert_id;
+			$leaders = self::fetch_ride_leaders($ride_id);
+			$mileage = self::fetch_ride_mileage($ride_id);
 			$response = array(
+				'ride_id' => $ride_id,
+				'title' => $title,
 				'startdate' => $startdate, 
-				'rides' => $rides,
-				'ridecal' => $ridecal);
+				'leaders' => $leaders,
+				'mileage' => $mileage);
     		echo wp_json_encode($response);
 		}
 		wp_die();
@@ -163,7 +161,6 @@ class PwtcMileage {
 
 	public static function remove_ride_callback() {
 		$startdate = $_POST['startdate'];
-		$date = date("D M j, Y", strtotime($startdate));
 		$rideid = $_POST['ride_id'];
 		$mcnt = self::fetch_ride_has_mileage(intval($rideid));
 		$lcnt = self::fetch_ride_has_leaders(intval($rideid));
@@ -183,12 +180,9 @@ class PwtcMileage {
 			}
 			else {
 				$rides = self::fetch_club_rides($startdate);
-				$ridecal = self::fetch_sched_rides($startdate);
 				$response = array(
 					'startdate' => $startdate, 
-					'date' => $date, 
-					'rides' => $rides,
-					'ridecal' => $ridecal);
+					'rides' => $rides);
     			echo wp_json_encode($response);
 			}
 		}
@@ -198,13 +192,11 @@ class PwtcMileage {
 	public static function lookup_ridesheet_callback() {
 		$rideid = $_POST['ride_id'];
 		$startdate = $_POST['startdate'];
-		$date = date("D M j, Y", strtotime($startdate));
 		$title = $_POST['title'];
 		$leaders = self::fetch_ride_leaders(intval($rideid));
 		$mileage = self::fetch_ride_mileage(intval($rideid));
 		$response = array(
 			'startdate' => $startdate,
-			'date' => $date,
 			'ride_id' => $rideid,
 			'title' => $title,
 			'leaders' => $leaders,
@@ -722,6 +714,7 @@ class PwtcMileage {
 		return $results;
 	}
 
+/*
 	public static function fetch_sched_rides($date) {
     	global $wpdb;
 		$plugin_options = self::get_plugin_options();
@@ -733,6 +726,7 @@ class PwtcMileage {
 			$plugin_options['ride_post_type'], $plugin_options['ride_date_metakey'], $date), ARRAY_A);
 		return $results;
 	}
+*/
 
 	public static function fetch_posts_without_rides() {
     	global $wpdb;
@@ -743,7 +737,8 @@ class PwtcMileage {
 			' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
 			' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
 			' and m.meta_key = %s and (cast(m.meta_value as date) < curdate())' . 
-			' and p.ID not in (select post_id from ' . $ride_table . ' where post_id is not null)', 
+			' and p.ID not in (select post_id from ' . $ride_table . ' where post_id is not null)' . 
+			' order by m.meta_value', 
 			$plugin_options['ride_post_type'], $plugin_options['ride_date_metakey']), ARRAY_A);
 		return $results;
 	}
@@ -837,8 +832,22 @@ class PwtcMileage {
 	public static function insert_ride_with_postid($title, $startdate, $postid) {
     	global $wpdb;
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		/*
 		$status = $wpdb->query($wpdb->prepare('insert into ' . $ride_table .
 			' (title, date, post_id) values (%s, %s, %d)', $title, $startdate, $postid));
+		*/
+		$status = $wpdb->insert($ride_table,
+			array( 
+				'title' => $title, 
+				'date' => $startdate,
+				'post_id' => $postid
+			), 
+			array( 
+				'%s', 
+				'%s',
+				'%d' 
+			)
+		);			
 		return $status;
 	}
 

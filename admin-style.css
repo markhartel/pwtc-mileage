@@ -11,6 +11,10 @@
   margin-top: -70px; /* 1/2 height */
 }
 
+.initially-hidden {
+  display: none;  
+}
+
 .riders-popup div {
   overflow: auto;
   height: 100px;
