@@ -113,6 +113,7 @@ class PwtcMileage {
 	}
 
 	public static function create_ride_callback() {
+    	global $wpdb;
 		$startdate = $_POST['startdate'];	
 		$title = $_POST['title'];	
 		$status = self::insert_ride($title, $startdate);
@@ -123,10 +124,15 @@ class PwtcMileage {
     		echo wp_json_encode($response);
 		}
 		else {
-			$rides = self::fetch_club_rides($startdate);
+			$ride_id = $wpdb->insert_id;
+			$leaders = self::fetch_ride_leaders($ride_id);
+			$mileage = self::fetch_ride_mileage($ride_id);
 			$response = array(
+				'ride_id' => $ride_id,
+				'title' => $title,
 				'startdate' => $startdate, 
-				'rides' => $rides);
+				'leaders' => $leaders,
+				'mileage' => $mileage);
     		echo wp_json_encode($response);
 		}
 		wp_die();
@@ -208,7 +214,11 @@ class PwtcMileage {
 	public static function lookup_riders_callback() {
 		$lastname = $_POST['lastname'];	
 		$firstname = $_POST['firstname'];
-		$members = self::fetch_riders($lastname, $firstname);	
+		$memberid = '';
+    	if (isset($_POST['memberid'])) {
+			$memberid = $_POST['memberid'];
+		}
+		$members = self::fetch_riders($lastname, $firstname, $memberid);	
 		$response = array(
 			'lastname' => $lastname,
 			'firstname' => $firstname,
@@ -870,12 +880,13 @@ class PwtcMileage {
 		return $status;
 	}
 
-	public static function fetch_riders($lastname, $firstname) {
+	public static function fetch_riders($lastname, $firstname, $memberid = '') {
     	global $wpdb;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
     	$results = $wpdb->get_results($wpdb->prepare('select * from ' . $member_table . 
-			' where first_name like %s and last_name like %s order by last_name, first_name', 
-            $firstname . "%", $lastname . "%"), ARRAY_A);
+			' where first_name like %s and last_name like %s and member_id like %s' . 
+			' order by last_name, first_name', 
+            $firstname . "%", $lastname . "%", $memberid . "%"), ARRAY_A);
 		return $results;
 	}
 

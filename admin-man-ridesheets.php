@@ -38,6 +38,12 @@ jQuery(document).ready(function($) {
 
 	function populate_ridesheet_table(startdate, rides) {
 		$('#ridesheet-ride-page .rides-tbl tr').remove();
+		/*
+		if (rides.length == 0) {
+			$('#ridesheet-ride-page .rides-tbl').append('<caption>No ridesheets found!</caption>')
+			return;
+		}
+		*/
         $('#ridesheet-ride-page .rides-tbl').append('<tr><th>Ride Sheet</th><th></th></tr>');    
         rides.forEach(function(item) {
             $('#ridesheet-ride-page .rides-tbl').append(
@@ -132,19 +138,30 @@ jQuery(document).ready(function($) {
 		$('#ridesheet-ride-page .rides-section').show();
 	}   
 
-/*
 	function create_ride_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
 			show_error_msg('#ridesheet-error-msg', res.error);
-			//alert(res.error);
 		}
 		else {
-			populate_ridesheet_table(res.startdate, res.rides, res.ridecal);
-			$('#ride-create-title').val('');
+			$('#ridesheet-main-page').hide();
+ 			var fmt = new DateFormatter();
+			var fmtdate = fmt.formatDate(fmt.parseDate(res.startdate, 'Y-m-d'), 
+				'<?php echo $plugin_options['date_display_format']; ?>');
+			$('#ridesheet-sheet-page h2').html(res.title + ' (' + fmtdate + ')');
+			$("#ridesheet-sheet-page .leader-section .add-frm input[name='rideid']").val(res.ride_id); 
+			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='rideid']").val(res.ride_id); 
+			populate_ride_leader_table(res.ride_id, res.leaders);
+			populate_ride_mileage_table(res.ride_id, res.mileage);
+			$("#ridesheet-sheet-page .leader-section .add-blk").hide(); 
+			$("#ridesheet-sheet-page .mileage-section .add-blk").hide(); 
+			ridesheet_back_btn_cb = function() {
+				$('#ridesheet-main-page .add-blk').hide();
+				$('#ridesheet-main-page').show();
+			};
+			$('#ridesheet-sheet-page').show();
 		}
 	} 
-*/  
 
 	function create_ride_from_event_cb(response) {
         var res = JSON.parse(response);
@@ -290,19 +307,6 @@ jQuery(document).ready(function($) {
 		$.post(action, data, lookup_rides_cb);
     });
 	
-	/*
-    $('#ride-create-form').on('submit', function(evt) {
-        evt.preventDefault();
-        var action = $('#ride-create-form').attr('action');
-        var data = {
-			'action': 'pwtc_mileage_create_ride',
-			'startdate': $('#ride-create-date').val(),
-			'title': $('#ride-create-title').val()
-		};
-		$.post(action, data, create_ride_cb);
-    });
-	*/
-
     $('#ridesheet-sheet-page .leader-section .add-frm').on('submit', function(evt) {
         evt.preventDefault();
         var action = $('#ridesheet-sheet-page .leader-section .add-frm').attr('action');
@@ -330,8 +334,12 @@ jQuery(document).ready(function($) {
         lookup_pwtc_riders(function(riderid, name) {
             $('#ridesheet-sheet-page .leader-section .add-frm .riderid').html(riderid);
             $('#ridesheet-sheet-page .leader-section .add-frm .ridername').html(name); 
-			$('#ridesheet-sheet-page .leader-section .add-blk').show();           
+			$('#ridesheet-sheet-page .leader-section .add-blk').show(500);           
         });
+    });
+
+	$("#ridesheet-sheet-page .leader-section .add-frm .cancel-btn").on('click', function(evt) {
+ 		$('#ridesheet-sheet-page .leader-section .add-blk').hide();           
     });
 
 	$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").on('click', function(evt) {
@@ -339,9 +347,39 @@ jQuery(document).ready(function($) {
             $('#ridesheet-sheet-page .mileage-section .add-frm .riderid').html(riderid);
             $('#ridesheet-sheet-page .mileage-section .add-frm .ridername').html(name); 
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(''); 
-			$('#ridesheet-sheet-page .mileage-section .add-blk').show();           
+			$('#ridesheet-sheet-page .mileage-section .add-blk').show(500);           
         });
     });
+
+	$("#ridesheet-sheet-page .mileage-section .add-frm .cancel-btn").on('click', function(evt) {
+ 		$('#ridesheet-sheet-page .mileage-section .add-blk').hide();           
+    });
+
+	$("#ridesheet-main-page .add-btn").on('click', function(evt) {
+		$("#ridesheet-main-page .add-blk .add-frm input[type='text']").val(''); 
+		$('#ridesheet-main-page .add-blk').show(500);           
+    });
+
+	$("#ridesheet-main-page .add-blk .cancel-btn").on('click', function(evt) {
+		$('#ridesheet-main-page .add-blk').hide();
+    });
+
+	$('#ridesheet-main-page .add-blk .add-frm').on('submit', function(evt) {
+        evt.preventDefault();
+        var action = $('#ridesheet-main-page .add-blk .add-frm').attr('action');
+        var data = {
+			'action': 'pwtc_mileage_create_ride',
+			'title': $("#ridesheet-main-page .add-blk .add-frm input[name='title']").val(),
+			'startdate': $("#ridesheet-main-page .add-blk .add-frm input[name='fmtdate']").val(),
+		};
+		$.post(action, data, create_ride_cb);
+    });
+
+	$("#ridesheet-main-page .add-blk .add-frm input[name='date']").datepicker({
+  		dateFormat: 'D M d yy',
+		altField: "#ridesheet-main-page .add-blk .add-frm input[name='fmtdate']",
+		altFormat: 'yy-mm-dd'
+	});
 
 	$("#ridesheet-ride-page .ride-search-frm input[name='date']").datepicker({
   		dateFormat: 'D M d yy',
@@ -355,10 +393,25 @@ jQuery(document).ready(function($) {
 	<h1><?= esc_html(get_admin_page_title()); ?></h1>
 	<div id='ridesheet-error-msg'></div>
 	<div id="ridesheet-main-page">
-        <p><strong>Create Ride Sheets from Posted Rides</strong><br>
-        <button class="create-btn button button-primary button-large">Create</button></p>
-        <p><strong>Modify Existing Ride Sheets</strong><br>
-        <button class="modify-btn button button-primary button-large">Modify</button></p>
+		<p>
+        <div><strong>Create Ride Sheets from Posted Rides</strong></div>
+        <div><button class="create-btn button button-primary button-large">Create</button></div><br>
+        <div><strong>Modify Existing Ride Sheets</strong></div>
+        <div><button class="modify-btn button button-primary button-large">Modify</button></div><br>
+        <div><strong>Add a New Ride Sheet</strong></div>
+        <div><button class="add-btn button button-primary button-large">New</button>
+		<span class="add-blk initially-hidden">
+			<form class="add-frm" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+				<table>
+				<tr><td>Ride Title:</td><td><input name="title" type="text" required/></td></tr>
+				<tr><td>Start Date:</td><td><input name="date" type="text" required/></td></tr>
+				</table>
+				<input type="hidden" name="fmtdate"/>
+				<input class="button button-primary" type="submit" value="Create"/>
+				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
+			</form>
+		</span></div>
+		</p>
 	</div>
 	<div id="ridesheet-post-page" class="initially-hidden">
 		<p><button class='back-btn button button-primary button-large'>Back</button></p>
@@ -389,10 +442,13 @@ jQuery(document).ready(function($) {
 			<p><form class="add-frm" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 				<input class="button button-primary" name="lookup" type="button" value="Lookup Leader"/>
 				<span class="add-blk initially-hidden">
-					<label class="riderid"></label>
-            		<label class="ridername"></label>
+					<table>
+					<tr><td>ID:</td><td><label class="riderid"></label></td></tr>
+            		<tr><td>Name:</td><td><label class="ridername"></label></td></tr>
+					</table>
 					<input name="rideid" type="hidden"/>
 					<input class="button button-primary" type="submit" value="Add Leader"/>
+					<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 				</span>
 			</form></p>
 			<table class="leader-tbl pretty"></table>
@@ -402,11 +458,14 @@ jQuery(document).ready(function($) {
 			<p><form class="add-frm" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 				<input class="button button-primary" name="lookup" type="button" value="Lookup Rider"/>
 				<span class="add-blk initially-hidden">
-					<label class="riderid"></label>
-            		<label class="ridername"></label>
-					<input name="mileage" type="text" placeholder="Enter mileage" required/>
+					<table>
+					<tr><td>ID:</td><td><label class="riderid"></label></td></tr>
+            		<tr><td>Name:</td><td><label class="ridername"></label></td></tr>
+					<tr><td>Mileage:</td><td><input name="mileage" type="text" required/></td></tr>
+					</table>
 					<input name="rideid" type="hidden"/>
 					<input class="button button-primary" type="submit" value="Add Mileage"/>
+					<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 				</span>
 			</form></p>
 			<table class="mileage-tbl pretty"></table>
