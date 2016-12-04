@@ -2,17 +2,17 @@
 A Wordpress plugin to record and manage the mileage of riders in the [Portland Wheelmen Touring Club](http://pwtc.com).
 
 ## Package Files
-- README.md
-- pwtc-mileage.php
-- class.pwtcmileage.php
-- admin-gen-reports.php
-- admin-man-riders.php
-- admin-man-ridesheets.php
-- admin-man-yearend.php
-- admin-man-settings.php
-- admin-rider-lookup.php
-- admin-scripts.js
-- php-date-formatter.js (from [github](https://github.com/kartik-v/php-date-formatter))
-- php-date-formatter.min.js (from [github](https://github.com/kartik-v/php-date-formatter))
-- admin-style.css
-- datepicker.css (from [github](https://github.com/stuttter/wp-datepicker-styling))
+- README.md *(this file)*
+- pwtc-mileage.php *(plugin definition file)*
+- class.pwtcmileage.php *(PHP class with server-side logic)*
+- admin-gen-reports.php *(client-side logic for Generate Reports admin page)*
+- admin-man-riders.php *(client-side logic for Manage Riders admin page)*
+- admin-man-ridesheets.php *(client-side logic for Manage Ride Sheets admin page)*
+- admin-man-yearend.php *(client-side logic for Manage Year-end Operations admin page)*
+- admin-man-settings.php *(client-side logic for Settings admin page)*
+- admin-rider-lookup.php *(client-side logic for rider lookup dialog)*
+- admin-scripts.js *(javascript utility functions for admin pages)*
+- php-date-formatter.js *(javascript utility for PHP-style date formats - from [github](https://github.com/kartik-v/php-date-formatter))*
+- php-date-formatter.min.js *(minimized version of above file - from [github](https://github.com/kartik-v/php-date-formatter))*
+- admin-style.css *(stylesheet for admin pages)*
+- datepicker.css *(stylesheet for Wordpress jQueryUI datepicker - from [github](https://github.com/stuttter/wp-datepicker-styling))*
