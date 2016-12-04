@@ -13,9 +13,9 @@ jQuery(document).ready(function($) {
 				'<td>' + item.first_name + ' ' + item.last_name + '</td></tr>');    
 		});
         $('#rider-lookup-results .lookup-tlb tr').on('click', function(evt) {
+            $("#rider-lookup-results").dialog('close');
             window.pwtc_rider_cb($(this).attr('memberid'), 
                 $(this).find('td').first().next().html());
-            $("#rider-lookup-results").dialog('close');
         });
         return members.length;
     }
@@ -24,9 +24,9 @@ jQuery(document).ready(function($) {
         var res = JSON.parse(response);
 		var num_riders = populate_riders_table(res.members);
         if (num_riders == 1) {
+            $("#rider-lookup-results").dialog('close');
             window.pwtc_rider_cb(res.members[0].member_id, 
                 res.members[0].first_name + ' ' + res.members[0].last_name);
-            $("#rider-lookup-results").dialog('close');
         }
         else if (num_riders == 0) {
             $('#rider-lookup-results .lookup-tlb tr').remove();

@@ -232,22 +232,37 @@ class PwtcMileage {
 		$lastname = $_POST['lastname'];	
 		$firstname = $_POST['firstname'];
 		$expdate = $_POST['exp_date'];
+		$mode = $_POST['mode'];
 		$lookupfirst = '';
 		$lookuplast = strtolower(substr($lastname, 0, 1));
-		$status = self::insert_rider($memberid, $lastname, $firstname, $expdate);	
-		if (false === $status or 0 === $status) {
+		$no_overwrite = false;
+		if ($mode == 'insert') {
+			if (count(self::fetch_rider($memberid)) > 0) {
+				$no_overwrite = true;
+			}
+		}
+		if ($no_overwrite) {
 			$response = array(
-				'error' => 'Could not insert rider into database.'
+				'error' => 'Member ID ' . $memberid . ' already exists.'
 			);
     		echo wp_json_encode($response);
 		}
 		else {
-			$members = self::fetch_riders($lookuplast, $lookupfirst);
-			$response = array(
-				'lastname' => $lookuplast,
-				'firstname' => $lookupfirst,
-				'members' => $members);
-    		echo wp_json_encode($response);
+			$status = self::insert_rider($memberid, $lastname, $firstname, $expdate);	
+			if (false === $status or 0 === $status) {
+				$response = array(
+					'error' => 'Could not insert rider into database.'
+				);
+    			echo wp_json_encode($response);
+			}
+			else {
+				$members = self::fetch_riders($lookuplast, $lookupfirst);
+				$response = array(
+					'lastname' => $lookuplast,
+					'firstname' => $lookupfirst,
+					'members' => $members);
+    			echo wp_json_encode($response);
+			}
 		}
 		wp_die();
 	}
@@ -876,6 +891,14 @@ class PwtcMileage {
 			' where first_name like %s and last_name like %s and member_id like %s' . 
 			' order by last_name, first_name', 
             $firstname . "%", $lastname . "%", $memberid . "%"), ARRAY_A);
+		return $results;
+	}
+
+	public static function fetch_rider($memberid) {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+    	$results = $wpdb->get_results($wpdb->prepare('select * from ' . $member_table . 
+			' where member_id = %s', $memberid), ARRAY_A);
 		return $results;
 	}
 

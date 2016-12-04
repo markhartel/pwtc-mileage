@@ -39,7 +39,10 @@ jQuery(document).ready(function($) {
 			$("#rider-inspect-section .add-blk .add-frm input[name='fmtdate']").val(
                 $(this).parent().parent().find('td').eq(3).attr('date')
             );
+            $("#rider-inspect-section .add-blk .add-frm input[name='mode']").val('update');
+            $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").attr("disabled", "disabled");
             $('#rider-inspect-section .add-blk').show(500);
+            $("#rider-inspect-section .add-blk .add-frm input[name='firstname']").focus();
         });
 		$('#rider-inspect-section .riders-tbl .remove-btn').on('click', function(evt) {
             evt.preventDefault();
@@ -112,7 +115,11 @@ jQuery(document).ready(function($) {
 
     $("#rider-inspect-section .add-btn").on('click', function(evt) {
 		$("#rider-inspect-section .add-blk .add-frm input[type='text']").val(''); 
-		$('#rider-inspect-section .add-blk').show(500);           
+		$("#rider-inspect-section .add-blk .add-frm input[type='hidden']").val(''); 
+        $("#rider-inspect-section .add-blk .add-frm input[name='mode']").val('insert');
+        $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").removeAttr("disabled");
+		$('#rider-inspect-section .add-blk').show(500); 
+        $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").focus();          
     });
 
 	$("#rider-inspect-section .add-blk .cancel-btn").on('click', function(evt) {
@@ -130,6 +137,7 @@ jQuery(document).ready(function($) {
         var action = $('#rider-inspect-section .add-blk .add-frm').attr('action');
         var data = {
 			'action': 'pwtc_mileage_create_rider',
+            'mode': $("#rider-inspect-section .add-blk .add-frm input[name='mode']").val(),
 			'member_id': $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").val(),
 			'lastname': $("#rider-inspect-section .add-blk .add-frm input[name='lastname']").val(),
 			'firstname': $("#rider-inspect-section .add-blk .add-frm input[name='firstname']").val(),
@@ -192,6 +200,7 @@ jQuery(document).ready(function($) {
 				<tr><td>Expiration Date:</td><td><input name="expdate" type="text" required/></td></tr>
 				</table>
 				<input type="hidden" name="fmtdate"/>
+				<input type="hidden" name="mode"/>
 				<input class="button button-primary" type="submit" value="Create"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>

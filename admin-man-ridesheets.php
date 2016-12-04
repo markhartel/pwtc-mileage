@@ -245,6 +245,7 @@ jQuery(document).ready(function($) {
 		else {
 			$('#ridesheet-sheet-page .leader-section .add-blk').hide();
 			populate_ride_leader_table(res.ride_id, res.leaders);
+			$("#ridesheet-sheet-page .leader-section .add-frm input[name='lookup']").focus();
 		}
 	}
 
@@ -256,6 +257,7 @@ jQuery(document).ready(function($) {
 		else {
 			$('#ridesheet-sheet-page .mileage-section .add-blk').hide();
 			populate_ride_mileage_table(res.ride_id, res.mileage);
+			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").focus();
 		}
 	}
 
@@ -334,12 +336,14 @@ jQuery(document).ready(function($) {
         lookup_pwtc_riders(function(riderid, name) {
             $('#ridesheet-sheet-page .leader-section .add-frm .riderid').html(riderid);
             $('#ridesheet-sheet-page .leader-section .add-frm .ridername').html(name); 
-			$('#ridesheet-sheet-page .leader-section .add-blk').show(500);           
+			$('#ridesheet-sheet-page .leader-section .add-blk').show(500); 
+			$("#ridesheet-sheet-page .leader-section .add-frm input[type='submit']").focus();          
         });
     });
 
 	$("#ridesheet-sheet-page .leader-section .add-frm .cancel-btn").on('click', function(evt) {
  		$('#ridesheet-sheet-page .leader-section .add-blk').hide();           
+		$("#ridesheet-sheet-page .leader-section .add-frm input[name='lookup']").focus();
     });
 
 	$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").on('click', function(evt) {
@@ -347,17 +351,20 @@ jQuery(document).ready(function($) {
             $('#ridesheet-sheet-page .mileage-section .add-frm .riderid').html(riderid);
             $('#ridesheet-sheet-page .mileage-section .add-frm .ridername').html(name); 
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(''); 
-			$('#ridesheet-sheet-page .mileage-section .add-blk').show(500);           
+			$('#ridesheet-sheet-page .mileage-section .add-blk').show(500);  
+			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").focus();         
         });
     });
 
 	$("#ridesheet-sheet-page .mileage-section .add-frm .cancel-btn").on('click', function(evt) {
  		$('#ridesheet-sheet-page .mileage-section .add-blk').hide();           
+		$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").focus();
     });
 
 	$("#ridesheet-main-page .add-btn").on('click', function(evt) {
 		$("#ridesheet-main-page .add-blk .add-frm input[type='text']").val(''); 
-		$('#ridesheet-main-page .add-blk').show(500);           
+		$('#ridesheet-main-page .add-blk').show(500); 
+		$("#ridesheet-main-page .add-blk .add-frm input[name='title']").focus();          
     });
 
 	$("#ridesheet-main-page .add-blk .cancel-btn").on('click', function(evt) {
