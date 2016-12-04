@@ -117,7 +117,7 @@ class PwtcMileage {
 		$startdate = $_POST['startdate'];	
 		$title = $_POST['title'];	
 		$status = self::insert_ride($title, $startdate);
-		if (false === $status) {
+		if (false === $status or 0 === $status) {
 			$response = array(
 				'error' => 'Could not insert ride into database.'
 			);
@@ -144,7 +144,7 @@ class PwtcMileage {
 		$title = $_POST['title'];	
 		$postid = $_POST['post_id'];	
 		$status = self::insert_ride_with_postid($title, $startdate, intval($postid));
-		if (false === $status) {
+		if (false === $status or 0 === $status) {
 			$response = array(
 				'error' => 'Could not insert ride into database.'
 			);
@@ -178,7 +178,7 @@ class PwtcMileage {
 		}
 		else {
 			$status = self::delete_ride(intval($rideid));
-			if (false === $status) {
+			if (false === $status or 0 === $status) {
 				$response = array(
 					'error' => 'Could not delete ride from database.'
 				);
@@ -231,16 +231,11 @@ class PwtcMileage {
 		$memberid = $_POST['member_id'];	
 		$lastname = $_POST['lastname'];	
 		$firstname = $_POST['firstname'];
-		$lookupfirst = $_POST['lookup_first'];
-		$lookuplast = $_POST['lookup_last'];
-		$status = self::insert_rider($memberid, $lastname, $firstname);	
-		if (false === $status) {
-			$response = array(
-				'error' => 'Could not insert rider into database.'
-			);
-    		echo wp_json_encode($response);
-		}
-		else if (0 === $status) {
+		$expdate = $_POST['exp_date'];
+		$lookupfirst = '';
+		$lookuplast = strtolower(substr($lastname, 0, 1));
+		$status = self::insert_rider($memberid, $lastname, $firstname, $expdate);	
+		if (false === $status or 0 === $status) {
 			$response = array(
 				'error' => 'Could not insert rider into database.'
 			);
@@ -271,13 +266,7 @@ class PwtcMileage {
 		}
 		else {
 			$status = self::delete_rider($memberid);	
-			if (false === $status) {
-				$response = array(
-					'error' => 'Could not delete rider from database.'
-				);
-    			echo wp_json_encode($response);
-			}
-			else if (0 === $status) {
+			if (false === $status or 0 === $status) {
 				$response = array(
 					'error' => 'Could not delete rider from database.'
 				);
@@ -299,7 +288,7 @@ class PwtcMileage {
 		$rideid = $_POST['ride_id'];
 		$memberid = $_POST['member_id'];
 		$status = self::delete_ride_leader(intval($rideid), $memberid);
-		if (false === $status) {
+		if (false === $status or 0 === $status) {
 			$response = array(
 				'error' => 'Could not delete ride leader from database.'
 			);
@@ -320,7 +309,7 @@ class PwtcMileage {
 		$rideid = $_POST['ride_id'];
 		$memberid = $_POST['member_id'];
 		$status = self::delete_ride_mileage(intval($rideid), $memberid);
-		if (false === $status) {
+		if (false === $status or 0 === $status) {
 			$response = array(
 				'error' => 'Could not delete ride mileage from database.'
 			);
@@ -341,7 +330,7 @@ class PwtcMileage {
 		$rideid = $_POST['ride_id'];
 		$memberid = $_POST['member_id'];
 		$status = self::insert_ride_leader(intval($rideid), $memberid);
-		if (false === $status) {
+		if (false === $status or 0 === $status) {
 			$response = array(
 				'error' => 'Could not insert ride leader into database.'
 			);
@@ -363,7 +352,7 @@ class PwtcMileage {
 		$memberid = $_POST['member_id'];
 		$mileage = $_POST['mileage'];
 		$status = self::insert_ride_mileage(intval($rideid), $memberid, intval($mileage));
-		if (false === $status) {
+		if (false === $status or 0 === $status) {
 			$response = array(
 				'error' => 'Could not insert ride mileage into database.'
 			);
@@ -890,7 +879,7 @@ class PwtcMileage {
 		return $results;
 	}
 
-	public static function insert_rider($memberid, $lastname, $firstname) {
+	public static function insert_rider($memberid, $lastname, $firstname, $expdate) {
     	global $wpdb;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
 		/*
@@ -899,9 +888,9 @@ class PwtcMileage {
 			$memberid, $lastname, $firstname));
 		*/
 		$status = $wpdb->query($wpdb->prepare('insert into ' . $member_table .
-			' (member_id, last_name, first_name, expir_date) values (%s, %s, %s, curdate())' . 
-			' on duplicate key update last_name = %s, first_name = %s, expir_date = curdate()',
-			$memberid, $lastname, $firstname, $lastname, $firstname));
+			' (member_id, last_name, first_name, expir_date) values (%s, %s, %s, %s)' . 
+			' on duplicate key update last_name = %s, first_name = %s, expir_date = %s',
+			$memberid, $lastname, $firstname, $expdate, $lastname, $firstname, $expdate));
 		return $status;
 	}
 

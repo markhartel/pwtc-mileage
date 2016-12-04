@@ -6,18 +6,42 @@ if (!current_user_can('manage_options')) {
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
 	function populate_riders_table(members, lastname, firstname) {
-		$('#rider-inspect-section table tr').remove();
-		$('#rider-inspect-section table').append(
-			'<tr><th>Rider ID</th><th>Name</th><th>Expiration Date</th><th></th></tr>');
+		$('#rider-inspect-section .riders-tbl tr').remove();
+		$('#rider-inspect-section .riders-tbl').append(
+			'<tr><th>Member ID</th><th>First Name</th><th>Last Name</th><th>Expiration Date</th><th></th></tr>');
+		var fmt = new DateFormatter();
         members.forEach(function(item) {
-            $('#rider-inspect-section table').append(
+			var d = fmt.parseDate(item.expir_date, 'Y-m-d');
+			var fmtdate = fmt.formatDate(d, 
+				'<?php echo $plugin_options['date_display_format']; ?>');
+            $('#rider-inspect-section .riders-tbl').append(
 				'<tr memberid="' + item.member_id + '">' + 
 				'<td>' + item.member_id + '</td>' +
-				'<td>' + item.first_name + ' ' + item.last_name + '</td>' + 
-				'<td>' + item.expir_date + '</td>' + 
-                '<td><button class="remove_btn">Remove</button></td></tr>');    
+				'<td>' + item.first_name + '</td><td>' + item.last_name + '</td>' + 
+				'<td date="' + item.expir_date + '">' + fmtdate + '</td>' + 
+                '<td><button class="modify-btn button">Modify</button>' + 
+                '<button class="remove-btn button">Remove</button></td></tr>');    
 		});
-		$('#rider-inspect-section table .remove_btn').on('click', function(evt) {
+        $('#rider-inspect-section .riders-tbl .modify-btn').on('click', function(evt) {
+            evt.preventDefault();
+			$("#rider-inspect-section .add-blk .add-frm input[name='memberid']").val(
+                $(this).parent().parent().attr('memberid')
+            );
+			$("#rider-inspect-section .add-blk .add-frm input[name='firstname']").val(
+                $(this).parent().parent().find('td').eq(1).html()
+            );
+			$("#rider-inspect-section .add-blk .add-frm input[name='lastname']").val(
+                $(this).parent().parent().find('td').eq(2).html()
+            );
+			$("#rider-inspect-section .add-blk .add-frm input[name='expdate']").val(
+                $(this).parent().parent().find('td').eq(3).html()
+            );
+			$("#rider-inspect-section .add-blk .add-frm input[name='fmtdate']").val(
+                $(this).parent().parent().find('td').eq(3).attr('date')
+            );
+            $('#rider-inspect-section .add-blk').show(500);
+        });
+		$('#rider-inspect-section .riders-tbl .remove-btn').on('click', function(evt) {
             evt.preventDefault();
             var action = '<?php echo admin_url('admin-ajax.php'); ?>';
             var data = {
@@ -33,105 +57,147 @@ jQuery(document).ready(function($) {
 	function lookup_riders_cb(response) {
         var res = JSON.parse(response);
 		populate_riders_table(res.members, res.lastname, res.firstname);
-        $('#rider-create-lookup-first').val(res.firstname);
-        $('#rider-create-lookup-last').val(res.lastname);
-        $('#rider-create-form').show();
 	}   
 
 	function create_rider_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
-			alert(res.error);
+            show_error_msg('#rider-error-msg', res.error);
 		}
 		else {
+            $('#rider-inspect-section .add-blk').hide();
             populate_riders_table(res.members, res.lastname, res.firstname);
-            $('#rider-create-id').val('');
-			$('#rider-create-last').val('');
-            $('#rider-create-first').val('');
         }
 	}   
 
 	function remove_rider_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
-			alert(res.error);
+            show_error_msg('#rider-error-msg', res.error);
 		}
 		else {
             populate_riders_table(res.members, res.lastname, res.firstname);
         }
 	}   
 
-    $('#rider-update-button').on('click', function(evt) {
+    $('#rider-manage-section .populate-btn').on('click', function(evt) {
         evt.preventDefault();
-        alert('Update Riders button pressed');
+        alert('Populate button pressed');
     });
 
-    $('#rider-inspect-button').on('click', function(evt) {
+    $('#rider-manage-section .inspect-btn').on('click', function(evt) {
         evt.preventDefault();
-	    $('#rider-inspect-section').show();
 	    $('#rider-manage-section').hide();
+        $('#rider-inspect-section .riders-tbl tr').remove();
+        $('#rider-inspect-section .add-blk').hide();
+	    $('#rider-inspect-section').show();
     });
 
-    $('#rider-back-button').on('click', function(evt) {
+    $('#rider-inspect-section .back-btn').on('click', function(evt) {
         evt.preventDefault();
 	    $('#rider-inspect-section').hide();
 	    $('#rider-manage-section').show();
     });
 
-    $('#rider-lookup-form').on('submit', function(evt) {
+    $('#rider-inspect-section .lookup-btn').on('click', function(evt) {
         evt.preventDefault();
-        var action = $('#rider-lookup-form').attr('action');
+        var action = '<?php echo admin_url('admin-ajax.php'); ?>';
         var data = {
-			'action': 'pwtc_mileage_lookup_riders',
-			'lastname': $('#rider-lookup-last').val(),
-            'firstname': $('#rider-lookup-first').val()
+            'action': 'pwtc_mileage_lookup_riders',
+            'lastname': $(this).attr('lastname'),
+            'firstname': ''
 		};
         $.post(action, data, lookup_riders_cb);
     });
 
-    $('#rider-create-form').on('submit', function(evt) {
-        evt.preventDefault();
-        var action = $('#rider-create-form').attr('action');
-        var data = {
-			'action': 'pwtc_mileage_create_rider',
-			'member_id': $('#rider-create-id').val(),
-			'lastname': $('#rider-create-last').val(),
-            'firstname': $('#rider-create-first').val(),
-            'lookup_first': $('#rider-create-lookup-first').val(),
-            'lookup_last': $('#rider-create-lookup-last').val()
-		};
-        $.post(action, data, create_rider_cb);
+    $("#rider-inspect-section .add-btn").on('click', function(evt) {
+		$("#rider-inspect-section .add-blk .add-frm input[type='text']").val(''); 
+		$('#rider-inspect-section .add-blk').show(500);           
     });
 
-	$('#rider-inspect-section').hide();
-	$('#rider-create-form').hide();
-	$('#rider-manage-section').show();
+	$("#rider-inspect-section .add-blk .cancel-btn").on('click', function(evt) {
+		$('#rider-inspect-section .add-blk').hide();
+    });
+
+    $("#rider-inspect-section .add-blk .add-frm input[name='expdate']").datepicker({
+  		dateFormat: 'D M d yy',
+		altField: "#rider-inspect-section .add-blk .add-frm input[name='fmtdate']",
+		altFormat: 'yy-mm-dd'
+	});
+
+    $('#rider-inspect-section .add-blk .add-frm').on('submit', function(evt) {
+        evt.preventDefault();
+        var action = $('#rider-inspect-section .add-blk .add-frm').attr('action');
+        var data = {
+			'action': 'pwtc_mileage_create_rider',
+			'member_id': $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").val(),
+			'lastname': $("#rider-inspect-section .add-blk .add-frm input[name='lastname']").val(),
+			'firstname': $("#rider-inspect-section .add-blk .add-frm input[name='firstname']").val(),
+			'exp_date': $("#rider-inspect-section .add-blk .add-frm input[name='fmtdate']").val()
+		};
+		$.post(action, data, create_rider_cb);
+    });
+
 });
 </script>
 <div class="wrap">
 	<h1><?= esc_html(get_admin_page_title()); ?></h1>
+    <div id='rider-error-msg'></div>
     <div id='rider-manage-section'>
-        <p>Press button to synchronize rider list with current PWTC membership database.</p>
-        <button id="rider-update-button">Update Riders</button>
-        <p>Press button to inspect and modify rider list.</p>
-        <button id="rider-inspect-button">Inspect Riders</button>
+        <p>
+        <div><strong>Populate rider list with current membership database.</strong></div>
+        <div><button class="populate-btn button button-primary button-large">Populate</button></div><br>
+        <div><strong>Inspect and modify rider list.</strong></div>
+        <div><button class="inspect-btn button button-primary button-large">Inspect</button></div>
+        </p>
     </div>
-    <div id='rider-inspect-section'>
-		<button id='rider-back-button'>Go Back</button>
-		<form id="rider-lookup-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-            <input id="rider-lookup-first" type="text" name="firstname" placeholder="Enter first name"/>        
-            <input id="rider-lookup-last" type="text" name="lastname" placeholder="Enter last name"/> 
-            <input type="submit" value="Lookup"/>       
-        </form>
-		<form id="rider-create-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-            <input id="rider-create-id" type="text" name="memberid" placeholder="Enter member ID" required/>        
-            <input id="rider-create-first" type="text" name="firstname" placeholder="Enter first name" required/>        
-            <input id="rider-create-last" type="text" name="lastname" placeholder="Enter last name" required/> 
-			<input id="rider-create-lookup-first" type="hidden"/>
-			<input id="rider-create-lookup-last" type="hidden"/>
-            <input type="submit" value="Create Rider"/>       
-        </form>
-        <table class="pretty"></table>
+    <div id='rider-inspect-section' class="initially-hidden">
+        <p><button class='back-btn button button-primary button-large'>Back</button></p>
+        <p>
+            <button class='lookup-btn button' lastname='a'>A</button>
+            <button class='lookup-btn button' lastname='b'>B</button>
+            <button class='lookup-btn button' lastname='c'>C</button>
+            <button class='lookup-btn button' lastname='d'>D</button>
+            <button class='lookup-btn button' lastname='e'>E</button>
+            <button class='lookup-btn button' lastname='f'>F</button>
+            <button class='lookup-btn button' lastname='g'>G</button>
+            <button class='lookup-btn button' lastname='h'>H</button>
+            <button class='lookup-btn button' lastname='i'>I</button>
+            <button class='lookup-btn button' lastname='j'>J</button>
+            <button class='lookup-btn button' lastname='k'>K</button>
+            <button class='lookup-btn button' lastname='l'>L</button>
+            <button class='lookup-btn button' lastname='m'>M</button>
+            <button class='lookup-btn button' lastname='n'>N</button>
+            <button class='lookup-btn button' lastname='o'>O</button>
+            <button class='lookup-btn button' lastname='p'>P</button>
+            <button class='lookup-btn button' lastname='q'>Q</button>
+            <button class='lookup-btn button' lastname='r'>R</button>
+            <button class='lookup-btn button' lastname='s'>S</button>
+            <button class='lookup-btn button' lastname='t'>T</button>
+            <button class='lookup-btn button' lastname='u'>U</button>
+            <button class='lookup-btn button' lastname='v'>V</button>
+            <button class='lookup-btn button' lastname='w'>W</button>
+            <button class='lookup-btn button' lastname='x'>X</button>
+            <button class='lookup-btn button' lastname='y'>Y</button>
+            <button class='lookup-btn button' lastname='z'>Z</button>
+        </p>
+
+        <div><button class="add-btn button button-primary button-large">New</button>
+		<span class="add-blk initially-hidden">
+			<form class="add-frm" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+				<table>
+				<tr><td>Member ID:</td><td><input name="memberid" type="text" required/></td></tr>
+				<tr><td>First Name:</td><td><input name="firstname" type="text" required/></td></tr>
+				<tr><td>Last Name:</td><td><input name="lastname" type="text" required/></td></tr>
+				<tr><td>Expiration Date:</td><td><input name="expdate" type="text" required/></td></tr>
+				</table>
+				<input type="hidden" name="fmtdate"/>
+				<input class="button button-primary" type="submit" value="Create"/>
+				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
+			</form>
+		</span></div>
+
+        <p><table class="riders-tbl pretty"></table></p>
     </div>
 </div>
 <?php
