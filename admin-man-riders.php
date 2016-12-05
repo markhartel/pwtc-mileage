@@ -6,6 +6,8 @@ if (!current_user_can('manage_options')) {
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
 	function populate_riders_table(members, lastname, firstname) {
+        $('#rider-inspect-section .lookup-btn').removeClass('button-primary');
+        $("#rider-inspect-section .lookup-btn[lastname='" + lastname + "']").addClass('button-primary');
 		$('#rider-inspect-section .riders-tbl tr').remove();
 		$('#rider-inspect-section .riders-tbl').append(
 			'<tr><th>Member ID</th><th>First Name</th><th>Last Name</th><th>Expiration Date</th><th></th></tr>');
@@ -93,6 +95,7 @@ jQuery(document).ready(function($) {
 	    $('#rider-manage-section').hide();
         $('#rider-inspect-section .riders-tbl tr').remove();
         $('#rider-inspect-section .add-blk').hide();
+        $('#rider-inspect-section .lookup-btn').removeClass('button-primary');
 	    $('#rider-inspect-section').show();
     });
 

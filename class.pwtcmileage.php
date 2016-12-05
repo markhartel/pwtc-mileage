@@ -387,66 +387,57 @@ class PwtcMileage {
 	public static function generate_report_callback() {
 		$reportid = $_POST['report_id'];
 		$plugin_options = self::get_plugin_options();
+		$error = null;
+		$data = array();
+		$meta = null;
 		switch ($reportid) {
 			case "ytd_miles":
 			case "ly_lt_achvmnt":
 				$sort = $_POST['sort'];
-				$title = null;
-				$header = null;
-				$data = null;
 				switch ($reportid) {			
 					case "ytd_miles":
-						$title = self::get_ytd_miles_title();
-						$header = self::get_ytd_miles_header();
+						$meta = self::meta_ytd_miles();
 						$data = self::fetch_ytd_miles(ARRAY_N, $sort);
 						break;
 					case "ly_lt_achvmnt":
-						$title = self::get_ly_lt_achvmnt_title();
-						$header = self::get_ly_lt_achvmnt_header();
+						$meta = self::meta_ly_lt_achvmnt();
 						$data = self::fetch_ly_lt_achvmnt(ARRAY_N, $sort);
 						break;
 				}
-				$response = array(
-					'title' => $title,
-					'header' => $header,
-					'data' => $data
-				);
-				echo wp_json_encode($response);
 				break;
 			case "ytd_led":
 				$sort = $_POST['sort'];
-				$title = self::get_ytd_led_title();
-				$header = self::get_ytd_led_header();
+				$meta = self::meta_ytd_led();
 				$data = self::fetch_ytd_led(ARRAY_N, $sort);
-				$response = array(
-					'title' => $title,
-					'header' => $header,
-					'data' => $data
-				);
-				echo wp_json_encode($response);
 				break;
 			case "ytd_rides":
 				$memberid = $_POST['member_id'];
 				$name = $_POST['name'];
-				$title = self::get_ytd_rides_title($name);
-				$header = self::get_ytd_rides_header();
+				$meta = self::meta_ytd_rides($name);
 				$data = self::fetch_ytd_rides(ARRAY_N, $memberid);
-				//self::format_date_in_array(1, $data, $plugin_options['date_display_format']);
-				foreach( $data as $key => $row ):
-					$data[$key][1] = date($plugin_options['date_display_format'], strtotime($row[1]));
-				endforeach;	
-				$response = array(
-					'title' => $title,
-					'header' => $header,
-					'data' => $data
-				);
-				echo wp_json_encode($response);
 				break;
 			default:
-				$response = array(
-					'error' => 'Report type ' . $reportid . ' not found.'
-				);
-				echo wp_json_encode($response);
+				$error = 'Report type ' . $reportid . ' not found.';
+		}
+		if (null === $error) {
+			if ($meta['date_idx'] >= 0) {
+				$i = $meta['date_idx'];
+				foreach( $data as $key => $row ):
+					$data[$key][$i] = date($plugin_options['date_display_format'], strtotime($row[$i]));
+				endforeach;					
+			}
+			$response = array(
+				'title' => $meta['title'],
+				'header' => $meta['header'],
+				'data' => $data
+			);
+			echo wp_json_encode($response);			
+		}
+		else {
+			$response = array(
+				'error' => $error
+			);
+			echo wp_json_encode($response);
 		}
 		wp_die();
 	}
@@ -575,40 +566,64 @@ class PwtcMileage {
 		include('admin-man-settings.php');
 	}
 
-	public static function shortcode_build_table($header, $data) {
+	public static function shortcode_build_table($meta, $data, $hide_id = false, $id = null) {
+		$plugin_options = self::get_plugin_options();
 		$out = '';
-		$out .= '<table><tr>';
-		foreach( $header as $item ):
-			$out .= '<th>' . $item . '</th>';
+		$out .= '<table class="pwtc-mileage-report"><tr>';
+		$i = 0;
+		foreach( $meta['header'] as $item ):
+			if ($meta['id_idx'] === $i) {
+				if (!$hide_id) {
+					$out .= '<th>' . $item . '</th>';						
+				}
+			} 
+			else {
+				$out .= '<th>' . $item . '</th>';
+			}
+			$i++;
 		endforeach;	
 		$out .= '</tr>';
 		foreach( $data as $row ):
-			$out .= '<tr>';
+			$outrow = '';
+			$i = 0;
+			$highlight = false;
 			foreach( $row as $item ):
-				$out .= '<td>' . $item . '</td>';
+				if ($meta['date_idx'] == $i) {
+					$fmtdate = date($plugin_options['date_display_format'], strtotime($item));
+					$outrow .= '<td>' . $fmtdate . '</td>';
+				}
+				else if ($meta['id_idx'] === $i) {
+					if ($id !== null and $id == $item) {
+						$highlight = true;
+					}
+					if (!$hide_id) {
+						$outrow .= '<td>' . $item . '</td>';						
+					}
+				}
+				else {
+					$outrow .= '<td>' . $item . '</td>';
+				}
+				$i++;
 			endforeach;	
-			$out .= '</tr>';
+			if ($highlight) {
+				$out .= '<tr class="highlight">' . $outrow . '</tr>';
+			}
+			else {
+				$out .= '<tr>' . $outrow . '</tr>';
+			}
 		endforeach;
 		$out .= '</table>';
 		return $out;
 	}
 
-/*  This does not work!
-	public static function format_date_in_array($index, $data, $fmtstr) {
-		foreach( $data as $key => $row ):
-			$data[$key][$index] = date($fmtstr, strtotime($row[$index]));
-		endforeach;	
-	}
-*/
-
 	public static function shortcode_ly_lt_achvmnt() {
 		$out = '';
-		$header = self::get_ly_lt_achvmnt_header();
+		$meta = self::meta_ly_lt_achvmnt();
 		$data = self::fetch_ly_lt_achvmnt(ARRAY_N, 'mileage');
 		$out .= '<div><h3>';
-		$out .= self::get_ly_lt_achvmnt_title();
+		$out .= $meta['title'];
 		$out .= '</h3>';
-		$out .= self::shortcode_build_table($header, $data);
+		$out .= self::shortcode_build_table($meta, $data);
 		$out .= '</div>';	
 		return $out;
 	}
@@ -649,6 +664,16 @@ class PwtcMileage {
 		return $results;
 	}
 
+	public static function meta_ly_lt_achvmnt() {
+		$meta = array(
+			'header' => self::get_ly_lt_achvmnt_header(),
+			'title' => self::get_ly_lt_achvmnt_title(),
+			'date_idx' => -1,
+			'id_idx' => 0
+		);
+		return $meta;
+	}
+
 	public static function get_ly_lt_achvmnt_header() {
 		$header = array('Member ID', 'Name', 'Mileage', 'Achievement');
 		return $header;
@@ -669,6 +694,16 @@ class PwtcMileage {
 		return $results;
 	}
 
+	public static function meta_ytd_miles() {
+		$meta = array(
+			'header' => self::get_ytd_miles_header(),
+			'title' => self::get_ytd_miles_title(),
+			'date_idx' => -1,
+			'id_idx' => 0
+		);
+		return $meta;
+	}
+
 	public static function get_ytd_miles_header() {
 		$header = array('Member ID', 'Name', 'Mileage');
 		return $header;
@@ -685,6 +720,16 @@ class PwtcMileage {
 			'select member_id, concat(first_name, \' \', last_name), rides_led from ' . 
 			self::YTD_LED_VIEW . ' order by ' . $sort , $outtype);
 		return $results;
+	}
+
+	public static function meta_ytd_led() {
+		$meta = array(
+			'header' => self::get_ytd_led_header(),
+			'title' => self::get_ytd_led_title(),
+			'date_idx' => -1,
+			'id_idx' => 0
+		);
+		return $meta;
 	}
 
 	public static function get_ytd_led_header() {
@@ -708,6 +753,16 @@ class PwtcMileage {
 			self::YTD_RIDES_VIEW . ' where member_id = %s', $memberid), $outtype);
 		*/
 		return $results;
+	}
+
+	public static function meta_ytd_rides($title_arg = '') {
+		$meta = array(
+			'header' => self::get_ytd_rides_header(),
+			'title' => self::get_ytd_rides_title($title_arg),
+			'date_idx' => 1,
+			'id_idx' => -1
+		);
+		return $meta;
 	}
 
 	public static function get_ytd_rides_header() {
@@ -905,11 +960,6 @@ class PwtcMileage {
 	public static function insert_rider($memberid, $lastname, $firstname, $expdate) {
     	global $wpdb;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
-		/*
-		$status = $wpdb->query($wpdb->prepare('insert into ' . $member_table .
-			' (member_id, last_name, first_name, expir_date) values (%s, %s, %s, curdate())', 
-			$memberid, $lastname, $firstname));
-		*/
 		$status = $wpdb->query($wpdb->prepare('insert into ' . $member_table .
 			' (member_id, last_name, first_name, expir_date) values (%s, %s, %s, %s)' . 
 			' on duplicate key update last_name = %s, first_name = %s, expir_date = %s',
