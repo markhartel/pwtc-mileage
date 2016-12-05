@@ -38,18 +38,17 @@ class PwtcMileage {
 		add_action( 'admin_enqueue_scripts', 
 			array( 'PwtcMileage', 'load_admin_scripts' ) );
 		/*
-		[pwtc_mileage_year_to_date orderby="mileage/name" minimum="500"]
 		[pwtc_mileage_lifetime orderby="mileage/name" minimum="500"]
 		[pwtc_mileage_last_year orderby="mileage/name" minimum="500"]
-		[pwtc_rides_led_year_to_date orderby="number/name" minimum="12"]
 		[pwtc_rides_led_last_year orderby="number/name" minimum="12"]
-		[pwtc_achievement_last_year]
 		*/
 		add_shortcode('pwtc_achievement_last_year', 
 			array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
-		/*
-		add_shortcode('pwtc_mileage_year_to_date', array( 'PwtcMileage', 'shortcode_ytd_mileage'));
-		*/
+		add_shortcode('pwtc_mileage_year_to_date', 
+			array( 'PwtcMileage', 'shortcode_ytd_miles'));
+		add_shortcode('pwtc_rides_led_year_to_date', 
+			array( 'PwtcMileage', 'shortcode_ytd_led'));
+
 		add_action( 'wp_ajax_pwtc_mileage_lookup_posts', 
 			array( 'PwtcMileage', 'lookup_posts_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_rides', 
@@ -566,10 +565,21 @@ class PwtcMileage {
 		include('admin-man-settings.php');
 	}
 
-	public static function shortcode_build_table($meta, $data, $hide_id = false, $id = null) {
+	public static function shortcode_build_table($meta, $data, $atts) {
 		$plugin_options = self::get_plugin_options();
-		$out = '';
-		$out .= '<table class="pwtc-mileage-report"><tr>';
+		$hide_id = true;
+		if ($atts['show_id'] == 'on') {
+			$hide_id = false;
+		}
+		$id = null;
+		if ($atts['highlight_user'] == 'on') {
+			//TODO: if user is logged in, get and use his ID.
+		}
+		$out = '<div class="pwtc-mileage-report">';
+		if ($atts['caption'] == 'on') {
+			$out .= '<div class="report-caption">' . $meta['title'] . '</div>';
+		}
+		$out .= '<table><tr>';
 		$i = 0;
 		foreach( $meta['header'] as $item ):
 			if ($meta['id_idx'] === $i) {
@@ -612,50 +622,83 @@ class PwtcMileage {
 				$out .= '<tr>' . $outrow . '</tr>';
 			}
 		endforeach;
-		$out .= '</table>';
-		return $out;
-	}
-
-	public static function shortcode_ly_lt_achvmnt() {
-		$out = '';
-		$meta = self::meta_ly_lt_achvmnt();
-		$data = self::fetch_ly_lt_achvmnt(ARRAY_N, 'mileage');
-		$out .= '<div><h3>';
-		$out .= $meta['title'];
-		$out .= '</h3>';
-		$out .= self::shortcode_build_table($meta, $data);
-		$out .= '</div>';	
-		return $out;
-	}
-
-/*
-	public static function shortcode_ytd_mileage($atts = [], $content = null, $tag = '') {
-		$my_atts = convert_mileage_atts($atts, $tag);
-		$out = '';
-		$thisyear = date('Y');
-		$results = self::fetch_ytd_mileage($my_atts['orderby'], $my_atts['minimum']);
-		$out .= '<div><table><tr>';
-		$out .= '<th>Name</th>';
-		$out .= '<th>' . $thisyear . ' YTD Mileage</th>';
-		$out .= '</tr>';
-		foreach( $results as $row ):
-			$out .= '<tr>';
-			$out .= '<td>' . $row['first_name'] . ' ' . $row['last_name'] . '</td>';
-			$out .= '<td>' . $row['mileage'] . '</td>';
-			$out .= '</tr>';
-		endforeach;
 		$out .= '</table></div>';
 		return $out;
 	}
 
-	public static function fetch_ytd_mileage($orderby, $minimum) {
-    	global $wpdb;
-    	$results = $wpdb->get_results('select * from ' . self::YTD_MILES_VIEW . 
-			' where mileage >= ' . $minimum . ' order by ' . $orderby, ARRAY_A);
-		return $results;
+	public static function normalize_atts($atts) {
+    	$a = shortcode_atts(array(
+        		'show_id' => 'off',
+       			'highlight_user' => 'on',
+				'sort_by' => 'off',
+				'sort_order' => 'asc',
+				'minimum' => 0,
+				'caption' => 'on'
+			), $atts);
+		return $a;
 	}
 
-*/
+	public static function build_mileage_sort($atts) {
+		$order = 'asc';
+		if ($atts['sort_order'] == 'desc') {
+			$order = 'desc';
+		}
+		$sort = 'mileage ' . $order;
+		if ($atts['sort_by'] == 'name') {
+			$sort = 'last_name ' . $order . ', first_name ' . $order;
+		}
+		return $sort;
+	}
+
+	public static function build_rides_led_sort($atts) {
+		$order = 'asc';
+		if ($atts['sort_order'] == 'desc') {
+			$order = 'desc';
+		}
+		$sort = 'rides_led ' . $order;
+		if ($atts['sort_by'] == 'name') {
+			$sort = 'last_name ' . $order . ', first_name ' . $order;
+		}
+		return $sort;
+	}
+
+	public static function get_minimum_val($atts) {
+		$min = 0;
+		if ($atts['minimum'] > 0) {
+			$min = $atts['minimum'];
+		}
+		return $min;
+	}
+
+	public static function shortcode_ly_lt_achvmnt($atts) {
+		$a = self::normalize_atts($atts);
+		$sort = self::build_mileage_sort($a);
+		$meta = self::meta_ly_lt_achvmnt();
+		$data = self::fetch_ly_lt_achvmnt(ARRAY_N, $sort);
+		$out = self::shortcode_build_table($meta, $data, $a);
+		return $out;
+	}
+
+	public static function shortcode_ytd_miles($atts) {
+		$a = self::normalize_atts($atts);
+		$sort = self::build_mileage_sort($a);
+		$min = self::get_minimum_val($a);
+		$meta = self::meta_ytd_miles();
+		$data = self::fetch_ytd_miles(ARRAY_N, $sort, $min);
+		$out = self::shortcode_build_table($meta, $data, $a);
+		return $out;
+	}
+
+	public static function shortcode_ytd_led($atts) {
+		$a = self::normalize_atts($atts);
+		$sort = self::build_rides_led_sort($a);
+		$min = self::get_minimum_val($a);
+		$meta = self::meta_ytd_led();
+		$data = self::fetch_ytd_led(ARRAY_N, $sort, $min);
+		$out = self::shortcode_build_table($meta, $data, $a);
+		return $out;
+	}
+
 	public static function fetch_ly_lt_achvmnt($outtype, $sort) {
     	global $wpdb;
     	$results = $wpdb->get_results(
@@ -686,11 +729,15 @@ class PwtcMileage {
 		return $title;
 	}
 
-	public static function fetch_ytd_miles($outtype, $sort) {
+	public static function fetch_ytd_miles($outtype, $sort, $min = 0) {
     	global $wpdb;
+		$where = '';
+		if ($min > 0) {
+			$where = ' where mileage >= ' . $min . ' ';
+		}
     	$results = $wpdb->get_results(
 			'select member_id, concat(first_name, \' \', last_name), mileage from ' . 
-			self::YTD_MILES_VIEW . ' order by ' . $sort , $outtype);
+			self::YTD_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
 		return $results;
 	}
 
@@ -714,11 +761,15 @@ class PwtcMileage {
 		return $title;
 	}
 
-	public static function fetch_ytd_led($outtype, $sort) {
+	public static function fetch_ytd_led($outtype, $sort, $min = 0) {
     	global $wpdb;
+		$where = '';
+		if ($min > 0) {
+			$where = ' where rides_led >= ' . $min . ' ';
+		}
     	$results = $wpdb->get_results(
 			'select member_id, concat(first_name, \' \', last_name), rides_led from ' . 
-			self::YTD_LED_VIEW . ' order by ' . $sort , $outtype);
+			self::YTD_LED_VIEW . $where . ' order by ' . $sort , $outtype);
 		return $results;
 	}
 
@@ -1025,19 +1076,6 @@ class PwtcMileage {
 	public static function update_plugin_options($data) {
 		update_option('pwtc_mileage_options', $data);
 	}
-
-/*
-	public static function convert_mileage_atts($atts, $tag) {
-    	// normalize attribute keys, lowercase
-    	$atts = array_change_key_case((array)$atts, CASE_LOWER);
- 
-    	// override default attributes with user attributes
-    	$atts = shortcode_atts([
-        	'orderby' => 'mileage',
-			'minimum' => '1'], $atts, $tag);
-
-	}
-*/
 
 	public static function plugin_activation() {
 		error_log( 'PWTC Mileage plugin activated' );
