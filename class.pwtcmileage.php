@@ -35,6 +35,8 @@ class PwtcMileage {
 		self::$initiated = true;
 		add_action( 'admin_menu', 
 			array( 'PwtcMileage', 'plugin_menu' ) );
+		add_action( 'wp_enqueue_scripts', 
+			array( 'PwtcMileage', 'load_report_scripts' ) );
 		add_action( 'admin_enqueue_scripts', 
 			array( 'PwtcMileage', 'load_admin_scripts' ) );
 		/*
@@ -48,6 +50,8 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'shortcode_ytd_miles'));
 		add_shortcode('pwtc_rides_led_year_to_date', 
 			array( 'PwtcMileage', 'shortcode_ytd_led'));
+		add_shortcode('pwtc_posted_rides_wo_sheets', 
+			array( 'PwtcMileage', 'shortcode_rides_wo_sheets'));
 
 		add_action( 'wp_ajax_pwtc_mileage_lookup_posts', 
 			array( 'PwtcMileage', 'lookup_posts_callback') );
@@ -82,6 +86,10 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'consolidation_callback') );  
 	}
 
+	public static function load_report_scripts() {
+        wp_enqueue_style('pwtc_mileage_report_css', PWTC_MILEAGE__PLUGIN_URL . 'reports-style.css' );
+	}
+
 	public static function load_admin_scripts($hook) {
 		if (!strpos($hook, "pwtc_mileage")) {
             return;
@@ -95,7 +103,7 @@ class PwtcMileage {
 	}
 
 	public static function lookup_posts_callback() {
-		$posts = self::fetch_posts_without_rides();
+		$posts = self::fetch_posts_without_rides(ARRAY_A);
 		$response = array('posts' => $posts);
     	echo wp_json_encode($response);
 		wp_die();
@@ -463,24 +471,28 @@ class PwtcMileage {
     	$page_title = 'Generate Reports';
     	$menu_title = 'Generate Reports';
     	$menu_slug = 'pwtc_mileage_generate_reports';
+    	$capability = 'edit_posts';
     	$function = array( 'PwtcMileage', 'page_generate_reports');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
     	$page_title = 'Manage Riders';
     	$menu_title = 'Manage Riders';
     	$menu_slug = 'pwtc_mileage_manage_riders';
+    	$capability = 'edit_published_pages';
     	$function = array( 'PwtcMileage', 'page_manage_riders');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
     	$page_title = 'Manage Ride Sheets';
     	$menu_title = 'Manage Ride Sheets';
     	$menu_slug = 'pwtc_mileage_manage_ride_sheets';
+    	$capability = 'edit_published_pages';
     	$function = array( 'PwtcMileage', 'page_manage_ride_sheets');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
     	$page_title = ' Manage Year-End Operations';
     	$menu_title = 'Manage Year-End';
     	$menu_slug = 'pwtc_mileage_manage_year_end';
+    	$capability = 'manage_options';
     	$function = array( 'PwtcMileage', 'page_manage_year_end');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
@@ -489,6 +501,7 @@ class PwtcMileage {
 		$page_title = 'Plugin Settings';
     	$menu_title = 'Settings';
     	$menu_slug = 'pwtc_mileage_settings';
+    	$capability = 'manage_options';
     	$function = array( 'PwtcMileage', 'page_manage_settings');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 	}
@@ -699,6 +712,14 @@ class PwtcMileage {
 		return $out;
 	}
 
+	public static function shortcode_rides_wo_sheets($atts) {
+		$a = self::normalize_atts($atts);
+		$meta = self::meta_posts_without_rides();
+		$data = self::fetch_posts_without_rides(ARRAY_N);
+		$out = self::shortcode_build_table($meta, $data, $a);
+		return $out;
+	}
+
 	public static function fetch_ly_lt_achvmnt($outtype, $sort) {
     	global $wpdb;
     	$results = $wpdb->get_results(
@@ -848,7 +869,7 @@ class PwtcMileage {
 	}
 */
 
-	public static function fetch_posts_without_rides() {
+	public static function fetch_posts_without_rides($outtype) {
     	global $wpdb;
 		$plugin_options = self::get_plugin_options();
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
@@ -859,8 +880,18 @@ class PwtcMileage {
 			' and m.meta_key = %s and (cast(m.meta_value as date) < curdate())' . 
 			' and p.ID not in (select post_id from ' . $ride_table . ' where post_id is not null)' . 
 			' order by m.meta_value', 
-			$plugin_options['ride_post_type'], $plugin_options['ride_date_metakey']), ARRAY_A);
+			$plugin_options['ride_post_type'], $plugin_options['ride_date_metakey']), $outtype);
 		return $results;
+	}
+
+	public static function meta_posts_without_rides() {
+		$meta = array(
+			'header' => array('Ride ID', 'Title', 'Start Date'),
+			'title' => 'Posted Rides without Ride Sheets',
+			'date_idx' => 2,
+			'id_idx' => 0
+		);
+		return $meta;
 	}
 
 	public static function fetch_ride_mileage($rideid) {

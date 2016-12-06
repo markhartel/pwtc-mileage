@@ -1,7 +1,16 @@
-# pwtc-mileage
+# PWTC Mileage 
 A Wordpress plugin to record and manage the mileage of riders in the [Portland Wheelmen Touring Club](http://pwtc.com).
 
-## Package Files
+## Installation
+TBD
+
+## Administration pages
+TBD
+
+## Shortcodes
+TBD
+
+## Package files
 - README.md *(this file)*
 - pwtc-mileage.php *(plugin definition file)*
 - class.pwtcmileage.php *(PHP class with server-side logic)*

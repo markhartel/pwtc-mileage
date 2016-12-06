@@ -44,6 +44,7 @@ table.pretty td, table.pretty th {
 
 table.pretty th {
   background: #DFDFDF; /* Darken header a bit */
+  text-align: center;
   font-weight: bold;
 }
 

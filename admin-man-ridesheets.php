@@ -1,6 +1,6 @@
 <?php
-if (!current_user_can('manage_options')) {
-        	return;
+if (!current_user_can('edit_published_pages')) {
+    return;
 }
 ?>
 <script type="text/javascript" >
