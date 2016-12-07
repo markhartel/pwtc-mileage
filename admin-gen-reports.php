@@ -105,8 +105,8 @@ jQuery(document).ready(function($) {
         </p>
         <div class='ride-mileage'>
             <div><a href='#' report-id='ytd_miles'>Year-to-date mileage</a></div>
-            <div><a href='#' report-id='2'>Last year's mileage</a></div>
-            <div><a href='#' report-id='3'>Lifetime mileage</a></div>
+            <div><a href='#' report-id='ly_miles'>Last year's mileage</a></div>
+            <div><a href='#' report-id='lt_miles'>Lifetime mileage</a></div>
             <div><a href='#' report-id='ly_lt_achvmnt'>Last year's achievement awards</a></div>
         </div>
         <h3>Ride Leader Reports</h3>
@@ -118,7 +118,7 @@ jQuery(document).ready(function($) {
         </p>
         <div class='ride-leader'>
             <div><a href='#' report-id='ytd_led'>Year-to-date ride leaders</a></div>
-            <div><a href='#' report-id='6'>Last year's ride leaders</a></div>
+            <div><a href='#' report-id='ly_led'>Last year's ride leaders</a></div>
         </div>
         <h3>Individual Rider Reports</h3>
         <p>
@@ -128,9 +128,9 @@ jQuery(document).ready(function($) {
         </p>
         <div class='specific-rider'>
             <div><a href='#' report-id='ytd_rides'>Year-to-date rides</a></div>
-            <div><a href='#' report-id='8'>Last year's rides</a></div>
-            <div><a href='#' report-id='9'>Year-to-date rides led</a></div>
-            <div><a href='#' report-id='10'>Last year's rides led</a></div>
+            <div><a href='#' report-id='ly_rides'>Last year's rides</a></div>
+            <div><a href='#' report-id='ytd_rides_led'>Year-to-date rides led</a></div>
+            <div><a href='#' report-id='ly_rides_led'>Last year's rides led</a></div>
         </div>
     </div>
     <div id='report-results-section' class="initially-hidden">
