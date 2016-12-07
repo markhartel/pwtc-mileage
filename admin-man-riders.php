@@ -132,7 +132,9 @@ jQuery(document).ready(function($) {
     $("#rider-inspect-section .add-blk .add-frm input[name='expdate']").datepicker({
   		dateFormat: 'D M d yy',
 		altField: "#rider-inspect-section .add-blk .add-frm input[name='fmtdate']",
-		altFormat: 'yy-mm-dd'
+		altFormat: 'yy-mm-dd',
+		changeMonth: true,
+      	changeYear: true
 	});
 
     $('#rider-inspect-section .add-blk .add-frm').on('submit', function(evt) {
@@ -156,10 +158,10 @@ jQuery(document).ready(function($) {
     <div id='rider-error-msg'></div>
     <div id='rider-manage-section'>
         <p>
-        <div><strong>Populate rider list with current membership database.</strong></div>
-        <div><button class="populate-btn button button-primary button-large">Populate</button></div><br>
-        <div><strong>Inspect and modify rider list.</strong></div>
-        <div><button class="inspect-btn button button-primary button-large">Inspect</button></div>
+        <div><strong>Synchronize rider list with current membership database.</strong></div>
+        <div><button class="populate-btn button button-primary button-large">Synchronize</button></div><br>
+        <div><strong>View and modify rider list.</strong></div>
+        <div><button class="inspect-btn button button-primary button-large">View</button></div>
         </p>
     </div>
     <div id='rider-inspect-section' class="initially-hidden">

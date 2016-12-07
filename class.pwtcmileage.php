@@ -87,19 +87,26 @@ class PwtcMileage {
 	}
 
 	public static function load_report_scripts() {
-        wp_enqueue_style('pwtc_mileage_report_css', PWTC_MILEAGE__PLUGIN_URL . 'reports-style.css' );
+        wp_enqueue_style('pwtc_mileage_report_css', 
+			PWTC_MILEAGE__PLUGIN_URL . 'reports-style.css' );
 	}
 
 	public static function load_admin_scripts($hook) {
 		if (!strpos($hook, "pwtc_mileage")) {
             return;
         }
-        wp_enqueue_style('pwtc_mileage_admin_css', PWTC_MILEAGE__PLUGIN_URL . 'admin-style.css' );
-        wp_enqueue_style('pwtc_mileage_datepicker_css', PWTC_MILEAGE__PLUGIN_URL . 'datepicker.css' );
+        wp_enqueue_style('pwtc_mileage_admin_css', 
+			PWTC_MILEAGE__PLUGIN_URL . 'admin-style.css');
+        wp_enqueue_style('pwtc_mileage_datepicker_css', 
+			PWTC_MILEAGE__PLUGIN_URL . 'datepicker.css');
 		wp_enqueue_style('wp-jquery-ui-dialog');
 		wp_enqueue_script('jquery-ui-datepicker');   
-		wp_enqueue_script('pwtc_mileage_admin_js', PWTC_MILEAGE__PLUGIN_URL . 'admin-scripts.js', array('jquery-ui-dialog'), 1.1, true);
-		wp_enqueue_script('pwtc_mileage_dateformatter_js', PWTC_MILEAGE__PLUGIN_URL . 'php-date-formatter.min.js', array('jquery'), 1.1, true);
+		wp_enqueue_script('pwtc_mileage_admin_js', 
+			PWTC_MILEAGE__PLUGIN_URL . 'admin-scripts.js',
+			array('jquery-ui-dialog'), 1.1, true);
+		wp_enqueue_script('pwtc_mileage_dateformatter_js', 
+			PWTC_MILEAGE__PLUGIN_URL . 'php-date-formatter.min.js', 
+			array('jquery'), 1.1, true);
 	}
 
 	public static function lookup_posts_callback() {
@@ -111,9 +118,10 @@ class PwtcMileage {
 
 	public static function lookup_rides_callback() {
 		$startdate = $_POST['startdate'];	
-		$rides = self::fetch_club_rides($startdate);
+		$enddate = $_POST['enddate'];	
+		$title = $_POST['title'];	
+		$rides = self::fetch_club_rides($title, $startdate, $enddate);
 		$response = array(
-			'startdate' => $startdate,
 			'rides' => $rides);
     	echo wp_json_encode($response);
 		wp_die();
@@ -174,6 +182,8 @@ class PwtcMileage {
 
 	public static function remove_ride_callback() {
 		$startdate = $_POST['startdate'];
+		$enddate = $_POST['enddate'];	
+		$title = $_POST['title'];	
 		$rideid = $_POST['ride_id'];
 		$mcnt = self::fetch_ride_has_mileage(intval($rideid));
 		$lcnt = self::fetch_ride_has_leaders(intval($rideid));
@@ -192,9 +202,8 @@ class PwtcMileage {
     			echo wp_json_encode($response);
 			}
 			else {
-				$rides = self::fetch_club_rides($startdate);
+				$rides = self::fetch_club_rides($title, $startdate, $enddate);
 				$response = array(
-					'startdate' => $startdate, 
 					'rides' => $rides);
     			echo wp_json_encode($response);
 			}
@@ -468,8 +477,8 @@ class PwtcMileage {
     	$position = $plugin_options['plugin_menu_location'];
 		add_menu_page($page_title, $menu_title, $capability, $parent_menu_slug, $function, $icon_url, $position);
 
-    	$page_title = 'Generate Reports';
-    	$menu_title = 'Generate Reports';
+    	$page_title = 'View Reports';
+    	$menu_title = 'View Reports';
     	$menu_slug = 'pwtc_mileage_generate_reports';
     	$capability = 'edit_posts';
     	$function = array( 'PwtcMileage', 'page_generate_reports');
@@ -489,8 +498,8 @@ class PwtcMileage {
     	$function = array( 'PwtcMileage', 'page_manage_ride_sheets');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
-    	$page_title = ' Manage Year-End Operations';
-    	$menu_title = 'Manage Year-End';
+    	$page_title = 'Year-End Operations';
+    	$menu_title = 'Year-End Ops';
     	$menu_slug = 'pwtc_mileage_manage_year_end';
     	$capability = 'manage_options';
     	$function = array( 'PwtcMileage', 'page_manage_year_end');
@@ -729,25 +738,15 @@ class PwtcMileage {
 	}
 
 	public static function meta_ly_lt_achvmnt() {
+		$thisyear = date('Y');
+    	$lastyear = intval($thisyear) - 1;
 		$meta = array(
-			'header' => self::get_ly_lt_achvmnt_header(),
-			'title' => self::get_ly_lt_achvmnt_title(),
+			'header' => array('Member ID', 'Name', 'Mileage', 'Achievement'),
+			'title' => '' . $lastyear . ' Lifetime Mileage Achievement',
 			'date_idx' => -1,
 			'id_idx' => 0
 		);
 		return $meta;
-	}
-
-	public static function get_ly_lt_achvmnt_header() {
-		$header = array('Member ID', 'Name', 'Mileage', 'Achievement');
-		return $header;
-	}
-
-	public static function get_ly_lt_achvmnt_title() {
-		$thisyear = date('Y');
-    	$lastyear = intval($thisyear) - 1;
-		$title = '' . $lastyear . ' Lifetime Mileage Achievement';
-		return $title;
 	}
 
 	public static function fetch_ytd_miles($outtype, $sort, $min = 0) {
@@ -764,22 +763,12 @@ class PwtcMileage {
 
 	public static function meta_ytd_miles() {
 		$meta = array(
-			'header' => self::get_ytd_miles_header(),
-			'title' => self::get_ytd_miles_title(),
+			'header' => array('Member ID', 'Name', 'Mileage'),
+			'title' => 'Year-to-date Rider Mileage',
 			'date_idx' => -1,
 			'id_idx' => 0
 		);
 		return $meta;
-	}
-
-	public static function get_ytd_miles_header() {
-		$header = array('Member ID', 'Name', 'Mileage');
-		return $header;
-	}
-
-	public static function get_ytd_miles_title() {
-		$title = 'Year-to-date Rider Mileage';
-		return $title;
 	}
 
 	public static function fetch_ytd_led($outtype, $sort, $min = 0) {
@@ -796,22 +785,12 @@ class PwtcMileage {
 
 	public static function meta_ytd_led() {
 		$meta = array(
-			'header' => self::get_ytd_led_header(),
-			'title' => self::get_ytd_led_title(),
+			'header' => array('Member ID', 'Name', 'Rides Led'),
+			'title' => 'Year-to-date Number of Rides Led',
 			'date_idx' => -1,
 			'id_idx' => 0
 		);
 		return $meta;
-	}
-
-	public static function get_ytd_led_header() {
-		$header = array('Member ID', 'Name', 'Rides Led');
-		return $header;
-	}
-
-	public static function get_ytd_led_title() {
-		$title = 'Year-to-date Number of Rides Led';
-		return $title;
 	}
 
 	public static function fetch_ytd_rides($outtype, $memberid) {
@@ -819,55 +798,27 @@ class PwtcMileage {
     	$results = $wpdb->get_results($wpdb->prepare(
 			'select title, date, mileage from ' . 
 			self::YTD_RIDES_VIEW . ' where member_id = %s', $memberid), $outtype);
-		/*
-    	$results = $wpdb->get_results($wpdb->prepare(
-			'select title, DATE_FORMAT(CURDATE(), \'%a %b %e %Y\'), mileage from ' . 
-			self::YTD_RIDES_VIEW . ' where member_id = %s', $memberid), $outtype);
-		*/
 		return $results;
 	}
 
-	public static function meta_ytd_rides($title_arg = '') {
+	public static function meta_ytd_rides($name = '') {
 		$meta = array(
-			'header' => self::get_ytd_rides_header(),
-			'title' => self::get_ytd_rides_title($title_arg),
+			'header' => array('Title', 'Date', 'Mileage'),
+			'title' => 'Year-to-date Rides by ' . $name,
 			'date_idx' => 1,
 			'id_idx' => -1
 		);
 		return $meta;
 	}
 
-	public static function get_ytd_rides_header() {
-		$header = array('Title', 'Date', 'Mileage');
-		return $header;
-	}
-
-	public static function get_ytd_rides_title($name) {
-		$title = 'Year-to-date Rides by ' . $name;
-		return $title;
-	}
-
-	public static function fetch_club_rides($date) {
+	public static function fetch_club_rides($title, $fromdate, $todate) {
     	global $wpdb;
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
     	$results = $wpdb->get_results($wpdb->prepare('select * from ' . $ride_table . 
-			' where date = %s', $date), ARRAY_A);
+			' where title like %s and date between cast(%s as date) and cast(%s as date) order by date', 
+			$title . '%', $fromdate, $todate), ARRAY_A);
 		return $results;
 	}
-
-/*
-	public static function fetch_sched_rides($date) {
-    	global $wpdb;
-		$plugin_options = self::get_plugin_options();
-    	$results = $wpdb->get_results($wpdb->prepare('select p.ID, p.post_title' . 
-			' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
-			' as m on p.ID = m.post_id' . 
-			' where p.post_type = %s and p.post_status = \'publish\'' . 
-			' and m.meta_key = %s and cast(m.meta_value as date) = %s', 
-			$plugin_options['ride_post_type'], $plugin_options['ride_date_metakey'], $date), ARRAY_A);
-		return $results;
-	}
-*/
 
 	public static function fetch_posts_without_rides($outtype) {
     	global $wpdb;

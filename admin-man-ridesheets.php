@@ -36,7 +36,7 @@ jQuery(document).ready(function($) {
 		});
 	}
 
-	function populate_ridesheet_table(startdate, rides) {
+	function populate_ridesheet_table(rides) {
 		$('#ridesheet-ride-page .rides-tbl tr').remove();
 		/*
 		if (rides.length == 0) {
@@ -44,11 +44,17 @@ jQuery(document).ready(function($) {
 			return;
 		}
 		*/
-        $('#ridesheet-ride-page .rides-tbl').append('<tr><th>Ride Sheet</th><th></th></tr>');    
+        $('#ridesheet-ride-page .rides-tbl').append(
+			'<tr><th>Ride Sheet</th><th>Start Date</th><th></th></tr>');    
+		var fmt = new DateFormatter();
         rides.forEach(function(item) {
+			var d = fmt.parseDate(item.date, 'Y-m-d');
+			var fmtdate = fmt.formatDate(d, 
+				'<?php echo $plugin_options['date_display_format']; ?>');
             $('#ridesheet-ride-page .rides-tbl').append(
-				'<tr rideid="' + item.ID + '" ridedate="' + startdate + '"><td>' +
-				item.title + '</td><td><button class="edit-btn button">Edit Sheet</button>' + 
+				'<tr rideid="' + item.ID + '" ridedate="' + item.date + '"><td>' +
+				item.title + '</td><td>' + fmtdate + '</td><td>' + 
+				'<button class="edit-btn button">Edit Sheet</button>' + 
 				'<button class="remove-btn button">Delete Sheet</button></td></tr>');    
         });
 		$('#ridesheet-ride-page .rides-tbl .edit-btn').on('click', function(evt) {
@@ -68,7 +74,9 @@ jQuery(document).ready(function($) {
             var data = {
 			    'action': 'pwtc_mileage_remove_ride',
                 'ride_id': $(this).parent().parent().attr('rideid'),
-				'startdate': $(this).parent().parent().attr('ridedate')
+				'title': $("#ridesheet-ride-page .ride-search-frm input[name='title']").val(),
+				'startdate': $("#ridesheet-ride-page .ride-search-frm input[name='fmtdate']").val(),
+				'enddate': $("#ridesheet-ride-page .ride-search-frm input[name='tofmtdate']").val()
 		    };
 			$.post(action, data, remove_ride_cb);
 		});
@@ -133,8 +141,7 @@ jQuery(document).ready(function($) {
 		var fmt = new DateFormatter();
 		var fmtdate = fmt.formatDate(fmt.parseDate(res.startdate, 'Y-m-d'), 
 			'<?php echo $plugin_options['date_display_format']; ?>');
-		$('#ridesheet-ride-page .rides-section h3').html('Ridesheets for ' + fmtdate);
-		populate_ridesheet_table(res.startdate, res.rides);
+		populate_ridesheet_table(res.rides);
 		$('#ridesheet-ride-page .rides-section').show();
 	}   
 
@@ -213,7 +220,7 @@ jQuery(document).ready(function($) {
 			show_error_msg('#ridesheet-error-msg', res.error);
 		}
 		else {
-			populate_ridesheet_table(res.startdate, res.rides);
+			populate_ridesheet_table(res.rides);
 		}
 	}
 
@@ -289,8 +296,9 @@ jQuery(document).ready(function($) {
 		$('#ridesheet-ride-page').hide();
 		$('#ridesheet-main-page').show();
 		$('#ridesheet-ride-page .rides-tbl tr').remove();
-		$('#ridesheet-ride-page .rides-section h3').html('');
 		$("#ridesheet-ride-page .ride-search-frm input[name='date']").val('');
+		$("#ridesheet-ride-page .ride-search-frm input[name='todate']").val('');
+		$("#ridesheet-ride-page .ride-search-frm input[name='title']").val('');
 	});
 
 	/* Back button click handler for sheets page. */
@@ -304,7 +312,9 @@ jQuery(document).ready(function($) {
         var action = $('#ridesheet-ride-page .ride-search-frm').attr('action');
         var data = {
 			'action': 'pwtc_mileage_lookup_rides',
-			'startdate': $("#ridesheet-ride-page .ride-search-frm input[name='fmtdate']").val()
+			'title': $("#ridesheet-ride-page .ride-search-frm input[name='title']").val(),
+			'startdate': $("#ridesheet-ride-page .ride-search-frm input[name='fmtdate']").val(),
+			'enddate': $("#ridesheet-ride-page .ride-search-frm input[name='tofmtdate']").val()
 		};
 		$.post(action, data, lookup_rides_cb);
     });
@@ -385,14 +395,40 @@ jQuery(document).ready(function($) {
 	$("#ridesheet-main-page .add-blk .add-frm input[name='date']").datepicker({
   		dateFormat: 'D M d yy',
 		altField: "#ridesheet-main-page .add-blk .add-frm input[name='fmtdate']",
-		altFormat: 'yy-mm-dd'
+		altFormat: 'yy-mm-dd',
+		changeMonth: true,
+      	changeYear: true
 	});
 
-	$("#ridesheet-ride-page .ride-search-frm input[name='date']").datepicker({
+	function getDate( element ) {
+    	var date;
+      	try {
+        	date = $.datepicker.parseDate('D M d yy', element.value);
+      	} catch( error ) {
+        	date = null;
+      	}
+     	return date;
+    }
+
+	var fromDate = $("#ridesheet-ride-page .ride-search-frm input[name='date']").datepicker({
   		dateFormat: 'D M d yy',
 		altField: "#ridesheet-ride-page .ride-search-frm input[name='fmtdate']",
-		altFormat: 'yy-mm-dd'
-	});
+		altFormat: 'yy-mm-dd',
+		changeMonth: true,
+      	changeYear: true
+	}).on( "change", function() {
+        toDate.datepicker("option", "minDate", getDate(this));
+    });
+
+	var toDate = $("#ridesheet-ride-page .ride-search-frm input[name='todate']").datepicker({
+  		dateFormat: 'D M d yy',
+		altField: "#ridesheet-ride-page .ride-search-frm input[name='tofmtdate']",
+		altFormat: 'yy-mm-dd',
+		changeMonth: true,
+      	changeYear: true
+	}).on( "change", function() {
+        fromDate.datepicker("option", "maxDate", getDate(this));
+    });
 
 });
 </script>
@@ -429,11 +465,19 @@ jQuery(document).ready(function($) {
 	</div>
 	<div id="ridesheet-ride-page" class="initially-hidden">
 		<p><button class='back-btn button button-primary button-large'>Back</button></p>
-		<p><strong>Search for Existing Ride Sheets by Start Date</strong><br>
 		<p><form class="ride-search-frm" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-    		<label>Start Date:
-			<input type="text" name="date" required/></label>
+			<table>
+    			<tr><td><label>Title:</label></td>
+					<td><input type="text" name="title"/></td>
+				</tr>
+    			<tr><td><label>Start Date:</label></td>
+					<td><input type="text" name="date" required/><label> to</label>
+						<input type="text" name="todate" required/>
+					</td>
+				</tr>
+			</table>
 			<input type="hidden" name="fmtdate"/>
+			<input type="hidden" name="tofmtdate"/>
 			<input class="button button-primary" type="submit" value="Search"/>
 		</form></p>	
 		<div class="rides-section initially-hidden"><p>

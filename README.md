@@ -24,4 +24,5 @@ TBD
 - php-date-formatter.js *(javascript utility for PHP-style date formats - from [github](https://github.com/kartik-v/php-date-formatter))*
 - php-date-formatter.min.js *(minimized version of above file - from [github](https://github.com/kartik-v/php-date-formatter))*
 - admin-style.css *(stylesheet for admin pages)*
+- reports-style.css *(stylesheet for report shortcodes)*
 - datepicker.css *(stylesheet for Wordpress jQueryUI datepicker - from [github](https://github.com/stuttter/wp-datepicker-styling))*
