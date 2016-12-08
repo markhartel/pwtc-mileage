@@ -54,8 +54,8 @@ jQuery(document).ready(function($) {
             $('#ridesheet-ride-page .rides-tbl').append(
 				'<tr rideid="' + item.ID + '" ridedate="' + item.date + '"><td>' +
 				item.title + '</td><td>' + fmtdate + '</td><td>' + 
-				'<button class="edit-btn button">Edit Sheet</button>' + 
-				'<button class="remove-btn button">Delete Sheet</button></td></tr>');    
+				'<button class="edit-btn button">Edit</button>' + 
+				'<button class="remove-btn button">Delete</button></td></tr>');    
         });
 		$('#ridesheet-ride-page .rides-tbl .edit-btn').on('click', function(evt) {
             evt.preventDefault();
@@ -91,7 +91,7 @@ jQuery(document).ready(function($) {
 				'<tr rideid="' + ride_id + '" memberid="' + item.member_id + '">' + 
 				'<td>' + item.member_id + '</td>' +
 				'<td>' + item.first_name + ' ' + item.last_name + '</td>' + 
-				'<td><button class="remove-btn button">Remove</button></td></tr>');    
+				'<td><button class="remove-btn button">Delete</button></td></tr>');    
 		});
 		$('#ridesheet-sheet-page .leader-tbl .remove-btn').on('click', function(evt) {
             evt.preventDefault();
@@ -115,7 +115,7 @@ jQuery(document).ready(function($) {
 				'<td>' + item.member_id + '</td>' +
 				'<td>' + item.first_name + ' ' + item.last_name + '</td>' + 
 				'<td>' + item.mileage + '</td>' +
-				'<td><button class="remove-btn button">Remove</button></td></tr>');    
+				'<td><button class="remove-btn button">Delete</button></td></tr>');    
 		});
 		$('#ridesheet-sheet-page .mileage-tbl .remove-btn').on('click', function(evt) {
             evt.preventDefault();
@@ -439,8 +439,8 @@ jQuery(document).ready(function($) {
 		<p>
         <div><strong>Create Ride Sheets from Posted Rides</strong></div>
         <div><button class="create-btn button button-primary button-large">Create</button></div><br>
-        <div><strong>Modify Existing Ride Sheets</strong></div>
-        <div><button class="modify-btn button button-primary button-large">Modify</button></div><br>
+        <div><strong>Edit Existing Ride Sheets</strong></div>
+        <div><button class="modify-btn button button-primary button-large">Edit</button></div><br>
         <div><strong>Add a New Ride Sheet</strong></div>
         <div><button class="add-btn button button-primary button-large">New</button>
 		<span class="add-blk initially-hidden">

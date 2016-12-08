@@ -52,6 +52,14 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'shortcode_ytd_led'));
 		add_shortcode('pwtc_rides_led_last_year', 
 			array( 'PwtcMileage', 'shortcode_ly_led'));
+		add_shortcode('pwtc_rides_year_to_date', 
+			array( 'PwtcMileage', 'shortcode_ytd_rides'));
+		add_shortcode('pwtc_rides_last_year', 
+			array( 'PwtcMileage', 'shortcode_ly_rides'));
+		add_shortcode('pwtc_led_rides_year_to_date', 
+			array( 'PwtcMileage', 'shortcode_ytd_led_rides'));
+		add_shortcode('pwtc_led_rides_last_year', 
+			array( 'PwtcMileage', 'shortcode_ly_led_rides'));
 		add_shortcode('pwtc_posted_rides_wo_sheets', 
 			array( 'PwtcMileage', 'shortcode_rides_wo_sheets'));
 
@@ -665,6 +673,33 @@ class PwtcMileage {
 		include('admin-man-settings.php');
 	}
 
+	public static function get_login_user_id() {
+		$id = null;
+		//TODO: if user is logged in, get and use his ID.
+		$id = '12231'; //This is a test
+		return $id;
+	}
+
+	public static function get_rider_name($id) {
+		$rider = self::fetch_rider($id);
+		$name = '';
+		if (count($rider) > 0) {
+			$r = $rider[0];
+			$name = $r['first_name'] . ' ' . $r['last_name'];
+		}
+		else {
+			$name = $id;
+		}
+		return $name;
+	}
+
+	public static function shortcode_build_errmsg($errmsg) {
+		$out = '<div class="pwtc-mileage-report"><div class="report-caption">';
+		$out .= $errmsg;
+		$out .= '</div></div>';
+		return $out;	
+	}
+
 	public static function shortcode_build_table($meta, $data, $atts) {
 		$plugin_options = self::get_plugin_options();
 		$hide_id = true;
@@ -672,8 +707,8 @@ class PwtcMileage {
 			$hide_id = false;
 		}
 		$id = null;
-		if ($atts['highlight_user'] == 'on') {
-			//TODO: if user is logged in, get and use his ID.
+		if ($meta['id_idx'] >= 0 and $atts['highlight_user'] == 'on') {
+			$id = self::get_login_user_id();
 		}
 		$out = '<div class="pwtc-mileage-report">';
 		if ($atts['caption'] == 'on') {
@@ -827,6 +862,69 @@ class PwtcMileage {
 		$data = self::fetch_ly_led(ARRAY_N, $sort, $min);
 		$out = self::shortcode_build_table($meta, $data, $a);
 		return $out;
+	}
+
+	public static function shortcode_ytd_rides($atts) {
+		$member_id = self::get_login_user_id();
+		$out = '';
+		if ($member_id === null) {
+			$out = self::shortcode_build_errmsg('This report requires a valid logged on rider!');
+		}
+		else {
+			$name = self::get_rider_name($member_id);
+			$a = self::normalize_atts($atts);
+			$meta = self::meta_ytd_rides($name);
+			$data = self::fetch_ytd_rides(ARRAY_N, $member_id);
+			$out = self::shortcode_build_table($meta, $data, $a);
+		}
+		return $out;
+	}
+
+	public static function shortcode_ly_rides($atts) {
+		$member_id = self::get_login_user_id();
+		$out = '';
+		if ($member_id === null) {
+			$out = self::shortcode_build_errmsg('This report requires a valid logged on rider!');
+		}
+		else {
+			$name = self::get_rider_name($member_id);
+			$a = self::normalize_atts($atts);
+			$meta = self::meta_ly_rides($name);
+			$data = self::fetch_ly_rides(ARRAY_N, $member_id);
+			$out = self::shortcode_build_table($meta, $data, $a);
+		}
+		return $out;
+	}
+
+	public static function shortcode_ytd_led_rides($atts) {
+		$member_id = self::get_login_user_id();
+		$out = '';
+		if ($member_id === null) {
+			$out = self::shortcode_build_errmsg('This report requires a valid logged on rider!');
+		}
+		else {
+			$name = self::get_rider_name($member_id);
+			$a = self::normalize_atts($atts);
+			$meta = self::meta_ytd_rides_led($name);
+			$data = self::fetch_ytd_rides_led(ARRAY_N, $member_id);
+			$out = self::shortcode_build_table($meta, $data, $a);
+		}
+		return $out;
+	}
+
+	public static function shortcode_ly_led_rides($atts) {
+		$member_id = self::get_login_user_id();
+		if ($member_id === null) {
+			$out = self::shortcode_build_errmsg('This report requires a valid logged on rider!');
+		}
+		else {
+			$name = self::get_rider_name($member_id);
+			$a = self::normalize_atts($atts);
+			$meta = self::meta_ly_rides_led($name);
+			$data = self::fetch_ly_rides_led(ARRAY_N, $member_id);
+			$out = self::shortcode_build_table($meta, $data, $a);
+			return $out;
+		}
 	}
 
 	public static function shortcode_rides_wo_sheets($atts) {

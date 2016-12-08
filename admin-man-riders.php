@@ -21,8 +21,8 @@ jQuery(document).ready(function($) {
 				'<td>' + item.member_id + '</td>' +
 				'<td>' + item.first_name + '</td><td>' + item.last_name + '</td>' + 
 				'<td date="' + item.expir_date + '">' + fmtdate + '</td>' + 
-                '<td><button class="modify-btn button">Modify</button>' + 
-                '<button class="remove-btn button">Remove</button></td></tr>');    
+                '<td><button class="modify-btn button">Edit</button>' + 
+                '<button class="remove-btn button">Delete</button></td></tr>');    
 		});
         $('#rider-inspect-section .riders-tbl .modify-btn').on('click', function(evt) {
             evt.preventDefault();
