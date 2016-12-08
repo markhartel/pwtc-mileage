@@ -3,6 +3,12 @@ A Wordpress plugin to record, manage and report the mileage of riders in the [Po
 
 ## Installation
 TBD
+### Database Schema 
+TBD
+### Plugin Setup
+TBD
+### Plugin Uninstall
+TBD
 
 ## Administration Pages
 TBD
@@ -19,17 +25,32 @@ TBD
 
 ## Report Shortcodes
 TBD
-`pwtc_achievement_last_year`
-`pwtc_mileage_year_to_date`
-`pwtc_mileage_last_year`
-`pwtc_mileage_lifetime`
-`pwtc_rides_led_year_to_date`
-`pwtc_rides_led_last_year`
-`pwtc_rides_year_to_date`
-`pwtc_rides_last_year`
-`pwtc_led_rides_year_to_date`
-`pwtc_led_rides_last_year`
-`pwtc_posted_rides_wo_sheets`
+
+Argument|Description|Values|Default
+--------|-----------|------|-------
+caption|Blah, blah, blah|"on" or "off"|"on"
+show_id|Blah, blah, blah|"on" or "off"|"off"
+highlight_user|Blah, blah, blah|"on" or "off"|"on"
+sort_order|Blah, blah, blah|"asc" or "desc"|"asc"
+
+### Mileage Reports
+`[pwtc_achievement_last_year]`
+`[pwtc_mileage_year_to_date]`
+`[pwtc_mileage_last_year]`
+`[pwtc_mileage_lifetime]`
+
+### Ride Leader Reports
+`[pwtc_rides_led_year_to_date]`
+`[pwtc_rides_led_last_year]`
+
+### Individual Ride Reports
+`[pwtc_rides_year_to_date]`
+`[pwtc_rides_last_year]`
+`[pwtc_led_rides_year_to_date]`
+`[pwtc_led_rides_last_year]`
+
+### Administrative Reports
+`[pwtc_posted_rides_wo_sheets]`
 
 ## Package Files
 - README.md *(this file)*
