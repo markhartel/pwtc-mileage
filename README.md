@@ -55,6 +55,7 @@ sort_order|Blah, blah, blah|"asc" or "desc"|"asc"
 ## Package Files
 - README.md *(this file)*
 - pwtc-mileage.php *(plugin definition file)*
+- pwtc-mileage-hooks.php *(plugin membership hooks file)*
 - class.pwtcmileage.php *(PHP class with server-side logic)*
 - admin-gen-reports.php *(client-side logic for View Reports admin page)*
 - admin-man-riders.php *(client-side logic for Manage Riders admin page)*

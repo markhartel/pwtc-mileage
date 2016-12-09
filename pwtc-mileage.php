@@ -22,6 +22,7 @@ register_activation_hook( __FILE__, array( 'PwtcMileage', 'plugin_activation' ) 
 register_deactivation_hook( __FILE__, array( 'PwtcMileage', 'plugin_deactivation' ) );
 register_uninstall_hook( __FILE__, array( 'PwtcMileage', 'plugin_uninstall' ) );
 
+require_once( PWTC_MILEAGE__PLUGIN_DIR . 'pwtc-mileage-hooks.php' );
 require_once( PWTC_MILEAGE__PLUGIN_DIR . 'class.pwtcmileage.php' );
 
 add_action( 'init', array( 'PwtcMileage', 'init' ) );

@@ -2,9 +2,15 @@
 if (!current_user_can('edit_published_pages')) {
     return;
 }
+$message = '';
+$notice_type = '';
+$show_buttons = true;
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
+
+    var confirm_sync = true;
+
 	function populate_riders_table(members, lastname, firstname) {
         $('#rider-inspect-section .lookup-btn').removeClass('button-primary');
         $("#rider-inspect-section .lookup-btn[lastname='" + lastname + "']").addClass('button-primary');
@@ -85,11 +91,6 @@ jQuery(document).ready(function($) {
         }
 	}   
 
-    $('#rider-manage-section .populate-btn').on('click', function(evt) {
-        evt.preventDefault();
-        alert('Populate button pressed');
-    });
-
     $('#rider-manage-section .inspect-btn').on('click', function(evt) {
         evt.preventDefault();
 	    $('#rider-manage-section').hide();
@@ -151,15 +152,64 @@ jQuery(document).ready(function($) {
 		$.post(action, data, create_rider_cb);
     });
 
+    $("#s-confirm-dlg").dialog({
+        autoOpen: false,
+        resizable: false,
+        height: "auto",
+        width: 400,
+        modal: true,
+        buttons: {
+            "OK": function(evt) {
+                $(this).dialog("close");
+                confirm_sync = false;
+                $('#rider-manage-section .sync-frm input[name="member_sync"]').click();
+            },
+            Cancel: function() {
+                $(this).dialog("close");
+            }
+        }
+    });
+
+    $('#rider-manage-section .sync-frm').on('submit', function(evt) {
+        if (confirm_sync) {
+            evt.preventDefault();
+            $("#s-confirm-dlg").dialog('open');
+        }
+    });
+
 });
 </script>
 <div class="wrap">
 	<h1><?= esc_html(get_admin_page_title()); ?></h1>
+<?php
+if (null !== $job_status_s) {
+    if ($job_status_s['status'] == 'triggered') {
+        $message = 'Synchronize action has been triggered.';
+        $notice_type = 'notice-warning';
+        $show_buttons = false;
+    } 
+    else if ($job_status_s['status'] == 'started') {
+        $message = 'Synchronize action is currently running.';
+        $notice_type = 'notice-warning';
+        $show_buttons = false;
+    }
+    else {
+        $message = 'Synchronize action is in an unknown state: ' . $job_status_s['status'] . '.';
+        $notice_type = 'notice-error';
+    }
+?>
+    <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
+<?php
+} 
+if ($show_buttons) {
+?>
     <div id='rider-error-msg'></div>
     <div id='rider-manage-section'>
         <p>
         <div><strong>Synchronize rider list with current membership database.</strong></div>
-        <div><button class="populate-btn button button-primary button-large">Synchronize</button></div><br>
+        <div><form class="sync-frm" method="POST">
+            <input type="submit" name="member_sync" value="Synchronize" class="button button-primary button-large">
+        </form></div><br>
         <div><strong>View and modify rider list.</strong></div>
         <div><button class="inspect-btn button button-primary button-large">View</button></div>
         </p>
@@ -213,5 +263,11 @@ jQuery(document).ready(function($) {
 
         <p><table class="riders-tbl pretty"></table></p>
     </div>
+    <div id="s-confirm-dlg" title="Run Synchronize?">
+        <p>Blah, blah, blah</p>   
+    </div>
+<?php
+}
+?>
 </div>
 <?php

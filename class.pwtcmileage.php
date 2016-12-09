@@ -94,6 +94,10 @@ class PwtcMileage {
 
 		add_action( 'pwtc_mileage_consolidation', 
 			array( 'PwtcMileage', 'consolidation_callback') );  
+		add_action( 'pwtc_mileage_backup', 
+			array( 'PwtcMileage', 'backup_callback') );  
+		add_action( 'pwtc_mileage_member_sync', 
+			array( 'PwtcMileage', 'member_sync_callback') );  
 	}
 
 	public static function load_report_scripts() {
@@ -144,7 +148,7 @@ class PwtcMileage {
 		$status = self::insert_ride($title, $startdate);
 		if (false === $status or 0 === $status) {
 			$response = array(
-				'error' => 'Could not insert ride into database.'
+				'error' => 'Could not insert ridesheet into database.'
 			);
     		echo wp_json_encode($response);
 		}
@@ -171,7 +175,7 @@ class PwtcMileage {
 		$status = self::insert_ride_with_postid($title, $startdate, intval($postid));
 		if (false === $status or 0 === $status) {
 			$response = array(
-				'error' => 'Could not insert ride into database.'
+				'error' => 'Could not insert ridesheet into database.'
 			);
     		echo wp_json_encode($response);
 		}
@@ -199,7 +203,7 @@ class PwtcMileage {
 		$lcnt = self::fetch_ride_has_leaders(intval($rideid));
 		if ($mcnt > 0 or $lcnt > 0) {
 			$response = array(
-				'error' => 'Cannot remove a ride with a ride sheet.'
+				'error' => 'Cannot delete a ridesheet that has riders.'
 			);
     		echo wp_json_encode($response);
 		}
@@ -207,7 +211,7 @@ class PwtcMileage {
 			$status = self::delete_ride(intval($rideid));
 			if (false === $status or 0 === $status) {
 				$response = array(
-					'error' => 'Could not delete ride from database.'
+					'error' => 'Could not delete ridesheet from database.'
 				);
     			echo wp_json_encode($response);
 			}
@@ -301,7 +305,7 @@ class PwtcMileage {
 		$lcnt = self::fetch_member_has_leaders($memberid);
 		if ($mcnt > 0 or $lcnt > 0) {
 			$response = array(
-				'error' => 'Cannot remove a rider with a ride sheet.'
+				'error' => 'Cannot delete a rider that is entered on a ridesheet.'
 			);
     		echo wp_json_encode($response);
 		}
@@ -381,7 +385,7 @@ class PwtcMileage {
 			}
 		}
 		else {
-			$errormsg = 'Could not file rider ' + $memberid . ' in database.';
+			$errormsg = 'Could not find rider ' + $memberid . ' in database.';
 		}
 		return $errormsg;
 	}
@@ -547,8 +551,32 @@ class PwtcMileage {
 	public static function consolidation_callback() {
 		error_log( 'Consolidation process triggered.');
 		self::job_set_status('consolidation', 'started');
-		sleep(60);
+		sleep(30);
 		self::job_remove('consolidation');	
+	}
+
+	public static function backup_callback() {
+		error_log( 'Backup process triggered.');
+		self::job_set_status('backup', 'started');
+		sleep(30);
+		self::job_remove('backup');	
+	}
+
+	public static function member_sync_callback() {
+		error_log( 'Membership Sync process triggered.');
+		self::job_set_status('member_sync', 'started');
+		$members = pwtc_mileage_fetch_membership();
+    	foreach ( $members as $item ) {
+       		$memberid = $item[0];
+			$firstname = $item[1];
+        	$lastname = $item[2];
+        	$expirdate = $item[3];
+			$status = self::insert_rider($memberid, $lastname, $firstname, $expirdate);	
+			if (false === $status or 0 === $status) {
+				error_log('Could not insert or update ' . $memberid);
+			}
+		}
+		self::job_remove('member_sync');	
 	}
 
 	public static function plugin_menu() {
@@ -616,6 +644,11 @@ class PwtcMileage {
 
 	public static function page_manage_riders() {
 		$plugin_options = self::get_plugin_options();
+    	if (isset($_POST['member_sync'])) {
+			self::job_set_status('member_sync', 'triggered');
+			wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
+		}
+		$job_status_s = self::job_get_status('member_sync');
 		include('admin-man-riders.php');
 	}
 
@@ -625,7 +658,12 @@ class PwtcMileage {
 			self::job_set_status('consolidation', 'triggered');
 			wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
 		}
-		$job_status = self::job_get_status('consolidation');
+    	if (isset($_POST['backup'])) {
+			self::job_set_status('backup', 'triggered');
+			wp_schedule_single_event(time(), 'pwtc_mileage_backup');
+		}
+		$job_status_b = self::job_get_status('backup');
+		$job_status_c = self::job_get_status('consolidation');
 		include('admin-man-yearend.php');
 	}
 
@@ -673,13 +711,6 @@ class PwtcMileage {
 		include('admin-man-settings.php');
 	}
 
-	public static function get_login_user_id() {
-		$id = null;
-		//TODO: if user is logged in, get and use his ID.
-		$id = '12231'; //This is a test
-		return $id;
-	}
-
 	public static function get_rider_name($id) {
 		$rider = self::fetch_rider($id);
 		$name = '';
@@ -708,7 +739,7 @@ class PwtcMileage {
 		}
 		$id = null;
 		if ($meta['id_idx'] >= 0 and $atts['highlight_user'] == 'on') {
-			$id = self::get_login_user_id();
+			$id = pwtc_mileage_get_member_id();
 		}
 		$out = '<div class="pwtc-mileage-report">';
 		if ($atts['caption'] == 'on') {
@@ -865,10 +896,10 @@ class PwtcMileage {
 	}
 
 	public static function shortcode_ytd_rides($atts) {
-		$member_id = self::get_login_user_id();
+		$member_id = pwtc_mileage_get_member_id();
 		$out = '';
 		if ($member_id === null) {
-			$out = self::shortcode_build_errmsg('This report requires a valid logged on rider!');
+			$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
 		}
 		else {
 			$name = self::get_rider_name($member_id);
@@ -881,10 +912,10 @@ class PwtcMileage {
 	}
 
 	public static function shortcode_ly_rides($atts) {
-		$member_id = self::get_login_user_id();
+		$member_id = pwtc_mileage_get_member_id();
 		$out = '';
 		if ($member_id === null) {
-			$out = self::shortcode_build_errmsg('This report requires a valid logged on rider!');
+			$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
 		}
 		else {
 			$name = self::get_rider_name($member_id);
@@ -897,10 +928,10 @@ class PwtcMileage {
 	}
 
 	public static function shortcode_ytd_led_rides($atts) {
-		$member_id = self::get_login_user_id();
+		$member_id = pwtc_mileage_get_member_id();
 		$out = '';
 		if ($member_id === null) {
-			$out = self::shortcode_build_errmsg('This report requires a valid logged on rider!');
+			$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
 		}
 		else {
 			$name = self::get_rider_name($member_id);
@@ -913,9 +944,9 @@ class PwtcMileage {
 	}
 
 	public static function shortcode_ly_led_rides($atts) {
-		$member_id = self::get_login_user_id();
+		$member_id = pwtc_mileage_get_member_id();
 		if ($member_id === null) {
-			$out = self::shortcode_build_errmsg('This report requires a valid logged on rider!');
+			$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
 		}
 		else {
 			$name = self::get_rider_name($member_id);
@@ -1178,7 +1209,8 @@ class PwtcMileage {
     	$results = $wpdb->get_results($wpdb->prepare('select' . 
 			' c.member_id, c.first_name, c.last_name, m.mileage' . 
 			' from ' . $member_table . ' as c inner join ' . $mileage_table . ' as m' . 
-			' on c.member_id = m.member_id where m.ride_id = %d', $rideid), ARRAY_A);
+			' on c.member_id = m.member_id where m.ride_id = %d order by c.last_name, c.first_name', 
+			$rideid), ARRAY_A);
 		return $results;
 	}
 
@@ -1189,7 +1221,8 @@ class PwtcMileage {
     	$results = $wpdb->get_results($wpdb->prepare('select' . 
 			' c.member_id, c.first_name, c.last_name' . 
 			' from ' . $member_table . ' as c inner join ' . $leader_table . ' as l' . 
-			' on c.member_id = l.member_id where l.ride_id = %d', $rideid), ARRAY_A);
+			' on c.member_id = l.member_id where l.ride_id = %d order by c.last_name, c.first_name', 
+			$rideid), ARRAY_A);
 		return $results;
 	}
 
