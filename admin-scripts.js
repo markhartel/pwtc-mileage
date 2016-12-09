@@ -7,6 +7,17 @@ function lookup_pwtc_riders(mycb) {
     window.pwtc_rider_cb = mycb;
 } 
 
+function open_confirm_dialog(msg, mycb) {
+    window.pwtc_mileage_confirm_cb = mycb;
+    jQuery("#confirm-dialog p").html(msg);
+    jQuery("#confirm-dialog").dialog('open');
+}
+
+function open_error_dialog(msg) {
+    jQuery("#error-dialog p").html(msg);
+    jQuery("#error-dialog").dialog('open');
+}
+
 function click_to_close_msg(selector) {
     jQuery(selector + ' div').on('click', function(evt) {
         jQuery(this).parent().html('');

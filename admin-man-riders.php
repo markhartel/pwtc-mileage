@@ -2,14 +2,9 @@
 if (!current_user_can('edit_published_pages')) {
     return;
 }
-$message = '';
-$notice_type = '';
-$show_buttons = true;
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
-
-    var confirm_sync = true;
 
 	function populate_riders_table(members, lastname, firstname) {
         $('#rider-inspect-section .lookup-btn').removeClass('button-primary');
@@ -84,27 +79,13 @@ jQuery(document).ready(function($) {
 	function remove_rider_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
-            show_error_msg('#rider-error-msg', res.error);
+            //show_error_msg('#rider-error-msg', res.error);
+            open_error_dialog(res.error);
 		}
 		else {
             populate_riders_table(res.members, res.lastname, res.firstname);
         }
 	}   
-
-    $('#rider-manage-section .inspect-btn').on('click', function(evt) {
-        evt.preventDefault();
-	    $('#rider-manage-section').hide();
-        $('#rider-inspect-section .riders-tbl tr').remove();
-        $('#rider-inspect-section .add-blk').hide();
-        $('#rider-inspect-section .lookup-btn').removeClass('button-primary');
-	    $('#rider-inspect-section').show();
-    });
-
-    $('#rider-inspect-section .back-btn').on('click', function(evt) {
-        evt.preventDefault();
-	    $('#rider-inspect-section').hide();
-	    $('#rider-manage-section').show();
-    });
 
     $('#rider-inspect-section .lookup-btn').on('click', function(evt) {
         evt.preventDefault();
@@ -152,70 +133,21 @@ jQuery(document).ready(function($) {
 		$.post(action, data, create_rider_cb);
     });
 
-    $("#s-confirm-dlg").dialog({
-        autoOpen: false,
-        resizable: false,
-        height: "auto",
-        width: 400,
-        modal: true,
-        buttons: {
-            "OK": function(evt) {
-                $(this).dialog("close");
-                confirm_sync = false;
-                $('#rider-manage-section .sync-frm input[name="member_sync"]').click();
-            },
-            Cancel: function() {
-                $(this).dialog("close");
-            }
-        }
-    });
-
-    $('#rider-manage-section .sync-frm').on('submit', function(evt) {
-        if (confirm_sync) {
-            evt.preventDefault();
-            $("#s-confirm-dlg").dialog('open');
-        }
-    });
-
 });
 </script>
 <div class="wrap">
 	<h1><?= esc_html(get_admin_page_title()); ?></h1>
 <?php
-if (null !== $job_status_s) {
-    if ($job_status_s['status'] == 'triggered') {
-        $message = 'Synchronize action has been triggered.';
-        $notice_type = 'notice-warning';
-        $show_buttons = false;
-    } 
-    else if ($job_status_s['status'] == 'started') {
-        $message = 'Synchronize action is currently running.';
-        $notice_type = 'notice-warning';
-        $show_buttons = false;
-    }
-    else {
-        $message = 'Synchronize action is in an unknown state: ' . $job_status_s['status'] . '.';
-        $notice_type = 'notice-error';
-    }
+if ($running_jobs > 0) {
 ?>
-    <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
+    <div class="notice notice-warning"><p><strong>
+        A database batch operation is currently running!
+    </strong></p></div>
 <?php
-} 
-if ($show_buttons) {
+} else {
 ?>
     <div id='rider-error-msg'></div>
-    <div id='rider-manage-section'>
-        <p>
-        <div><strong>Synchronize rider list with current membership database.</strong></div>
-        <div><form class="sync-frm" method="POST">
-            <input type="submit" name="member_sync" value="Synchronize" class="button button-primary button-large">
-        </form></div><br>
-        <div><strong>View and modify rider list.</strong></div>
-        <div><button class="inspect-btn button button-primary button-large">View</button></div>
-        </p>
-    </div>
-    <div id='rider-inspect-section' class="initially-hidden">
-        <p><button class='back-btn button button-primary button-large'>Back</button></p>
+    <div id='rider-inspect-section'>
         <p>
             <button class='lookup-btn button' lastname='a'>A</button>
             <button class='lookup-btn button' lastname='b'>B</button>
@@ -263,10 +195,8 @@ if ($show_buttons) {
 
         <p><table class="riders-tbl pretty"></table></p>
     </div>
-    <div id="s-confirm-dlg" title="Run Synchronize?">
-        <p>Blah, blah, blah</p>   
-    </div>
 <?php
+    include('admin-rider-lookup.php');
 }
 ?>
 </div>

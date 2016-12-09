@@ -549,21 +549,71 @@ class PwtcMileage {
 	}
 
 	public static function consolidation_callback() {
-		error_log( 'Consolidation process triggered.');
+    	global $wpdb;
+		error_log( 'Consolidation process started.');
 		self::job_set_status('consolidation', 'started');
-		sleep(30);
+
+		$thisyear = date('Y');
+    	$yearbeforelast = intval($thisyear) - 2;
+		$title = 'Totals Through ' . $yearbeforelast;
+		$maxdate = '' . $yearbeforelast . '-12-31';
+
+		$status = self::insert_ride($title, $maxdate);
+		if (false === $status or 0 === $status) {
+			error_log('Consolidation failed, could not insert ridesheet.');
+		}
+		else {
+			$rideid = $wpdb->insert_id;
+
+			$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+			$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+			$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+			$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+
+			$status = $wpdb->query($wpdb->prepare('insert into ' . $mileage_table .
+				'  (member_id, ride_id, mileage) select c.member_id, %d, SUM(m.mileage)' . 
+				' from ((' . $mileage_table . ' as m inner join ' . $member_table . 
+				' as c on c.member_id = m.member_id) inner join ' . $ride_table . 
+				' as r on m.ride_id = r.ID) where r.ID <> %d and r.date <= %s' . 
+				' group by m.member_id', $rideid, $rideid, $maxdate));
+			error_log('Consolidation inserted ' . $status . ' records into mileage table.');
+
+			$status = $wpdb->query($wpdb->prepare('insert into ' . $leader_table .
+				'  (member_id, ride_id, rides_led) select c.member_id, %d, SUM(l.rides_led)' . 
+				' from ((' . $leader_table . ' as l inner join ' . $member_table . 
+				' as c on c.member_id = l.member_id) inner join ' . $ride_table . 
+				' as r on l.ride_id = r.ID) where r.ID <> %d and r.date <= %s' . 
+				' group by l.member_id', $rideid, $rideid, $maxdate));
+			error_log('Consolidation inserted ' . $status . ' records into leader table.');
+
+			$status = $wpdb->query($wpdb->prepare('delete from ' . $mileage_table . 
+				' where ride_id in (select ID from ' . $ride_table . 
+				' where ID <> %d and date <= %s)', $rideid, $maxdate));
+			error_log('Consolidation deleted ' . $status . ' records from mileage table.');
+
+			$status = $wpdb->query($wpdb->prepare('delete from ' . $leader_table . 
+				' where ride_id in (select ID from ' . $ride_table . 
+				' where ID <> %d and date <= %s)', $rideid, $maxdate));
+			error_log('Consolidation deleted ' . $status . ' records from leader table.');
+
+			$status = $wpdb->query($wpdb->prepare('delete from ' . $ride_table . 
+				' where ID <> %d and date <= %s', $rideid, $maxdate));
+			error_log('Consolidation deleted ' . $status . ' records from ridesheet table.');
+		}
+
 		self::job_remove('consolidation');	
 	}
 
 	public static function backup_callback() {
-		error_log( 'Backup process triggered.');
+		error_log( 'Backup process started.');
 		self::job_set_status('backup', 'started');
 		sleep(30);
+		//self::job_set_status('backup', 'failed', "a test error message");
 		self::job_remove('backup');	
 	}
 
 	public static function member_sync_callback() {
-		error_log( 'Membership Sync process triggered.');
+		error_log( 'Membership Sync process started.');
 		self::job_set_status('member_sync', 'started');
 		$members = pwtc_mileage_fetch_membership();
     	foreach ( $members as $item ) {
@@ -612,8 +662,8 @@ class PwtcMileage {
     	$function = array( 'PwtcMileage', 'page_manage_ride_sheets');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
-    	$page_title = 'Year-End Operations';
-    	$menu_title = 'Year-End Ops';
+    	$page_title = 'Batch Database Operations';
+    	$menu_title = 'Batch Ops';
     	$menu_slug = 'pwtc_mileage_manage_year_end';
     	$capability = 'manage_options';
     	$function = array( 'PwtcMileage', 'page_manage_year_end');
@@ -634,6 +684,7 @@ class PwtcMileage {
 
 	public static function page_manage_ride_sheets() {
 		$plugin_options = self::get_plugin_options();
+		$running_jobs = self::num_running_jobs();
 		include('admin-man-ridesheets.php');
 	}
 
@@ -644,11 +695,7 @@ class PwtcMileage {
 
 	public static function page_manage_riders() {
 		$plugin_options = self::get_plugin_options();
-    	if (isset($_POST['member_sync'])) {
-			self::job_set_status('member_sync', 'triggered');
-			wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
-		}
-		$job_status_s = self::job_get_status('member_sync');
+		$running_jobs = self::num_running_jobs();
 		include('admin-man-riders.php');
 	}
 
@@ -662,6 +709,11 @@ class PwtcMileage {
 			self::job_set_status('backup', 'triggered');
 			wp_schedule_single_event(time(), 'pwtc_mileage_backup');
 		}
+    	if (isset($_POST['member_sync'])) {
+			self::job_set_status('member_sync', 'triggered');
+			wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
+		}
+		$job_status_s = self::job_get_status('member_sync');
 		$job_status_b = self::job_get_status('backup');
 		$job_status_c = self::job_get_status('consolidation');
 		include('admin-man-yearend.php');
@@ -1375,14 +1427,22 @@ class PwtcMileage {
 		return $result;
 	}
 
-	public static function job_set_status($jobid, $status) {
+	public static function job_set_status($jobid, $status, $errmsg = '') {
     	global $wpdb;
 		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
 		$status = $wpdb->query($wpdb->prepare('insert into ' . $jobs_table .
-			' (job_id, status, timestamp) values (%s, %s, now())' . 
-			' on duplicate key update status = %s, timestamp = now()',
-			$jobid, $status, $status));
+			' (job_id, status, timestamp, error_msg) values (%s, %s, now(), %s)' . 
+			' on duplicate key update status = %s, timestamp = now(), error_msg = %s',
+			$jobid, $status, $errmsg, $status, $errmsg));
 		return $status;
+	}
+
+	public static function num_running_jobs() {
+    	global $wpdb;
+		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
+		$results = $wpdb->get_var('select count(*) from ' . $jobs_table . 
+			' where status = \'triggered\' or status = \'started\'');
+		return $results;
 	}
 
 	public static function job_remove($jobid) {

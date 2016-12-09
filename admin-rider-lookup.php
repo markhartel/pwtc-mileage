@@ -53,6 +53,38 @@ jQuery(document).ready(function($) {
         modal: true
     });
 
+    $("#confirm-dialog").dialog({
+        autoOpen: false,
+        resizable: false,
+        height: "auto",
+        width: 400,
+        modal: true,
+        buttons: {
+            "OK": function() {
+                $(this).dialog("close");
+                if (window.pwtc_mileage_confirm_cb) {
+                    window.pwtc_mileage_confirm_cb();
+                }
+            },
+            Cancel: function() {
+                $(this).dialog("close");
+            }
+        }
+    });
+
+    $("#error-dialog").dialog({
+        autoOpen: false,
+        resizable: false,
+        height: "auto",
+        width: 400,
+        modal: true,
+        buttons: {
+            "OK": function() {
+                $(this).dialog("close");
+            }
+        }
+    });
+
 });
 </script>
 <div id="rider-lookup-results" title="Lookup Riders">
@@ -68,5 +100,11 @@ jQuery(document).ready(function($) {
         <div class='error-msg'></div>
         <table class="lookup-tlb"></table>
     </p>
+</div>
+<div id="confirm-dialog" title="Confirmation">
+    <p></p>   
+</div>
+<div id="error-dialog" title="Error">
+    <p></p>   
 </div>
 <?php

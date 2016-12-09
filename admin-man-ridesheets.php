@@ -115,7 +115,22 @@ jQuery(document).ready(function($) {
 				'<td>' + item.member_id + '</td>' +
 				'<td>' + item.first_name + ' ' + item.last_name + '</td>' + 
 				'<td>' + item.mileage + '</td>' +
-				'<td><button class="remove-btn button">Delete</button></td></tr>');    
+				'<td><button class="edit-btn button">Edit</button>' +
+				'<button class="remove-btn button">Delete</button></td></tr>');    
+		});
+		$('#ridesheet-sheet-page .mileage-tbl .edit-btn').on('click', function(evt) {
+            evt.preventDefault();
+            $('#ridesheet-sheet-page .mileage-section .add-frm .riderid').html(
+				$(this).parent().parent().attr('memberid')
+			);
+            $('#ridesheet-sheet-page .mileage-section .add-frm .ridername').html(
+				$(this).parent().parent().find('td').eq(1).html()
+			);
+			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(
+				$(this).parent().parent().find('td').eq(2).html()
+			); 
+			$('#ridesheet-sheet-page .mileage-section .add-blk').show(500);  
+			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").focus();         
 		});
 		$('#ridesheet-sheet-page .mileage-tbl .remove-btn').on('click', function(evt) {
             evt.preventDefault();
@@ -434,6 +449,15 @@ jQuery(document).ready(function($) {
 </script>
 <div class="wrap">
 	<h1><?= esc_html(get_admin_page_title()); ?></h1>
+<?php
+if ($running_jobs > 0) {
+?>
+    <div class="notice notice-warning"><p><strong>
+        A database batch operation is currently running!
+    </strong></p></div>
+<?php
+} else {
+?>
 	<div id='ridesheet-error-msg'></div>
 	<div id="ridesheet-main-page">
 		<p>
@@ -523,7 +547,8 @@ jQuery(document).ready(function($) {
 		</div>
 	</div>
 <?php
-    include('admin-rider-lookup.php');
+	include('admin-rider-lookup.php');
+}
 ?>
 </div>
 <?php

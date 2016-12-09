@@ -11,54 +11,44 @@ jQuery(document).ready(function($) {
 
     var confirm_backup = true;
     var confirm_consolidate = true;
+    var confirm_sync = true;
 
-    $("#b-confirm-dlg").dialog({
-        autoOpen: false,
-        resizable: false,
-        height: "auto",
-        width: 400,
-        modal: true,
-        buttons: {
-            "OK": function(evt) {
-                $(this).dialog("close");
-                confirm_backup = false;
-                $('.backup-frm input[name="backup"]').click();
-            },
-            Cancel: function() {
-                $(this).dialog("close");
-            }
-        }
-    });
-
-    $("#c-confirm-dlg").dialog({
-        autoOpen: false,
-        resizable: false,
-        height: "auto",
-        width: 400,
-        modal: true,
-        buttons: {
-            "OK": function(evt) {
-                $(this).dialog("close");
-                confirm_consolidate = false;
-                $('.consol-frm input[name="consolidate"]').click();
-            },
-            Cancel: function() {
-                $(this).dialog("close");
-            }
+    $('.sync-frm').on('submit', function(evt) {
+        if (confirm_sync) {
+            evt.preventDefault();
+            open_confirm_dialog(
+                'Are you sure you want to synchronize with the membership list?', 
+                function() {
+                    confirm_sync = false;
+                    $('.sync-frm input[name="member_sync"]').click();
+                }
+            );
         }
     });
 
     $('.backup-frm').on('submit', function(evt) {
         if (confirm_backup) {
             evt.preventDefault();
-            $("#b-confirm-dlg").dialog('open');
-        }
+            open_confirm_dialog(
+                'Are you sure you want to perform backup?', 
+                function() {
+                    confirm_backup = false;
+                    $('.backup-frm input[name="backup"]').click();
+               }
+            );
+       }
     });
 
     $('.consol-frm').on('submit', function(evt) {
         if (confirm_consolidate) {
             evt.preventDefault();
-            $("#c-confirm-dlg").dialog('open');
+            open_confirm_dialog(
+                'Are you sure you want to perform consolidation?', 
+                function() {
+                    confirm_consolidate = false;
+                    $('.consol-frm input[name="consolidate"]').click();
+               }
+            );
         }
     });
 
@@ -67,6 +57,25 @@ jQuery(document).ready(function($) {
 <div class="wrap">
 	<h1><?= esc_html(get_admin_page_title()); ?></h1>
 <?php
+if (null !== $job_status_s) {
+    if ($job_status_s['status'] == 'triggered') {
+        $message = 'Synchronize action has been triggered.';
+        $notice_type = 'notice-warning';
+        $show_buttons = false;
+    } 
+    else if ($job_status_s['status'] == 'started') {
+        $message = 'Synchronize action is currently running.';
+        $notice_type = 'notice-warning';
+        $show_buttons = false;
+    }
+    else {
+        $message = 'Synchronize action failed: ' . $job_status_s['error_msg'];
+        $notice_type = 'notice-error';
+    }
+?>
+    <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
+<?php
+} 
 if (null !== $job_status_c) {
     if ($job_status_c['status'] == 'triggered') {
         $message = 'Consolidation action has been triggered.';
@@ -79,7 +88,7 @@ if (null !== $job_status_c) {
         $show_buttons = false;
     }
     else {
-        $message = 'Consolidation action is in an unknown state: ' . $job_status_c['status'] . '.';
+        $message = 'Consolidation action failed: ' . $job_status_c['error_msg'];
         $notice_type = 'notice-error';
     }
 ?>
@@ -98,7 +107,7 @@ if (null !== $job_status_b) {
         $show_buttons = false;
     }
     else {
-        $message = 'Backup action is in an unknown state: ' . $job_status_b['status'] . '.';
+        $message = 'Backup action failed: ' . $job_status_b['error_msg'];
         $notice_type = 'notice-error';
     }
 ?>
@@ -108,6 +117,10 @@ if (null !== $job_status_b) {
 if ($show_buttons) {
 ?>
     <p>
+        <div><strong>Synchronize rider list with current membership database.</strong></div>
+        <div><form class="sync-frm" method="POST">
+            <input type="submit" name="member_sync" value="Synchronize" class="button button-primary button-large">
+        </form></div><br>
         <div><strong>Backup mileage database to hard drive.</strong></div>
         <div><form class="backup-frm" method="POST">
             <input type="submit" name="backup" value="Backup" class="button button-primary button-large">
@@ -117,13 +130,8 @@ if ($show_buttons) {
             <input type="submit" name="consolidate" value="Consolidate" class="button button-primary button-large">
         </form></div>
     </p>
-    <div id="b-confirm-dlg" title="Run Backup?">
-        <p>Blah, blah, blah</p>   
-    </div>
-    <div id="c-confirm-dlg" title="Run Consolidate?">
-        <p>Blah, blah, blah</p>   
-    </div>
 <?php
+    include('admin-rider-lookup.php');
 }
 ?>
 </div>
