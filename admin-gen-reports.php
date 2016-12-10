@@ -27,7 +27,8 @@ jQuery(document).ready(function($) {
 	function generate_report_cb(response) {
         var res = JSON.parse(response);
         if (res.error) {
-            show_error_msg('#report-error-msg', res.error);
+            //show_error_msg('#report-error-msg', res.error);
+            open_error_dialog(res.error);
         }
         else {
             $('#report-results-section h2').html(res.title);
@@ -69,8 +70,9 @@ jQuery(document).ready(function($) {
             'name': $('#report-main-section .ridername').html()
 		};
         if (data.member_id === '') {
-            show_error_msg('#report-error-msg', 
-                'You must first select a rider before choosing this report.');
+            //show_error_msg('#report-error-msg', 
+            //    'You must first select a rider before choosing this report.');
+            open_error_dialog('You must first select a rider before choosing this report.');
         }
         else {
             $.post(action, data, generate_report_cb);
@@ -94,7 +96,6 @@ jQuery(document).ready(function($) {
 </script>
 <div class="wrap">
 	<h1><?= esc_html(get_admin_page_title()); ?></h1>
-    <div id='report-error-msg'></div>
     <div id='report-main-section'>
         <h3>Ride Mileage Reports</h3>
         <p>Sort by: 

@@ -558,57 +558,40 @@ class PwtcMileage {
 		$title = 'Totals Through ' . $yearbeforelast;
 		$maxdate = '' . $yearbeforelast . '-12-31';
 
-		$status = self::insert_ride($title, $maxdate);
-		if (false === $status or 0 === $status) {
-			error_log('Consolidation failed, could not insert ridesheet.');
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$num_rides = $wpdb->get_var($wpdb->prepare('select count(*) from ' . $ride_table . 
+			' where date <= %s', $maxdate));
+		if ($num_rides == 0) {
+			self::job_set_status('consolidation', 'failed', 
+				'no ridesheets were found for ' . $yearbeforelast);
+		}
+		else if ($num_rides == 1) {
+			self::job_set_status('consolidation', 'failed', 
+				'' . $yearbeforelast . ' ridesheets are already consolidated');
 		}
 		else {
-			$rideid = $wpdb->insert_id;
-
-			$member_table = $wpdb->prefix . self::MEMBER_TABLE;
-			$ride_table = $wpdb->prefix . self::RIDE_TABLE;
-			$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
-			$leader_table = $wpdb->prefix . self::LEADER_TABLE;
-
-			$status = $wpdb->query($wpdb->prepare('insert into ' . $mileage_table .
-				'  (member_id, ride_id, mileage) select c.member_id, %d, SUM(m.mileage)' . 
-				' from ((' . $mileage_table . ' as m inner join ' . $member_table . 
-				' as c on c.member_id = m.member_id) inner join ' . $ride_table . 
-				' as r on m.ride_id = r.ID) where r.ID <> %d and r.date <= %s' . 
-				' group by m.member_id', $rideid, $rideid, $maxdate));
-			error_log('Consolidation inserted ' . $status . ' records into mileage table.');
-
-			$status = $wpdb->query($wpdb->prepare('insert into ' . $leader_table .
-				'  (member_id, ride_id, rides_led) select c.member_id, %d, SUM(l.rides_led)' . 
-				' from ((' . $leader_table . ' as l inner join ' . $member_table . 
-				' as c on c.member_id = l.member_id) inner join ' . $ride_table . 
-				' as r on l.ride_id = r.ID) where r.ID <> %d and r.date <= %s' . 
-				' group by l.member_id', $rideid, $rideid, $maxdate));
-			error_log('Consolidation inserted ' . $status . ' records into leader table.');
-
-			$status = $wpdb->query($wpdb->prepare('delete from ' . $mileage_table . 
-				' where ride_id in (select ID from ' . $ride_table . 
-				' where ID <> %d and date <= %s)', $rideid, $maxdate));
-			error_log('Consolidation deleted ' . $status . ' records from mileage table.');
-
-			$status = $wpdb->query($wpdb->prepare('delete from ' . $leader_table . 
-				' where ride_id in (select ID from ' . $ride_table . 
-				' where ID <> %d and date <= %s)', $rideid, $maxdate));
-			error_log('Consolidation deleted ' . $status . ' records from leader table.');
-
-			$status = $wpdb->query($wpdb->prepare('delete from ' . $ride_table . 
-				' where ID <> %d and date <= %s', $rideid, $maxdate));
-			error_log('Consolidation deleted ' . $status . ' records from ridesheet table.');
-		}
-
-		self::job_remove('consolidation');	
+			$status = self::insert_ride($title, $maxdate);
+			if (false === $status or 0 === $status) {
+				self::job_set_status('consolidation', 'failed', 'could not insert new ridesheet');
+			}
+			else {
+				$rideid = $wpdb->insert_id;
+				if (isset($rideid) and is_int($rideid)) {
+					$status = self::rollup_ridesheets($rideid, $maxdate);
+					error_log(var_export($status, true));
+					self::job_remove('consolidation');
+				}
+				else {
+					self::job_set_status('consolidation', 'failed', 'new ridesheet ID is invalid');
+				}
+			}
+		}	
 	}
 
 	public static function backup_callback() {
 		error_log( 'Backup process started.');
 		self::job_set_status('backup', 'started');
 		sleep(30);
-		//self::job_set_status('backup', 'failed', "a test error message");
 		self::job_remove('backup');	
 	}
 
@@ -712,6 +695,9 @@ class PwtcMileage {
     	if (isset($_POST['member_sync'])) {
 			self::job_set_status('member_sync', 'triggered');
 			wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
+		}
+    	if (isset($_POST['clear_errs'])) {
+			self::job_remove_failed();
 		}
 		$job_status_s = self::job_get_status('member_sync');
 		$job_status_b = self::job_get_status('backup');
@@ -1419,6 +1405,48 @@ class PwtcMileage {
 		return $status;
 	}
 
+	public static function rollup_ridesheets($rideid, $maxdate) {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+
+		$status1 = $wpdb->query($wpdb->prepare('insert into ' . $mileage_table .
+				'  (member_id, ride_id, mileage) select c.member_id, %d, SUM(m.mileage)' . 
+				' from ((' . $mileage_table . ' as m inner join ' . $member_table . 
+				' as c on c.member_id = m.member_id) inner join ' . $ride_table . 
+				' as r on m.ride_id = r.ID) where r.ID <> %d and r.date <= %s' . 
+				' group by m.member_id', $rideid, $rideid, $maxdate));
+
+		$status2 = $wpdb->query($wpdb->prepare('insert into ' . $leader_table .
+				'  (member_id, ride_id, rides_led) select c.member_id, %d, SUM(l.rides_led)' . 
+				' from ((' . $leader_table . ' as l inner join ' . $member_table . 
+				' as c on c.member_id = l.member_id) inner join ' . $ride_table . 
+				' as r on l.ride_id = r.ID) where r.ID <> %d and r.date <= %s' . 
+				' group by l.member_id', $rideid, $rideid, $maxdate));
+
+		$status3 = $wpdb->query($wpdb->prepare('delete from ' . $mileage_table . 
+				' where ride_id in (select ID from ' . $ride_table . 
+				' where ID <> %d and date <= %s)', $rideid, $maxdate));
+
+		$status4 = $wpdb->query($wpdb->prepare('delete from ' . $leader_table . 
+				' where ride_id in (select ID from ' . $ride_table . 
+				' where ID <> %d and date <= %s)', $rideid, $maxdate));
+
+		$status5 = $wpdb->query($wpdb->prepare('delete from ' . $ride_table . 
+				' where ID <> %d and date <= %s', $rideid, $maxdate));	
+
+		$status = array(
+			'm_inserts' => $status1,
+			'l_inserts' => $status2,
+			'm_deletes' => $status3,
+			'l_deletes' => $status4,
+			'r_deletes' => $status5
+		);
+		return $status;
+	}
+
 	public static function job_get_status($jobid) {
     	global $wpdb;
 		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
@@ -1450,6 +1478,14 @@ class PwtcMileage {
 		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
 		$status = $wpdb->query($wpdb->prepare('delete from ' . $jobs_table . 
 			' where job_id = %s', $jobid));
+		return $status;
+	}
+
+	public static function job_remove_failed() {
+    	global $wpdb;
+		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
+		$status = $wpdb->query($wpdb->prepare('delete from ' . $jobs_table . 
+			' where status = %s', 'failed'));
 		return $status;
 	}
 

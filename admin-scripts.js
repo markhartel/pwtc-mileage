@@ -4,7 +4,7 @@ function lookup_pwtc_riders(mycb) {
     jQuery('#rider-lookup-results .lookup-tlb tr').remove();
     jQuery("#rider-lookup-results .lookup-frm input[type='text']").val('');
     jQuery("#rider-lookup-results").dialog('open');
-    window.pwtc_rider_cb = mycb;
+    window.pwtc_mileage_rider_cb = mycb;
 } 
 
 function open_confirm_dialog(msg, mycb) {
@@ -18,6 +18,7 @@ function open_error_dialog(msg) {
     jQuery("#error-dialog").dialog('open');
 }
 
+/*
 function click_to_close_msg(selector) {
     jQuery(selector + ' div').on('click', function(evt) {
         jQuery(this).parent().html('');
@@ -51,4 +52,5 @@ function show_info_msg(selector, msg) {
 function clear_msg(selector) {
     jQuery(selector).html('');
 }
+*/
 

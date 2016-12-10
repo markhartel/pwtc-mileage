@@ -5,6 +5,7 @@ if (!current_user_can('manage_options')) {
 $message = '';
 $notice_type = '';
 $show_buttons = true;
+$clear_button = false;
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
@@ -71,6 +72,7 @@ if (null !== $job_status_s) {
     else {
         $message = 'Synchronize action failed: ' . $job_status_s['error_msg'];
         $notice_type = 'notice-error';
+        $clear_button = true;
     }
 ?>
     <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
@@ -90,6 +92,7 @@ if (null !== $job_status_c) {
     else {
         $message = 'Consolidation action failed: ' . $job_status_c['error_msg'];
         $notice_type = 'notice-error';
+        $clear_button = true;
     }
 ?>
     <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
@@ -109,12 +112,20 @@ if (null !== $job_status_b) {
     else {
         $message = 'Backup action failed: ' . $job_status_b['error_msg'];
         $notice_type = 'notice-error';
+        $clear_button = true;
     }
 ?>
     <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
 <?php
 }
 if ($show_buttons) {
+    if ($clear_button) {
+?>
+        <div><form class="clear-frm" method="POST">
+            <input type="submit" name="clear_errs" value="Clear Errors" class="button">
+        </form></div>
+<?php        
+    }
 ?>
     <p>
         <div><strong>Synchronize rider list with current membership database.</strong></div>

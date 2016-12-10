@@ -68,7 +68,8 @@ jQuery(document).ready(function($) {
 	function create_rider_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
-            show_error_msg('#rider-error-msg', res.error);
+            //show_error_msg('#rider-error-msg', res.error);
+            open_error_dialog(res.error);
 		}
 		else {
             $('#rider-inspect-section .add-blk').hide();
@@ -146,7 +147,6 @@ if ($running_jobs > 0) {
 <?php
 } else {
 ?>
-    <div id='rider-error-msg'></div>
     <div id='rider-inspect-section'>
         <p>
             <button class='lookup-btn button' lastname='a'>A</button>

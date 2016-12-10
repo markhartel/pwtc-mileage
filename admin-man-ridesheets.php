@@ -163,7 +163,8 @@ jQuery(document).ready(function($) {
 	function create_ride_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
-			show_error_msg('#ridesheet-error-msg', res.error);
+			//show_error_msg('#ridesheet-error-msg', res.error);
+			open_error_dialog(res.error);
 		}
 		else {
 			$('#ridesheet-main-page').hide();
@@ -189,7 +190,8 @@ jQuery(document).ready(function($) {
         var res = JSON.parse(response);
 		console.log(res);
 		if (res.error) {
-			show_error_msg('#ridesheet-error-msg', res.error);
+			//show_error_msg('#ridesheet-error-msg', res.error);
+			open_error_dialog(res.error);
 		}
 		else {
 			$('#ridesheet-post-page').hide();
@@ -232,7 +234,8 @@ jQuery(document).ready(function($) {
 	function remove_ride_cb(response) {
 		var res = JSON.parse(response);
 		if (res.error) {
-			show_error_msg('#ridesheet-error-msg', res.error);
+			//show_error_msg('#ridesheet-error-msg', res.error);
+			open_error_dialog(res.error);
 		}
 		else {
 			populate_ridesheet_table(res.rides);
@@ -242,7 +245,8 @@ jQuery(document).ready(function($) {
 	function remove_leader_cb(response) {
 		var res = JSON.parse(response);
 		if (res.error) {
-			show_error_msg('#ridesheet-error-msg', res.error);
+			//show_error_msg('#ridesheet-error-msg', res.error);
+			open_error_dialog(res.error);
 		}
 		else {
 			populate_ride_leader_table(res.ride_id, res.leaders);
@@ -252,7 +256,8 @@ jQuery(document).ready(function($) {
 	function remove_mileage_cb(response) {
 		var res = JSON.parse(response);
 		if (res.error) {
-			show_error_msg('#ridesheet-error-msg', res.error);
+			//show_error_msg('#ridesheet-error-msg', res.error);
+			open_error_dialog(res.error);
 		}
 		else {
 			populate_ride_mileage_table(res.ride_id, res.mileage);
@@ -262,7 +267,8 @@ jQuery(document).ready(function($) {
 	function add_leader_cb(response) {
 		var res = JSON.parse(response);
 		if (res.error) {
-			show_error_msg('#ridesheet-error-msg', res.error);
+			//show_error_msg('#ridesheet-error-msg', res.error);
+			open_error_dialog(res.error);
 		}
 		else {
 			$('#ridesheet-sheet-page .leader-section .add-blk').hide();
@@ -274,7 +280,8 @@ jQuery(document).ready(function($) {
 	function add_mileage_cb(response) {
 		var res = JSON.parse(response);
 		if (res.error) {
-			show_error_msg('#ridesheet-error-msg', res.error);
+			//show_error_msg('#ridesheet-error-msg', res.error);
+			open_error_dialog(res.error);
 		}
 		else {
 			$('#ridesheet-sheet-page .mileage-section .add-blk').hide();
@@ -458,7 +465,6 @@ if ($running_jobs > 0) {
 <?php
 } else {
 ?>
-	<div id='ridesheet-error-msg'></div>
 	<div id="ridesheet-main-page">
 		<p>
         <div><strong>Create Ride Sheets from Posted Rides</strong></div>

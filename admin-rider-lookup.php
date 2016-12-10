@@ -14,8 +14,11 @@ jQuery(document).ready(function($) {
 		});
         $('#rider-lookup-results .lookup-tlb tr').on('click', function(evt) {
             $("#rider-lookup-results").dialog('close');
-            window.pwtc_rider_cb($(this).attr('memberid'), 
-                $(this).find('td').first().next().html());
+            if (window.pwtc_mileage_rider_cb) {
+                window.pwtc_mileage_rider_cb($(this).attr('memberid'), 
+                    $(this).find('td').first().next().html());
+                delete window.pwtc_mileage_rider_cb;
+            }
         });
         return members.length;
     }
@@ -25,8 +28,11 @@ jQuery(document).ready(function($) {
 		var num_riders = populate_riders_table(res.members);
         if (num_riders == 1) {
             $("#rider-lookup-results").dialog('close');
-            window.pwtc_rider_cb(res.members[0].member_id, 
-                res.members[0].first_name + ' ' + res.members[0].last_name);
+            if (window.pwtc_mileage_rider_cb) {
+                window.pwtc_mileage_rider_cb(res.members[0].member_id, 
+                    res.members[0].first_name + ' ' + res.members[0].last_name);
+                delete window.pwtc_mileage_rider_cb;
+            }
         }
         else if (num_riders == 0) {
             $('#rider-lookup-results .lookup-tlb tr').remove();
@@ -64,6 +70,7 @@ jQuery(document).ready(function($) {
                 $(this).dialog("close");
                 if (window.pwtc_mileage_confirm_cb) {
                     window.pwtc_mileage_confirm_cb();
+                    delete window.pwtc_mileage_confirm_cb;
                 }
             },
             Cancel: function() {
