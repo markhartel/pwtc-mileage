@@ -553,7 +553,7 @@ class PwtcMileage {
 		error_log( 'Consolidation process started.');
 		self::job_set_status('consolidation', 'started');
 
-		$thisyear = date('Y');
+		$thisyear = date('Y', current_time('timestamp'));
     	$yearbeforelast = intval($thisyear) - 2;
 		$title = 'Totals Through ' . $yearbeforelast;
 		$maxdate = '' . $yearbeforelast . '-12-31';
@@ -589,27 +589,79 @@ class PwtcMileage {
 	}
 
 	public static function backup_callback() {
+		global $wpdb;
 		error_log( 'Backup process started.');
 		self::job_set_status('backup', 'started');
-		sleep(30);
-		self::job_remove('backup');	
+
+		$export_dir = PWTC_MILEAGE__PLUGIN_DIR . 'exports';
+		if (!is_dir()) {
+			mkdir($export_dir);
+		}
+
+		$today = date('Y-m-d', current_time('timestamp'));
+		$prefix = 'pwtc-' . $today;
+		$members_file = $export_dir . '/' . $prefix . '-members.csv';
+		$rides_file = $export_dir . '/' . $prefix . '-rides.csv';
+		$mileage_file = $export_dir . '/' . $prefix . '-mileage.csv';
+		$leaders_file = $export_dir . '/' . $prefix . '-leaders.csv';
+
+		if (file_exists($members_file) or file_exists($rides_file) or
+			file_exists($mileage_file) or file_exists($leaders_file)) {
+			self::job_set_status('backup', 'failed', 'export files already exist for ' . $today);
+		}
+		else {
+			$fp = fopen($members_file, 'w');
+			self::write_export_csv_file($fp, self::fetch_members_for_export());
+			fclose($fp);
+
+			$fp = fopen($rides_file, 'w');
+			self::write_export_csv_file($fp, self::fetch_rides_for_export());
+			fclose($fp);
+
+			$fp = fopen($mileage_file, 'w');
+			self::write_export_csv_file($fp, self::fetch_mileage_for_export());
+			fclose($fp);
+
+			$fp = fopen($leaders_file, 'w');
+			self::write_export_csv_file($fp, self::fetch_leaders_for_export());
+			fclose($fp);
+
+			self::job_remove('backup');	
+		}
+		/*
+		$results = array(
+			array('abcdef', 'abc def', 'abc,def', 'abc"def', '2016-01-01', null, 5),
+			array('abcdef', 'abc def', "abc'def", 'abc"def"', '2016-01-01', null, 5)
+		);
+		*/	
+	}
+
+	public static function write_export_csv_file($fp, $data) {
+		foreach ($data as $item) {
+    		fputcsv($fp, $item);
+		}		
 	}
 
 	public static function member_sync_callback() {
 		error_log( 'Membership Sync process started.');
 		self::job_set_status('member_sync', 'started');
 		$members = pwtc_mileage_fetch_membership();
-    	foreach ( $members as $item ) {
-       		$memberid = $item[0];
-			$firstname = $item[1];
-        	$lastname = $item[2];
-        	$expirdate = $item[3];
-			$status = self::insert_rider($memberid, $lastname, $firstname, $expirdate);	
-			if (false === $status or 0 === $status) {
-				error_log('Could not insert or update ' . $memberid);
-			}
+		if (count($members) == 0) {
+			self::job_set_status('member_sync', 'failed', 'no members in membership list');
 		}
-		self::job_remove('member_sync');	
+		else {
+    		foreach ( $members as $item ) {
+       			$memberid = $item[0];
+				$firstname = $item[1];
+        		$lastname = $item[2];
+        		$expirdate = $item[3];
+				$status = self::insert_rider($memberid, $lastname, $firstname, $expirdate);	
+				if (false === $status or 0 === $status) {
+					error_log('Could not insert or update ' . $memberid);
+				}
+			}
+			self::job_remove('member_sync');	
+		}
 	}
 
 	public static function plugin_menu() {
@@ -1013,7 +1065,7 @@ class PwtcMileage {
 	}
 
 	public static function meta_ly_lt_achvmnt() {
-		$thisyear = date('Y');
+		$thisyear = date('Y', current_time('timestamp'));
     	$lastyear = intval($thisyear) - 1;
 		$meta = array(
 			'header' => array('Member ID', 'Name', 'Mileage', 'Achievement'),
@@ -1445,6 +1497,42 @@ class PwtcMileage {
 			'r_deletes' => $status5
 		);
 		return $status;
+	}
+
+	public static function fetch_members_for_export() {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+    	$results = $wpdb->get_results(
+			'select member_id, first_name, last_name, expir_date from ' . $member_table . 
+			' order by last_name, first_name', ARRAY_N);
+		return $results;
+	}
+
+	public static function fetch_rides_for_export() {
+    	global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+    	$results = $wpdb->get_results(
+			'select ID, title, date, post_id from ' . $ride_table . 
+			' order by date', ARRAY_N);
+		return $results;
+	}
+
+	public static function fetch_mileage_for_export() {
+    	global $wpdb;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+    	$results = $wpdb->get_results(
+			'select ride_id, member_id, mileage from ' . $mileage_table . 
+			' order by ride_id', ARRAY_N);
+		return $results;
+	}
+
+	public static function fetch_leaders_for_export() {
+    	global $wpdb;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+    	$results = $wpdb->get_results(
+			'select ride_id, member_id, rides_led from ' . $leader_table . 
+			' order by ride_id', ARRAY_N);
+		return $results;
 	}
 
 	public static function job_get_status($jobid) {

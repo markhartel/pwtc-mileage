@@ -8,6 +8,23 @@ jQuery(document).ready(function($) {
 
 	var ridesheet_back_btn_cb;
 
+	function set_ridesheet_lock(locked) {
+		if (locked) {
+			$("#ridesheet-sheet-page .leader-tbl .remove-btn").attr("disabled", "disabled");
+			$("#ridesheet-sheet-page .mileage-tbl .edit-btn").attr("disabled", "disabled");
+			$("#ridesheet-sheet-page .mileage-tbl .remove-btn").attr("disabled", "disabled");
+			$("#ridesheet-sheet-page .leader-section .add-frm input[name='lookup']").attr("disabled", "disabled");
+			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").attr("disabled", "disabled");
+		}
+		else {
+       		$("#ridesheet-sheet-page .leader-tbl .remove-btn").removeAttr("disabled");
+       		$("#ridesheet-sheet-page .mileage-tbl .edit-btn").removeAttr("disabled");
+       		$("#ridesheet-sheet-page .mileage-tbl .remove-btn").removeAttr("disabled");
+       		$("#ridesheet-sheet-page .leader-section .add-frm input[name='lookup']").removeAttr("disabled");
+       		$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").removeAttr("disabled");
+		}
+	}
+
 	function populate_posts_table(posts) {
 		$('#ridesheet-post-page .posts-tbl tr').remove();
 		$('#ridesheet-post-page .posts-tbl').append(
@@ -182,6 +199,7 @@ jQuery(document).ready(function($) {
 				$('#ridesheet-main-page .add-blk').hide();
 				$('#ridesheet-main-page').show();
 			};
+			set_ridesheet_lock(false);
 			$('#ridesheet-sheet-page').show();
 		}
 	} 
@@ -208,6 +226,7 @@ jQuery(document).ready(function($) {
 			ridesheet_back_btn_cb = function() {
 				load_posts_without_rides();
 			};
+			set_ridesheet_lock(false);
 			$('#ridesheet-sheet-page').show();
 		}
 	}   
@@ -228,6 +247,7 @@ jQuery(document).ready(function($) {
 		ridesheet_back_btn_cb = function() {
 			$('#ridesheet-ride-page').show();
 		};
+		set_ridesheet_lock(res.title.startsWith('Totals Through '));
 		$('#ridesheet-sheet-page').show();
 	}   
 

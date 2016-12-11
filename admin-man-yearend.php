@@ -141,6 +141,19 @@ if ($show_buttons) {
             <input type="submit" name="consolidate" value="Consolidate" class="button button-primary button-large">
         </form></div>
     </p>
+    <div>
+<?php 
+$files = array_diff(
+    scandir(PWTC_MILEAGE__PLUGIN_DIR . 'exports', SCANDIR_SORT_DESCENDING), array('..', '.'));     
+foreach( $files as $file ): 
+    $url = PWTC_MILEAGE__PLUGIN_URL . '/exports/' . $file;
+?> 
+        <div><a href="<?php echo $url; ?>"><?php echo $file; ?></a></div>
+<?php 
+endforeach; 
+?>            
+    </div>  
+
 <?php
     include('admin-rider-lookup.php');
 }
