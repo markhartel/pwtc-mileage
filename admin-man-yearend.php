@@ -134,26 +134,13 @@ if ($show_buttons) {
         </form></div><br>
         <div><strong>Backup mileage database to hard drive.</strong></div>
         <div><form class="backup-frm" method="POST">
-            <input type="submit" name="backup" value="Backup" class="button button-primary button-large">
+            <input type="submit" name="backup" value="Backup" class="button button-primary button-large" disabled>
         </form></div><br>
         <div><strong>Consolidate <?php echo(intval(date('Y'))-2); ?> club rides to single entry.</strong></div>
         <div><form class="consol-frm" method="POST">
             <input type="submit" name="consolidate" value="Consolidate" class="button button-primary button-large">
         </form></div>
     </p>
-    <div>
-<?php 
-$files = array_diff(
-    scandir(PWTC_MILEAGE__PLUGIN_DIR . 'exports', SCANDIR_SORT_DESCENDING), array('..', '.'));     
-foreach( $files as $file ): 
-    $url = PWTC_MILEAGE__PLUGIN_URL . '/exports/' . $file;
-?> 
-        <div><a href="<?php echo $url; ?>"><?php echo $file; ?></a></div>
-<?php 
-endforeach; 
-?>            
-    </div>  
-
 <?php
     include('admin-rider-lookup.php');
 }

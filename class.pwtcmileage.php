@@ -33,6 +33,9 @@ class PwtcMileage {
 	 */
 	private static function init_hooks() {
 		self::$initiated = true;
+		//add_action('admin_init', 
+		//	array('PwtcMileage', 'page_download_csv'));
+
 		add_action( 'admin_menu', 
 			array( 'PwtcMileage', 'plugin_menu' ) );
 		add_action( 'wp_enqueue_scripts', 
@@ -591,19 +594,21 @@ class PwtcMileage {
 	public static function backup_callback() {
 		global $wpdb;
 		error_log( 'Backup process started.');
+		$plugin_options = self::get_plugin_options();
 		self::job_set_status('backup', 'started');
 
-		$export_dir = PWTC_MILEAGE__PLUGIN_DIR . 'exports';
-		if (!is_dir()) {
-			mkdir($export_dir);
+		$export_dir = get_home_path() . $plugin_options['db_backup_location'];
+		error_log($export_dir);
+		if (!file_exists($export_dir)) {
+			mkdir($export_dir, 0777, true);
 		}
 
 		$today = date('Y-m-d', current_time('timestamp'));
 		$prefix = 'pwtc-' . $today;
-		$members_file = $export_dir . '/' . $prefix . '-members.csv';
-		$rides_file = $export_dir . '/' . $prefix . '-rides.csv';
-		$mileage_file = $export_dir . '/' . $prefix . '-mileage.csv';
-		$leaders_file = $export_dir . '/' . $prefix . '-leaders.csv';
+		$members_file = $export_dir . $prefix . '-members.csv';
+		$rides_file = $export_dir . $prefix . '-rides.csv';
+		$mileage_file = $export_dir . $prefix . '-mileage.csv';
+		$leaders_file = $export_dir . $prefix . '-leaders.csv';
 
 		if (file_exists($members_file) or file_exists($rides_file) or
 			file_exists($mileage_file) or file_exists($leaders_file)) {
@@ -704,6 +709,21 @@ class PwtcMileage {
     	$function = array( 'PwtcMileage', 'page_manage_year_end');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
+		$page_title = 'Export Database Tables';
+    	$menu_title = 'Export';
+    	$menu_slug = 'pwtc_mileage_export';
+    	$capability = 'manage_options';
+    	$function = array( 'PwtcMileage', 'page_export_db');
+		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+		add_action('load-' . $page, array('PwtcMileage','download_csv'));
+
+    	//$page_title = 'Download CSV';
+    	//$menu_title = 'Download CSV';
+    	//$menu_slug = 'pwtc_mileage_download_csv';
+    	//$capability = 'manage_options';
+		//$url = 'admin.php?download=pwtc_membership.csv';
+		//add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $url);
+
 		remove_submenu_page($parent_menu_slug, $parent_menu_slug);
 
 		$page_title = 'Plugin Settings';
@@ -734,6 +754,75 @@ class PwtcMileage {
 		include('admin-man-riders.php');
 	}
 
+/*
+	public static function page_download_csv() {
+      	global $pagenow;
+		error_log('page_download_csv called');
+      	if ($pagenow=='admin.php' && 
+			current_user_can('manage_options') && 
+          	isset($_GET['download'])  && 
+          	$_GET['download']=='pwtc_membership.csv') {
+  		$fileName = 'pwtc_membership.csv';
+ 
+		//header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+		header('Content-Description: File Transfer');
+		header("Content-type: text/csv");
+		header("Content-Disposition: attachment; filename={$fileName}");
+		//header("Expires: 0");
+		//header("Pragma: public");
+ 
+		$fh = fopen('php://output', 'w');
+		self::write_export_csv_file($fh, self::fetch_members_for_export());
+		fclose($fh);
+		exit();
+		}	
+	}
+*/
+
+	public static function download_csv() {
+		error_log('download_csv called');
+		if (isset($_POST['export_members'])) {
+			$today = date('Y-m-d', current_time('timestamp'));
+			header('Content-Description: File Transfer');
+			header("Content-type: text/csv");
+			header("Content-Disposition: attachment; filename=pwtc_membership_{$today}.csv");
+			$fh = fopen('php://output', 'w');
+			self::write_export_csv_file($fh, self::fetch_members_for_export());
+			fclose($fh);
+			die;
+		}
+		else if (isset($_POST['export_rides'])) {
+			$today = date('Y-m-d', current_time('timestamp'));
+			header('Content-Description: File Transfer');
+			header("Content-type: text/csv");
+			header("Content-Disposition: attachment; filename=pwtc_club_rides_{$today}.csv");
+			$fh = fopen('php://output', 'w');
+			self::write_export_csv_file($fh, self::fetch_rides_for_export());
+			fclose($fh);
+			die;
+		}
+		else if (isset($_POST['export_mileage'])) {
+			$today = date('Y-m-d', current_time('timestamp'));
+			header('Content-Description: File Transfer');
+			header("Content-type: text/csv");
+			header("Content-Disposition: attachment; filename=pwtc_ride_mileage_{$today}.csv");
+			$fh = fopen('php://output', 'w');
+			self::write_export_csv_file($fh, self::fetch_mileage_for_export());
+			fclose($fh);
+			die;
+		}
+		else if (isset($_POST['export_leaders'])) {
+			$today = date('Y-m-d', current_time('timestamp'));
+			header('Content-Description: File Transfer');
+			header("Content-type: text/csv");
+			header("Content-Disposition: attachment; filename=pwtc_ride_leaders_{$today}.csv");
+			$fh = fopen('php://output', 'w');
+			self::write_export_csv_file($fh, self::fetch_leaders_for_export());
+			fclose($fh);
+			die;
+		}
+	}
+
 	public static function page_manage_year_end() {
 		$plugin_options = self::get_plugin_options();
     	if (isset($_POST['consolidate'])) {
@@ -755,6 +844,12 @@ class PwtcMileage {
 		$job_status_b = self::job_get_status('backup');
 		$job_status_c = self::job_get_status('consolidation');
 		include('admin-man-yearend.php');
+	}
+
+	public static function page_export_db() {
+		$plugin_options = self::get_plugin_options();
+		$running_jobs = self::num_running_jobs();
+		include('admin-export-db.php');
 	}
 
 	public static function page_manage_settings() {
