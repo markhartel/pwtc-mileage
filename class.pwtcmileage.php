@@ -33,16 +33,18 @@ class PwtcMileage {
 	 */
 	private static function init_hooks() {
 		self::$initiated = true;
-		//add_action('admin_init', 
-		//	array('PwtcMileage', 'page_download_csv'));
 
+		// Register admin menu creation callback
 		add_action( 'admin_menu', 
 			array( 'PwtcMileage', 'plugin_menu' ) );
+
+		// Register script and style enqueue callbacks
 		add_action( 'wp_enqueue_scripts', 
 			array( 'PwtcMileage', 'load_report_scripts' ) );
 		add_action( 'admin_enqueue_scripts', 
 			array( 'PwtcMileage', 'load_admin_scripts' ) );
 
+		// Register shortcode callbacks
 		add_shortcode('pwtc_achievement_last_year', 
 			array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
 		add_shortcode('pwtc_mileage_year_to_date', 
@@ -66,6 +68,7 @@ class PwtcMileage {
 		add_shortcode('pwtc_posted_rides_wo_sheets', 
 			array( 'PwtcMileage', 'shortcode_rides_wo_sheets'));
 
+		// Register ajax callbacks
 		add_action( 'wp_ajax_pwtc_mileage_lookup_posts', 
 			array( 'PwtcMileage', 'lookup_posts_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_rides', 
@@ -95,13 +98,18 @@ class PwtcMileage {
 		add_action( 'wp_ajax_pwtc_mileage_generate_report', 
 			array( 'PwtcMileage', 'generate_report_callback') );
 
+		// Register background action task callbacks 
 		add_action( 'pwtc_mileage_consolidation', 
 			array( 'PwtcMileage', 'consolidation_callback') );  
-		add_action( 'pwtc_mileage_backup', 
-			array( 'PwtcMileage', 'backup_callback') );  
 		add_action( 'pwtc_mileage_member_sync', 
 			array( 'PwtcMileage', 'member_sync_callback') );  
+		add_action( 'pwtc_mileage_cvs_restore', 
+			array( 'PwtcMileage', 'cvs_restore_callback') );  
 	}
+
+	/*************************************************************/
+	/* Script and style enqueue callback functions
+	/*************************************************************/
 
 	public static function load_report_scripts() {
         wp_enqueue_style('pwtc_mileage_report_css', 
@@ -125,6 +133,10 @@ class PwtcMileage {
 			PWTC_MILEAGE__PLUGIN_URL . 'php-date-formatter.min.js', 
 			array('jquery'), 1.1, true);
 	}
+
+	/*************************************************************/
+	/* Ajax callback functions
+	/*************************************************************/
 
 	public static function lookup_posts_callback() {
 		$posts = self::fetch_posts_without_rides(ARRAY_A);
@@ -380,8 +392,6 @@ class PwtcMileage {
 		$errormsg = null;
 		if (count($rider) > 0) {
 			$r = $rider[0];
-			//error_log('now: ' . date('Y-m-d', current_time('timestamp')));
-			//error_log('expir_date: ' . date('Y-m-d', strtotime($r['expir_date'])));
 			if (strtotime($r['expir_date']) < strtotime(date('Y-m-d', current_time('timestamp')))) {
 				$errormsg = 'The membership of ' . $r['first_name'] . ' ' . $r['last_name'] .
 					' (' . $r['member_id'] . ') has expired.';
@@ -551,6 +561,10 @@ class PwtcMileage {
 		wp_die();
 	}
 
+	/*************************************************************/
+	/* Background action task callbacks
+	/*************************************************************/
+
 	public static function consolidation_callback() {
     	global $wpdb;
 		error_log( 'Consolidation process started.');
@@ -591,60 +605,19 @@ class PwtcMileage {
 		}	
 	}
 
-	public static function backup_callback() {
-		global $wpdb;
-		error_log( 'Backup process started.');
-		$plugin_options = self::get_plugin_options();
-		self::job_set_status('backup', 'started');
-
-		$export_dir = get_home_path() . $plugin_options['db_backup_location'];
-		error_log($export_dir);
-		if (!file_exists($export_dir)) {
-			mkdir($export_dir, 0777, true);
-		}
-
-		$today = date('Y-m-d', current_time('timestamp'));
-		$prefix = 'pwtc-' . $today;
-		$members_file = $export_dir . $prefix . '-members.csv';
-		$rides_file = $export_dir . $prefix . '-rides.csv';
-		$mileage_file = $export_dir . $prefix . '-mileage.csv';
-		$leaders_file = $export_dir . $prefix . '-leaders.csv';
-
-		if (file_exists($members_file) or file_exists($rides_file) or
-			file_exists($mileage_file) or file_exists($leaders_file)) {
-			self::job_set_status('backup', 'failed', 'export files already exist for ' . $today);
-		}
-		else {
-			$fp = fopen($members_file, 'w');
-			self::write_export_csv_file($fp, self::fetch_members_for_export());
-			fclose($fp);
-
-			$fp = fopen($rides_file, 'w');
-			self::write_export_csv_file($fp, self::fetch_rides_for_export());
-			fclose($fp);
-
-			$fp = fopen($mileage_file, 'w');
-			self::write_export_csv_file($fp, self::fetch_mileage_for_export());
-			fclose($fp);
-
-			$fp = fopen($leaders_file, 'w');
-			self::write_export_csv_file($fp, self::fetch_leaders_for_export());
-			fclose($fp);
-
-			self::job_remove('backup');	
-		}
-		/*
-		$results = array(
-			array('abcdef', 'abc def', 'abc,def', 'abc"def', '2016-01-01', null, 5),
-			array('abcdef', 'abc def', "abc'def", 'abc"def"', '2016-01-01', null, 5)
-		);
-		*/	
-	}
-
 	public static function write_export_csv_file($fp, $data) {
 		foreach ($data as $item) {
     		fputcsv($fp, $item);
 		}		
+	}
+
+	public static function read_export_csv_file($fp) {
+		$data = array();
+		// TODO: handle blank lines in csv file
+		while (($item = fgetcsv($fp)) !== FALSE) {
+			array_push($data, $item);
+		}
+		return $data;		
 	}
 
 	public static function member_sync_callback() {
@@ -668,6 +641,62 @@ class PwtcMileage {
 			self::job_remove('member_sync');	
 		}
 	}
+
+	public static function cvs_restore_callback() {
+		error_log( 'CVS restore process started.');
+		self::job_set_status('cvs_restore', 'started');
+		//sleep(30);
+		$upload_dir = wp_upload_dir();
+		$plugin_upload_dir = $upload_dir['basedir'] . '/pwtc_mileage';
+		$members_file = $plugin_upload_dir . '/' . self::MEMBER_TABLE . '.csv';
+		$rides_file = $plugin_upload_dir . '/' . self::RIDE_TABLE . '.csv';
+		$mileage_file = $plugin_upload_dir . '/' . self::MILEAGE_TABLE . '.csv';
+		$leaders_file = $plugin_upload_dir . '/' . self::LEADER_TABLE . '.csv';
+		if (!file_exists($members_file)) {
+			self::job_set_status('cvs_restore', 'failed', 'members upload file does not exist');
+		}
+		else if (!file_exists($rides_file)) {
+			self::job_set_status('cvs_restore', 'failed', 'rides upload file does not exist');
+		}
+		else if (!file_exists($mileage_file)) {
+			self::job_set_status('cvs_restore', 'failed', 'mileage upload file does not exist');
+		}
+		else if (!file_exists($leaders_file)) {
+			self::job_set_status('cvs_restore', 'failed', 'leaders upload file does not exist');
+		}
+		else {
+			$members_a = null;
+			if (($fp = fopen($members_file, 'r')) !== FALSE) {
+				$members_a = self::read_export_csv_file($fp);
+				error_log( 'members count: ' . count($members_a));	
+				fclose($fp);
+			}
+			$rides_a = null;
+			if (($fp = fopen($rides_file, 'r')) !== FALSE) {
+				$rides_a = self::read_export_csv_file($fp);
+				error_log( 'rides count: ' . count($rides_a));	
+				fclose($fp);
+			}
+			$mileage_a = null;
+			if (($fp = fopen($mileage_file, 'r')) !== FALSE) {
+				$mileage_a = self::read_export_csv_file($fp);
+				error_log( 'mileage count: ' . count($mileage_a));	
+				fclose($fp);
+			}
+			$leaders_a = null;
+			if (($fp = fopen($leaders_file, 'r')) !== FALSE) {
+				$leaders_a = self::read_export_csv_file($fp);
+				error_log( 'leaders count: ' . count($leaders_a));	
+				fclose($fp);
+			}
+
+			self::job_remove('cvs_restore');
+		}	
+	}
+
+	/*************************************************************/
+	/* Admin menu and pages creation functions
+	/*************************************************************/
 
 	public static function plugin_menu() {
 		$plugin_options = self::get_plugin_options();
@@ -702,27 +731,13 @@ class PwtcMileage {
     	$function = array( 'PwtcMileage', 'page_manage_ride_sheets');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
-    	$page_title = 'Batch Database Operations';
-    	$menu_title = 'Batch Ops';
+    	$page_title = 'Database Operations';
+    	$menu_title = 'Database Ops';
     	$menu_slug = 'pwtc_mileage_manage_year_end';
     	$capability = 'manage_options';
     	$function = array( 'PwtcMileage', 'page_manage_year_end');
-		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
-
-		$page_title = 'Export Database Tables';
-    	$menu_title = 'Export';
-    	$menu_slug = 'pwtc_mileage_export';
-    	$capability = 'manage_options';
-    	$function = array( 'PwtcMileage', 'page_export_db');
 		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 		add_action('load-' . $page, array('PwtcMileage','download_csv'));
-
-    	//$page_title = 'Download CSV';
-    	//$menu_title = 'Download CSV';
-    	//$menu_slug = 'pwtc_mileage_download_csv';
-    	//$capability = 'manage_options';
-		//$url = 'admin.php?download=pwtc_membership.csv';
-		//add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $url);
 
 		remove_submenu_page($parent_menu_slug, $parent_menu_slug);
 
@@ -745,6 +760,7 @@ class PwtcMileage {
 
 	public static function page_generate_reports() {
 		$plugin_options = self::get_plugin_options();
+		$running_jobs = self::num_running_jobs();
 		include('admin-gen-reports.php');
 	}
 
@@ -754,38 +770,12 @@ class PwtcMileage {
 		include('admin-man-riders.php');
 	}
 
-/*
-	public static function page_download_csv() {
-      	global $pagenow;
-		error_log('page_download_csv called');
-      	if ($pagenow=='admin.php' && 
-			current_user_can('manage_options') && 
-          	isset($_GET['download'])  && 
-          	$_GET['download']=='pwtc_membership.csv') {
-  		$fileName = 'pwtc_membership.csv';
- 
-		//header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-		header('Content-Description: File Transfer');
-		header("Content-type: text/csv");
-		header("Content-Disposition: attachment; filename={$fileName}");
-		//header("Expires: 0");
-		//header("Pragma: public");
- 
-		$fh = fopen('php://output', 'w');
-		self::write_export_csv_file($fh, self::fetch_members_for_export());
-		fclose($fh);
-		exit();
-		}	
-	}
-*/
-
 	public static function download_csv() {
-		error_log('download_csv called');
 		if (isset($_POST['export_members'])) {
 			$today = date('Y-m-d', current_time('timestamp'));
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename=pwtc_membership_{$today}.csv");
+			header("Content-Disposition: attachment; filename=members_{$today}.csv");
 			$fh = fopen('php://output', 'w');
 			self::write_export_csv_file($fh, self::fetch_members_for_export());
 			fclose($fh);
@@ -795,7 +785,7 @@ class PwtcMileage {
 			$today = date('Y-m-d', current_time('timestamp'));
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename=pwtc_club_rides_{$today}.csv");
+			header("Content-Disposition: attachment; filename=rides_{$today}.csv");
 			$fh = fopen('php://output', 'w');
 			self::write_export_csv_file($fh, self::fetch_rides_for_export());
 			fclose($fh);
@@ -805,7 +795,7 @@ class PwtcMileage {
 			$today = date('Y-m-d', current_time('timestamp'));
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename=pwtc_ride_mileage_{$today}.csv");
+			header("Content-Disposition: attachment; filename=mileage_{$today}.csv");
 			$fh = fopen('php://output', 'w');
 			self::write_export_csv_file($fh, self::fetch_mileage_for_export());
 			fclose($fh);
@@ -815,7 +805,7 @@ class PwtcMileage {
 			$today = date('Y-m-d', current_time('timestamp'));
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename=pwtc_ride_leaders_{$today}.csv");
+			header("Content-Disposition: attachment; filename=leaders_{$today}.csv");
 			$fh = fopen('php://output', 'w');
 			self::write_export_csv_file($fh, self::fetch_leaders_for_export());
 			fclose($fh);
@@ -829,13 +819,36 @@ class PwtcMileage {
 			self::job_set_status('consolidation', 'triggered');
 			wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
 		}
-    	if (isset($_POST['backup'])) {
-			self::job_set_status('backup', 'triggered');
-			wp_schedule_single_event(time(), 'pwtc_mileage_backup');
-		}
+
     	if (isset($_POST['member_sync'])) {
 			self::job_set_status('member_sync', 'triggered');
 			wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
+		}
+		if (isset($_POST['restore'])) {
+			self::job_set_status('cvs_restore', 'triggered');
+			$files = array(
+				self::generate_file_record(
+					'members_file', 'members', 'members_', self::MEMBER_TABLE),
+				self::generate_file_record(
+					'rides_file', 'rides', 'rides_', self::RIDE_TABLE),
+				self::generate_file_record(
+					'mileage_file', 'mileage', 'mileage_', self::MILEAGE_TABLE),
+				self::generate_file_record(
+					'leaders_file', 'leaders', 'leaders_', self::LEADER_TABLE)
+			);
+			$error = self::validate_uploaded_files($files);
+			if ($error) {
+				self::job_set_status('cvs_restore', 'failed', $error);
+			}
+			else {
+				$error = self::move_uploaded_files($files);
+				if ($error) {
+					self::job_set_status('cvs_restore', 'failed', $error);
+				}
+				else {
+					wp_schedule_single_event(time(), 'pwtc_mileage_cvs_restore');
+				}
+			}
 		}
     	if (isset($_POST['clear_errs'])) {
 			self::job_remove_failed();
@@ -843,13 +856,57 @@ class PwtcMileage {
 		$job_status_s = self::job_get_status('member_sync');
 		$job_status_b = self::job_get_status('backup');
 		$job_status_c = self::job_get_status('consolidation');
+		$job_status_r = self::job_get_status('cvs_restore');
 		include('admin-man-yearend.php');
 	}
 
-	public static function page_export_db() {
-		$plugin_options = self::get_plugin_options();
-		$running_jobs = self::num_running_jobs();
-		include('admin-export-db.php');
+	public static function generate_file_record($id, $label, $prefix, $tblname) {
+		return array(
+			'id' => $id,
+			'label' => $label,
+			'pattern' => '/' . $prefix . '\d{4}-\d{2}-\d{2}\.csv' . '/',
+			'tblname' => $tblname
+		);
+	}
+
+	public static function validate_uploaded_files($files) {
+		$errmsg = null;
+		// TODO: validate that $_FILES[$file['id']] exists
+    	foreach ( $files as $file ) {
+			if ($_FILES[$file['id']]['size'] == 0) {
+				$errmsg = $file['label'] . ' file empty or not selected';
+				break;
+			}
+			else if ($_FILES[$file['id']]['error'] != UPLOAD_ERR_OK) {
+				$errmsg = $file['label'] . ' file upload error code ' . $_FILES[$file]['error'];
+				break;
+			}
+			else if (preg_match($file['pattern'], $_FILES[$file['id']]['name']) !== 1) {
+				$errmsg = $file['label'] . ' file name pattern mismatch';
+				break;
+			}
+		}
+
+		return $errmsg;
+	}
+
+	public static function move_uploaded_files($files) {
+		$errmsg = null;
+		$upload_dir = wp_upload_dir();
+		$plugin_upload_dir = $upload_dir['basedir'] . '/pwtc_mileage';
+		error_log('plugin_upload_dir: ' . $plugin_upload_dir);
+		if (!file_exists($plugin_upload_dir)) {
+    		wp_mkdir_p($plugin_upload_dir);
+		}
+		foreach ( $files as $file ) {
+			$uploadfile = $plugin_upload_dir . '/' . $file['tblname'] . '.csv';
+			error_log('moved file: ' . $uploadfile);
+			if (!move_uploaded_file($_FILES[$file['id']]['tmp_name'], $uploadfile)) {
+				$errmsg = $file['label'] . ' file upload could not be moved';
+				break;
+			}
+		}
+		return $errmsg;
 	}
 
 	public static function page_manage_settings() {
@@ -895,6 +952,10 @@ class PwtcMileage {
 		}
 		include('admin-man-settings.php');
 	}
+
+	/*************************************************************/
+	/* Shortcode utility functions
+	/*************************************************************/
 
 	public static function get_rider_name($id) {
 		$rider = self::fetch_rider($id);
@@ -1020,6 +1081,10 @@ class PwtcMileage {
 		}
 		return $min;
 	}
+
+	/*************************************************************/
+	/* Shortcode report generation functions
+	/*************************************************************/
 
 	public static function shortcode_ly_lt_achvmnt($atts) {
 		$a = self::normalize_atts($atts);
@@ -1150,6 +1215,10 @@ class PwtcMileage {
 		$out = self::shortcode_build_table($meta, $data, $a);
 		return $out;
 	}
+
+	/*************************************************************/
+	/* Database access functions
+	/*************************************************************/
 
 	public static function fetch_ly_lt_achvmnt($outtype, $sort) {
     	global $wpdb;
@@ -1371,7 +1440,7 @@ class PwtcMileage {
 			' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
 			' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
 			' and m.meta_key = %s and (cast(m.meta_value as date) < curdate())' . 
-			' and p.ID not in (select post_id from ' . $ride_table . ' where post_id is not null)' . 
+			' and p.ID not in (select post_id from ' . $ride_table . ' where post_id <> 0)' . 
 			' order by m.meta_value', 
 			$plugin_options['ride_post_type'], $plugin_options['ride_date_metakey']), $outtype);
 		return $results;
@@ -1672,6 +1741,10 @@ class PwtcMileage {
 		return $status;
 	}
 
+	/*************************************************************/
+	/* Plugin options access functions
+	/*************************************************************/
+
 	public static function create_default_plugin_options() {
 		$data = array(
 			'ride_post_type' => 'ride',
@@ -1696,6 +1769,10 @@ class PwtcMileage {
 	public static function update_plugin_options($data) {
 		update_option('pwtc_mileage_options', $data);
 	}
+
+	/*************************************************************/
+	/* Plugin installation and removal functions
+	/*************************************************************/
 
 	public static function plugin_activation() {
 		error_log( 'PWTC Mileage plugin activated' );
@@ -1745,7 +1822,7 @@ class PwtcMileage {
 			' (ID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,' .
 			' title TEXT NOT NULL,' .
 			' date DATE NOT NULL,' . 
-			' post_id BIGINT UNSIGNED,' . 
+			' post_id BIGINT UNSIGNED NOT NULL DEFAULT 0,' . 
 			' constraint pk_' . $ride_table . ' PRIMARY KEY (ID))');
 		if (false === $result) {
 			error_log( 'Could not create table ' . $ride_table . ': ' . $wpdb->last_error);

@@ -96,6 +96,15 @@ jQuery(document).ready(function($) {
 </script>
 <div class="wrap">
 	<h1><?= esc_html(get_admin_page_title()); ?></h1>
+<?php
+if ($running_jobs > 0) {
+?>
+    <div class="notice notice-warning"><p><strong>
+        A database batch operation is currently running!
+    </strong></p></div>
+<?php
+} else {
+?>
     <div id='report-main-section'>
         <h3>Ride Mileage Reports</h3>
         <p>Sort by: 
@@ -141,6 +150,7 @@ jQuery(document).ready(function($) {
     </div>
 <?php
     include('admin-rider-lookup.php');
+}
 ?>
 </div>
 <?php
