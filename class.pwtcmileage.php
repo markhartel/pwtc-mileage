@@ -645,7 +645,6 @@ class PwtcMileage {
 	public static function cvs_restore_callback() {
 		error_log( 'CVS restore process started.');
 		self::job_set_status('cvs_restore', 'started');
-		//sleep(30);
 		$upload_dir = wp_upload_dir();
 		$plugin_upload_dir = $upload_dir['basedir'] . '/pwtc_mileage';
 		$members_file = $plugin_upload_dir . '/' . self::MEMBER_TABLE . '.csv';
@@ -668,29 +667,57 @@ class PwtcMileage {
 			$members_a = null;
 			if (($fp = fopen($members_file, 'r')) !== FALSE) {
 				$members_a = self::read_export_csv_file($fp);
-				error_log( 'members count: ' . count($members_a));	
+				//error_log( 'members count: ' . count($members_a));	
 				fclose($fp);
 			}
 			$rides_a = null;
 			if (($fp = fopen($rides_file, 'r')) !== FALSE) {
 				$rides_a = self::read_export_csv_file($fp);
-				error_log( 'rides count: ' . count($rides_a));	
+				//error_log( 'rides count: ' . count($rides_a));	
 				fclose($fp);
 			}
 			$mileage_a = null;
 			if (($fp = fopen($mileage_file, 'r')) !== FALSE) {
 				$mileage_a = self::read_export_csv_file($fp);
-				error_log( 'mileage count: ' . count($mileage_a));	
+				//error_log( 'mileage count: ' . count($mileage_a));	
 				fclose($fp);
 			}
 			$leaders_a = null;
 			if (($fp = fopen($leaders_file, 'r')) !== FALSE) {
 				$leaders_a = self::read_export_csv_file($fp);
-				error_log( 'leaders count: ' . count($leaders_a));	
+				//error_log( 'leaders count: ' . count($leaders_a));	
 				fclose($fp);
 			}
 
-			self::job_remove('cvs_restore');
+			if ($members_a == null or count($members_a) == 0 or count($members_a[0]) != 4) {
+				self::job_set_status('cvs_restore', 'failed', 
+					'members upload file invalid content');
+			}
+			else if ($rides_a == null or count($rides_a) == 0 or count($rides_a[0]) != 4) {
+				self::job_set_status('cvs_restore', 'failed', 
+					'rides upload file invalid content');
+			}
+			else if ($mileage_a == null or count($mileage_a) == 0 or count($mileage_a[0]) != 3) {
+				self::job_set_status('cvs_restore', 'failed', 
+					'mileage upload file invalid content');
+			}
+			else if ($leaders_a == null or count($leaders_a) == 0 or count($leaders_a[0]) != 3) {
+				self::job_set_status('cvs_restore', 'failed', 
+					'leaders upload file invalid content');
+			}
+			else {
+				self::delete_database_for_restore();
+				self::insert_members_for_restore($members_a);
+				self::insert_rides_for_restore($rides_a);
+				self::insert_mileage_for_restore($mileage_a);
+				self::insert_leaders_for_restore($leaders_a);
+
+				unlink($members_file);
+				unlink($rides_file);
+				unlink($mileage_file);
+				unlink($leaders_file);
+				self::job_remove('cvs_restore');
+			}
 		}	
 	}
 
@@ -894,13 +921,13 @@ class PwtcMileage {
 		$errmsg = null;
 		$upload_dir = wp_upload_dir();
 		$plugin_upload_dir = $upload_dir['basedir'] . '/pwtc_mileage';
-		error_log('plugin_upload_dir: ' . $plugin_upload_dir);
+		//error_log('plugin_upload_dir: ' . $plugin_upload_dir);
 		if (!file_exists($plugin_upload_dir)) {
     		wp_mkdir_p($plugin_upload_dir);
 		}
 		foreach ( $files as $file ) {
 			$uploadfile = $plugin_upload_dir . '/' . $file['tblname'] . '.csv';
-			error_log('moved file: ' . $uploadfile);
+			//error_log('moved file: ' . $uploadfile);
 			if (!move_uploaded_file($_FILES[$file['id']]['tmp_name'], $uploadfile)) {
 				$errmsg = $file['label'] . ' file upload could not be moved';
 				break;
@@ -1672,6 +1699,26 @@ class PwtcMileage {
 		return $results;
 	}
 
+	public static function delete_database_for_restore() {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$wpdb->query('delete from ' . $leader_table);
+		$wpdb->query('delete from ' . $mileage_table);
+		$wpdb->query('delete from ' . $ride_table);
+		$wpdb->query('delete from ' . $member_table);
+	}
+
+	public static function insert_members_for_restore($data) {
+		//error_log('members file contents');
+		foreach ( $data as $item ) {
+			//error_log($item[0] . ',' . $item[1] . ',' . $item[2] . ',' . $item[3]);
+			self::insert_rider($item[0], $item[2], $item[1], $item[3]);
+		}
+	}
+
 	public static function fetch_rides_for_export() {
     	global $wpdb;
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
@@ -1679,6 +1726,18 @@ class PwtcMileage {
 			'select ID, title, date, post_id from ' . $ride_table . 
 			' order by date', ARRAY_N);
 		return $results;
+	}
+
+	public static function insert_rides_for_restore($data) {
+    	global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		//error_log('rides file contents');
+		foreach ( $data as $item ) {
+			//error_log($item[0] . ',' . $item[1] . ',' . $item[2] . ',' . $item[3]);
+			$wpdb->query($wpdb->prepare('insert into ' . $ride_table .
+				' (ID, title, date, post_id) values (%d, %s, %s, %d)', 
+				intval($item[0]), $item[1], $item[2], intval($item[3])));
+		}
 	}
 
 	public static function fetch_mileage_for_export() {
@@ -1690,6 +1749,14 @@ class PwtcMileage {
 		return $results;
 	}
 
+	public static function insert_mileage_for_restore($data) {
+		//error_log('mileage file contents');
+		foreach ( $data as $item ) {
+			//error_log($item[0] . ',' . $item[1] . ',' . $item[2]);
+			self::insert_ride_mileage(intval($item[0]), $item[1], intval($item[2]));
+		}
+	}
+
 	public static function fetch_leaders_for_export() {
     	global $wpdb;
 		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
@@ -1697,6 +1764,19 @@ class PwtcMileage {
 			'select ride_id, member_id, rides_led from ' . $leader_table . 
 			' order by ride_id', ARRAY_N);
 		return $results;
+	}
+
+	public static function insert_leaders_for_restore($data) {
+    	global $wpdb;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		//error_log('leaders file contents');
+		foreach ( $data as $item ) {
+			//error_log($item[0] . ',' . $item[1] . ',' . $item[2]);
+			$wpdb->query($wpdb->prepare('insert into ' . $leader_table . 
+				' (member_id, ride_id, rides_led) values (%s, %d, %d)' . 
+				' on duplicate key update rides_led = %d', 
+				$item[1], intval($item[0]), intval($item[2]), intval($item[2])));
+		}
 	}
 
 	public static function job_get_status($jobid) {
