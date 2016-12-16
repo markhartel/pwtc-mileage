@@ -664,61 +664,148 @@ class PwtcMileage {
 			self::job_set_status('cvs_restore', 'failed', 'leaders upload file does not exist');
 		}
 		else {
-			$members_a = null;
-			if (($fp = fopen($members_file, 'r')) !== FALSE) {
-				$members_a = self::read_export_csv_file($fp);
-				//error_log( 'members count: ' . count($members_a));	
-				fclose($fp);
-			}
-			$rides_a = null;
-			if (($fp = fopen($rides_file, 'r')) !== FALSE) {
-				$rides_a = self::read_export_csv_file($fp);
-				//error_log( 'rides count: ' . count($rides_a));	
-				fclose($fp);
-			}
-			$mileage_a = null;
-			if (($fp = fopen($mileage_file, 'r')) !== FALSE) {
-				$mileage_a = self::read_export_csv_file($fp);
-				//error_log( 'mileage count: ' . count($mileage_a));	
-				fclose($fp);
-			}
-			$leaders_a = null;
-			if (($fp = fopen($leaders_file, 'r')) !== FALSE) {
-				$leaders_a = self::read_export_csv_file($fp);
-				//error_log( 'leaders count: ' . count($leaders_a));	
-				fclose($fp);
-			}
+			$use_load = true;
+			if ($use_load) {
+				$plugin_upload_url = $upload_dir['baseurl'] . '/pwtc_mileage';
+				$members_url = $plugin_upload_url . '/' . self::MEMBER_TABLE . '.csv';
+				$rides_url = $plugin_upload_url . '/' . self::RIDE_TABLE . '.csv';
+				$mileage_url = $plugin_upload_url . '/' . self::MILEAGE_TABLE . '.csv';
+				$leaders_url = $plugin_upload_url . '/' . self::LEADER_TABLE . '.csv';
+				error_log('members_url: ' . $members_url);
+				error_log('rides_url: ' . $rides_url);
+				error_log('mileage_url: ' . $mileage_url);
+				error_log('leaders_url: ' . $leaders_url);
 
-			if ($members_a == null or count($members_a) == 0 or count($members_a[0]) != 4) {
-				self::job_set_status('cvs_restore', 'failed', 
-					'members upload file invalid content');
-			}
-			else if ($rides_a == null or count($rides_a) == 0 or count($rides_a[0]) != 4) {
-				self::job_set_status('cvs_restore', 'failed', 
-					'rides upload file invalid content');
-			}
-			else if ($mileage_a == null or count($mileage_a) == 0 or count($mileage_a[0]) != 3) {
-				self::job_set_status('cvs_restore', 'failed', 
-					'mileage upload file invalid content');
-			}
-			else if ($leaders_a == null or count($leaders_a) == 0 or count($leaders_a[0]) != 3) {
-				self::job_set_status('cvs_restore', 'failed', 
-					'leaders upload file invalid content');
-			}
-			else {
 				self::delete_database_for_restore();
-				self::insert_members_for_restore($members_a);
-				self::insert_rides_for_restore($rides_a);
-				self::insert_mileage_for_restore($mileage_a);
-				self::insert_leaders_for_restore($leaders_a);
+				self::load_members_for_restore($members_url);
+				self::load_rides_for_restore($rides_url);
+				self::load_mileage_for_restore($mileage_url);
+				self::load_leaders_for_restore($leaders_url);
 
 				unlink($members_file);
 				unlink($rides_file);
 				unlink($mileage_file);
 				unlink($leaders_file);
+
 				self::job_remove('cvs_restore');
 			}
+			else {
+				$members_a = null;
+				$members_fc = 0;
+				if (($fp = fopen($members_file, 'r')) !== FALSE) {
+					$members_a = self::read_export_csv_file($fp);
+					error_log( 'members count: ' . count($members_a));
+					$members_fc = self::field_count_check($members_a, 4);	
+					fclose($fp);
+				}
+				$rides_a = null;
+				$rides_fc = 0;
+				if (($fp = fopen($rides_file, 'r')) !== FALSE) {
+					$rides_a = self::read_export_csv_file($fp);
+					error_log( 'rides count: ' . count($rides_a));	
+					$rides_fc = self::field_count_check($rides_a, 4);	
+					fclose($fp);
+				}
+				$mileage_a = null;
+				$mileage_fc = 0;
+				if (($fp = fopen($mileage_file, 'r')) !== FALSE) {
+					$mileage_a = self::read_export_csv_file($fp);
+					error_log( 'mileage count: ' . count($mileage_a));	
+					$mileage_fc = self::field_count_check($mileage_a, 3);	
+					fclose($fp);
+				}
+				$leaders_a = null;
+				$leaders_fc = 0;
+				if (($fp = fopen($leaders_file, 'r')) !== FALSE) {
+					$leaders_a = self::read_export_csv_file($fp);
+					error_log( 'leaders count: ' . count($leaders_a));	
+					$leaders_fc = self::field_count_check($leaders_a, 3);	
+					fclose($fp);
+				}
+
+				if ($members_a == null) {
+					self::job_set_status('cvs_restore', 'failed', 
+						'members upload file cannot be opened for read');
+				}
+				else if ($members_fc > 0) {
+					self::job_set_status('cvs_restore', 'failed', 
+						'members upload file contains invalid entries');
+				}
+				else if ($rides_a == null) {
+					self::job_set_status('cvs_restore', 'failed', 
+						'rides upload file cannot be opened for read');
+				}
+				else if ($rides_fc > 0) {
+					self::job_set_status('cvs_restore', 'failed', 
+						'rides upload file contains invalid entries');
+				}
+				else if ($mileage_a == null) {
+					self::job_set_status('cvs_restore', 'failed', 
+						'mileage upload file cannot be opened for read');
+				}
+				else if ($mileage_fc > 0) {
+					self::job_set_status('cvs_restore', 'failed', 
+						'mileage upload file contains invalid entries');
+				}
+				else if ($leaders_a == null) {
+					self::job_set_status('cvs_restore', 'failed', 
+						'leaders upload file cannot be opened for read');
+				}
+					else if ($leaders_fc > 0) {
+					self::job_set_status('cvs_restore', 'failed', 
+						'leaders upload file contains invalid entries');
+				}
+				else {
+					$errs_detected = false;
+				
+					self::delete_database_for_restore();
+				
+					if (self::insert_members_for_restore($members_a) > 0) {
+						self::job_set_status('cvs_restore', 'failed', 
+							'members table insert errors detected');
+						$errs_detected = true;
+					}
+					error_log('after insert members');
+				
+					if (self::insert_rides_for_restore($rides_a) > 0) {
+						self::job_set_status('cvs_restore', 'failed', 
+							'rides table insert errors detected');
+						$errs_detected = true;
+					}
+				
+					if (self::insert_mileage_for_restore($mileage_a) > 0) {
+						self::job_set_status('cvs_restore', 'failed', 
+							'mileage table insert errors detected');
+						$errs_detected = true;
+					}
+
+					if (self::insert_leaders_for_restore($leaders_a) > 0) {
+						self::job_set_status('cvs_restore', 'failed', 
+							'leaders table insert errors detected');
+						$errs_detected = true;
+					}
+
+					unlink($members_file);
+					unlink($rides_file);
+					unlink($mileage_file);
+					unlink($leaders_file);
+
+					if (!$errs_detected) {
+						self::job_remove('cvs_restore');
+					}
+				}
+			}
 		}	
+	}
+
+	public static function field_count_check($data, $num) {
+		$count = 0;
+		foreach ( $data as $item ) {	
+			if (count($item) != $num) {
+				$count++;
+			}	
+		}
+		return $count;
 	}
 
 	/*************************************************************/
@@ -1690,6 +1777,32 @@ class PwtcMileage {
 		return $status;
 	}
 
+	public static function delete_database_for_restore() {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$errcnt = 0;
+		$status = $wpdb->query('delete from ' . $leader_table);
+		if (false === $status or 0 === $status) {
+			$errcnt++;
+		}
+		$status = $wpdb->query('delete from ' . $mileage_table);
+		if (false === $status or 0 === $status) {
+			$errcnt++;
+		}
+		$status = $wpdb->query('delete from ' . $ride_table);
+		if (false === $status or 0 === $status) {
+			$errcnt++;
+		}
+		$status = $wpdb->query('delete from ' . $member_table);
+		if (false === $status or 0 === $status) {
+			$errcnt++;
+		}
+		return $errcnt;
+	}
+
 	public static function fetch_members_for_export() {
     	global $wpdb;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
@@ -1699,24 +1812,33 @@ class PwtcMileage {
 		return $results;
 	}
 
-	public static function delete_database_for_restore() {
-    	global $wpdb;
-		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
-		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
-		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
-		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
-		$wpdb->query('delete from ' . $leader_table);
-		$wpdb->query('delete from ' . $mileage_table);
-		$wpdb->query('delete from ' . $ride_table);
-		$wpdb->query('delete from ' . $member_table);
-	}
-
 	public static function insert_members_for_restore($data) {
+    	global $wpdb;
+		error_log('enter insert_members_for_restore');		
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
 		//error_log('members file contents');
+		$errcnt = 0;
 		foreach ( $data as $item ) {
 			//error_log($item[0] . ',' . $item[1] . ',' . $item[2] . ',' . $item[3]);
-			self::insert_rider($item[0], $item[2], $item[1], $item[3]);
+			$status = $wpdb->query($wpdb->prepare('insert into ' . $member_table .
+				' (member_id, first_name, last_name, expir_date) values (%s, %s, %s, %s)',
+				$item[0], $item[1], $item[2], $item[3]));
+			if (false === $status or 0 === $status) {
+				$errcnt++;
+			}
 		}
+		error_log('exit insert_members_for_restore');		
+		return $errcnt;
+	}
+
+	public static function load_members_for_restore($filename) {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		$status = $wpdb->query("LOAD DATA LOCAL INFILE '" . $filename . "'" . 
+			" INTO TABLE " . $member_table . " FIELDS TERMINATED BY ','" . 
+			" OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n'" . 
+			" (member_id, first_name, last_name, expir_date)");
+		return $status;
 	}
 
 	public static function fetch_rides_for_export() {
@@ -1732,12 +1854,27 @@ class PwtcMileage {
     	global $wpdb;
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
 		//error_log('rides file contents');
+		$errcnt = 0;
 		foreach ( $data as $item ) {
 			//error_log($item[0] . ',' . $item[1] . ',' . $item[2] . ',' . $item[3]);
-			$wpdb->query($wpdb->prepare('insert into ' . $ride_table .
+			$status = $wpdb->query($wpdb->prepare('insert into ' . $ride_table .
 				' (ID, title, date, post_id) values (%d, %s, %s, %d)', 
 				intval($item[0]), $item[1], $item[2], intval($item[3])));
+			if (false === $status or 0 === $status) {
+				$errcnt++;
+			}
 		}
+		return $errcnt;
+	}
+
+	public static function load_rides_for_restore($filename) {
+    	global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$status = $wpdb->query("LOAD DATA LOCAL INFILE '" . $filename . "'" . 
+			" INTO TABLE " . $ride_table . " FIELDS TERMINATED BY ','" . 
+			" OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n'" . 
+			" (ID, title, date, post_id)");
+		return $status;
 	}
 
 	public static function fetch_mileage_for_export() {
@@ -1750,11 +1887,30 @@ class PwtcMileage {
 	}
 
 	public static function insert_mileage_for_restore($data) {
+    	global $wpdb;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
 		//error_log('mileage file contents');
+		$errcnt = 0;
 		foreach ( $data as $item ) {
 			//error_log($item[0] . ',' . $item[1] . ',' . $item[2]);
-			self::insert_ride_mileage(intval($item[0]), $item[1], intval($item[2]));
+			$status = $wpdb->query($wpdb->prepare('insert into ' . $mileage_table . 
+				' (ride_id, member_id, mileage) values (%d, %s, %d)', 
+				intval($item[0]), $item[1], intval($item[2])));
+			if (false === $status or 0 === $status) {
+				$errcnt++;
+			}
 		}
+		return $errcnt;
+	}
+
+	public static function load_mileage_for_restore($filename) {
+    	global $wpdb;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		$status = $wpdb->query("LOAD DATA LOCAL INFILE '" . $filename . "'" . 
+			" INTO TABLE " . $mileage_table . " FIELDS TERMINATED BY ','" . 
+			" OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n'" . 
+			" (ride_id, member_id, mileage)");
+		return $status;
 	}
 
 	public static function fetch_leaders_for_export() {
@@ -1770,13 +1926,27 @@ class PwtcMileage {
     	global $wpdb;
 		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
 		//error_log('leaders file contents');
+		$errcnt = 0;
 		foreach ( $data as $item ) {
 			//error_log($item[0] . ',' . $item[1] . ',' . $item[2]);
-			$wpdb->query($wpdb->prepare('insert into ' . $leader_table . 
-				' (member_id, ride_id, rides_led) values (%s, %d, %d)' . 
-				' on duplicate key update rides_led = %d', 
-				$item[1], intval($item[0]), intval($item[2]), intval($item[2])));
+			$status = $wpdb->query($wpdb->prepare('insert into ' . $leader_table . 
+				' (ride_id, member_id, rides_led) values (%d, %s, %d)', 
+				intval($item[0]), $item[1], intval($item[2])));
+			if (false === $status or 0 === $status) {
+				$errcnt++;
+			}
 		}
+		return $errcnt;
+	}
+
+	public static function load_leaders_for_restore($filename) {
+    	global $wpdb;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$status = $wpdb->query("LOAD DATA LOCAL INFILE '" . $filename . "'" . 
+			" INTO TABLE " . $leader_table . " FIELDS TERMINATED BY ','" . 
+			" OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n'" . 
+			" (ride_id, member_id, rides_led)");
+		return $status;
 	}
 
 	public static function job_get_status($jobid) {
