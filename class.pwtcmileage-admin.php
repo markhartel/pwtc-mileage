@@ -97,26 +97,40 @@ class PwtcMileage_Admin {
 	}
 
 	public static function create_ride_callback() {
-		$startdate = $_POST['startdate'];	
-		$title = $_POST['title'];	
-		$status = PwtcMileage_DB::insert_ride($title, $startdate);
-		if (false === $status or 0 === $status) {
+		$startdate = trim($_POST['startdate']);	
+		$title = trim($_POST['title']);	
+		if (!self::validate_ride_title_str($title)) {
 			$response = array(
-				'error' => 'Could not insert ridesheet into database.'
+				'error' => 'Title entry "' . $title . '" is invalid, must start with a letter.'
 			);
-    		echo wp_json_encode($response);
+			echo wp_json_encode($response);
+		}
+		else if (!self::validate_date_str($startdate)) {
+			$response = array(
+				'error' => 'Start date entry "' . $startdate . '" is invalid.'
+			);
+			echo wp_json_encode($response);
 		}
 		else {
-			$ride_id = PwtcMileage_DB::get_new_ride_id();
-			$leaders = PwtcMileage_DB::fetch_ride_leaders($ride_id);
-			$mileage = PwtcMileage_DB::fetch_ride_mileage($ride_id);
-			$response = array(
-				'ride_id' => $ride_id,
-				'title' => $title,
-				'startdate' => $startdate, 
-				'leaders' => $leaders,
-				'mileage' => $mileage);
-    		echo wp_json_encode($response);
+			$status = PwtcMileage_DB::insert_ride($title, $startdate);
+			if (false === $status or 0 === $status) {
+				$response = array(
+					'error' => 'Could not insert ridesheet into database.'
+				);
+				echo wp_json_encode($response);
+			}
+			else {
+				$ride_id = PwtcMileage_DB::get_new_ride_id();
+				$leaders = PwtcMileage_DB::fetch_ride_leaders($ride_id);
+				$mileage = PwtcMileage_DB::fetch_ride_mileage($ride_id);
+				$response = array(
+					'ride_id' => $ride_id,
+					'title' => $title,
+					'startdate' => $startdate, 
+					'leaders' => $leaders,
+					'mileage' => $mileage);
+				echo wp_json_encode($response);
+			}
 		}
 		wp_die();
 	}
@@ -211,40 +225,66 @@ class PwtcMileage_Admin {
 	}
 
 	public static function create_rider_callback() {
-		$memberid = $_POST['member_id'];	
-		$lastname = $_POST['lastname'];	
-		$firstname = $_POST['firstname'];
-		$expdate = $_POST['exp_date'];
+		$memberid = trim($_POST['member_id']);	
+		$lastname = trim($_POST['lastname']);	
+		$firstname = trim($_POST['firstname']);
+		$expdate = trim($_POST['exp_date']);
 		$mode = $_POST['mode'];
 		$lookupfirst = '';
 		$lookuplast = strtolower(substr($lastname, 0, 1));
-		$no_overwrite = false;
-		if ($mode == 'insert') {
-			if (count(PwtcMileage_DB::fetch_rider($memberid)) > 0) {
-				$no_overwrite = true;
-			}
-		}
-		if ($no_overwrite) {
+		if (!self::validate_member_id_str($memberid)) {
 			$response = array(
-				'error' => 'Member ID ' . $memberid . ' already exists.'
+				'error' => 'Member ID entry "' . $memberid . '" is invalid, must be a 5 digit number.'
 			);
-    		echo wp_json_encode($response);
+			echo wp_json_encode($response);
+		}
+		else if (!self::validate_member_name_str($lastname)) {
+			$response = array(
+				'error' => 'Last name entry "' . $lastname . '" is invalid, must start with a letter.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!self::validate_member_name_str($firstname)) {
+			$response = array(
+				'error' => 'First name entry "' . $firstname . '" is invalid, must start with a letter.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!self::validate_date_str($expdate)) {
+			$response = array(
+				'error' => 'Expiration date entry "' . $expdate . '" is invalid.'
+			);
+			echo wp_json_encode($response);
 		}
 		else {
-			$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expdate);	
-			if (false === $status or 0 === $status) {
+			$no_overwrite = false;
+			if ($mode == 'insert') {
+				if (count(PwtcMileage_DB::fetch_rider($memberid)) > 0) {
+					$no_overwrite = true;
+				}
+			}
+			if ($no_overwrite) {
 				$response = array(
-					'error' => 'Could not insert rider into database.'
+					'error' => 'Member ID ' . $memberid . ' already exists.'
 				);
-    			echo wp_json_encode($response);
+				echo wp_json_encode($response);
 			}
 			else {
-				$members = PwtcMileage_DB::fetch_riders($lookuplast, $lookupfirst);
-				$response = array(
-					'lastname' => $lookuplast,
-					'firstname' => $lookupfirst,
-					'members' => $members);
-    			echo wp_json_encode($response);
+				$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expdate);	
+				if (false === $status or 0 === $status) {
+					$response = array(
+						'error' => 'Could not insert rider into database.'
+					);
+					echo wp_json_encode($response);
+				}
+				else {
+					$members = PwtcMileage_DB::fetch_riders($lookuplast, $lookupfirst);
+					$response = array(
+						'lastname' => $lookuplast,
+						'firstname' => $lookupfirst,
+						'members' => $members);
+					echo wp_json_encode($response);
+				}
 			}
 		}
 		wp_die();
@@ -372,9 +412,9 @@ class PwtcMileage_Admin {
 	}
 
 	public static function add_mileage_callback() {
-		$rideid = $_POST['ride_id'];
-		$memberid = $_POST['member_id'];
-		$mileage = $_POST['mileage'];
+		$rideid = trim($_POST['ride_id']);
+		$memberid = trim($_POST['member_id']);
+		$mileage = trim($_POST['mileage']);
 		$error = self::check_expir_date($memberid);
 		if ($error != null) {
 			$response = array(
@@ -383,20 +423,28 @@ class PwtcMileage_Admin {
     		echo wp_json_encode($response);
 		}
 		else {
-			$status = PwtcMileage_DB::insert_ride_mileage(intval($rideid), $memberid, intval($mileage));
-			if (false === $status or 0 === $status) {
+			if (!self::validate_mileage_str($mileage)) {
 				$response = array(
-					'error' => 'Could not insert ride mileage into database.'
+					'error' => 'Mileage entry "' . $mileage . '" is invalid, must be a non-negative number.'
 				);
     			echo wp_json_encode($response);
 			}
 			else {
-				$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
-				$response = array(
-					'ride_id' => $rideid,
-					'mileage' => $mileage
-				);
-    			echo wp_json_encode($response);
+				$status = PwtcMileage_DB::insert_ride_mileage(intval($rideid), $memberid, intval($mileage));
+				if (false === $status or 0 === $status) {
+					$response = array(
+						'error' => 'Could not insert ride mileage into database.'
+					);
+    				echo wp_json_encode($response);
+				}
+				else {
+					$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
+					$response = array(
+						'ride_id' => $rideid,
+						'mileage' => $mileage
+					);
+    				echo wp_json_encode($response);
+				}
 			}
 		}
 		wp_die();
@@ -497,6 +545,53 @@ class PwtcMileage_Admin {
 			echo wp_json_encode($response);
 		}
 		wp_die();
+	}
+
+	/*************************************************************/
+	/* Admin user input validation functions
+	/*************************************************************/
+
+	public static function validate_date_str($datestr) {
+		$ok = true;
+		if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $datestr) !== 1) {
+			$ok = false;
+		}
+		return $ok;
+	}
+
+	public static function validate_member_id_str($memberid) {
+		$ok = true;
+		if (preg_match('/^\d{5}$/', $memberid) !== 1) {
+			$ok = false;
+		}
+		return $ok;
+	}
+
+	public static function validate_member_name_str($name) {
+		$ok = true;
+		if (preg_match('/^[A-Za-z].*/', $name) !== 1) {
+			$ok = false;
+		}
+		return $ok;
+	}
+
+	public static function validate_ride_title_str($title) {
+		$ok = true;
+		if (preg_match('/^[A-Za-z].*/', $title) !== 1) {
+			$ok = false;
+		}
+		return $ok;
+	}
+
+	public static function validate_mileage_str($mileage) {
+		$ok = true;
+		if (!is_numeric($mileage)) {
+			$ok = false;
+		}
+		else if (intval($mileage) < 0) {
+			$ok = false;
+		}
+		return $ok;
 	}
 
 	/*************************************************************/
