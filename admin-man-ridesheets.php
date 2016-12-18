@@ -31,12 +31,15 @@ jQuery(document).ready(function($) {
 			'<tr><th>Posted Ride</th><th>Start Date</th><th></th></tr>');
 		var fmt = new DateFormatter();
 		posts.forEach(function(post) {
-			var d = fmt.parseDate(post.start_date, 'Y-m-d');
+			//var d = fmt.parseDate(post.start_date, 'Y-m-d');
+			var d = fmt.parseDate(post[2], 'Y-m-d');
 			var fmtdate = fmt.formatDate(d, 
 				'<?php echo $plugin_options['date_display_format']; ?>');
 			$('#ridesheet-post-page .posts-tbl').append(
-				'<tr postid="' + post.ID + '" ridedate="' + post.start_date + '"><td>' +
-				post.post_title + '</td><td>' + fmtdate + '</td>' + 
+				//'<tr postid="' + post.ID + '" ridedate="' + post.start_date + '"><td>' +
+				'<tr postid="' + post[0] + '" ridedate="' + post[2] + '"><td>' +
+				//post.post_title + '</td><td>' + fmtdate + '</td>' + 
+				post[1] + '</td><td>' + fmtdate + '</td>' + 
 				' <td><button class="create-btn button">Create Sheet</button></td>' + 
 				'<td></td></tr>'); 
 		});
@@ -163,6 +166,7 @@ jQuery(document).ready(function($) {
 
 	function lookup_posts_cb(response) {
         var res = JSON.parse(response);
+		//console.log(res);
 		populate_posts_table(res.posts);
 		$('#ridesheet-main-page').hide();
 		$('#ridesheet-post-page').show();
@@ -170,11 +174,13 @@ jQuery(document).ready(function($) {
 
 	function lookup_rides_cb(response) {
         var res = JSON.parse(response);
-		var fmt = new DateFormatter();
-		var fmtdate = fmt.formatDate(fmt.parseDate(res.startdate, 'Y-m-d'), 
-			'<?php echo $plugin_options['date_display_format']; ?>');
-		populate_ridesheet_table(res.rides);
-		$('#ridesheet-ride-page .rides-section').show();
+		if (res.error) {
+			open_error_dialog(res.error);
+		}
+		else {
+			populate_ridesheet_table(res.rides);
+			$('#ridesheet-ride-page .rides-section').show();
+		}
 	}   
 
 	function create_ride_cb(response) {

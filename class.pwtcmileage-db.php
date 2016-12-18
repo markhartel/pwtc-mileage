@@ -245,6 +245,7 @@ class PwtcMileage_DB {
 		return $results;
 	}
 
+/*
 	public static function fetch_posts_without_rides($outtype) {
     	global $wpdb;
 		$plugin_options = PwtcMileage::get_plugin_options();
@@ -259,10 +260,23 @@ class PwtcMileage_DB {
 			$plugin_options['ride_post_type'], $plugin_options['ride_date_metakey']), $outtype);
 		return $results;
 	}
+*/
+
+	public static function fetch_posts_without_rides() {
+		global $wpdb;
+		// TODO: use lookback date from plugin options
+		$plugin_options = PwtcMileage::get_plugin_options();
+		$lookback_date = null;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$results = pwtc_mileage_fetch_posts(
+			'select post_id from ' . $ride_table . ' where post_id <> 0',
+			$lookback_date);
+		return $results;
+	}
 
 	public static function meta_posts_without_rides() {
 		$meta = array(
-			'header' => array('Ride ID', 'Title', 'Start Date'),
+			'header' => array('Post ID', 'Title', 'Start Date'),
 			'title' => 'Posted Rides without Ride Sheets',
 			'date_idx' => 2,
 			'id_idx' => 0
@@ -660,10 +674,11 @@ class PwtcMileage_DB {
 	public static function job_set_status($jobid, $status, $errmsg = '') {
     	global $wpdb;
 		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
+		$t = time();
 		$status = $wpdb->query($wpdb->prepare('insert into ' . $jobs_table .
-			' (job_id, status, timestamp, error_msg) values (%s, %s, now(), %s)' . 
-			' on duplicate key update status = %s, timestamp = now(), error_msg = %s',
-			$jobid, $status, $errmsg, $status, $errmsg));
+			' (job_id, status, timestamp, error_msg) values (%s, %s, %d, %s)' . 
+			' on duplicate key update status = %s, timestamp = %d, error_msg = %s',
+			$jobid, $status, $t, $errmsg, $status, $t, $errmsg));
 		return $status;
 	}
 
@@ -671,6 +686,14 @@ class PwtcMileage_DB {
     	global $wpdb;
 		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
 		$results = $wpdb->get_var('select count(*) from ' . $jobs_table . 
+			' where status = \'triggered\' or status = \'started\'');
+		return $results;
+	}
+
+	public static function max_job_timestamp() {
+    	global $wpdb;
+		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
+		$results = $wpdb->get_var('select max(timestamp) from ' . $jobs_table . 
 			' where status = \'triggered\' or status = \'started\'');
 		return $results;
 	}
@@ -688,6 +711,14 @@ class PwtcMileage_DB {
 		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
 		$status = $wpdb->query($wpdb->prepare('delete from ' . $jobs_table . 
 			' where status = %s', 'failed'));
+		return $status;
+	} 
+
+	public static function job_remove_running() {
+    	global $wpdb;
+		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
+		$status = $wpdb->query('delete from ' . $jobs_table . 
+			' where status = \'triggered\' or status = \'started\'');
 		return $status;
 	} 
 
@@ -745,7 +776,7 @@ class PwtcMileage_DB {
 		$result = $wpdb->query('create table if not exists ' . $jobs_table . 
 			' (job_id VARCHAR(20) NOT NULL,' .
 			' status TEXT NOT NULL,' . 
-			' timestamp DATETIME NOT NULL,' . 
+			' timestamp BIGINT UNSIGNED NOT NULL,' . 
 			' error_msg TEXT,' . 
 			' constraint pk_' . $jobs_table . ' PRIMARY KEY (job_id))');
 		if (false === $result) {

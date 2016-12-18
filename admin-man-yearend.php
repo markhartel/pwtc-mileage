@@ -179,6 +179,24 @@ if ($show_buttons) {
 <?php
     include('admin-rider-lookup.php');
 }
+else if ($show_clear_lock) {
+?>
+    <div>
+        <form class="clear-lock-frm" method="POST">
+            <input type="submit" name="clear_lock" value="Clear Lock" class="button">
+        </form>
+    </div>
+<?php
+}
+else {
+?>
+    <div>
+        <form class="refresh-frm" method="POST">
+            <input type="submit" name="refresh_page" value="Refresh" class="button">
+        </form>
+    </div>
+<?php
+}
 ?>
 </div>
 <?php

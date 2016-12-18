@@ -114,15 +114,33 @@ class PwtcMileage {
 		}
 		else {
     		foreach ( $members as $item ) {
-       			$memberid = $item[0];
-				$firstname = $item[1];
-        		$lastname = $item[2];
-        		$expirdate = $item[3];
-				$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expirdate);	
-				if (false === $status or 0 === $status) {
-					error_log('Could not insert or update ' . $memberid);
+				$memberid = trim($item[0]);
+				$firstname = trim($item[1]);
+				$lastname = trim($item[2]);
+				$expirdate = trim($item[3]);
+				if (!self::validate_member_id_str($memberid)) {
+					error_log('Member ID entry "' . $memberid . 
+						'" is invalid, must be a 5 digit number.');
+				}
+				else if (!self::validate_member_name_str($lastname)) {
+					error_log('Last name entry "' . $lastname . 
+						'" is invalid, must start with a letter.');
+				}
+				else if (!self::validate_member_name_str($firstname)) {
+					error_log('First name entry "' . $firstname . 
+						'" is invalid, must start with a letter.');
+				}
+				else if (!self::validate_date_str($expirdate)) {
+					error_log('Expiration date entry "' . $expirdate . '" is invalid.');
+				}
+				else {
+					$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expirdate);	
+					if (false === $status or 0 === $status) {
+						error_log('Could not insert or update ' . $memberid);
+					}
 				}
 			}
+			sleep(30);
 			PwtcMileage_DB::job_remove('member_sync');	
 		}
 	}
@@ -433,9 +451,56 @@ class PwtcMileage {
 	public static function shortcode_rides_wo_sheets($atts) {
 		$a = self::normalize_atts($atts);
 		$meta = PwtcMileage_DB::meta_posts_without_rides();
-		$data = PwtcMileage_DB::fetch_posts_without_rides(ARRAY_N);
+		$data = PwtcMileage_DB::fetch_posts_without_rides();
 		$out = self::shortcode_build_table($meta, $data, $a);
 		return $out;
+	}
+
+	/*************************************************************/
+	/* User input validation functions
+	/*************************************************************/
+
+	public static function validate_date_str($datestr) {
+		$ok = true;
+		if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $datestr) !== 1) {
+			$ok = false;
+		}
+		return $ok;
+	}
+
+	public static function validate_member_id_str($memberid) {
+		$ok = true;
+		if (preg_match('/^\d{5}$/', $memberid) !== 1) {
+			$ok = false;
+		}
+		return $ok;
+	}
+
+	public static function validate_member_name_str($name) {
+		$ok = true;
+		if (preg_match('/^[A-Za-z].*/', $name) !== 1) {
+			$ok = false;
+		}
+		return $ok;
+	}
+
+	public static function validate_ride_title_str($title) {
+		$ok = true;
+		if (preg_match('/^[A-Za-z].*/', $title) !== 1) {
+			$ok = false;
+		}
+		return $ok;
+	}
+
+	public static function validate_mileage_str($mileage) {
+		$ok = true;
+		if (!is_numeric($mileage)) {
+			$ok = false;
+		}
+		else if (intval($mileage) < 0) {
+			$ok = false;
+		}
+		return $ok;
 	}
 
 	/*************************************************************/
@@ -481,6 +546,17 @@ class PwtcMileage {
 		if (self::get_plugin_options() === false) {
 			self::create_default_plugin_options();
 		}
+		/*
+		$subscriber = get_role('subscriber');
+  		$capabilities = $subscriber->capabilities;
+  		$statistician = add_role('statistician', 'Statistician', $capabilities);
+		if ($statistician !== null) {
+  			$statistician->add_cap('view_mileage');
+  			$statistician->add_cap('edit_mileage');
+  			$statistician->add_cap('edit_riders');
+  			$statistician->add_cap('mileage_db_ops');
+		}
+		*/
 	}
 
 	public static function plugin_deactivation( ) {

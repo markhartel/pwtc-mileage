@@ -79,33 +79,47 @@ class PwtcMileage_Admin {
 	/*************************************************************/
 
 	public static function lookup_posts_callback() {
-		$posts = PwtcMileage_DB::fetch_posts_without_rides(ARRAY_A);
+		$posts = PwtcMileage_DB::fetch_posts_without_rides();
 		$response = array('posts' => $posts);
     	echo wp_json_encode($response);
 		wp_die();
 	}
 
 	public static function lookup_rides_callback() {
-		$startdate = $_POST['startdate'];	
-		$enddate = $_POST['enddate'];	
-		$title = $_POST['title'];	
-		$rides = PwtcMileage_DB::fetch_club_rides($title, $startdate, $enddate);
-		$response = array(
-			'rides' => $rides);
-    	echo wp_json_encode($response);
+		$startdate = trim($_POST['startdate']);	
+		$enddate = trim($_POST['enddate']);	
+		$title = trim($_POST['title']);	
+		if (!PwtcMileage::validate_date_str($startdate)) {
+			$response = array(
+				'error' => 'Start date entry "' . $startdate . '" is invalid.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!PwtcMileage::validate_date_str($enddate)) {
+			$response = array(
+				'error' => 'End date entry "' . $enddate . '" is invalid.'
+			);
+			echo wp_json_encode($response);
+		}
+		else {
+			$rides = PwtcMileage_DB::fetch_club_rides($title, $startdate, $enddate);
+			$response = array(
+				'rides' => $rides);
+    		echo wp_json_encode($response);
+		}
 		wp_die();
 	}
 
 	public static function create_ride_callback() {
 		$startdate = trim($_POST['startdate']);	
 		$title = trim($_POST['title']);	
-		if (!self::validate_ride_title_str($title)) {
+		if (!PwtcMileage::validate_ride_title_str($title)) {
 			$response = array(
 				'error' => 'Title entry "' . $title . '" is invalid, must start with a letter.'
 			);
 			echo wp_json_encode($response);
 		}
-		else if (!self::validate_date_str($startdate)) {
+		else if (!PwtcMileage::validate_date_str($startdate)) {
 			$response = array(
 				'error' => 'Start date entry "' . $startdate . '" is invalid.'
 			);
@@ -136,9 +150,9 @@ class PwtcMileage_Admin {
 	}
 
 	public static function create_ride_from_event_callback() {
-		$startdate = $_POST['startdate'];	
-		$title = $_POST['title'];	
-		$postid = $_POST['post_id'];	
+		$startdate = trim($_POST['startdate']);	
+		$title = trim($_POST['title']);	
+		$postid = trim($_POST['post_id']);	
 		$status = PwtcMileage_DB::insert_ride_with_postid($title, $startdate, intval($postid));
 		if (false === $status or 0 === $status) {
 			$response = array(
@@ -162,10 +176,10 @@ class PwtcMileage_Admin {
 	}
 
 	public static function remove_ride_callback() {
-		$startdate = $_POST['startdate'];
-		$enddate = $_POST['enddate'];	
-		$title = $_POST['title'];	
-		$rideid = $_POST['ride_id'];
+		$startdate = trim($_POST['startdate']);
+		$enddate = trim($_POST['enddate']);	
+		$title = trim($_POST['title']);	
+		$rideid = trim($_POST['ride_id']);
 		$mcnt = PwtcMileage_DB::fetch_ride_has_mileage(intval($rideid));
 		$lcnt = PwtcMileage_DB::fetch_ride_has_leaders(intval($rideid));
 		if ($mcnt > 0 or $lcnt > 0) {
@@ -193,9 +207,9 @@ class PwtcMileage_Admin {
 	}
 
 	public static function lookup_ridesheet_callback() {
-		$rideid = $_POST['ride_id'];
-		$startdate = $_POST['startdate'];
-		$title = $_POST['title'];
+		$rideid = trim($_POST['ride_id']);
+		$startdate = trim($_POST['startdate']);
+		$title = trim($_POST['title']);
 		$leaders = PwtcMileage_DB::fetch_ride_leaders(intval($rideid));
 		$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
 		$response = array(
@@ -209,11 +223,11 @@ class PwtcMileage_Admin {
 	}
 
 	public static function lookup_riders_callback() {
-		$lastname = $_POST['lastname'];	
-		$firstname = $_POST['firstname'];
+		$lastname = trim($_POST['lastname']);	
+		$firstname = trim($_POST['firstname']);
 		$memberid = '';
     	if (isset($_POST['memberid'])) {
-			$memberid = $_POST['memberid'];
+			$memberid = trim($_POST['memberid']);
 		}
 		$members = PwtcMileage_DB::fetch_riders($lastname, $firstname, $memberid);	
 		$response = array(
@@ -232,25 +246,25 @@ class PwtcMileage_Admin {
 		$mode = $_POST['mode'];
 		$lookupfirst = '';
 		$lookuplast = strtolower(substr($lastname, 0, 1));
-		if (!self::validate_member_id_str($memberid)) {
+		if (!PwtcMileage::validate_member_id_str($memberid)) {
 			$response = array(
 				'error' => 'Member ID entry "' . $memberid . '" is invalid, must be a 5 digit number.'
 			);
 			echo wp_json_encode($response);
 		}
-		else if (!self::validate_member_name_str($lastname)) {
+		else if (!PwtcMileage::validate_member_name_str($lastname)) {
 			$response = array(
 				'error' => 'Last name entry "' . $lastname . '" is invalid, must start with a letter.'
 			);
 			echo wp_json_encode($response);
 		}
-		else if (!self::validate_member_name_str($firstname)) {
+		else if (!PwtcMileage::validate_member_name_str($firstname)) {
 			$response = array(
 				'error' => 'First name entry "' . $firstname . '" is invalid, must start with a letter.'
 			);
 			echo wp_json_encode($response);
 		}
-		else if (!self::validate_date_str($expdate)) {
+		else if (!PwtcMileage::validate_date_str($expdate)) {
 			$response = array(
 				'error' => 'Expiration date entry "' . $expdate . '" is invalid.'
 			);
@@ -291,9 +305,9 @@ class PwtcMileage_Admin {
 	}
 
 	public static function remove_rider_callback() {
-		$memberid = $_POST['member_id'];	
-		$lastname = $_POST['lastname'];	
-		$firstname = $_POST['firstname'];
+		$memberid = trim($_POST['member_id']);	
+		$lastname = trim($_POST['lastname']);	
+		$firstname = trim($_POST['firstname']);
 		$mcnt = PwtcMileage_DB::fetch_member_has_mileage($memberid);
 		$lcnt = PwtcMileage_DB::fetch_member_has_leaders($memberid);
 		if ($mcnt > 0 or $lcnt > 0) {
@@ -323,8 +337,8 @@ class PwtcMileage_Admin {
 	}
 
 	public static function remove_leader_callback() {
-		$rideid = $_POST['ride_id'];
-		$memberid = $_POST['member_id'];
+		$rideid = trim($_POST['ride_id']);
+		$memberid = trim($_POST['member_id']);
 		$status = PwtcMileage_DB::delete_ride_leader(intval($rideid), $memberid);
 		if (false === $status or 0 === $status) {
 			$response = array(
@@ -344,8 +358,8 @@ class PwtcMileage_Admin {
 	}
 
 	public static function remove_mileage_callback() {
-		$rideid = $_POST['ride_id'];
-		$memberid = $_POST['member_id'];
+		$rideid = trim($_POST['ride_id']);
+		$memberid = trim($_POST['member_id']);
 		$status = PwtcMileage_DB::delete_ride_mileage(intval($rideid), $memberid);
 		if (false === $status or 0 === $status) {
 			$response = array(
@@ -382,8 +396,8 @@ class PwtcMileage_Admin {
 	}
 
 	public static function add_leader_callback() {
-		$rideid = $_POST['ride_id'];
-		$memberid = $_POST['member_id'];
+		$rideid = trim($_POST['ride_id']);
+		$memberid = trim($_POST['member_id']);
 		$error = self::check_expir_date($memberid);
 		if ($error != null) {
 			$response = array(
@@ -423,7 +437,7 @@ class PwtcMileage_Admin {
     		echo wp_json_encode($response);
 		}
 		else {
-			if (!self::validate_mileage_str($mileage)) {
+			if (!PwtcMileage::validate_mileage_str($mileage)) {
 				$response = array(
 					'error' => 'Mileage entry "' . $mileage . '" is invalid, must be a non-negative number.'
 				);
@@ -451,7 +465,7 @@ class PwtcMileage_Admin {
 	}
 
 	public static function generate_report_callback() {
-		$reportid = $_POST['report_id'];
+		$reportid = trim($_POST['report_id']);
 		$plugin_options = PwtcMileage::get_plugin_options();
 		$error = null;
 		$data = array();
@@ -545,53 +559,6 @@ class PwtcMileage_Admin {
 			echo wp_json_encode($response);
 		}
 		wp_die();
-	}
-
-	/*************************************************************/
-	/* Admin user input validation functions
-	/*************************************************************/
-
-	public static function validate_date_str($datestr) {
-		$ok = true;
-		if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $datestr) !== 1) {
-			$ok = false;
-		}
-		return $ok;
-	}
-
-	public static function validate_member_id_str($memberid) {
-		$ok = true;
-		if (preg_match('/^\d{5}$/', $memberid) !== 1) {
-			$ok = false;
-		}
-		return $ok;
-	}
-
-	public static function validate_member_name_str($name) {
-		$ok = true;
-		if (preg_match('/^[A-Za-z].*/', $name) !== 1) {
-			$ok = false;
-		}
-		return $ok;
-	}
-
-	public static function validate_ride_title_str($title) {
-		$ok = true;
-		if (preg_match('/^[A-Za-z].*/', $title) !== 1) {
-			$ok = false;
-		}
-		return $ok;
-	}
-
-	public static function validate_mileage_str($mileage) {
-		$ok = true;
-		if (!is_numeric($mileage)) {
-			$ok = false;
-		}
-		else if (intval($mileage) < 0) {
-			$ok = false;
-		}
-		return $ok;
 	}
 
 	/*************************************************************/
@@ -759,10 +726,19 @@ class PwtcMileage_Admin {
     	if (isset($_POST['clear_errs'])) {
 			PwtcMileage_DB::job_remove_failed();
 		}
+    	if (isset($_POST['clear_lock'])) {
+			PwtcMileage_DB::job_remove_running();
+		}
 		$job_status_s = PwtcMileage_DB::job_get_status('member_sync');
 		$job_status_b = PwtcMileage_DB::job_get_status('backup');
 		$job_status_c = PwtcMileage_DB::job_get_status('consolidation');
 		$job_status_r = PwtcMileage_DB::job_get_status('cvs_restore');
+		$max_timestamp = PwtcMileage_DB::max_job_timestamp();
+		$show_clear_lock = false;
+		// TODO: get lock time limit from plugin options
+		if ($max_timestamp !== null && time() - $max_timestamp > 60) {
+			$show_clear_lock = true;
+		}
 		include('admin-man-yearend.php');
 	}
 
@@ -819,31 +795,31 @@ class PwtcMileage_Admin {
 		$plugin_options = PwtcMileage::get_plugin_options();
 		$form_submitted = false;
     	if (isset($_POST['ride_post_type'])) {
-			$plugin_options['ride_post_type'] = $_POST['ride_post_type'];
+			$plugin_options['ride_post_type'] = trim($_POST['ride_post_type']);
 			$form_submitted = true;
     	} 
     	if (isset($_POST['ride_date_metakey'])) {
-			$plugin_options['ride_date_metakey'] = $_POST['ride_date_metakey'];
+			$plugin_options['ride_date_metakey'] = trim($_POST['ride_date_metakey']);
 			$form_submitted = true;
     	} 
     	if (isset($_POST['ride_date_format'])) {
-			$plugin_options['ride_date_format'] = $_POST['ride_date_format'];
+			$plugin_options['ride_date_format'] = trim($_POST['ride_date_format']);
 			$form_submitted = true;
     	} 
     	if (isset($_POST['date_display_format'])) {
-			$plugin_options['date_display_format'] = $_POST['date_display_format'];
+			$plugin_options['date_display_format'] = trim($_POST['date_display_format']);
  			$form_submitted = true;
 	   	} 
     	if (isset($_POST['db_backup_location'])) {
-			$plugin_options['db_backup_location'] = $_POST['db_backup_location'];
+			$plugin_options['db_backup_location'] = trim($_POST['db_backup_location']);
 			$form_submitted = true;
     	} 
     	if (isset($_POST['plugin_menu_label'])) {
-			$plugin_options['plugin_menu_label'] = $_POST['plugin_menu_label'];
+			$plugin_options['plugin_menu_label'] = trim($_POST['plugin_menu_label']);
 			$form_submitted = true;
     	} 
     	if (isset($_POST['plugin_menu_location'])) {
-			$plugin_options['plugin_menu_location'] = intval($_POST['plugin_menu_location']);
+			$plugin_options['plugin_menu_location'] = intval(trim($_POST['plugin_menu_location']));
 			$form_submitted = true;
     	} 
 		if ($form_submitted) {
