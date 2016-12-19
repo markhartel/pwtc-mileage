@@ -509,14 +509,17 @@ class PwtcMileage {
 
 	public static function create_default_plugin_options() {
 		$data = array(
-			'ride_post_type' => 'ride',
-			'ride_date_metakey' => 'date',
-			'ride_date_format' => 'Y-m-d',
+			'ride_post_type' => 'ride',			// TODO: remove
+			'ride_date_metakey' => 'date',		// TODO: remove
+			'ride_date_format' => 'Y-m-d',		// TODO: remove
 			'date_display_format' => 'D M j, Y',
 			'drop_db_on_delete' => false,
-			'db_backup_location' => '',
+			'db_backup_location' => '',			// TODO: remove
 			'plugin_menu_label' => 'Rider Mileage',
 			'plugin_menu_location' => 50);
+			// TODO: add ride_lookback_date => ''
+			// TODO: add disable_expir_date_check => false
+			// TODO: add batch_lock_time_limit => 60
 		add_option('pwtc_mileage_options', $data);
 	}
 

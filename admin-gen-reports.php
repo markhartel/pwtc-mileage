@@ -27,7 +27,6 @@ jQuery(document).ready(function($) {
 	function generate_report_cb(response) {
         var res = JSON.parse(response);
         if (res.error) {
-            //show_error_msg('#report-error-msg', res.error);
             open_error_dialog(res.error);
         }
         else {
@@ -35,47 +34,84 @@ jQuery(document).ready(function($) {
             populate_report_table(res.data, res.header);
             $('#report-results-section').show();
 	        $('#report-main-section').hide();
+            $('#report-results-section .back-btn').focus();
         }
 	}   
 
     $('#report-main-section .ride-mileage a').on('click', function(evt) {
         evt.preventDefault();
-        var action = '<?php echo admin_url('admin-ajax.php'); ?>';
-        var data = {
-            'action': 'pwtc_mileage_generate_report',
-            'report_id': $(this).attr('report-id'),
-            'sort': $('#report-main-section .mileage-sort-slt').val()
-		};
-        $.post(action, data, generate_report_cb);
+        if ($('#report-main-section .dwnld-file').is(':checked')) {
+            $('#report-main-section .download').html(
+                '<form method="post">' + 
+                '<input type="hidden" name="export_report"/>' +
+                '<input type="hidden" name="report_id" value="' + $(this).attr('report-id') + '"/>' +
+                '<input type="hidden" name="sort" value="' + 
+                    $('#report-main-section .mileage-sort-slt').val() + '"/>' +
+                '</form>');
+            $('#report-main-section .download form').submit();
+        }
+        else {
+            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+            var data = {
+                'action': 'pwtc_mileage_generate_report',
+                'report_id': $(this).attr('report-id'),
+                'sort': $('#report-main-section .mileage-sort-slt').val()
+            };
+            $.post(action, data, generate_report_cb);
+        }
     });
 
     $('#report-main-section .ride-leader a').on('click', function(evt) {
         evt.preventDefault();
-        var action = '<?php echo admin_url('admin-ajax.php'); ?>';
-        var data = {
-            'action': 'pwtc_mileage_generate_report',
-            'report_id': $(this).attr('report-id'),
-            'sort': $('#report-main-section .leader-sort-slt').val()
-		};
-        $.post(action, data, generate_report_cb);
+        if ($('#report-main-section .dwnld-file').is(':checked')) {
+            $('#report-main-section .download').html(
+                '<form method="post">' + 
+                '<input type="hidden" name="export_report"/>' +
+                '<input type="hidden" name="report_id" value="' + $(this).attr('report-id') + '"/>' +
+                '<input type="hidden" name="sort" value="' + 
+                    $('#report-main-section .leader-sort-slt').val() + '"/>' +
+                '</form>');
+            $('#report-main-section .download form').submit();
+        }
+        else {
+            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+            var data = {
+                'action': 'pwtc_mileage_generate_report',
+                'report_id': $(this).attr('report-id'),
+                'sort': $('#report-main-section .leader-sort-slt').val()
+            };
+            $.post(action, data, generate_report_cb);
+        }
     });
 
     $('#report-main-section .specific-rider a').on('click', function(evt) {
         evt.preventDefault();
-        var action = '<?php echo admin_url('admin-ajax.php'); ?>';
-        var data = {
-            'action': 'pwtc_mileage_generate_report',
-            'report_id': $(this).attr('report-id'),
-            'member_id': $('#report-main-section .riderid').html(),
-            'name': $('#report-main-section .ridername').html()
-		};
-        if (data.member_id === '') {
-            //show_error_msg('#report-error-msg', 
-            //    'You must first select a rider before choosing this report.');
+        var memberid = $('#report-main-section .riderid').html();
+        if (memberid === '') {
             open_error_dialog('You must first select a rider before choosing this report.');
         }
         else {
-            $.post(action, data, generate_report_cb);
+            if ($('#report-main-section .dwnld-file').is(':checked')) {
+                $('#report-main-section .download').html(
+                    '<form method="post">' + 
+                    '<input type="hidden" name="export_report"/>' +
+                    '<input type="hidden" name="report_id" value="' + $(this).attr('report-id') + '"/>' +
+                    '<input type="hidden" name="member_id" value="' + memberid + '"/>' +
+                    '<input type="hidden" name="name" value="' + 
+                        $('#report-main-section .ridername').html() + '"/>' +
+                    '</form>');
+                $('#report-main-section .download form').submit();
+            }
+            else {
+                var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+                var data = {
+                    'action': 'pwtc_mileage_generate_report',
+                    'report_id': $(this).attr('report-id'),
+                    'member_id': memberid,
+                    'name': $('#report-main-section .ridername').html()
+                };
+                $.post(action, data, generate_report_cb);
+            }
         }
     });
 
@@ -106,6 +142,7 @@ if ($running_jobs > 0) {
 } else {
 ?>
     <div id='report-main-section'>
+        <p><input type="checkbox" class="dwnld-file"/>download report file</p>
         <h3>Ride Mileage Reports</h3>
         <p>Sort by: 
             <select class='mileage-sort-slt'>
@@ -142,6 +179,7 @@ if ($running_jobs > 0) {
             <div><a href='#' report-id='ytd_rides_led'>Year-to-date rides led</a></div>
             <div><a href='#' report-id='ly_rides_led'>Last year's rides led</a></div>
         </div>
+        <div class='download'></div>
     </div>
     <div id='report-results-section' class="initially-hidden">
         <p><button class='back-btn button button-primary button-large'>Back</button></p>

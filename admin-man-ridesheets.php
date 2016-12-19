@@ -58,12 +58,6 @@ jQuery(document).ready(function($) {
 
 	function populate_ridesheet_table(rides) {
 		$('#ridesheet-ride-page .rides-tbl tr').remove();
-		/*
-		if (rides.length == 0) {
-			$('#ridesheet-ride-page .rides-tbl').append('<caption>No ridesheets found!</caption>')
-			return;
-		}
-		*/
         $('#ridesheet-ride-page .rides-tbl').append(
 			'<tr><th>Ride Sheet</th><th>Start Date</th><th></th></tr>');    
 		var fmt = new DateFormatter();
@@ -166,7 +160,6 @@ jQuery(document).ready(function($) {
 
 	function lookup_posts_cb(response) {
         var res = JSON.parse(response);
-		//console.log(res);
 		populate_posts_table(res.posts);
 		$('#ridesheet-main-page').hide();
 		$('#ridesheet-post-page').show();
@@ -186,7 +179,6 @@ jQuery(document).ready(function($) {
 	function create_ride_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
-			//show_error_msg('#ridesheet-error-msg', res.error);
 			open_error_dialog(res.error);
 		}
 		else {
@@ -207,6 +199,7 @@ jQuery(document).ready(function($) {
 			};
 			set_ridesheet_lock(false);
 			$('#ridesheet-sheet-page').show();
+			$('#ridesheet-sheet-page .back-btn').focus();
 		}
 	} 
 
@@ -214,7 +207,6 @@ jQuery(document).ready(function($) {
         var res = JSON.parse(response);
 		console.log(res);
 		if (res.error) {
-			//show_error_msg('#ridesheet-error-msg', res.error);
 			open_error_dialog(res.error);
 		}
 		else {
@@ -234,6 +226,7 @@ jQuery(document).ready(function($) {
 			};
 			set_ridesheet_lock(false);
 			$('#ridesheet-sheet-page').show();
+			$('#ridesheet-sheet-page .back-btn').focus();
 		}
 	}   
 
@@ -255,12 +248,12 @@ jQuery(document).ready(function($) {
 		};
 		set_ridesheet_lock(res.title.startsWith('Totals Through '));
 		$('#ridesheet-sheet-page').show();
+		$('#ridesheet-sheet-page .back-btn').focus();
 	}   
 
 	function remove_ride_cb(response) {
 		var res = JSON.parse(response);
 		if (res.error) {
-			//show_error_msg('#ridesheet-error-msg', res.error);
 			open_error_dialog(res.error);
 		}
 		else {
@@ -271,7 +264,6 @@ jQuery(document).ready(function($) {
 	function remove_leader_cb(response) {
 		var res = JSON.parse(response);
 		if (res.error) {
-			//show_error_msg('#ridesheet-error-msg', res.error);
 			open_error_dialog(res.error);
 		}
 		else {
@@ -282,7 +274,6 @@ jQuery(document).ready(function($) {
 	function remove_mileage_cb(response) {
 		var res = JSON.parse(response);
 		if (res.error) {
-			//show_error_msg('#ridesheet-error-msg', res.error);
 			open_error_dialog(res.error);
 		}
 		else {
@@ -293,7 +284,6 @@ jQuery(document).ready(function($) {
 	function add_leader_cb(response) {
 		var res = JSON.parse(response);
 		if (res.error) {
-			//show_error_msg('#ridesheet-error-msg', res.error);
 			open_error_dialog(res.error);
 		}
 		else {
@@ -306,7 +296,6 @@ jQuery(document).ready(function($) {
 	function add_mileage_cb(response) {
 		var res = JSON.parse(response);
 		if (res.error) {
-			//show_error_msg('#ridesheet-error-msg', res.error);
 			open_error_dialog(res.error);
 		}
 		else {

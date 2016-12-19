@@ -112,7 +112,7 @@ class PwtcMileage_Admin {
 
 	public static function create_ride_callback() {
 		$startdate = trim($_POST['startdate']);	
-		$title = trim($_POST['title']);	
+		$title = sanitize_text_field($_POST['title']);	
 		if (!PwtcMileage::validate_ride_title_str($title)) {
 			$response = array(
 				'error' => 'Title entry "' . $title . '" is invalid, must start with a letter.'
@@ -464,7 +464,7 @@ class PwtcMileage_Admin {
 		wp_die();
 	}
 
-	public static function generate_report_callback() {
+	public static function generate_report() {
 		$reportid = trim($_POST['report_id']);
 		$plugin_options = PwtcMileage::get_plugin_options();
 		$error = null;
@@ -546,18 +546,24 @@ class PwtcMileage_Admin {
 				endforeach;					
 			}
 			$response = array(
+				'report_id' => $reportid,
 				'title' => $meta['title'],
 				'header' => $meta['header'],
 				'data' => $data
 			);
-			echo wp_json_encode($response);			
+			return $response;			
 		}
 		else {
 			$response = array(
+				'report_id' => $reportid,
 				'error' => $error
 			);
-			echo wp_json_encode($response);
+			return $response;
 		}
+	}
+
+	public static function generate_report_callback() {
+		echo wp_json_encode(self::generate_report());
 		wp_die();
 	}
 
@@ -582,7 +588,8 @@ class PwtcMileage_Admin {
     	$menu_slug = 'pwtc_mileage_generate_reports';
     	$capability = 'edit_posts';
     	$function = array( 'PwtcMileage_Admin', 'page_generate_reports');
-		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_csv'));
 
     	$page_title = 'Manage Riders';
     	$menu_title = 'Manage Riders';
@@ -637,10 +644,28 @@ class PwtcMileage_Admin {
 		include('admin-man-riders.php');
 	}
 
-	public static function write_export_csv_file($fp, $data) {
+	public static function write_export_csv_file($fp, $data, $header = null) {
+		if ($header != null) {
+			fputcsv($fp, $header);
+		}
 		foreach ($data as $item) {
     		fputcsv($fp, $item);
 		}		
+	}
+
+	public static function download_report_csv() {
+		if (isset($_POST['export_report'])) {
+			$response = self::generate_report();
+			$today = date('Y-m-d', current_time('timestamp'));
+			$report_id = $response['report_id'];
+			header('Content-Description: File Transfer');
+			header("Content-type: text/csv");
+			header("Content-Disposition: attachment; filename={$report_id}_{$today}.csv");
+			$fh = fopen('php://output', 'w');
+			self::write_export_csv_file($fh, $response['data'], $response['header']);
+			fclose($fh);
+			die;
+		}
 	}
 
 	public static function download_csv() {
