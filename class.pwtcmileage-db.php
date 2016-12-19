@@ -34,6 +34,56 @@ class PwtcMileage_DB {
 		return $num_rides;
 	}
 
+	public static function get_ytd_rider_mileage($memberid) {
+    	global $wpdb;
+		$mileage = $wpdb->get_var($wpdb->prepare('select mileage from ' . self::YTD_MILES_VIEW . 
+			' where member_id = %s', $memberid));
+		if ($mileage == null) {
+			$mileage = 0;
+		}
+		return $mileage;
+	}
+
+	public static function get_ly_rider_mileage($memberid) {
+    	global $wpdb;
+		$mileage = $wpdb->get_var($wpdb->prepare('select mileage from ' . self::LY_MILES_VIEW . 
+			' where member_id = %s', $memberid));
+		if ($mileage == null) {
+			$mileage = 0;
+		}
+		return $mileage;
+	}
+
+	public static function get_lt_rider_mileage($memberid) {
+    	global $wpdb;
+		$mileage = $wpdb->get_var($wpdb->prepare('select mileage from ' . self::LT_MILES_VIEW . 
+			' where member_id = %s', $memberid));
+		if ($mileage == null) {
+			$mileage = 0;
+		}
+		return $mileage;
+	}
+
+	public static function get_ytd_rider_led($memberid) {
+    	global $wpdb;
+		$num_led = $wpdb->get_var($wpdb->prepare('select rides_led from ' . self::YTD_LED_VIEW . 
+			' where member_id = %s', $memberid));
+		if ($num_led == null) {
+			$num_led = 0;
+		}
+		return $num_led;
+	}
+
+	public static function get_ly_rider_led($memberid) {
+    	global $wpdb;
+		$num_led = $wpdb->get_var($wpdb->prepare('select rides_led from ' . self::LY_LED_VIEW . 
+			' where member_id = %s', $memberid));
+		if ($num_led == null) {
+			$num_led = 0;
+		}
+		return $num_led;
+	}
+
 	public static function fetch_ly_lt_achvmnt($outtype, $sort) {
     	global $wpdb;
     	$results = $wpdb->get_results(

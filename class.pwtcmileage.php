@@ -21,6 +21,8 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'load_report_scripts' ) );
 
 		// Register shortcode callbacks
+		add_shortcode('pwtc_rider_information', 
+			array( 'PwtcMileage', 'shortcode_rider_info'));
 		add_shortcode('pwtc_achievement_last_year', 
 			array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
 		add_shortcode('pwtc_mileage_year_to_date', 
@@ -325,6 +327,26 @@ class PwtcMileage {
 	/*************************************************************/
 	/* Shortcode report generation functions
 	/*************************************************************/
+
+	public static function shortcode_rider_info($atts) {
+		$out = '';
+		$id = pwtc_mileage_get_member_id();
+		if ($id != null) {
+			$out .= '<div class="pwtc-mileage-rider-report"><table>';
+			$out .= '<tr><td>Year-to-date mileage:</td>';
+			$out .= '<td>' . PwtcMileage_DB::get_ytd_rider_mileage($id) . '</td></tr>';
+			$out .= '<tr><td>Last year\'s mileage:</td>';
+			$out .= '<td>' . PwtcMileage_DB::get_ly_rider_mileage($id) . '</td></tr>';
+			$out .= '<tr><td>Lifetime mileage:</td>';
+			$out .= '<td>' . PwtcMileage_DB::get_lt_rider_mileage($id) . '</td></tr>';
+			$out .= '<tr><td>Year-to-date rides led:</td>';
+			$out .= '<td>' . PwtcMileage_DB::get_ytd_rider_led($id) . '</td></tr>';
+			$out .= '<tr><td>Last year\'s rides led:</td>';
+			$out .= '<td>' . PwtcMileage_DB::get_ly_rider_led($id) . '</td></tr>';
+			$out .= '</table></div>';
+		}
+		return $out;
+	}
 
 	public static function shortcode_ly_lt_achvmnt($atts) {
 		$a = self::normalize_atts($atts);

@@ -145,14 +145,14 @@ if ($show_buttons) {
         <div><form class="consol-frm" method="POST">
             <input type="submit" name="consolidate" value="Consolidate" class="button button-primary button-large">
         </form></div><br>
-        <div><strong>Export database tables to CVS files.</strong></div>
+        <div><strong>Export database tables to CSV files.</strong></div>
         <div><form class="export-frm" method="POST">
             <input type="submit" name="export_members" value="Export Members" class="button button-primary button-large">
             <input type="submit" name="export_rides" value="Export Rides" class="button button-primary button-large">
             <input type="submit" name="export_mileage" value="Export Mileage" class="button button-primary button-large">
             <input type="submit" name="export_leaders" value="Export Leaders" class="button button-primary button-large">
         </form></div><br>
-        <div><strong>Restore database tables from exported CVS files.</strong></div>
+        <div><strong>Restore database tables from exported CSV files.</strong></div>
         <div>
             <button class="restore-btn button button-primary button-large">Restore</button>
             <span class="restore-blk initially-hidden">
