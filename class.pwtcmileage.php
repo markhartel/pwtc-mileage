@@ -538,10 +538,11 @@ class PwtcMileage {
 			'drop_db_on_delete' => false,
 			'db_backup_location' => '',			// TODO: remove
 			'plugin_menu_label' => 'Rider Mileage',
-			'plugin_menu_location' => 50);
-			// TODO: add ride_lookback_date => ''
-			// TODO: add disable_expir_date_check => false
-			// TODO: add batch_lock_time_limit => 60
+			'plugin_menu_location' => 50,
+			'ride_lookback_date' => '',
+			'disable_expir_check' => false,
+			'disable_delete_confirm' => false,
+			'db_lock_time_limit' => 60);
 		add_option('pwtc_mileage_options', $data);
 	}
 
@@ -569,6 +570,7 @@ class PwtcMileage {
 		PwtcMileage_DB::create_db_tables();
 		PwtcMileage_DB::create_db_views();
 		if (self::get_plugin_options() === false) {
+			//self::delete_plugin_options();
 			self::create_default_plugin_options();
 		}
 		/*

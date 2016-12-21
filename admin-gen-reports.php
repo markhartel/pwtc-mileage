@@ -32,9 +32,10 @@ jQuery(document).ready(function($) {
         else {
             $('#report-results-section h2').html(res.title);
             populate_report_table(res.data, res.header);
-            $('#report-results-section').show();
-	        $('#report-main-section').hide();
-            $('#report-results-section .back-btn').focus();
+	        $('#report-main-section').hide('fast', function() {
+                $('#report-results-section').fadeIn('slow');
+                $('#report-results-section .back-btn').focus();                
+            });
         }
 	}   
 
@@ -124,8 +125,9 @@ jQuery(document).ready(function($) {
 
     $('#report-results-section .back-btn').on('click', function(evt) {
         evt.preventDefault();
-        $('#report-results-section').hide();
-	    $('#report-main-section').show();
+        $('#report-results-section').fadeOut('slow', function() {
+	        $('#report-main-section').show('fast');
+        });
     });
 
 });

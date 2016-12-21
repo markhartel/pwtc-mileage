@@ -660,7 +660,7 @@ class PwtcMileage_Admin {
 			$report_id = $response['report_id'];
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename={$report_id}_{$today}.csv");
+			header("Content-Disposition: attachment; filename=rpt_{$report_id}_{$today}.csv");
 			$fh = fopen('php://output', 'w');
 			self::write_export_csv_file($fh, $response['data'], $response['header']);
 			fclose($fh);

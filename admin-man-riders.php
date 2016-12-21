@@ -11,7 +11,7 @@ jQuery(document).ready(function($) {
         $("#rider-inspect-section .lookup-btn[lastname='" + lastname + "']").addClass('button-primary');
 		$('#rider-inspect-section .riders-tbl tr').remove();
 		$('#rider-inspect-section .riders-tbl').append(
-			'<tr><th>Member ID</th><th>First Name</th><th>Last Name</th><th>Expiration Date</th><th></th></tr>');
+			'<tr><th>Member ID</th><th>First Name</th><th>Last Name</th><th>Expiration Date</th><th>Actions</th></tr>');
 		var fmt = new DateFormatter();
         members.forEach(function(item) {
 			var d = fmt.parseDate(item.expir_date, 'Y-m-d');
@@ -22,8 +22,8 @@ jQuery(document).ready(function($) {
 				'<td>' + item.member_id + '</td>' +
 				'<td>' + item.first_name + '</td><td>' + item.last_name + '</td>' + 
 				'<td date="' + item.expir_date + '">' + fmtdate + '</td>' + 
-                '<td><button class="modify-btn button">Edit</button>' + 
-                '<button class="remove-btn button">Delete</button></td></tr>');    
+                '<td><a class="modify-btn">Edit</a>' + ' ' +
+                '<a class="remove-btn">Delete</a></td></tr>');    
 		});
         $('#rider-inspect-section .riders-tbl .modify-btn').on('click', function(evt) {
             evt.preventDefault();

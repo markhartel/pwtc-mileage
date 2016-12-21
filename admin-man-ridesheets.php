@@ -10,16 +10,16 @@ jQuery(document).ready(function($) {
 
 	function set_ridesheet_lock(locked) {
 		if (locked) {
-			$("#ridesheet-sheet-page .leader-tbl .remove-btn").attr("disabled", "disabled");
-			$("#ridesheet-sheet-page .mileage-tbl .edit-btn").attr("disabled", "disabled");
-			$("#ridesheet-sheet-page .mileage-tbl .remove-btn").attr("disabled", "disabled");
+			$("#ridesheet-sheet-page .leader-tbl .remove-btn").hide();
+			$("#ridesheet-sheet-page .mileage-tbl .edit-btn").hide();
+			$("#ridesheet-sheet-page .mileage-tbl .remove-btn").hide();
 			$("#ridesheet-sheet-page .leader-section .add-frm input[name='lookup']").attr("disabled", "disabled");
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").attr("disabled", "disabled");
 		}
 		else {
-       		$("#ridesheet-sheet-page .leader-tbl .remove-btn").removeAttr("disabled");
-       		$("#ridesheet-sheet-page .mileage-tbl .edit-btn").removeAttr("disabled");
-       		$("#ridesheet-sheet-page .mileage-tbl .remove-btn").removeAttr("disabled");
+			$("#ridesheet-sheet-page .leader-tbl .remove-btn").show();
+       		$("#ridesheet-sheet-page .mileage-tbl .edit-btn").show();
+       		$("#ridesheet-sheet-page .mileage-tbl .remove-btn").show();
        		$("#ridesheet-sheet-page .leader-section .add-frm input[name='lookup']").removeAttr("disabled");
        		$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").removeAttr("disabled");
 		}
@@ -28,7 +28,7 @@ jQuery(document).ready(function($) {
 	function populate_posts_table(posts) {
 		$('#ridesheet-post-page .posts-tbl tr').remove();
 		$('#ridesheet-post-page .posts-tbl').append(
-			'<tr><th>Posted Ride</th><th>Start Date</th><th></th></tr>');
+			'<tr><th>Posted Ride</th><th>Start Date</th><th>Actions</th></tr>');
 		var fmt = new DateFormatter();
 		posts.forEach(function(post) {
 			//var d = fmt.parseDate(post.start_date, 'Y-m-d');
@@ -40,7 +40,7 @@ jQuery(document).ready(function($) {
 				'<tr postid="' + post[0] + '" ridedate="' + post[2] + '"><td>' +
 				//post.post_title + '</td><td>' + fmtdate + '</td>' + 
 				post[1] + '</td><td>' + fmtdate + '</td>' + 
-				' <td><button class="create-btn button">Create Sheet</button></td>' + 
+				' <td><a class="create-btn">Create Sheet</a></td>' + 
 				'<td></td></tr>'); 
 		});
 		$('#ridesheet-post-page .posts-tbl .create-btn').on('click', function(evt) {
@@ -59,7 +59,7 @@ jQuery(document).ready(function($) {
 	function populate_ridesheet_table(rides) {
 		$('#ridesheet-ride-page .rides-tbl tr').remove();
         $('#ridesheet-ride-page .rides-tbl').append(
-			'<tr><th>Ride Sheet</th><th>Start Date</th><th></th></tr>');    
+			'<tr><th>Ride Sheet</th><th>Start Date</th><th>Actions</th></tr>');    
 		var fmt = new DateFormatter();
         rides.forEach(function(item) {
 			var d = fmt.parseDate(item.date, 'Y-m-d');
@@ -68,8 +68,8 @@ jQuery(document).ready(function($) {
             $('#ridesheet-ride-page .rides-tbl').append(
 				'<tr rideid="' + item.ID + '" ridedate="' + item.date + '"><td>' +
 				item.title + '</td><td>' + fmtdate + '</td><td>' + 
-				'<button class="edit-btn button">Edit</button>' + 
-				'<button class="remove-btn button">Delete</button></td></tr>');    
+				'<a class="edit-btn">Edit</a>' + ' ' +
+				'<a class="remove-btn">Delete</a></td></tr>');    
         });
 		$('#ridesheet-ride-page .rides-tbl .edit-btn').on('click', function(evt) {
             evt.preventDefault();
@@ -99,13 +99,13 @@ jQuery(document).ready(function($) {
 	function populate_ride_leader_table(ride_id, leaders) {
 		$('#ridesheet-sheet-page .leader-tbl tr').remove();
 		$('#ridesheet-sheet-page .leader-tbl').append(
-			'<tr><th>Rider ID</th><th>Name</th><th></th></tr>');
+			'<tr><th>Rider ID</th><th>Name</th><th>Actions</th></tr>');
         leaders.forEach(function(item) {
             $('#ridesheet-sheet-page .leader-tbl').append(
 				'<tr rideid="' + ride_id + '" memberid="' + item.member_id + '">' + 
 				'<td>' + item.member_id + '</td>' +
 				'<td>' + item.first_name + ' ' + item.last_name + '</td>' + 
-				'<td><button class="remove-btn button">Delete</button></td></tr>');    
+				'<td><a class="remove-btn">Delete</a></td></tr>');    
 		});
 		$('#ridesheet-sheet-page .leader-tbl .remove-btn').on('click', function(evt) {
             evt.preventDefault();
@@ -122,15 +122,15 @@ jQuery(document).ready(function($) {
 	function populate_ride_mileage_table(ride_id, mileage) {
 		$('#ridesheet-sheet-page .mileage-tbl tr').remove();
 		$('#ridesheet-sheet-page .mileage-tbl').append(
-			'<tr><th>Rider ID</th><th>Name</th><th>Mileage</th><th></th></tr>');
+			'<tr><th>Rider ID</th><th>Name</th><th>Mileage</th><th>Actions</th></tr>');
         mileage.forEach(function(item) {
             $('#ridesheet-sheet-page .mileage-tbl').append(
 				'<tr rideid="' + ride_id + '" memberid="' + item.member_id + '">' + 
 				'<td>' + item.member_id + '</td>' +
 				'<td>' + item.first_name + ' ' + item.last_name + '</td>' + 
 				'<td>' + item.mileage + '</td>' +
-				'<td><button class="edit-btn button">Edit</button>' +
-				'<button class="remove-btn button">Delete</button></td></tr>');    
+				'<td><a class="edit-btn">Edit</a>' + ' ' +
+				'<a class="remove-btn">Delete</a></td></tr>');    
 		});
 		$('#ridesheet-sheet-page .mileage-tbl .edit-btn').on('click', function(evt) {
             evt.preventDefault();
@@ -143,7 +143,7 @@ jQuery(document).ready(function($) {
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(
 				$(this).parent().parent().find('td').eq(2).html()
 			); 
-			$('#ridesheet-sheet-page .mileage-section .add-blk').show(500);  
+			$('#ridesheet-sheet-page .mileage-section .add-blk').show('slow');  
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").focus();         
 		});
 		$('#ridesheet-sheet-page .mileage-tbl .remove-btn').on('click', function(evt) {
@@ -161,8 +161,9 @@ jQuery(document).ready(function($) {
 	function lookup_posts_cb(response) {
         var res = JSON.parse(response);
 		populate_posts_table(res.posts);
-		$('#ridesheet-main-page').hide();
-		$('#ridesheet-post-page').show();
+		$('#ridesheet-main-page').hide('fast', function() {
+			$('#ridesheet-post-page').fadeIn('slow');
+		});
 	}   
 
 	function lookup_rides_cb(response) {
@@ -182,7 +183,6 @@ jQuery(document).ready(function($) {
 			open_error_dialog(res.error);
 		}
 		else {
-			$('#ridesheet-main-page').hide();
  			var fmt = new DateFormatter();
 			var fmtdate = fmt.formatDate(fmt.parseDate(res.startdate, 'Y-m-d'), 
 				'<?php echo $plugin_options['date_display_format']; ?>');
@@ -195,11 +195,13 @@ jQuery(document).ready(function($) {
 			$("#ridesheet-sheet-page .mileage-section .add-blk").hide(); 
 			ridesheet_back_btn_cb = function() {
 				$('#ridesheet-main-page .add-blk').hide();
-				$('#ridesheet-main-page').show();
+				$('#ridesheet-main-page').fadeIn('slow');
 			};
 			set_ridesheet_lock(false);
-			$('#ridesheet-sheet-page').show();
-			$('#ridesheet-sheet-page .back-btn').focus();
+			$('#ridesheet-main-page').hide('fast', function() {
+				$('#ridesheet-sheet-page').fadeIn('slow');
+				$('#ridesheet-sheet-page .back-btn').focus();
+			});
 		}
 	} 
 
@@ -210,7 +212,6 @@ jQuery(document).ready(function($) {
 			open_error_dialog(res.error);
 		}
 		else {
-			$('#ridesheet-post-page').hide();
  			var fmt = new DateFormatter();
 			var fmtdate = fmt.formatDate(fmt.parseDate(res.startdate, 'Y-m-d'), 
 				'<?php echo $plugin_options['date_display_format']; ?>');
@@ -225,13 +226,14 @@ jQuery(document).ready(function($) {
 				load_posts_without_rides();
 			};
 			set_ridesheet_lock(false);
-			$('#ridesheet-sheet-page').show();
-			$('#ridesheet-sheet-page .back-btn').focus();
+			$('#ridesheet-post-page').hide('fast', function() {
+				$('#ridesheet-sheet-page').fadeIn('slow');
+				$('#ridesheet-sheet-page .back-btn').focus();
+			});
 		}
 	}   
 
 	function lookup_ridesheet_cb(response) {
-		$('#ridesheet-ride-page').hide();
         var res = JSON.parse(response);
  		var fmt = new DateFormatter();
 		var fmtdate = fmt.formatDate(fmt.parseDate(res.startdate, 'Y-m-d'), 
@@ -244,11 +246,13 @@ jQuery(document).ready(function($) {
 		$("#ridesheet-sheet-page .leader-section .add-blk").hide(); 
 		$("#ridesheet-sheet-page .mileage-section .add-blk").hide(); 
 		ridesheet_back_btn_cb = function() {
-			$('#ridesheet-ride-page').show();
+			$('#ridesheet-ride-page').fadeIn('slow');
 		};
 		set_ridesheet_lock(res.title.startsWith('Totals Through '));
-		$('#ridesheet-sheet-page').show();
-		$('#ridesheet-sheet-page .back-btn').focus();
+		$('#ridesheet-ride-page').hide('fast', function() {
+			$('#ridesheet-sheet-page').fadeIn('slow');
+			$('#ridesheet-sheet-page .back-btn').focus();
+		});
 	}   
 
 	function remove_ride_cb(response) {
@@ -318,20 +322,23 @@ jQuery(document).ready(function($) {
 	});
 
 	$('#ridesheet-main-page .modify-btn').on('click', function(evt) {
-		$('#ridesheet-main-page').hide();
-		$('#ridesheet-ride-page').show();
+		$('#ridesheet-main-page').hide('fast', function() {
+			$('#ridesheet-ride-page').fadeIn('slow');
+		});
 	});
 
 	/* Back button click handler for posts page. */
 	$('#ridesheet-post-page .back-btn').on('click', function(evt) {
-		$('#ridesheet-post-page').hide();
-		$('#ridesheet-main-page').show();
+		$('#ridesheet-post-page').hide('fast', function() {
+			$('#ridesheet-main-page').fadeIn('slow');
+		});
 	});
 
 	/* Back button click handler for rides page. */
 	$('#ridesheet-ride-page .back-btn').on('click', function(evt) {
-		$('#ridesheet-ride-page').hide();
-		$('#ridesheet-main-page').show();
+		$('#ridesheet-ride-page').hide('fast', function() {
+			$('#ridesheet-main-page').fadeIn('slow');
+		});
 		$('#ridesheet-ride-page .rides-tbl tr').remove();
 		$("#ridesheet-ride-page .ride-search-frm input[name='date']").val('');
 		$("#ridesheet-ride-page .ride-search-frm input[name='todate']").val('');
@@ -340,8 +347,9 @@ jQuery(document).ready(function($) {
 
 	/* Back button click handler for sheets page. */
 	$('#ridesheet-sheet-page .back-btn').on('click', function(evt) {
-		$('#ridesheet-sheet-page').hide();
-		ridesheet_back_btn_cb();
+		$('#ridesheet-sheet-page').hide('fast', function() {
+			ridesheet_back_btn_cb();
+		});
 	});
 
     $('#ridesheet-ride-page .ride-search-frm').on('submit', function(evt) {
@@ -383,7 +391,7 @@ jQuery(document).ready(function($) {
         lookup_pwtc_riders(function(riderid, name) {
             $('#ridesheet-sheet-page .leader-section .add-frm .riderid').html(riderid);
             $('#ridesheet-sheet-page .leader-section .add-frm .ridername').html(name); 
-			$('#ridesheet-sheet-page .leader-section .add-blk').show(500); 
+			$('#ridesheet-sheet-page .leader-section .add-blk').show('slow'); 
 			$("#ridesheet-sheet-page .leader-section .add-frm input[type='submit']").focus();          
         });
     });
@@ -398,7 +406,7 @@ jQuery(document).ready(function($) {
             $('#ridesheet-sheet-page .mileage-section .add-frm .riderid').html(riderid);
             $('#ridesheet-sheet-page .mileage-section .add-frm .ridername').html(name); 
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(''); 
-			$('#ridesheet-sheet-page .mileage-section .add-blk').show(500);  
+			$('#ridesheet-sheet-page .mileage-section .add-blk').show('slow');  
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").focus();         
         });
     });
@@ -410,7 +418,7 @@ jQuery(document).ready(function($) {
 
 	$("#ridesheet-main-page .add-btn").on('click', function(evt) {
 		$("#ridesheet-main-page .add-blk .add-frm input[type='text']").val(''); 
-		$('#ridesheet-main-page .add-blk').show(500); 
+		$('#ridesheet-main-page .add-blk').show('slow'); 
 		$("#ridesheet-main-page .add-blk .add-frm input[name='title']").focus();          
     });
 
