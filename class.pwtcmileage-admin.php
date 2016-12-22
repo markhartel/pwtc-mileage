@@ -378,19 +378,21 @@ class PwtcMileage_Admin {
 		wp_die();
 	}
 
-	//TODO: Disable this check if option is set.
 	public static function check_expir_date($memberid) {
-		$rider = PwtcMileage_DB::fetch_rider($memberid);
 		$errormsg = null;
-		if (count($rider) > 0) {
-			$r = $rider[0];
-			if (strtotime($r['expir_date']) < strtotime(date('Y-m-d', current_time('timestamp')))) {
-				$errormsg = 'The membership of ' . $r['first_name'] . ' ' . $r['last_name'] .
-					' (' . $r['member_id'] . ') has expired.';
+		$plugin_options = PwtcMileage::get_plugin_options();
+		if (!$plugin_options['disable_expir_check']) {
+			$rider = PwtcMileage_DB::fetch_rider($memberid);
+			if (count($rider) > 0) {
+				$r = $rider[0];
+				if (strtotime($r['expir_date']) < strtotime(date('Y-m-d', current_time('timestamp')))) {
+					$errormsg = 'The membership of ' . $r['first_name'] . ' ' . $r['last_name'] .
+						' (' . $r['member_id'] . ') has expired.';
+				}
 			}
-		}
-		else {
-			$errormsg = 'Could not find rider ' + $memberid . ' in database.';
+			else {
+				$errormsg = 'Could not find rider ' + $memberid . ' in database.';
+			}
 		}
 		return $errormsg;
 	}
@@ -760,10 +762,14 @@ class PwtcMileage_Admin {
 		$job_status_r = PwtcMileage_DB::job_get_status('cvs_restore');
 		$max_timestamp = PwtcMileage_DB::max_job_timestamp();
 		$show_clear_lock = false;
-		// TODO: get lock time limit from plugin options
-		if ($max_timestamp !== null && time() - $max_timestamp > 60) {
+		if ($max_timestamp !== null && time()-$max_timestamp > $plugin_options['db_lock_time_limit']) {
 			$show_clear_lock = true;
 		}
+		$thisyear = date('Y', current_time('timestamp'));
+    	$yearbeforelast = intval($thisyear) - 2;
+		$maxdate = '' . $yearbeforelast . '-12-31';
+		$rides_to_consolidate = PwtcMileage_DB::get_num_rides_before_date($maxdate);
+
 		include('admin-man-yearend.php');
 	}
 
@@ -819,33 +825,61 @@ class PwtcMileage_Admin {
 	public static function page_manage_settings() {
 		$plugin_options = PwtcMileage::get_plugin_options();
 		$form_submitted = false;
-    	if (isset($_POST['ride_post_type'])) {
-			$plugin_options['ride_post_type'] = trim($_POST['ride_post_type']);
-			$form_submitted = true;
-    	} 
-    	if (isset($_POST['ride_date_metakey'])) {
-			$plugin_options['ride_date_metakey'] = trim($_POST['ride_date_metakey']);
-			$form_submitted = true;
-    	} 
-    	if (isset($_POST['ride_date_format'])) {
-			$plugin_options['ride_date_format'] = trim($_POST['ride_date_format']);
-			$form_submitted = true;
-    	} 
+		$error_msgs = array();
     	if (isset($_POST['date_display_format'])) {
-			$plugin_options['date_display_format'] = trim($_POST['date_display_format']);
  			$form_submitted = true;
+			$entry = sanitize_text_field($_POST['date_display_format']);
+			if ($entry == '') {
+				array_push($error_msgs,
+					'Date Display Format field must contain a PHP date format string.');
+			}
+			else {
+				$plugin_options['date_display_format'] = $entry;
+			}
 	   	} 
-    	if (isset($_POST['db_backup_location'])) {
-			$plugin_options['db_backup_location'] = trim($_POST['db_backup_location']);
-			$form_submitted = true;
-    	} 
     	if (isset($_POST['plugin_menu_label'])) {
-			$plugin_options['plugin_menu_label'] = trim($_POST['plugin_menu_label']);
 			$form_submitted = true;
+			$entry = sanitize_text_field($_POST['plugin_menu_label']);
+			if (!PwtcMileage::validate_label_str($entry)) {
+				array_push($error_msgs,
+					'Plugin Menu Label field must contain a valid string.');
+			}
+			else {
+				$plugin_options['plugin_menu_label'] = $entry;
+			}
     	} 
     	if (isset($_POST['plugin_menu_location'])) {
-			$plugin_options['plugin_menu_location'] = intval(trim($_POST['plugin_menu_location']));
 			$form_submitted = true;
+			$entry = sanitize_text_field($_POST['plugin_menu_location']);
+			if (!PwtcMileage::validate_number_str($entry)) {
+				array_push($error_msgs,
+					'Plugin Menu Location field must contain a non-negative number.');
+			}
+			else {
+				$plugin_options['plugin_menu_location'] = intval($entry);
+			}
+    	} 
+    	if (isset($_POST['db_lock_time_limit'])) {
+			$form_submitted = true;
+			$entry = sanitize_text_field($_POST['db_lock_time_limit']);
+			if (!PwtcMileage::validate_number_str($entry)) {
+				array_push($error_msgs,
+					'DB Batch Job Lock Time Limit field must contain a non-negative number.');
+			}
+			else {
+				$plugin_options['db_lock_time_limit'] = intval($entry);
+			}
+    	} 
+    	if (isset($_POST['ride_lookback_date'])) {
+			$form_submitted = true;
+			$entry = sanitize_text_field($_POST['ride_lookback_date']);
+			if ($entry != '' and !PwtcMileage::validate_date_str($entry)) {
+				array_push($error_msgs,
+					'Posted Ride Maximum Lookback Date field must contain a valid date.');
+			}
+			else {
+				$plugin_options['ride_lookback_date'] = $entry;
+			}
     	} 
 		if ($form_submitted) {
 			if (isset($_POST['drop_db_on_delete'])) {
@@ -853,6 +887,18 @@ class PwtcMileage_Admin {
 			}
 			else {
 				$plugin_options['drop_db_on_delete'] = false;
+			}
+			if (isset($_POST['disable_expir_check'])) {
+				$plugin_options['disable_expir_check'] = true;
+			}
+			else {
+				$plugin_options['disable_expir_check'] = false;
+			}
+			if (isset($_POST['disable_delete_confirm'])) {
+				$plugin_options['disable_delete_confirm'] = true;
+			}
+			else {
+				$plugin_options['disable_delete_confirm'] = false;
 			}
 			PwtcMileage::update_plugin_options($plugin_options);
 			$plugin_options = PwtcMileage::get_plugin_options();			

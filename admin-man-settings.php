@@ -5,42 +5,38 @@ if (!current_user_can('manage_options')) {
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
+
+    $("#ride_lookback_date").datepicker({
+  		dateFormat: 'yy-mm-dd',
+		changeMonth: true,
+      	changeYear: true
+	});
+
 });
 </script>
 <div class="wrap">
 	<h1><?= esc_html(get_admin_page_title()); ?></h1>
+<?php
+if (count($error_msgs) > 0) {
+?>
+    <div class="notice notice-error"><p>
+	<?php 
+	foreach ($error_msgs as $msg):
+		echo '<strong>' . $msg . '</strong><br>';
+	endforeach;
+	?>
+	</p></div>
+<?php
+}
+?>
 	<form method="POST">
 		<p>
 		<table>
-			<tr><td>
-				<label for="ride_post_type">Post Type for the Ride Object</label>
-			</td><td>
-    			<input type="text" name="ride_post_type" id="ride_post_type" 
-					value="<?php echo $plugin_options['ride_post_type']; ?>" required/>
-			</td></tr>
-			<tr><td>
-				<label for="ride_date_metakey">Metakey for the Ride Start Date</label>
-			</td><td>
-    			<input type="text" name="ride_date_metakey" id="ride_date_metakey" 
-					value="<?php echo $plugin_options['ride_date_metakey']; ?>" required/>
-			</td></tr>
-			<tr><td>
-				<label for="ride_date_format">Storage Format for the Ride Start Date</label>
-			</td><td>
-    			<input type="text" name="ride_date_format" id="ride_date_format" 
-					value="<?php echo $plugin_options['ride_date_format']; ?>" required/>
-			</td></tr>
 			<tr><td>
 				<label for="date_display_format">Date Display Format</label>
 			</td><td>
     			<input type="text" name="date_display_format" id="date_display_format" 
 					value="<?php echo $plugin_options['date_display_format']; ?>" required/>
-			</td></tr>
-			<tr><td>
-				<label for="db_backup_location">Location of Year-End Backups</label>
-			</td><td>
-    			<input type="text" name="db_backup_location" id="db_backup_location" 
-					value="<?php echo $plugin_options['db_backup_location']; ?>"/>
 			</td></tr>
 			<tr><td>
 				<label for="plugin_menu_label">Plugin Menu Label</label>
@@ -55,7 +51,7 @@ jQuery(document).ready(function($) {
 					value="<?php echo $plugin_options['plugin_menu_location']; ?>" required/>
 			</td></tr>
 			<tr><td>
-				<label for="ride_lookback_date">Posted Ride Minimum Lookback Date</label>
+				<label for="ride_lookback_date">Posted Ride Maximum Lookback Date</label>
 			</td><td>
     			<input type="text" name="ride_lookback_date" id="ride_lookback_date" 
 					value="<?php echo $plugin_options['ride_lookback_date']; ?>"/>
@@ -67,7 +63,7 @@ jQuery(document).ready(function($) {
 					value="<?php echo $plugin_options['db_lock_time_limit']; ?>"/>
 			</td></tr>
 			<tr><td>
-				<label for="disable_expir_check">Disable Rider Expiration Check</label>
+				<label for="disable_expir_check">Disable Member Expiration Check</label>
 			</td><td>
     			<input type="checkbox" name="disable_expir_check" id="disable_expir_check" 
 					<?php if ($plugin_options['disable_expir_check']) { echo 'checked'; } ?>/>

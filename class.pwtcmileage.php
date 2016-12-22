@@ -514,6 +514,14 @@ class PwtcMileage {
 		return $ok;
 	}
 
+	public static function validate_label_str($label) {
+		$ok = true;
+		if (preg_match('/^[A-Za-z].*/', $label) !== 1) {
+			$ok = false;
+		}
+		return $ok;
+	}
+
 	public static function validate_mileage_str($mileage) {
 		$ok = true;
 		if (!is_numeric($mileage)) {
@@ -525,18 +533,26 @@ class PwtcMileage {
 		return $ok;
 	}
 
+	public static function validate_number_str($number) {
+		$ok = true;
+		if (!is_numeric($number)) {
+			$ok = false;
+		}
+		else if (intval($number) < 0) {
+			$ok = false;
+		}
+		return $ok;
+	}
+
+
 	/*************************************************************/
 	/* Plugin options access functions
 	/*************************************************************/
 
 	public static function create_default_plugin_options() {
 		$data = array(
-			'ride_post_type' => 'ride',			// TODO: remove
-			'ride_date_metakey' => 'date',		// TODO: remove
-			'ride_date_format' => 'Y-m-d',		// TODO: remove
 			'date_display_format' => 'D M j, Y',
 			'drop_db_on_delete' => false,
-			'db_backup_location' => '',			// TODO: remove
 			'plugin_menu_label' => 'Rider Mileage',
 			'plugin_menu_location' => 50,
 			'ride_lookback_date' => '',

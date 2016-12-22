@@ -47,14 +47,28 @@ array[2] - start date (string with PHP date format 'Y-m-d')
 */
 function pwtc_mileage_fetch_posts($select_sql, $lookback_date) {
     global $wpdb;
-    $plugin_options = PwtcMileage::get_plugin_options();
-    $results = $wpdb->get_results($wpdb->prepare(
-        'select p.ID, p.post_title, m.meta_value as start_date' . 
-        ' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
-        ' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
-        ' and m.meta_key = %s and (cast(m.meta_value as date) < curdate())' . 
-        ' and p.ID not in (' . $select_sql . ')' . ' order by m.meta_value', 
-        'rideevent', 'start_date'), ARRAY_N);
+    $ride_post_type = 'rideevent';
+    $ride_date_metakey = 'start_date';
+    $sql_stmt = null;
+    if ($lookback_date != null) {
+        $sql_stmt = $wpdb->prepare(
+            'select p.ID, p.post_title, m.meta_value as start_date' . 
+            ' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
+            ' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
+            ' and m.meta_key = %s and (cast(m.meta_value as date) between %s and curdate())' . 
+            ' and p.ID not in (' . $select_sql . ')' . ' order by m.meta_value', 
+            $ride_post_type, $ride_date_metakey, $lookback_date);
+    }
+    else {
+        $sql_stmt = $wpdb->prepare(
+            'select p.ID, p.post_title, m.meta_value as start_date' . 
+            ' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
+            ' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
+            ' and m.meta_key = %s and (cast(m.meta_value as date) < curdate())' . 
+            ' and p.ID not in (' . $select_sql . ')' . ' order by m.meta_value', 
+            $ride_post_type, $ride_date_metakey);
+    }
+    $results = $wpdb->get_results($sql_stmt, ARRAY_N);
     //return array();
     return $results;
 }

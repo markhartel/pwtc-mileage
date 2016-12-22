@@ -139,18 +139,25 @@ if ($show_buttons) {
     <p>
         <div><strong>Synchronize rider list with current membership database.</strong></div>
         <div><form class="sync-frm" method="POST">
-            <input type="submit" name="member_sync" value="Synchronize" class="button button-primary button-large">
+            <input type="submit" name="member_sync" value="Synchronize" 
+                class="button button-primary button-large"/>
         </form></div><br>
         <div><strong>Consolidate <?php echo(intval(date('Y'))-2); ?> club rides to single entry.</strong></div>
         <div><form class="consol-frm" method="POST">
-            <input type="submit" name="consolidate" value="Consolidate" class="button button-primary button-large">
+            <input type="submit" name="consolidate" value="Consolidate" 
+                class="button button-primary button-large" 
+                <?php if ($rides_to_consolidate <= 1) { echo 'disabled'; } ?>/>
         </form></div><br>
         <div><strong>Export database tables to CSV files.</strong></div>
         <div><form class="export-frm" method="POST">
-            <input type="submit" name="export_members" value="Export Members" class="button button-primary button-large">
-            <input type="submit" name="export_rides" value="Export Rides" class="button button-primary button-large">
-            <input type="submit" name="export_mileage" value="Export Mileage" class="button button-primary button-large">
-            <input type="submit" name="export_leaders" value="Export Leaders" class="button button-primary button-large">
+            <input type="submit" name="export_members" value="Export Members" 
+                class="button button-primary button-large"/>
+            <input type="submit" name="export_rides" value="Export Rides" 
+                class="button button-primary button-large"/>
+            <input type="submit" name="export_mileage" value="Export Mileage" 
+                class="button button-primary button-large"/>
+            <input type="submit" name="export_leaders" value="Export Leaders" 
+                class="button button-primary button-large"/>
         </form></div><br>
         <div><strong>Restore database tables from exported CSV files.</strong></div>
         <div>
