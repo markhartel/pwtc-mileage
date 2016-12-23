@@ -57,7 +57,7 @@ if (count($error_msgs) > 0) {
 					value="<?php echo $plugin_options['ride_lookback_date']; ?>"/>
 			</td></tr>
 			<tr><td>
-				<label for="db_lock_time_limit">DB Batch Job Lock Time Limit</label>
+				<label for="db_lock_time_limit">Database Job Lock Time Limit</label>
 			</td><td>
     			<input type="text" name="db_lock_time_limit" id="db_lock_time_limit" 
 					value="<?php echo $plugin_options['db_lock_time_limit']; ?>"/>
