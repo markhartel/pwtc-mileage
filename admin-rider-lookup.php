@@ -61,7 +61,6 @@ jQuery(document).ready(function($) {
 
     $("#confirm-dialog").dialog({
         autoOpen: false,
-        resizable: false,
         height: "auto",
         width: 400,
         modal: true,
@@ -81,7 +80,6 @@ jQuery(document).ready(function($) {
 
     $("#error-dialog").dialog({
         autoOpen: false,
-        resizable: false,
         height: "auto",
         width: 400,
         modal: true,

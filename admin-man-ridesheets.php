@@ -92,7 +92,17 @@ jQuery(document).ready(function($) {
 				'startdate': $("#ridesheet-ride-page .ride-search-frm input[name='fmtdate']").val(),
 				'enddate': $("#ridesheet-ride-page .ride-search-frm input[name='tofmtdate']").val()
 		    };
+<?php if ($plugin_options['disable_delete_confirm']) { ?>
 			$.post(action, data, remove_ride_cb);
+<?php } else { ?>
+            open_confirm_dialog(
+                'Are you sure you want to delete ride "' + 
+					$(this).parent().parent().find('td').first().html() + '"?', 
+                function() {
+                    $.post(action, data, remove_ride_cb);
+                }
+            );
+<?php } ?>		
 		});
 	}
 
@@ -115,7 +125,16 @@ jQuery(document).ready(function($) {
                 'ride_id': $(this).parent().parent().attr('rideid'),
 				'member_id': $(this).parent().parent().attr('memberid')
 		    };
+<?php if ($plugin_options['disable_delete_confirm']) { ?>
 			$.post(action, data, remove_leader_cb);
+<?php } else { ?>
+            open_confirm_dialog(
+                'Are you sure you want to delete ride leader ' + data.member_id + '?', 
+                function() {
+                    $.post(action, data, remove_leader_cb);
+                }
+            );
+<?php } ?>		
 		});
 	}
 
@@ -154,7 +173,16 @@ jQuery(document).ready(function($) {
                 'ride_id': $(this).parent().parent().attr('rideid'),
 				'member_id': $(this).parent().parent().attr('memberid')
 		    };
+<?php if ($plugin_options['disable_delete_confirm']) { ?>
 			$.post(action, data, remove_mileage_cb);
+<?php } else { ?>
+            open_confirm_dialog(
+                'Are you sure you want to delete the mileage for rider ' + data.member_id + '?', 
+                function() {
+                    $.post(action, data, remove_mileage_cb);
+                }
+            );
+<?php } ?>		
 		});
 	}
 

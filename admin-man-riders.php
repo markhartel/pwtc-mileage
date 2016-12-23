@@ -56,8 +56,17 @@ jQuery(document).ready(function($) {
                 'lastname': lastname,
                 'firstname': firstname
 		    };
-			$.post(action, data, remove_rider_cb);
-		});
+<?php if ($plugin_options['disable_delete_confirm']) { ?>
+            $.post(action, data, remove_rider_cb);
+<?php } else { ?>
+            open_confirm_dialog(
+                'Are you sure you want to delete rider ' + data.member_id + '?', 
+                function() {
+                    $.post(action, data, remove_rider_cb);
+                }
+            );
+<?php } ?>		
+        });
     }
 
 	function lookup_riders_cb(response) {
