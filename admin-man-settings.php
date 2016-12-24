@@ -75,6 +75,12 @@ if (count($error_msgs) > 0) {
 					<?php if ($plugin_options['disable_delete_confirm']) { echo 'checked'; } ?>/>
 			</td></tr>
 			<tr><td>
+				<label for="show_ride_ids">Show Ride IDs</label>
+			</td><td>
+    			<input type="checkbox" name="show_ride_ids" id="show_ride_ids" 
+					<?php if ($plugin_options['show_ride_ids']) { echo 'checked'; } ?>/>
+			</td></tr>
+			<tr><td>
 				<label for="drop_db_on_delete">Drop Tables/Views Upon Plugin Delete</label>
 			</td><td>
 				<input type="checkbox" id="drop_db_on_delete" name="drop_db_on_delete" 

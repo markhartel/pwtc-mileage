@@ -900,6 +900,12 @@ class PwtcMileage_Admin {
 			else {
 				$plugin_options['disable_delete_confirm'] = false;
 			}
+			if (isset($_POST['show_ride_ids'])) {
+				$plugin_options['show_ride_ids'] = true;
+			}
+			else {
+				$plugin_options['show_ride_ids'] = false;
+			}
 			PwtcMileage::update_plugin_options($plugin_options);
 			$plugin_options = PwtcMileage::get_plugin_options();			
 		}

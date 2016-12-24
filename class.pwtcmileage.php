@@ -558,6 +558,7 @@ class PwtcMileage {
 			'ride_lookback_date' => '',
 			'disable_expir_check' => false,
 			'disable_delete_confirm' => false,
+			'show_ride_ids' => false,
 			'db_lock_time_limit' => 60);
 		add_option('pwtc_mileage_options', $data);
 	}
@@ -604,6 +605,7 @@ class PwtcMileage {
 
 	public static function plugin_deactivation( ) {
 		error_log( 'PWTC Mileage plugin deactivated' );
+		//self::delete_plugin_options();
 	}
 
 	public static function plugin_uninstall() {

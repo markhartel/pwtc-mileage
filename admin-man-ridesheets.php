@@ -8,6 +8,18 @@ jQuery(document).ready(function($) {
 
 	var ridesheet_back_btn_cb;
 
+<?php if ($plugin_options['show_ride_ids']) { ?>
+	var show_ride_id = true;
+<?php } else { ?>
+	var show_ride_id = false;
+<?php } ?>		
+
+<?php if ($plugin_options['disable_delete_confirm']) { ?>
+	var disable_delete_confirm = true;
+<?php } else { ?>
+	var disable_delete_confirm = false;
+<?php } ?>		
+
 	function set_ridesheet_lock(locked) {
 		if (locked) {
 			$("#ridesheet-sheet-page .leader-tbl .remove-btn").hide();
@@ -27,21 +39,33 @@ jQuery(document).ready(function($) {
 
 	function populate_posts_table(posts) {
 		$('#ridesheet-post-page .posts-tbl tr').remove();
-		$('#ridesheet-post-page .posts-tbl').append(
-			'<tr><th>Posted Ride</th><th>Start Date</th><th>Actions</th></tr>');
+		if (show_ride_id) {
+			$('#ridesheet-post-page .posts-tbl').append(
+				'<tr><th>Posted Ride</th><th>Start Date</th><th>Post ID</th><th>Actions</th></tr>');
+		}
+		else {
+			$('#ridesheet-post-page .posts-tbl').append(
+				'<tr><th>Posted Ride</th><th>Start Date</th><th>Actions</th></tr>');
+		}
 		var fmt = new DateFormatter();
 		posts.forEach(function(post) {
-			//var d = fmt.parseDate(post.start_date, 'Y-m-d');
 			var d = fmt.parseDate(post[2], 'Y-m-d');
 			var fmtdate = fmt.formatDate(d, 
 				'<?php echo $plugin_options['date_display_format']; ?>');
-			$('#ridesheet-post-page .posts-tbl').append(
-				//'<tr postid="' + post.ID + '" ridedate="' + post.start_date + '"><td>' +
-				'<tr postid="' + post[0] + '" ridedate="' + post[2] + '"><td>' +
-				//post.post_title + '</td><td>' + fmtdate + '</td>' + 
-				post[1] + '</td><td>' + fmtdate + '</td>' + 
-				' <td><a class="create-btn">Create Sheet</a></td>' + 
-				'<td></td></tr>'); 
+			if (show_ride_id) {
+				$('#ridesheet-post-page .posts-tbl').append(
+					'<tr postid="' + post[0] + '" ridedate="' + post[2] + '"><td>' +
+				 	post[1] + '</td><td>' + fmtdate + '</td><td>' + post[0] + '</td>' +
+					' <td><a class="create-btn">Create Sheet</a></td>' + 
+					'<td></td></tr>');
+			}
+			else {
+				$('#ridesheet-post-page .posts-tbl').append(
+					'<tr postid="' + post[0] + '" ridedate="' + post[2] + '"><td>' +
+					post[1] + '</td><td>' + fmtdate + '</td>' + 
+					' <td><a class="create-btn">Create Sheet</a></td>' + 
+					'<td></td></tr>');
+			} 
 		});
 		$('#ridesheet-post-page .posts-tbl .create-btn').on('click', function(evt) {
             evt.preventDefault();
@@ -58,18 +82,33 @@ jQuery(document).ready(function($) {
 
 	function populate_ridesheet_table(rides) {
 		$('#ridesheet-ride-page .rides-tbl tr').remove();
-        $('#ridesheet-ride-page .rides-tbl').append(
-			'<tr><th>Ride Sheet</th><th>Start Date</th><th>Actions</th></tr>');    
+		if (show_ride_id) {
+       		$('#ridesheet-ride-page .rides-tbl').append(
+				'<tr><th>Ride Sheet</th><th>Start Date</th><th>ID</th><th>Post ID</th><th>Actions</th></tr>'); 
+		}
+		else {
+       		$('#ridesheet-ride-page .rides-tbl').append(
+				'<tr><th>Ride Sheet</th><th>Start Date</th><th>Actions</th></tr>'); 
+		}   
 		var fmt = new DateFormatter();
         rides.forEach(function(item) {
 			var d = fmt.parseDate(item.date, 'Y-m-d');
 			var fmtdate = fmt.formatDate(d, 
 				'<?php echo $plugin_options['date_display_format']; ?>');
-            $('#ridesheet-ride-page .rides-tbl').append(
-				'<tr rideid="' + item.ID + '" ridedate="' + item.date + '"><td>' +
-				item.title + '</td><td>' + fmtdate + '</td><td>' + 
-				'<a class="edit-btn">Edit</a>' + ' ' +
-				'<a class="remove-btn">Delete</a></td></tr>');    
+			if (show_ride_id) {
+				$('#ridesheet-ride-page .rides-tbl').append(
+					'<tr rideid="' + item.ID + '" ridedate="' + item.date + '"><td>' +
+					item.title + '</td><td>' + fmtdate + '</td><td>' + item.ID + '</td><td>' + 
+					item.post_id + '</td><td><a class="edit-btn">Edit</a>' + ' ' +
+					'<a class="remove-btn">Delete</a></td></tr>'); 
+			}
+			else {
+				$('#ridesheet-ride-page .rides-tbl').append(
+					'<tr rideid="' + item.ID + '" ridedate="' + item.date + '"><td>' +
+					item.title + '</td><td>' + fmtdate + '</td><td>' + 
+					'<a class="edit-btn">Edit</a>' + ' ' +
+					'<a class="remove-btn">Delete</a></td></tr>'); 
+			}   
         });
 		$('#ridesheet-ride-page .rides-tbl .edit-btn').on('click', function(evt) {
             evt.preventDefault();
@@ -92,17 +131,18 @@ jQuery(document).ready(function($) {
 				'startdate': $("#ridesheet-ride-page .ride-search-frm input[name='fmtdate']").val(),
 				'enddate': $("#ridesheet-ride-page .ride-search-frm input[name='tofmtdate']").val()
 		    };
-<?php if ($plugin_options['disable_delete_confirm']) { ?>
-			$.post(action, data, remove_ride_cb);
-<?php } else { ?>
-            open_confirm_dialog(
-                'Are you sure you want to delete ride "' + 
-					$(this).parent().parent().find('td').first().html() + '"?', 
-                function() {
-                    $.post(action, data, remove_ride_cb);
-                }
-            );
-<?php } ?>		
+			if (disable_delete_confirm) {
+				$.post(action, data, remove_ride_cb);
+			} 
+			else {
+				open_confirm_dialog(
+					'Are you sure you want to delete ride "' + 
+						$(this).parent().parent().find('td').first().html() + '"?', 
+					function() {
+						$.post(action, data, remove_ride_cb);
+					}
+				);
+			}		
 		});
 	}
 
@@ -125,16 +165,17 @@ jQuery(document).ready(function($) {
                 'ride_id': $(this).parent().parent().attr('rideid'),
 				'member_id': $(this).parent().parent().attr('memberid')
 		    };
-<?php if ($plugin_options['disable_delete_confirm']) { ?>
-			$.post(action, data, remove_leader_cb);
-<?php } else { ?>
-            open_confirm_dialog(
-                'Are you sure you want to delete ride leader ' + data.member_id + '?', 
-                function() {
-                    $.post(action, data, remove_leader_cb);
-                }
-            );
-<?php } ?>		
+			if (disable_delete_confirm) {
+				$.post(action, data, remove_leader_cb);
+			}
+			else {
+				open_confirm_dialog(
+					'Are you sure you want to delete ride leader ' + data.member_id + '?', 
+					function() {
+						$.post(action, data, remove_leader_cb);
+					}
+				);
+			}		
 		});
 	}
 
@@ -173,16 +214,17 @@ jQuery(document).ready(function($) {
                 'ride_id': $(this).parent().parent().attr('rideid'),
 				'member_id': $(this).parent().parent().attr('memberid')
 		    };
-<?php if ($plugin_options['disable_delete_confirm']) { ?>
-			$.post(action, data, remove_mileage_cb);
-<?php } else { ?>
-            open_confirm_dialog(
-                'Are you sure you want to delete the mileage for rider ' + data.member_id + '?', 
-                function() {
-                    $.post(action, data, remove_mileage_cb);
-                }
-            );
-<?php } ?>		
+			if (disable_delete_confirm) {
+				$.post(action, data, remove_mileage_cb);
+			}
+			else {
+				open_confirm_dialog(
+					'Are you sure you want to delete the mileage for rider ' + data.member_id + '?', 
+					function() {
+						$.post(action, data, remove_mileage_cb);
+					}
+				);
+			}		
 		});
 	}
 
