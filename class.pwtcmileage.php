@@ -21,8 +21,12 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'load_report_scripts' ) );
 
 		// Register shortcode callbacks
-		add_shortcode('pwtc_rider_information', 
-			array( 'PwtcMileage', 'shortcode_rider_info'));
+		add_shortcode('pwtc_rider_name', 
+			array( 'PwtcMileage', 'shortcode_rider_name'));
+		add_shortcode('pwtc_rider_mileage', 
+			array( 'PwtcMileage', 'shortcode_rider_mileage'));
+		add_shortcode('pwtc_rider_led', 
+			array( 'PwtcMileage', 'shortcode_rider_led'));
 		add_shortcode('pwtc_achievement_last_year', 
 			array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
 		add_shortcode('pwtc_mileage_year_to_date', 
@@ -219,7 +223,7 @@ class PwtcMileage {
 		return $out;	
 	}
 
-	public static function shortcode_build_table($meta, $data, $atts) {
+	public static function shortcode_build_table($meta, $data, $atts, $content = null) {
 		$plugin_options = self::get_plugin_options();
 		$hide_id = true;
 		if ($atts['show_id'] == 'on') {
@@ -230,10 +234,16 @@ class PwtcMileage {
 			$id = pwtc_mileage_get_member_id();
 		}
 		$out = '<div class="pwtc-mileage-report">';
-		if ($atts['caption'] == 'on') {
-			$out .= '<div class="report-caption">' . $meta['title'] . '</div>';
+		$out .= '<table>';
+		if (empty($content)) {
+			if ($atts['caption'] == 'on') {
+				$out .= '<caption>' . $meta['title'] . '</caption>';
+			}
 		}
-		$out .= '<table><tr>';
+		else {
+			$out .= '<caption>' . do_shortcode($content) . '</caption>';
+		}
+		$out .= '<tr>';
 		$i = 0;
 		foreach( $meta['header'] as $item ):
 			if ($meta['id_idx'] === $i) {
@@ -328,153 +338,183 @@ class PwtcMileage {
 	/* Shortcode report generation functions
 	/*************************************************************/
 
-	public static function shortcode_rider_info($atts) {
+	public static function shortcode_rider_name($atts) {
 		$out = '';
 		$id = pwtc_mileage_get_member_id();
 		if ($id != null) {
-			$out .= '<div class="pwtc-mileage-rider-report"><table>';
-			$out .= '<tr><td>Year-to-date mileage:</td>';
-			$out .= '<td>' . PwtcMileage_DB::get_ytd_rider_mileage($id) . '</td></tr>';
-			$out .= '<tr><td>Last year\'s mileage:</td>';
-			$out .= '<td>' . PwtcMileage_DB::get_ly_rider_mileage($id) . '</td></tr>';
-			$out .= '<tr><td>Lifetime mileage:</td>';
-			$out .= '<td>' . PwtcMileage_DB::get_lt_rider_mileage($id) . '</td></tr>';
-			$out .= '<tr><td>Year-to-date rides led:</td>';
-			$out .= '<td>' . PwtcMileage_DB::get_ytd_rider_led($id) . '</td></tr>';
-			$out .= '<tr><td>Last year\'s rides led:</td>';
-			$out .= '<td>' . PwtcMileage_DB::get_ly_rider_led($id) . '</td></tr>';
-			$out .= '</table></div>';
+			$result = PwtcMileage_DB::fetch_rider($id);
+			if (count($result) > 0) {
+				$out .= '<span>' . $result[0]['first_name'] . ' ' . 
+					$result[0]['last_name'] . '</span>';
+			}
 		}
 		return $out;
 	}
 
-	public static function shortcode_ly_lt_achvmnt($atts) {
+	public static function shortcode_rider_mileage($atts) {
+    	$a = shortcode_atts(array('type' => 'year2date'), $atts);
+		$out = '';
+		$id = pwtc_mileage_get_member_id();
+		if ($id != null) {
+			if ($a['type'] == 'year2date') {
+				$out .= '<span>' . PwtcMileage_DB::get_ytd_rider_mileage($id) . '</span>';
+			}
+			else if ($a['type'] == 'lastyear') {
+				$out .= '<span>' . PwtcMileage_DB::get_ly_rider_mileage($id) . '</span>';
+			}
+			else if ($a['type'] == 'lifetime') {
+				$out .= '<span>' . PwtcMileage_DB::get_lt_rider_mileage($id) . '</span>';
+			}
+		}
+		return $out;
+	}
+
+	public static function shortcode_rider_led($atts) {
+    	$a = shortcode_atts(array('type' => 'year2date'), $atts);
+		$out = '';
+		$id = pwtc_mileage_get_member_id();
+		if ($id != null) {
+			if ($a['type'] == 'year2date') {
+				$out .= '<span>' . PwtcMileage_DB::get_ytd_rider_led($id) . '</span>';
+			}
+			else if ($a['type'] == 'lastyear') {
+				$out .= '<span>' . PwtcMileage_DB::get_ly_rider_led($id) . '</span>';
+			}
+		}
+		return $out;
+	}
+
+	public static function shortcode_ly_lt_achvmnt($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$sort = self::build_mileage_sort($a);
 		$meta = PwtcMileage_DB::meta_ly_lt_achvmnt();
 		$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, $sort);
-		$out = self::shortcode_build_table($meta, $data, $a);
+		$out = self::shortcode_build_table($meta, $data, $a, $content);
 		return $out;
 	}
 
-	public static function shortcode_ytd_miles($atts) {
+	public static function shortcode_ytd_miles($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$sort = self::build_mileage_sort($a);
 		$min = self::get_minimum_val($a);
 		$meta = PwtcMileage_DB::meta_ytd_miles();
 		$data = PwtcMileage_DB::fetch_ytd_miles(ARRAY_N, $sort, $min);
-		$out = self::shortcode_build_table($meta, $data, $a);
+		$out = self::shortcode_build_table($meta, $data, $a, $content);
 		return $out;
 	}
 
-	public static function shortcode_ly_miles($atts) {
+	public static function shortcode_ly_miles($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$sort = self::build_mileage_sort($a);
 		$min = self::get_minimum_val($a);
 		$meta = PwtcMileage_DB::meta_ly_miles();
 		$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, $sort, $min);
-		$out = self::shortcode_build_table($meta, $data, $a);
+		$out = self::shortcode_build_table($meta, $data, $a, $content);
 		return $out;
 	}
 
-	public static function shortcode_lt_miles($atts) {
+	public static function shortcode_lt_miles($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$sort = self::build_mileage_sort($a);
 		$min = self::get_minimum_val($a);
 		$meta = PwtcMileage_DB::meta_lt_miles();
 		$data = PwtcMileage_DB::fetch_lt_miles(ARRAY_N, $sort, $min);
-		$out = self::shortcode_build_table($meta, $data, $a);
+		$out = self::shortcode_build_table($meta, $data, $a, $content);
 		return $out;
 	}
 
-	public static function shortcode_ytd_led($atts) {
+	public static function shortcode_ytd_led($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$sort = self::build_rides_led_sort($a);
 		$min = self::get_minimum_val($a);
 		$meta = PwtcMileage_DB::meta_ytd_led();
 		$data = PwtcMileage_DB::fetch_ytd_led(ARRAY_N, $sort, $min);
-		$out = self::shortcode_build_table($meta, $data, $a);
+		$out = self::shortcode_build_table($meta, $data, $a, $content);
 		return $out;
 	}
 
-	public static function shortcode_ly_led($atts) {
+	public static function shortcode_ly_led($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$sort = self::build_rides_led_sort($a);
 		$min = self::get_minimum_val($a);
 		$meta = PwtcMileage_DB::meta_ly_led();
 		$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, $sort, $min);
-		$out = self::shortcode_build_table($meta, $data, $a);
+		$out = self::shortcode_build_table($meta, $data, $a, $content);
 		return $out;
 	}
 
-	public static function shortcode_ytd_rides($atts) {
+	public static function shortcode_ytd_rides($atts, $content = null) {
 		$member_id = pwtc_mileage_get_member_id();
 		$out = '';
 		if ($member_id === null) {
-			$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
+			//$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
+			$out = '';
 		}
 		else {
 			$name = self::get_rider_name($member_id);
 			$a = self::normalize_atts($atts);
 			$meta = PwtcMileage_DB::meta_ytd_rides($name);
 			$data = PwtcMileage_DB::fetch_ytd_rides(ARRAY_N, $member_id);
-			$out = self::shortcode_build_table($meta, $data, $a);
+			$out = self::shortcode_build_table($meta, $data, $a, $content);
 		}
 		return $out;
 	}
 
-	public static function shortcode_ly_rides($atts) {
+	public static function shortcode_ly_rides($atts, $content = null) {
 		$member_id = pwtc_mileage_get_member_id();
 		$out = '';
 		if ($member_id === null) {
-			$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
+			//$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
+			$out = '';
 		}
 		else {
 			$name = self::get_rider_name($member_id);
 			$a = self::normalize_atts($atts);
 			$meta = PwtcMileage_DB::meta_ly_rides($name);
 			$data = PwtcMileage_DB::fetch_ly_rides(ARRAY_N, $member_id);
-			$out = self::shortcode_build_table($meta, $data, $a);
+			$out = self::shortcode_build_table($meta, $data, $a, $content);
 		}
 		return $out;
 	}
 
-	public static function shortcode_ytd_led_rides($atts) {
+	public static function shortcode_ytd_led_rides($atts, $content = null) {
 		$member_id = pwtc_mileage_get_member_id();
 		$out = '';
 		if ($member_id === null) {
-			$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
+			//$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
+			$out = '';
 		}
 		else {
 			$name = self::get_rider_name($member_id);
 			$a = self::normalize_atts($atts);
 			$meta = PwtcMileage_DB::meta_ytd_rides_led($name);
 			$data = PwtcMileage_DB::fetch_ytd_rides_led(ARRAY_N, $member_id);
-			$out = self::shortcode_build_table($meta, $data, $a);
+			$out = self::shortcode_build_table($meta, $data, $a, $content);
 		}
 		return $out;
 	}
 
-	public static function shortcode_ly_led_rides($atts) {
+	public static function shortcode_ly_led_rides($atts, $content = null) {
 		$member_id = pwtc_mileage_get_member_id();
 		if ($member_id === null) {
-			$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
+			//$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
+			$out = '';
 		}
 		else {
 			$name = self::get_rider_name($member_id);
 			$a = self::normalize_atts($atts);
 			$meta = PwtcMileage_DB::meta_ly_rides_led($name);
 			$data = PwtcMileage_DB::fetch_ly_rides_led(ARRAY_N, $member_id);
-			$out = self::shortcode_build_table($meta, $data, $a);
+			$out = self::shortcode_build_table($meta, $data, $a, $content);
 			return $out;
 		}
 	}
 
-	public static function shortcode_rides_wo_sheets($atts) {
+	public static function shortcode_rides_wo_sheets($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$meta = PwtcMileage_DB::meta_posts_without_rides();
 		$data = PwtcMileage_DB::fetch_posts_without_rides();
-		$out = self::shortcode_build_table($meta, $data, $a);
+		$out = self::shortcode_build_table($meta, $data, $a, $content);
 		return $out;
 	}
 

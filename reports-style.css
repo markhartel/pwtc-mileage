@@ -1,25 +1,4 @@
-.pwtc-mileage-rider-report table {
-  color: #333;
-  font-family: Helvetica, Arial, sans-serif;
-  width: auto;
-  border-collapse: collapse; 
-  border-spacing: 0;
-}
 
-.pwtc-mileage-rider-report table td {
-  border: 1px solid transparent; /* No more visible border */
-  text-align: left;
-}
-
-.pwtc-mileage-report .report-caption {
-  color: #333;
-  font-family: Helvetica, Arial, sans-serif;
-  width: 100%;
-  max-width: 640px;
-  height: 30px;
-  text-align: left;
-  font-weight: bold;
-}
 
 .pwtc-mileage-report table {
   color: #333;
@@ -28,6 +7,12 @@
   max-width: 640px;
   border-collapse:
   collapse; border-spacing: 0;
+}
+
+.pwtc-mileage-report table caption {
+  height: 30px;
+  text-align: center;
+  font-weight: bold;
 }
 
 .pwtc-mileage-report table td, .pwtc-mileage-report table th {
