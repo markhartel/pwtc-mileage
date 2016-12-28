@@ -30,6 +30,7 @@ if (count($error_msgs) > 0) {
 }
 ?>
 	<form method="POST">
+		<?php wp_nonce_field('pwtc_mileage_settings'); ?>
 		<p>
 		<table>
 			<tr><td>

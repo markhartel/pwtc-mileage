@@ -131,6 +131,7 @@ if ($show_buttons) {
     if ($clear_button) {
 ?>
         <div><form class="clear-frm" method="POST">
+        	<?php wp_nonce_field('pwtc_mileage_clear_errs'); ?>
             <input type="submit" name="clear_errs" value="Clear Errors" class="button">
         </form></div>
 <?php        
@@ -139,17 +140,20 @@ if ($show_buttons) {
     <p>
         <div><strong>Synchronize rider list with current membership database.</strong></div>
         <div><form class="sync-frm" method="POST">
+            <?php wp_nonce_field('pwtc_mileage_member_sync'); ?>
             <input type="submit" name="member_sync" value="Synchronize" 
                 class="button button-primary button-large"/>
         </form></div><br>
         <div><strong>Consolidate <?php echo(intval(date('Y'))-2); ?> club rides to single entry.</strong></div>
         <div><form class="consol-frm" method="POST">
+            <?php wp_nonce_field('pwtc_mileage_consolidate'); ?>
             <input type="submit" name="consolidate" value="Consolidate" 
                 class="button button-primary button-large" 
                 <?php if ($rides_to_consolidate <= 1) { echo 'disabled'; } ?>/>
         </form></div><br>
         <div><strong>Export database tables to CSV files.</strong></div>
         <div><form class="export-frm" method="POST">
+            <?php wp_nonce_field('pwtc_mileage_export'); ?>
             <input type="submit" name="export_members" value="Export Members" 
                 class="button button-primary button-large"/>
             <input type="submit" name="export_rides" value="Export Rides" 
@@ -164,6 +168,7 @@ if ($show_buttons) {
             <button class="restore-btn button button-primary button-large">Restore</button>
             <span class="restore-blk initially-hidden">
 			<form class="restore-frm" method="post" enctype="multipart/form-data">
+                <?php wp_nonce_field('pwtc_mileage_restore'); ?>
                 <table><tr>
                     <td><label>Select members:</label></td>
                     <td><input type="file" name="members_file" multiple="false" accept=".csv"/></td>
@@ -190,6 +195,7 @@ else if ($show_clear_lock) {
 ?>
     <div>
         <form class="clear-lock-frm" method="POST">
+            <?php wp_nonce_field('pwtc_mileage_clear_lock'); ?>
             <input type="submit" name="clear_lock" value="Clear Lock" class="button">
         </form>
     </div>

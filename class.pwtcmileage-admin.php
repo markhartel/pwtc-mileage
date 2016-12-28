@@ -672,6 +672,10 @@ class PwtcMileage_Admin {
 
 	public static function download_csv() {
 		if (isset($_POST['export_members'])) {
+			if (!isset($_POST['_wpnonce']) or
+				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_export')) {
+     			die('Nonce security check failed!'); 
+			}			
 			$today = date('Y-m-d', current_time('timestamp'));
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
@@ -682,6 +686,10 @@ class PwtcMileage_Admin {
 			die;
 		}
 		else if (isset($_POST['export_rides'])) {
+			if (!isset($_POST['_wpnonce']) or
+				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_export')) {
+     			die('Nonce security check failed!'); 
+			}			
 			$today = date('Y-m-d', current_time('timestamp'));
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
@@ -692,6 +700,10 @@ class PwtcMileage_Admin {
 			die;
 		}
 		else if (isset($_POST['export_mileage'])) {
+			if (!isset($_POST['_wpnonce']) or
+				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_export')) {
+     			die('Nonce security check failed!'); 
+			}			
 			$today = date('Y-m-d', current_time('timestamp'));
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
@@ -702,6 +714,10 @@ class PwtcMileage_Admin {
 			die;
 		}
 		else if (isset($_POST['export_leaders'])) {
+			if (!isset($_POST['_wpnonce']) or
+				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_export')) {
+     			die('Nonce security check failed!'); 
+			}			
 			$today = date('Y-m-d', current_time('timestamp'));
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
@@ -716,15 +732,27 @@ class PwtcMileage_Admin {
 	public static function page_manage_year_end() {
 		$plugin_options = PwtcMileage::get_plugin_options();
     	if (isset($_POST['consolidate'])) {
+			if (!isset($_POST['_wpnonce']) or
+				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_consolidate')) {
+     			die('Nonce security check failed!'); 
+			}			
 			PwtcMileage_DB::job_set_status('consolidation', 'triggered');
 			wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
 		}
 
     	if (isset($_POST['member_sync'])) {
+			if (!isset($_POST['_wpnonce']) or
+				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_member_sync')) {
+     			die('Nonce security check failed!'); 
+			}			
 			PwtcMileage_DB::job_set_status('member_sync', 'triggered');
 			wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
 		}
 		if (isset($_POST['restore'])) {
+			if (!isset($_POST['_wpnonce']) or
+				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_restore')) {
+     			die('Nonce security check failed!'); 
+			}			
 			PwtcMileage_DB::job_set_status('cvs_restore', 'triggered');
 			$files = array(
 				self::generate_file_record(
@@ -751,9 +779,17 @@ class PwtcMileage_Admin {
 			}
 		}
     	if (isset($_POST['clear_errs'])) {
+			if (!isset($_POST['_wpnonce']) or
+				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_clear_errs')) {
+     			die('Nonce security check failed!'); 
+			}			
 			PwtcMileage_DB::job_remove_failed();
 		}
     	if (isset($_POST['clear_lock'])) {
+			if (!isset($_POST['_wpnonce']) or
+				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_clear_lock')) {
+     			die('Nonce security check failed!'); 
+			}			
 			PwtcMileage_DB::job_remove_running();
 		}
 		$job_status_s = PwtcMileage_DB::job_get_status('member_sync');
@@ -823,6 +859,11 @@ class PwtcMileage_Admin {
 	}
 
 	public static function page_manage_settings() {
+		if (isset($_POST['_wpnonce'])) {
+			if (!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_settings')) {
+     			die('Nonce security check failed!'); 
+			}			
+		}
 		$plugin_options = PwtcMileage::get_plugin_options();
 		$form_submitted = false;
 		$error_msgs = array();

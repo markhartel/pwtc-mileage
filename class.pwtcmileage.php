@@ -119,35 +119,73 @@ class PwtcMileage {
 			PwtcMileage_DB::job_set_status('member_sync', 'failed', 'no members in membership list');
 		}
 		else {
+			$val_fail_count = 0;
+			$ins_fail_count = 0;
+			$ins_succ_count = 0;
+			$dup_rec_count = 0;
+			$riders = PwtcMileage_DB::fetch_members_for_export();
+			$hashmap = array();
+			foreach ( $riders as $item ) {
+				$hashmap[$item[0]] = $item;
+			}
     		foreach ( $members as $item ) {
 				$memberid = trim($item[0]);
 				$firstname = trim($item[1]);
 				$lastname = trim($item[2]);
 				$expirdate = trim($item[3]);
 				if (!self::validate_member_id_str($memberid)) {
-					error_log('Member ID entry "' . $memberid . 
-						'" is invalid, must be a 5 digit number.');
+					$val_fail_count++;
 				}
 				else if (!self::validate_member_name_str($lastname)) {
-					error_log('Last name entry "' . $lastname . 
-						'" is invalid, must start with a letter.');
+					$val_fail_count++;
 				}
 				else if (!self::validate_member_name_str($firstname)) {
-					error_log('First name entry "' . $firstname . 
-						'" is invalid, must start with a letter.');
+					$val_fail_count++;
 				}
 				else if (!self::validate_date_str($expirdate)) {
-					error_log('Expiration date entry "' . $expirdate . '" is invalid.');
+					$val_fail_count++;
 				}
 				else {
-					$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expirdate);	
-					if (false === $status or 0 === $status) {
-						error_log('Could not insert or update ' . $memberid);
+					$insert = false;
+					if (array_key_exists($memberid, $hashmap)) {
+						$rider = $hashmap[$memberid];
+						if ($firstname != $rider[1] or $lastname != $rider[2] or $expirdate != $rider[3]) {
+							$insert = true;
+						}
+						else {
+							$dup_rec_count++;
+						}
+					}
+					else {
+						$insert = true;
+					}
+
+					if ($insert) {
+						$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expirdate);	
+						if (false === $status or 0 === $status) {
+							$ins_fail_count++;
+						}
+						else {
+							$ins_succ_count++;
+						}
 					}
 				}
 			}
-			sleep(30);
-			PwtcMileage_DB::job_remove('member_sync');	
+			error_log('val_fail_count: ' . $val_fail_count);
+			error_log('ins_fail_count: ' . $ins_fail_count);
+			error_log('ins_succ_count: ' . $ins_succ_count);
+			error_log('dup_rec_count: ' . $dup_rec_count);
+			if ($ins_fail_count > 0) {
+				PwtcMileage_DB::job_set_status('member_sync', 'failed', 
+					'member database insert failed ' . $ins_fail_count . ' times');
+			}
+			else if ($val_fail_count > 0) {
+				PwtcMileage_DB::job_set_status('member_sync', 'failed', 
+					'member validation failed ' . $val_fail_count . ' times');
+			}
+			else {
+				PwtcMileage_DB::job_remove('member_sync');
+			}	
 		}
 	}
 
