@@ -629,7 +629,7 @@ class PwtcMileage {
 
 	public static function create_default_plugin_options() {
 		$data = array(
-			'date_display_format' => 'D M j, Y',
+			'date_display_format' => 'D M j, Y', // TODO: remove this and hardcode to 'D M j Y'
 			'drop_db_on_delete' => false,
 			'plugin_menu_label' => 'Rider Mileage',
 			'plugin_menu_location' => 50,

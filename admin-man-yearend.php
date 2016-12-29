@@ -154,13 +154,17 @@ if ($show_buttons) {
         <div><strong>Export database tables to CSV files.</strong></div>
         <div><form class="export-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_export'); ?>
-            <input type="submit" name="export_members" value="Export Members" 
+            <input type="submit" name="export_members" 
+                value="Members (<?php echo $member_count; ?>)" 
                 class="button button-primary button-large"/>
-            <input type="submit" name="export_rides" value="Export Rides" 
+            <input type="submit" name="export_rides" 
+                value="Rides (<?php echo $ride_count; ?>)" 
                 class="button button-primary button-large"/>
-            <input type="submit" name="export_mileage" value="Export Mileage" 
+            <input type="submit" name="export_mileage" 
+                value="Mileage (<?php echo $mileage_count; ?>)" 
                 class="button button-primary button-large"/>
-            <input type="submit" name="export_leaders" value="Export Leaders" 
+            <input type="submit" name="export_leaders" 
+                value="Leaders (<?php echo $leader_count; ?>)" 
                 class="button button-primary button-large"/>
         </form></div><br>
         <div><strong>Restore database tables from exported CSV files.</strong></div>

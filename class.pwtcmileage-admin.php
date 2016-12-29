@@ -806,6 +806,11 @@ class PwtcMileage_Admin {
 		$maxdate = '' . $yearbeforelast . '-12-31';
 		$rides_to_consolidate = PwtcMileage_DB::get_num_rides_before_date($maxdate);
 
+		$member_count = PwtcMileage_DB::count_members();
+		$ride_count = PwtcMileage_DB::count_rides();
+		$mileage_count = PwtcMileage_DB::count_mileage();
+		$leader_count = PwtcMileage_DB::count_leaders();
+
 		include('admin-man-yearend.php');
 	}
 

@@ -12,11 +12,8 @@ jQuery(document).ready(function($) {
 		$('#rider-inspect-section .riders-tbl tr').remove();
 		$('#rider-inspect-section .riders-tbl').append(
 			'<tr><th>Member ID</th><th>First Name</th><th>Last Name</th><th>Expiration Date</th><th>Actions</th></tr>');
-		var fmt = new DateFormatter();
         members.forEach(function(item) {
-			var d = fmt.parseDate(item.expir_date, 'Y-m-d');
-			var fmtdate = fmt.formatDate(d, 
-				'<?php echo $plugin_options['date_display_format']; ?>');
+			var fmtdate = getPrettyDate(item.expir_date);
             $('#rider-inspect-section .riders-tbl').append(
 				'<tr memberid="' + item.member_id + '">' + 
 				'<td>' + item.member_id + '</td>' +

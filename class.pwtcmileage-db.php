@@ -779,6 +779,34 @@ class PwtcMileage_DB {
 		return $status;
 	} 
 
+	public static function count_members() {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		$results = $wpdb->get_var('select count(member_id) from ' . $member_table);
+		return $results;
+	}
+
+	public static function count_rides() {
+    	global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$results = $wpdb->get_var('select count(ID) from ' . $ride_table);
+		return $results;
+	}
+
+	public static function count_mileage() {
+    	global $wpdb;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		$results = $wpdb->get_var('select count(ride_id) from ' . $mileage_table);
+		return $results;
+	}
+
+	public static function count_leaders() {
+    	global $wpdb;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$results = $wpdb->get_var('select count(ride_id) from ' . $leader_table);
+		return $results;
+	}
+
 	public static function create_db_tables( ) {
 		global $wpdb;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
