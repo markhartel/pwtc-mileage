@@ -40,6 +40,8 @@ class PwtcMileage_Admin {
 			array( 'PwtcMileage_Admin', 'create_rider_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_rider', 
 			array( 'PwtcMileage_Admin', 'remove_rider_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_get_rider', 
+			array( 'PwtcMileage_Admin', 'get_rider_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_leader', 
 			array( 'PwtcMileage_Admin', 'remove_leader_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_mileage', 
@@ -223,14 +225,21 @@ class PwtcMileage_Admin {
 	}
 
 	public static function lookup_riders_callback() {
-		$lastname = trim($_POST['lastname']);	
-		$firstname = trim($_POST['firstname']);
+		$lastname = sanitize_text_field($_POST['lastname']);	
+		$firstname = sanitize_text_field($_POST['firstname']);
 		$memberid = '';
     	if (isset($_POST['memberid'])) {
-			$memberid = trim($_POST['memberid']);
+			$memberid = sanitize_text_field($_POST['memberid']);
 		}
-		$members = PwtcMileage_DB::fetch_riders($lastname, $firstname, $memberid);	
+		$members = null;
+		if ($memberid == '' and $firstname == '' and $lastname == '') {
+			$members = array();
+		}
+		else {
+			$members = PwtcMileage_DB::fetch_riders($lastname, $firstname, $memberid);
+		}	
 		$response = array(
+			'memberid' => $memberid,
 			'lastname' => $lastname,
 			'firstname' => $firstname,
 			'members' => $members);
@@ -239,13 +248,11 @@ class PwtcMileage_Admin {
 	}
 
 	public static function create_rider_callback() {
-		$memberid = trim($_POST['member_id']);	
-		$lastname = trim($_POST['lastname']);	
-		$firstname = trim($_POST['firstname']);
-		$expdate = trim($_POST['exp_date']);
+		$memberid = sanitize_text_field($_POST['member_id']);	
+		$lastname = sanitize_text_field($_POST['lastname']);	
+		$firstname = sanitize_text_field($_POST['firstname']);
+		$expdate = sanitize_text_field($_POST['exp_date']);
 		$mode = $_POST['mode'];
-		$lookupfirst = '';
-		$lookuplast = strtolower(substr($lastname, 0, 1));
 		if (!PwtcMileage::validate_member_id_str($memberid)) {
 			$response = array(
 				'error' => 'Member ID entry "' . $memberid . '" is invalid, must be a 5 digit number.'
@@ -292,11 +299,11 @@ class PwtcMileage_Admin {
 					echo wp_json_encode($response);
 				}
 				else {
-					$members = PwtcMileage_DB::fetch_riders($lookuplast, $lookupfirst);
 					$response = array(
-						'lastname' => $lookuplast,
-						'firstname' => $lookupfirst,
-						'members' => $members);
+						'member_id' => $memberid,
+						'lastname' => $lastname,
+						'firstname' => $firstname,
+						'exp_date' => $expdate);
 					echo wp_json_encode($response);
 				}
 			}
@@ -305,9 +312,7 @@ class PwtcMileage_Admin {
 	}
 
 	public static function remove_rider_callback() {
-		$memberid = trim($_POST['member_id']);	
-		$lastname = trim($_POST['lastname']);	
-		$firstname = trim($_POST['firstname']);
+		$memberid = sanitize_text_field($_POST['member_id']);	
 		$mcnt = PwtcMileage_DB::fetch_member_has_mileage($memberid);
 		$lcnt = PwtcMileage_DB::fetch_member_has_leaders($memberid);
 		if ($mcnt > 0 or $lcnt > 0) {
@@ -325,14 +330,30 @@ class PwtcMileage_Admin {
     			echo wp_json_encode($response);
 			}
 			else {
-				$members = PwtcMileage_DB::fetch_riders($lastname, $firstname);	
-				$response = array(
-					'lastname' => $lastname,
-					'firstname' => $firstname,
-					'members' => $members);
+				$response = array('member_id' => $memberid);
    				echo wp_json_encode($response);
 			}
 		}
+		wp_die();
+	}
+
+	public static function get_rider_callback() {
+		$memberid = sanitize_text_field($_POST['member_id']);	
+		$result = PwtcMileage_DB::fetch_rider($memberid);
+		if (count($result) == 0) {
+			$response = array(
+				'error' => 'Could not find rider ' . $memberid . '.'
+			);
+    		echo wp_json_encode($response);			
+		}
+		else {
+			$response = array(
+				'member_id' => $result[0]['member_id'],
+				'lastname' => $result[0]['last_name'],
+				'firstname' => $result[0]['first_name'],
+				'exp_date' => $result[0]['expir_date']);
+    		echo wp_json_encode($response);						
+		}	
 		wp_die();
 	}
 
