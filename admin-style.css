@@ -32,6 +32,11 @@
   font-weight: bold;
 }
 
+.popup-frm {
+  border: 1px solid;
+  padding: 10px;
+}
+
 table.pretty {
   color: #333;
   font-family: Helvetica, Arial, sans-serif;

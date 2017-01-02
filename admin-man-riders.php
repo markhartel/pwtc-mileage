@@ -63,7 +63,9 @@ jQuery(document).ready(function($) {
             open_error_dialog(res.error);
 		}
 		else {
-            $('#rider-inspect-section .add-blk').hide();
+            $('#rider-inspect-section .add-blk').hide('slow', function() {
+                $("#rider-inspect-section .add-btn").show('fast');     
+            });
             load_rider_table();
         }
 	}   
@@ -74,6 +76,9 @@ jQuery(document).ready(function($) {
             open_error_dialog(res.error);
 		}
 		else {
+			$("#rider-inspect-section .add-blk .add-frm input[type='submit']").val(
+                'Modify'
+            );
 			$("#rider-inspect-section .add-blk .add-frm input[name='memberid']").val(
                 res.member_id
             );
@@ -91,8 +96,10 @@ jQuery(document).ready(function($) {
             );
             $("#rider-inspect-section .add-blk .add-frm input[name='mode']").val('update');
             $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").attr("disabled", "disabled");
-            $('#rider-inspect-section .add-blk').show(500);
-            $("#rider-inspect-section .add-blk .add-frm input[name='firstname']").focus();
+            $("#rider-inspect-section .add-btn").hide('fast', function() {
+		        $('#rider-inspect-section .add-blk').show('slow'); 
+                $("#rider-inspect-section .add-blk .add-frm input[name='firstname']").focus();          
+            });
         }
 	}   
 
@@ -107,14 +114,22 @@ jQuery(document).ready(function($) {
 	}   
 
     function load_rider_table() {
-        var action = $('#rider-inspect-section .search-frm').attr('action');
-        var data = {
-			'action': 'pwtc_mileage_lookup_riders',
-			'memberid': $("#rider-inspect-section .search-frm input[name='memberid']").val(),
-			'lastname': $("#rider-inspect-section .search-frm input[name='lastname']").val(),
-			'firstname': $("#rider-inspect-section .search-frm input[name='firstname']").val()
-		};
-		$.post(action, data, lookup_riders_cb);   
+        var memberid = $("#rider-inspect-section .search-frm input[name='memberid']").val().trim();
+        var lastname = $("#rider-inspect-section .search-frm input[name='lastname']").val().trim();
+        var firstname = $("#rider-inspect-section .search-frm input[name='firstname']").val().trim();
+        if (memberid.length > 0 || lastname.length > 0 || firstname.length > 0) {
+            var action = $('#rider-inspect-section .search-frm').attr('action');
+            var data = {
+                'action': 'pwtc_mileage_lookup_riders',
+                'memberid': memberid,
+                'lastname': lastname,
+                'firstname': firstname
+            };
+            $.post(action, data, lookup_riders_cb); 
+        }
+        else {
+            $('#rider-inspect-section .riders-tbl tr').remove();  
+        }  
     }
 
     $('#rider-inspect-section .search-frm').on('submit', function(evt) {
@@ -125,19 +140,25 @@ jQuery(document).ready(function($) {
     $('#rider-inspect-section .search-frm .reset-btn').on('click', function(evt) {
         evt.preventDefault();
         $("#rider-inspect-section .search-frm input[type='text']").val(''); 
+        $('#rider-inspect-section .riders-tbl tr').remove();
     });
 
     $("#rider-inspect-section .add-btn").on('click', function(evt) {
+        $("#rider-inspect-section .add-blk .add-frm input[type='submit']").val('Create');
 		$("#rider-inspect-section .add-blk .add-frm input[type='text']").val(''); 
 		$("#rider-inspect-section .add-blk .add-frm input[type='hidden']").val(''); 
         $("#rider-inspect-section .add-blk .add-frm input[name='mode']").val('insert');
         $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").removeAttr("disabled");
-		$('#rider-inspect-section .add-blk').show(500); 
-        $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").focus();          
+        $("#rider-inspect-section .add-btn").hide('fast', function() {
+		    $('#rider-inspect-section .add-blk').show('slow'); 
+            $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").focus();          
+        });
     });
 
 	$("#rider-inspect-section .add-blk .cancel-btn").on('click', function(evt) {
-		$('#rider-inspect-section .add-blk').hide();
+		$('#rider-inspect-section .add-blk').hide('slow', function() {
+            $("#rider-inspect-section .add-btn").show('fast'); 
+        });
     });
 
     $("#rider-inspect-section .add-blk .add-frm input[name='expdate']").datepicker({
@@ -189,7 +210,7 @@ if ($running_jobs > 0) {
         </p>
 
         <div><button class="add-btn button button-primary button-large">New</button>
-		<span class="add-blk initially-hidden">
+		<span class="add-blk popup-frm initially-hidden">
 			<form class="add-frm" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 				<table>
 				<tr><td>Member ID:</td><td><input name="memberid" type="text" required/></td></tr>

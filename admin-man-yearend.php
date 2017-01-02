@@ -55,11 +55,15 @@ jQuery(document).ready(function($) {
 
     $(".restore-btn").on('click', function(evt) {
 		$(".restore-frm input[type='file']").val(''); 
-		$('.restore-blk').show(500); 
+        $(".restore-btn").hide('fast', function() {
+            $('.restore-blk').show('slow'); 
+        })
     });
 
 	$(".restore-blk .cancel-btn").on('click', function(evt) {
-		$('.restore-blk').hide();
+		$('.restore-blk').hide('slow', function() {
+            $(".restore-btn").show('fast');
+        });
     });
 
  });
@@ -170,7 +174,7 @@ if ($show_buttons) {
         <div><strong>Restore database tables from exported CSV files.</strong></div>
         <div>
             <button class="restore-btn button button-primary button-large">Restore</button>
-            <span class="restore-blk initially-hidden">
+            <span class="restore-blk popup-frm initially-hidden">
 			<form class="restore-frm" method="post" enctype="multipart/form-data">
                 <?php wp_nonce_field('pwtc_mileage_restore'); ?>
                 <table><tr>
