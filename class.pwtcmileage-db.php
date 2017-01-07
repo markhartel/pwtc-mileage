@@ -96,7 +96,7 @@ class PwtcMileage_DB {
 		$thisyear = date('Y', current_time('timestamp'));
     	$lastyear = intval($thisyear) - 1;
 		$meta = array(
-			'header' => array('Member ID', 'Name', 'Mileage', 'Achievement'),
+			'header' => array('ID', 'Name', 'Mileage', 'Award'),
 			'title' => '' . $lastyear . ' Lifetime Mileage Achievement',
 			'date_idx' => -1,
 			'id_idx' => 0
@@ -118,7 +118,7 @@ class PwtcMileage_DB {
 
 	public static function meta_ytd_miles() {
 		$meta = array(
-			'header' => array('Member ID', 'Name', 'Mileage'),
+			'header' => array('ID', 'Name', 'Mileage'),
 			'title' => 'Year-to-date Rider Mileage',
 			'date_idx' => -1,
 			'id_idx' => 0
@@ -139,9 +139,11 @@ class PwtcMileage_DB {
 	}
 
 	public static function meta_ly_miles() {
+		$thisyear = date('Y', current_time('timestamp'));
+    	$lastyear = intval($thisyear) - 1;
 		$meta = array(
-			'header' => array('Member ID', 'Name', 'Mileage'),
-			'title' => 'Last Year\'s Rider Mileage',
+			'header' => array('ID', 'Name', 'Mileage'),
+			'title' => $lastyear . ' Rider Mileage',
 			'date_idx' => -1,
 			'id_idx' => 0
 		);
@@ -162,7 +164,7 @@ class PwtcMileage_DB {
 
 	public static function meta_lt_miles() {
 		$meta = array(
-			'header' => array('Member ID', 'Name', 'Mileage'),
+			'header' => array('ID', 'Name', 'Mileage'),
 			'title' => 'Lifetime Rider Mileage',
 			'date_idx' => -1,
 			'id_idx' => 0
@@ -184,8 +186,8 @@ class PwtcMileage_DB {
 
 	public static function meta_ytd_led() {
 		$meta = array(
-			'header' => array('Member ID', 'Name', 'Rides Led'),
-			'title' => 'Year-to-date Number of Rides Led',
+			'header' => array('ID', 'Name', 'Rides Led'),
+			'title' => 'Year-to-date Rides Led',
 			'date_idx' => -1,
 			'id_idx' => 0
 		);
@@ -205,9 +207,11 @@ class PwtcMileage_DB {
 	}
 
 	public static function meta_ly_led() {
+		$thisyear = date('Y', current_time('timestamp'));
+    	$lastyear = intval($thisyear) - 1;
 		$meta = array(
-			'header' => array('Member ID', 'Name', 'Rides Led'),
-			'title' => 'Last year\'s Number of Rides Led',
+			'header' => array('ID', 'Name', 'Rides Led'),
+			'title' => $lastyear . ' Rides Led',
 			'date_idx' => -1,
 			'id_idx' => 0
 		);
@@ -241,9 +245,11 @@ class PwtcMileage_DB {
 	}
 
 	public static function meta_ly_rides($name = '') {
+		$thisyear = date('Y', current_time('timestamp'));
+    	$lastyear = intval($thisyear) - 1;
 		$meta = array(
 			'header' => array('Title', 'Date', 'Mileage'),
-			'title' => 'Last Year\'s Rides by ' . $name,
+			'title' => $lastyear . ' Rides by ' . $name,
 			'date_idx' => 1,
 			'id_idx' => -1
 		);
@@ -277,9 +283,11 @@ class PwtcMileage_DB {
 	}
 
 	public static function meta_ly_rides_led($name = '') {
+		$thisyear = date('Y', current_time('timestamp'));
+    	$lastyear = intval($thisyear) - 1;
 		$meta = array(
 			'header' => array('Title', 'Date'),
-			'title' => 'Last Year\'s Rides Led by ' . $name,
+			'title' => $lastyear . ' Rides Led by ' . $name,
 			'date_idx' => 1,
 			'id_idx' => -1
 		);
@@ -294,23 +302,6 @@ class PwtcMileage_DB {
 			$title . '%', $fromdate, $todate), ARRAY_A);
 		return $results;
 	}
-
-/*
-	public static function fetch_posts_without_rides($outtype) {
-    	global $wpdb;
-		$plugin_options = PwtcMileage::get_plugin_options();
-		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
-    	$results = $wpdb->get_results($wpdb->prepare(
-			'select p.ID, p.post_title, m.meta_value as start_date' . 
-			' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
-			' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
-			' and m.meta_key = %s and (cast(m.meta_value as date) < curdate())' . 
-			' and p.ID not in (select post_id from ' . $ride_table . ' where post_id <> 0)' . 
-			' order by m.meta_value', 
-			$plugin_options['ride_post_type'], $plugin_options['ride_date_metakey']), $outtype);
-		return $results;
-	}
-*/
 
 	public static function fetch_posts_without_rides() {
 		global $wpdb;
@@ -333,7 +324,7 @@ class PwtcMileage_DB {
 
 	public static function meta_posts_without_rides() {
 		$meta = array(
-			'header' => array('Post ID', 'Title', 'Start Date'),
+			'header' => array('ID', 'Title', 'Date'),
 			'title' => 'Posted Rides without Ride Sheets',
 			'date_idx' => 2,
 			'id_idx' => 0

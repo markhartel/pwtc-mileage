@@ -271,8 +271,10 @@ class PwtcMileage {
 		if ($meta['id_idx'] >= 0 and $atts['highlight_user'] == 'on') {
 			$id = pwtc_mileage_get_member_id();
 		}
-		$out = '<div class="pwtc-mileage-report">';
-		$out .= '<table>';
+		//$out = '<div class="pwtc-mileage-report">';
+		//$out .= '<table>';
+		$out = '<div>';  
+		$out .= '<table class="rwd-table">';
 		if (empty($content)) {
 			if ($atts['caption'] == 'on') {
 				$out .= '<caption>' . $meta['title'] . '</caption>';
@@ -300,20 +302,22 @@ class PwtcMileage {
 			$i = 0;
 			$highlight = false;
 			foreach( $row as $item ):
+				$label = $meta['header'][$i];
+				$lbl_attr = 'data-th="' . $label . '"';
 				if ($meta['date_idx'] == $i) {
 					$fmtdate = date($plugin_options['date_display_format'], strtotime($item));
-					$outrow .= '<td>' . $fmtdate . '</td>';
+					$outrow .= '<td ' . $lbl_attr . '>' . $fmtdate . '</td>';
 				}
 				else if ($meta['id_idx'] === $i) {
 					if ($id !== null and $id == $item) {
 						$highlight = true;
 					}
 					if (!$hide_id) {
-						$outrow .= '<td>' . $item . '</td>';						
+						$outrow .= '<td ' . $lbl_attr . '>' . $item . '</td>';						
 					}
 				}
 				else {
-					$outrow .= '<td>' . $item . '</td>';
+					$outrow .= '<td ' . $lbl_attr . '>' . $item . '</td>';
 				}
 				$i++;
 			endforeach;	
@@ -334,7 +338,7 @@ class PwtcMileage {
        			'highlight_user' => 'on',
 				'sort_by' => 'off',
 				'sort_order' => 'asc',
-				'minimum' => 0,
+				'minimum' => 1,
 				'caption' => 'on'
 			), $atts);
 		return $a;

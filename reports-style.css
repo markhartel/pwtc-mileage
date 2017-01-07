@@ -1,12 +1,14 @@
-
+/*
+@import "http://fonts.googleapis.com/css?family=Montserrat:300,400,700";
+*/
 
 .pwtc-mileage-report table {
   color: #333;
   font-family: Helvetica, Arial, sans-serif;
   width: 100%;
   max-width: 640px;
-  border-collapse:
-  collapse; border-spacing: 0;
+  border-collapse: collapse; 
+  border-spacing: 0;
 }
 
 .pwtc-mileage-report table caption {
@@ -39,3 +41,69 @@
 .pwtc-mileage-report table tr:nth-child(odd) td { background: #FEFEFE; }
 
 .pwtc-mileage-report table tr.highlight td { background: cyan; }
+
+
+.rwd-table {
+  /*font-family: Montserrat, sans-serif;*/
+  font-family: Helvetica, Arial, sans-serif;
+  margin: 1em 0;
+  min-width: 300px;
+  background: #34495E;
+  color: #fff;
+  border-radius: .4em;
+  overflow: hidden;
+  border-collapse: collapse;
+}
+.rwd-table caption {
+  background: #34495E;
+  text-align: center;
+  font-weight: bold;
+}
+.rwd-table th {
+  display: none;
+}
+.rwd-table td {
+  display: block;
+}
+.rwd-table td:first-child {
+  padding-top: .5em;
+}
+.rwd-table td:last-child {
+  padding-bottom: .5em;
+}
+.rwd-table td:before {
+  content: attr(data-th) ": ";
+  font-weight: bold;
+  width: 6.5em;
+  display: inline-block;
+}
+.rwd-table th, .rwd-table td {
+  margin: .5em 1em;
+} 
+.rwd-table th, .rwd-table td:before {
+  color: #dd5;
+}
+.rwd-table th, .rwd-table td {
+  text-align: left;
+  border: none;
+  padding: 0em .5em;
+}
+.rwd-table tr.highlight, .rwd-table tr.highlight td { 
+  background: grey; 
+}
+
+@media (min-width: 480px) {
+  .rwd-table td:before {
+    display: none;
+  }
+  .rwd-table th, .rwd-table td {
+    display: table-cell;
+    padding: 1em !important;
+  }
+  .rwd-table th:first-child, .rwd-table td:first-child {
+    padding-left: 0;
+  }
+  .rwd-table th:last-child, .rwd-table td:last-child {
+    padding-right: 0;
+  }
+}
