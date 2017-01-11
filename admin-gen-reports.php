@@ -41,10 +41,10 @@ jQuery(document).ready(function($) {
 
     $('#report-main-section .ride-mileage a').on('click', function(evt) {
         evt.preventDefault();
-        if ($('#report-main-section .dwnld-file').is(':checked')) {
+        if ($('#report-main-section .download-slt').val() != 'no') {
             $('#report-main-section .download').html(
                 '<form method="post">' + 
-                '<input type="hidden" name="export_report"/>' +
+                '<input type="hidden" name="' + $('#report-main-section .download-slt').val() + '"/>' +
                 '<input type="hidden" name="report_id" value="' + $(this).attr('report-id') + '"/>' +
                 '<input type="hidden" name="sort" value="' + 
                     $('#report-main-section .mileage-sort-slt').val() + '"/>' +
@@ -64,10 +64,10 @@ jQuery(document).ready(function($) {
 
     $('#report-main-section .ride-leader a').on('click', function(evt) {
         evt.preventDefault();
-        if ($('#report-main-section .dwnld-file').is(':checked')) {
+        if ($('#report-main-section .download-slt').val() != 'no') {
             $('#report-main-section .download').html(
                 '<form method="post">' + 
-                '<input type="hidden" name="export_report"/>' +
+                '<input type="hidden" name="' + $('#report-main-section .download-slt').val() + '"/>' +
                 '<input type="hidden" name="report_id" value="' + $(this).attr('report-id') + '"/>' +
                 '<input type="hidden" name="sort" value="' + 
                     $('#report-main-section .leader-sort-slt').val() + '"/>' +
@@ -92,10 +92,10 @@ jQuery(document).ready(function($) {
             open_error_dialog('You must first select a rider before choosing this report.');
         }
         else {
-            if ($('#report-main-section .dwnld-file').is(':checked')) {
+            if ($('#report-main-section .download-slt').val() != 'no') {
                 $('#report-main-section .download').html(
                     '<form method="post">' + 
-                    '<input type="hidden" name="export_report"/>' +
+                    '<input type="hidden" name="' + $('#report-main-section .download-slt').val() + '"/>' +
                     '<input type="hidden" name="report_id" value="' + $(this).attr('report-id') + '"/>' +
                     '<input type="hidden" name="member_id" value="' + memberid + '"/>' +
                     '<input type="hidden" name="name" value="' + 
@@ -144,7 +144,13 @@ if ($running_jobs > 0) {
 } else {
 ?>
     <div id='report-main-section'>
-        <p><input type="checkbox" class="dwnld-file"/>download report file</p>
+        <p>Download: 
+            <select class='download-slt'>
+                <option value="no" selected>No</option> 
+                <option value="export_pdf">PDF file</option> 
+                <option value="export_csv">CSV file</option>
+            </select>
+        </p>
         <h3>Ride Mileage Reports</h3>
         <p>Sort by: 
             <select class='mileage-sort-slt'>

@@ -65,6 +65,11 @@ sort_order|Blah, blah, blah|"asc" or "desc"|"asc"
 - admin-man-yearend.php *(client-side logic for Year-End Ops admin page)*
 - admin-man-settings.php *(client-side logic for Settings admin page)*
 - admin-rider-lookup.php *(client-side logic for rider lookup dialog)*
+- fpdf.php *(open source pdf generator - from [fpdf.org](http://www.fpdf.org))*
+- helvetica.php *(font definition for pdf generator)*
+- helveticai.php *(font definition for pdf generator)*
+- helveticab.php *(font definition for pdf generator)*
+- helveticabi.php *(font definition for pdf generator)*
 - admin-scripts.js *(javascript utility functions for admin pages)*
 - php-date-formatter.js *(javascript utility for PHP-style date formats - from [github](https://github.com/kartik-v/php-date-formatter))*
 - php-date-formatter.min.js *(minimized version of above file - from [github](https://github.com/kartik-v/php-date-formatter))*

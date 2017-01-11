@@ -612,6 +612,7 @@ class PwtcMileage_Admin {
     	$capability = 'edit_posts';
     	$function = array( 'PwtcMileage_Admin', 'page_generate_reports');
 		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_pdf'));
 		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_csv'));
 
     	$page_title = 'Manage Riders';
@@ -676,8 +677,67 @@ class PwtcMileage_Admin {
 		}		
 	}
 
+	public static function write_export_pdf_file($pdf, $data, $header, $title) {
+		$rows_per_page = 40;
+		$table_width = 190;
+		$tcell_width = $table_width/count($header);
+		$pdf->SetAutoPageBreak(false);
+		$pdf->SetFont('Arial', '', 14);
+		if (count($data) == 0) {
+			$pdf->AddPage();
+			$pdf->SetTextColor(0);
+			$pdf->SetFont('','B');
+			$pdf->Write(5, $title);
+			$pdf->Ln();
+			$pdf->Ln();
+			$pdf->SetFont('','I');
+			$pdf->Write(5, 'table is empty');
+		}
+		else {
+			$row_count = 9999;
+			$page_count = 0;
+			$fill = false;
+			foreach ( $data as $datum ) {
+				if ($row_count > $rows_per_page) {
+					if ($page_count > 0) {
+						$pdf->Cell($table_width,0,'','T');
+					}
+					$pdf->AddPage();
+					if ($page_count == 0) {
+						$pdf->SetTextColor(0);
+						$pdf->SetFont('','B');
+						$pdf->Write(5, $title);
+						$pdf->Ln();
+						$pdf->Ln();
+					}
+					$pdf->SetFillColor(255,0,0);
+					$pdf->SetTextColor(255);
+					$pdf->SetDrawColor(128,0,0);
+					$pdf->SetLineWidth(.3);
+					$pdf->SetFont('','B');
+					foreach ( $header as $item ) {
+						$pdf->Cell($tcell_width,7,$item,1,0,'C',true);
+					}
+					$pdf->Ln();
+					$pdf->SetFillColor(224,235,255);
+					$pdf->SetTextColor(0);
+					$pdf->SetFont('');
+					$row_count = 0;
+					$page_count++;
+				}
+				foreach ( $datum as $col ) {
+					$pdf->Cell($tcell_width,6,$col,'LR',0,'C',$fill);
+				}
+				$pdf->Ln();
+				$fill = !$fill;
+				$row_count++;
+			}
+			$pdf->Cell($table_width,0,'','T');
+		}
+	}
+
 	public static function download_report_csv() {
-		if (isset($_POST['export_report'])) {
+		if (isset($_POST['export_csv'])) {
 			$response = self::generate_report();
 			$today = date('Y-m-d', current_time('timestamp'));
 			$report_id = $response['report_id'];
@@ -687,6 +747,22 @@ class PwtcMileage_Admin {
 			$fh = fopen('php://output', 'w');
 			self::write_export_csv_file($fh, $response['data'], $response['header']);
 			fclose($fh);
+			die;
+		}
+	}
+
+	public static function download_report_pdf() {
+		if (isset($_POST['export_pdf'])) {
+			$response = self::generate_report();
+			$today = date('Y-m-d', current_time('timestamp'));
+			$report_id = $response['report_id'];
+			header('Content-Description: File Transfer');
+			header("Content-type: application/pdf");
+			header("Content-Disposition: attachment; filename=rpt_{$report_id}_{$today}.pdf");
+			require('fpdf.php');	
+			$pdf = new FPDF();
+			self::write_export_pdf_file($pdf, $response['data'], $response['header'], $response['title']);
+			$pdf->Output();
 			die;
 		}
 	}
