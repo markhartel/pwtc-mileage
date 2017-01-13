@@ -12,6 +12,8 @@ jQuery(document).ready(function($) {
       	changeYear: true
 	});
 
+	$("#plugin_menu_label").focus();
+
 });
 </script>
 <div class="wrap">

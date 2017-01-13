@@ -545,6 +545,8 @@ jQuery(document).ready(function($) {
         fromDate.datepicker("option", "maxDate", getDate(this));
     });
 
+	$('#ridesheet-main-page .create-btn').focus();
+
 });
 </script>
 <div class="wrap">

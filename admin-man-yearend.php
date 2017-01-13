@@ -54,9 +54,11 @@ jQuery(document).ready(function($) {
     });
 
     $(".restore-btn").on('click', function(evt) {
-		$(".restore-frm input[type='file']").val(''); 
+		$(".restore-frm input[type='file']").val('');
+        $(".restore-frm input[type='file']").next('label').html('Select file...'); 
         $(".restore-btn").hide('fast', function() {
             $('.restore-blk').show('slow'); 
+            $(".restore-frm input[name='members_file']").focus();
         })
     });
 
@@ -65,6 +67,32 @@ jQuery(document).ready(function($) {
             $(".restore-btn").show('fast');
         });
     });
+
+    $('.inputfile').each(function() {
+		var $input	 = $(this),
+			$label	 = $input.next('label'),
+			labelVal = $label.html();
+
+		$input.on('change', function(e) {
+			var fileName = '';
+            if (e.target.value) {
+				fileName = e.target.value.split( '\\' ).pop();
+            }
+			if (fileName) {
+				$label.html(fileName);
+            }
+			else {
+				$label.html(labelVal);
+            }
+		});
+
+		// Firefox bug fix
+		$input
+		.on('focus', function(){ $input.addClass('has-focus'); })
+		.on('blur', function(){ $input.removeClass('has-focus'); });
+	});
+
+    $('.sync-frm input[name="member_sync"]').focus();
 
  });
 </script>
@@ -178,17 +206,21 @@ if ($show_buttons) {
 			<form class="restore-frm" method="post" enctype="multipart/form-data">
                 <?php wp_nonce_field('pwtc_mileage_restore'); ?>
                 <table><tr>
-                    <td><label>Select members:</label></td>
-                    <td><input type="file" name="members_file" multiple="false" accept=".csv"/></td>
+                    <td>Members File: </td>
+                    <td><input id="select-members-file" class="inputfile" type="file" name="members_file" multiple="false" accept=".csv"/>
+                    <label for="select-members-file" class="button">Select file...</label></td>
                 </tr><tr>
-                    <td><label>Select rides:</label></td>
-                    <td><input type="file" name="rides_file" multiple="false" accept=".csv"/></td>
+                    <td>Rides File: </td>
+                    <td><input id="select-rides-file" class="inputfile" type="file" name="rides_file" multiple="false" accept=".csv"/>
+                    <label for="select-rides-file" class="button">Select file...</label></td>
                 </tr><tr>
-                    <td><label>Select mileage:</label></td>
-                    <td><input type="file" name="mileage_file" multiple="false" accept=".csv"/></td>
+                    <td>Mileage File: </td>
+                    <td><input id="select-mileage-file" class="inputfile" type="file" name="mileage_file" multiple="false" accept=".csv"/>
+                    <label for="select-mileage-file" class="button">Select file...</label></td>
                 </tr><tr>
-                    <td><label>Select leaders:</label></td>
-                    <td><input type="file" name="leaders_file" multiple="false" accept=".csv"/></td>
+                    <td>Leaders File: </td>
+                    <td><input id="select-leaders-file" class="inputfile" type="file" name="leaders_file" multiple="false" accept=".csv"/>
+                    <label for="select-leaders-file" class="button">Select file...</label></td>
                 </tr></table>
 				<input class="button button-primary" type="submit" name="restore" value="Restore"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>

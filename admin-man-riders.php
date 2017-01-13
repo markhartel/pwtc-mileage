@@ -34,7 +34,8 @@ jQuery(document).ready(function($) {
             var action = '<?php echo admin_url('admin-ajax.php'); ?>';
             var data = {
 			    'action': 'pwtc_mileage_remove_rider',
-                'member_id': $(this).parent().parent().attr('memberid')
+                'member_id': $(this).parent().parent().attr('memberid'),
+                'nonce': '<?php echo wp_create_nonce('pwtc_mileage_remove_rider'); ?>'
 		    };
 <?php if ($plugin_options['disable_delete_confirm']) { ?>
             $.post(action, data, remove_rider_cb);
@@ -174,6 +175,7 @@ jQuery(document).ready(function($) {
         var action = $('#rider-inspect-section .add-blk .add-frm').attr('action');
         var data = {
 			'action': 'pwtc_mileage_create_rider',
+            'nonce': '<?php echo wp_create_nonce('pwtc_mileage_create_rider'); ?>',
             'mode': $("#rider-inspect-section .add-blk .add-frm input[name='mode']").val(),
 			'member_id': $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").val(),
 			'lastname': $("#rider-inspect-section .add-blk .add-frm input[name='lastname']").val(),
@@ -182,6 +184,8 @@ jQuery(document).ready(function($) {
 		};
 		$.post(action, data, create_rider_cb);
     });
+
+    $("#rider-inspect-section .search-frm input[name='memberid']").focus();
 
 });
 </script>

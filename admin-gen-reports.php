@@ -130,6 +130,8 @@ jQuery(document).ready(function($) {
         });
     });
 
+    $('#report-main-section .download-slt').focus();
+
 });
 </script>
 <div class="wrap">

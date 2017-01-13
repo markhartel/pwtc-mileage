@@ -249,11 +249,18 @@ class PwtcMileage_Admin {
 
 	public static function create_rider_callback() {
 		$memberid = sanitize_text_field($_POST['member_id']);	
+		$nonce = $_POST['nonce'];	
 		$lastname = sanitize_text_field($_POST['lastname']);	
 		$firstname = sanitize_text_field($_POST['firstname']);
 		$expdate = sanitize_text_field($_POST['exp_date']);
 		$mode = $_POST['mode'];
-		if (!PwtcMileage::validate_member_id_str($memberid)) {
+		if (!wp_verify_nonce($nonce, 'pwtc_mileage_create_rider')) {
+			$response = array(
+				'error' => 'Access security check failed.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!PwtcMileage::validate_member_id_str($memberid)) {
 			$response = array(
 				'error' => 'Member ID entry "' . $memberid . '" is invalid, must be a 5 digit number.'
 			);
@@ -313,25 +320,34 @@ class PwtcMileage_Admin {
 
 	public static function remove_rider_callback() {
 		$memberid = sanitize_text_field($_POST['member_id']);	
-		$mcnt = PwtcMileage_DB::fetch_member_has_mileage($memberid);
-		$lcnt = PwtcMileage_DB::fetch_member_has_leaders($memberid);
-		if ($mcnt > 0 or $lcnt > 0) {
+		$nonce = $_POST['nonce'];	
+		if (!wp_verify_nonce($nonce, 'pwtc_mileage_remove_rider')) {
 			$response = array(
-				'error' => 'Cannot delete a rider that is entered on a ridesheet.'
+				'error' => 'Access security check failed.'
 			);
-    		echo wp_json_encode($response);
+			echo wp_json_encode($response);
 		}
 		else {
-			$status = PwtcMileage_DB::delete_rider($memberid);	
-			if (false === $status or 0 === $status) {
+			$mcnt = PwtcMileage_DB::fetch_member_has_mileage($memberid);
+			$lcnt = PwtcMileage_DB::fetch_member_has_leaders($memberid);
+			if ($mcnt > 0 or $lcnt > 0) {
 				$response = array(
-					'error' => 'Could not delete rider from database.'
+					'error' => 'Cannot delete a rider that is entered on a ridesheet.'
 				);
-    			echo wp_json_encode($response);
+				echo wp_json_encode($response);
 			}
 			else {
-				$response = array('member_id' => $memberid);
-   				echo wp_json_encode($response);
+				$status = PwtcMileage_DB::delete_rider($memberid);	
+				if (false === $status or 0 === $status) {
+					$response = array(
+						'error' => 'Could not delete rider from database.'
+					);
+					echo wp_json_encode($response);
+				}
+				else {
+					$response = array('member_id' => $memberid);
+					echo wp_json_encode($response);
+				}
 			}
 		}
 		wp_die();
