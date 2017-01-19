@@ -203,25 +203,20 @@ if ($show_buttons) {
         <div>
             <button class="restore-btn button button-primary button-large">Restore</button>
             <span class="restore-blk popup-frm initially-hidden">
-			<form class="restore-frm" method="post" enctype="multipart/form-data">
+			<form class="restore-frm stacked-form" method="post" enctype="multipart/form-data">
                 <?php wp_nonce_field('pwtc_mileage_restore'); ?>
-                <table><tr>
-                    <td>Members File: </td>
-                    <td><input id="select-members-file" class="inputfile" type="file" name="members_file" multiple="false" accept=".csv"/>
-                    <label for="select-members-file" class="button">Select file...</label></td>
-                </tr><tr>
-                    <td>Rides File: </td>
-                    <td><input id="select-rides-file" class="inputfile" type="file" name="rides_file" multiple="false" accept=".csv"/>
-                    <label for="select-rides-file" class="button">Select file...</label></td>
-                </tr><tr>
-                    <td>Mileage File: </td>
-                    <td><input id="select-mileage-file" class="inputfile" type="file" name="mileage_file" multiple="false" accept=".csv"/>
-                    <label for="select-mileage-file" class="button">Select file...</label></td>
-                </tr><tr>
-                    <td>Leaders File: </td>
-                    <td><input id="select-leaders-file" class="inputfile" type="file" name="leaders_file" multiple="false" accept=".csv"/>
-                    <label for="select-leaders-file" class="button">Select file...</label></td>
-                </tr></table>
+                <span>Members</span>
+                <input id="select-members-file" class="inputfile" type="file" name="members_file" multiple="false" accept=".csv"/>
+                <label for="select-members-file" class="button">Select file...</label>
+                <span>Rides</span>
+                <input id="select-rides-file" class="inputfile" type="file" name="rides_file" multiple="false" accept=".csv"/>
+                <label for="select-rides-file" class="button">Select file...</label>
+                <span>Mileage</span>
+                <input id="select-mileage-file" class="inputfile" type="file" name="mileage_file" multiple="false" accept=".csv"/>
+                <label for="select-mileage-file" class="button">Select file...</label>
+                <span>Leaders</span>
+                <input id="select-leaders-file" class="inputfile" type="file" name="leaders_file" multiple="false" accept=".csv"/>
+                <label for="select-leaders-file" class="button">Select file...</label>
 				<input class="button button-primary" type="submit" name="restore" value="Restore"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>

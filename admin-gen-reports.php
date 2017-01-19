@@ -16,8 +16,10 @@ jQuery(document).ready(function($) {
         $('#report-results-section .results-tbl').append(str);
         data.forEach(function(row) {
             str = '<tr>';
+            var count = 0;
             row.forEach(function(item) {
-                str += '<td>' + item + '</td>';
+                str += '<td data-th="' + header[count]+ '">' + item + '</td>';
+                count++;
             });
             str += '</tr>';
             $('#report-results-section .results-tbl').append(str);
@@ -194,7 +196,7 @@ if ($running_jobs > 0) {
     <div id='report-results-section' class="initially-hidden">
         <p><button class='back-btn button button-primary button-large'>Back</button></p>
 		<p><h2></h2></p>
-        <p><table class="results-tbl pretty"></table></p>
+        <p><table class="results-tbl rwd-table"></table></p>
     </div>
 <?php
     include('admin-rider-lookup.php');

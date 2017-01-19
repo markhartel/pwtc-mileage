@@ -1,27 +1,6 @@
-.riders-popup {
-  border: 2px solid black;
-  background: white;
-  padding: 10px;
-  position: absolute;
-  display: none;
-  max-width: 400px;
-  top: 50%;
-  left: 50%;
-  margin-left: -200px; /* 1/2 width */
-  margin-top: -70px; /* 1/2 height */
-}
 
 .initially-hidden {
   display: none;  
-}
-
-.riders-popup div {
-  overflow: auto;
-  height: 100px;
-}
-
-.riders-popup table tr {
-  cursor: pointer;
 }
 
 #rider-lookup-results .lookup-tlb tr {
@@ -85,8 +64,99 @@ table.pretty a {
 	z-index: -1;
 }
 
+.stacked-form .inputfile + label {
+  width: 100%;
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 4px 0;
+}
+
 .inputfile:focus + label,
 .inputfile.has-focus + label {
     outline: 1px dotted #000;
     outline: -webkit-focus-ring-color auto 5px;
+}
+
+.stacked-form {
+  width: 200px;    
+}
+
+.stacked-form input[type=text] {
+  width: 100%;
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 4px 0;
+}
+
+.stacked-form .checkbox-wrap {
+  width: 100%;
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 4px 0;
+}
+
+.stacked-form input[type=submit] {
+  margin: 4px 0;
+}
+
+.stacked-form input[type=button] {
+  margin: 4px 0;
+}
+
+.rwd-table {
+  font-family: Helvetica, Arial, sans-serif;
+  margin: 1em 0;
+  min-width: 300px;
+  background: #34495E;
+  color: #fff;
+  border-radius: .4em;
+  overflow: hidden;
+  border-collapse: collapse;
+}
+.rwd-table caption {
+  background: #34495E;
+  text-align: center;
+  font-weight: bold;
+}
+.rwd-table th {
+  display: none;
+}
+.rwd-table td {
+  display: block;
+}
+.rwd-table td:first-child {
+  padding-top: .5em;
+}
+.rwd-table td:last-child {
+  padding-bottom: .5em;
+}
+.rwd-table td:before {
+  content: attr(data-th) ": ";
+  font-weight: bold;
+  width: 6.5em;
+  display: inline-block;
+}
+.rwd-table th, .rwd-table td {
+  margin: .5em 1em;
+} 
+.rwd-table th, .rwd-table td:before {
+  color: #dd5;
+}
+.rwd-table th, .rwd-table td {
+  text-align: left;
+  border: none;
+  padding: 0em .5em;
+}
+.rwd-table tr.highlight, .rwd-table tr.highlight td { 
+  background: grey; 
+}
+
+@media (min-width: 480px) {
+  .rwd-table td:before {
+    display: none;
+  }
+  .rwd-table th, .rwd-table td {
+    display: table-cell;
+    padding: .5em 1em !important;
+  }
 }

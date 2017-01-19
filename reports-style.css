@@ -1,6 +1,3 @@
-/*
-@import "http://fonts.googleapis.com/css?family=Montserrat:300,400,700";
-*/
 
 .pwtc-mileage-report table {
   color: #333;
@@ -43,8 +40,7 @@
 .pwtc-mileage-report table tr.highlight td { background: cyan; }
 
 
-.rwd-table {
-  /*font-family: Montserrat, sans-serif;*/
+.pwtc-mileage-rwd-table {
   font-family: Helvetica, Arial, sans-serif;
   margin: 1em 0;
   min-width: 300px;
@@ -54,56 +50,50 @@
   overflow: hidden;
   border-collapse: collapse;
 }
-.rwd-table caption {
+.pwtc-mileage-rwd-table caption {
   background: #34495E;
   text-align: center;
   font-weight: bold;
 }
-.rwd-table th {
+.pwtc-mileage-rwd-table th {
   display: none;
 }
-.rwd-table td {
+.pwtc-mileage-rwd-table td {
   display: block;
 }
-.rwd-table td:first-child {
+.pwtc-mileage-rwd-table td:first-child {
   padding-top: .5em;
 }
-.rwd-table td:last-child {
+.pwtc-mileage-rwd-table td:last-child {
   padding-bottom: .5em;
 }
-.rwd-table td:before {
+.pwtc-mileage-rwd-table td:before {
   content: attr(data-th) ": ";
   font-weight: bold;
   width: 6.5em;
   display: inline-block;
 }
-.rwd-table th, .rwd-table td {
+.pwtc-mileage-rwd-table th, .pwtc-mileage-rwd-table td {
   margin: .5em 1em;
 } 
-.rwd-table th, .rwd-table td:before {
+.pwtc-mileage-rwd-table th, .pwtc-mileage-rwd-table td:before {
   color: #dd5;
 }
-.rwd-table th, .rwd-table td {
+.pwtc-mileage-rwd-table th, .pwtc-mileage-rwd-table td {
   text-align: left;
   border: none;
   padding: 0em .5em;
 }
-.rwd-table tr.highlight, .rwd-table tr.highlight td { 
+.pwtc-mileage-rwd-table tr.highlight, .pwtc-mileage-rwd-table tr.highlight td { 
   background: grey; 
 }
 
 @media (min-width: 480px) {
-  .rwd-table td:before {
+  .pwtc-mileage-rwd-table td:before {
     display: none;
   }
-  .rwd-table th, .rwd-table td {
+  .pwtc-mileage-rwd-table th, .pwtc-mileage-rwd-table td {
     display: table-cell;
-    padding: 1em !important;
-  }
-  .rwd-table th:first-child, .rwd-table td:first-child {
-    padding-left: 0;
-  }
-  .rwd-table th:last-child, .rwd-table td:last-child {
-    padding-right: 0;
+    padding: .5em 1em !important;
   }
 }

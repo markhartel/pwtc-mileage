@@ -202,12 +202,13 @@ if ($running_jobs > 0) {
 ?>
     <div id='rider-inspect-section'>
         <p>
-        	<form class="search-frm" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-				<table>
-				<tr><td>Member ID:</td><td><input name="memberid" type="text"/></td></tr>
-				<tr><td>First Name:</td><td><input name="firstname" type="text"/></td></tr>
-				<tr><td>Last Name:</td><td><input name="lastname" type="text"/></td></tr>
-				</table>
+        	<form class="search-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+                <span>Member ID</span>
+                <input name="memberid" type="text"/>
+                <span>First Name</span>
+                <input name="firstname" type="text"/>
+                <span>Last Name</span>
+                <input name="lastname" type="text"/>
 				<input class="button button-primary" type="submit" value="Search"/>
 				<input class="reset-btn button button-primary" type="button" value="Reset"/>
 			</form>
@@ -215,13 +216,15 @@ if ($running_jobs > 0) {
 
         <div><button class="add-btn button button-primary button-large">New</button>
 		<span class="add-blk popup-frm initially-hidden">
-			<form class="add-frm" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-				<table>
-				<tr><td>Member ID:</td><td><input name="memberid" type="text" required/></td></tr>
-				<tr><td>First Name:</td><td><input name="firstname" type="text" required/></td></tr>
-				<tr><td>Last Name:</td><td><input name="lastname" type="text" required/></td></tr>
-				<tr><td>Expiration Date:</td><td><input name="expdate" type="text" required/></td></tr>
-				</table>
+			<form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+                <span>Member ID</span>
+                <input name="memberid" type="text" required/>
+                <span>First Name</span>
+                <input name="firstname" type="text" required/>
+                <span>Last Name</span>
+                <input name="lastname" type="text" required/>
+                <span>Expiration Date</span>
+                <input name="expdate" type="text" required/>
 				<input type="hidden" name="fmtdate"/>
 				<input type="hidden" name="mode"/>
 				<input class="button button-primary" type="submit" value="Create"/>

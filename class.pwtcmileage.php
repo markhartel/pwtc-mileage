@@ -274,7 +274,7 @@ class PwtcMileage {
 		//$out = '<div class="pwtc-mileage-report">';
 		//$out .= '<table>';
 		$out = '<div>';  
-		$out .= '<table class="rwd-table">';
+		$out .= '<table class="pwtc-mileage-rwd-table">';
 		if (empty($content)) {
 			if ($atts['caption'] == 'on') {
 				$out .= '<caption>' . $meta['title'] . '</caption>';

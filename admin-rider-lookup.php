@@ -55,14 +55,14 @@ jQuery(document).ready(function($) {
     $( "#rider-lookup-results" ).dialog({
         autoOpen: false,
         height: 400,
-        width: 350,
+        width: 250,
         modal: true
     });
 
     $("#confirm-dialog").dialog({
         autoOpen: false,
         height: "auto",
-        width: 400,
+        width: 250,
         modal: true,
         buttons: {
             "OK": function() {
@@ -81,7 +81,7 @@ jQuery(document).ready(function($) {
     $("#error-dialog").dialog({
         autoOpen: false,
         height: "auto",
-        width: 400,
+        width: 250,
         modal: true,
         buttons: {
             "OK": function() {
@@ -93,12 +93,13 @@ jQuery(document).ready(function($) {
 });
 </script>
 <div id="rider-lookup-results" title="Lookup Riders">
-	<form class="lookup-frm" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-        <table>
-        <td><label>ID</label></td><td><input type="text" name="riderid"/></td></tr>   
-        <td><label>First Name</label></td><td><input type="text" name="firstname"/></td></tr>   
-        <td><label>Last Name</label></td><td><input type="text" name="lastname"/></td></tr> 
-        </table>
+	<form class="lookup-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+        <span>Member ID</span>
+        <input type="text" name="riderid"/>
+        <span>First Name</span>
+        <input type="text" name="firstname"/>
+        <span>Last Name</span>
+        <input type="text" name="lastname"/>
         <input class="button button-primary" type="submit" value="Lookup"/>       
     </form>
     <p>
