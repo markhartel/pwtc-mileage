@@ -7,23 +7,29 @@ if (!current_user_can('edit_posts')) {
 jQuery(document).ready(function($) { 
 
 	function populate_report_table(data, header) {
-	    $('#report-results-section .results-tbl tr').remove();
-        var str = '<tr>';
-        header.forEach(function(item) {
-            str += '<th>' + item + '</th>';
-        });
-        str += '</tr>';
-        $('#report-results-section .results-tbl').append(str);
-        data.forEach(function(row) {
-            str = '<tr>';
-            var count = 0;
-            row.forEach(function(item) {
-                str += '<td data-th="' + header[count]+ '">' + item + '</td>';
-                count++;
+        $('#report-results-section .results-div').empty();
+        if (data.length > 0) {
+            var str = '<table class="rwd-table"><tr>';
+            header.forEach(function(item) {
+                str += '<th>' + item + '</th>';
             });
-            str += '</tr>';
-            $('#report-results-section .results-tbl').append(str);
-        });
+            str += '</tr></table>';
+            $('#report-results-section .results-div').append(str);
+            data.forEach(function(row) {
+                str = '<tr>';
+                var count = 0;
+                row.forEach(function(item) {
+                    str += '<td data-th="' + header[count]+ '">' + item + '</td>';
+                    count++;
+                });
+                str += '</tr>';
+                $('#report-results-section .results-div table').append(str);
+            });
+        }
+        else {
+            $('#report-results-section .results-div').append(
+                '<span class="empty-tbl">No records found!</span>');
+        }
     }
 
 	function generate_report_cb(response) {
@@ -196,7 +202,7 @@ if ($running_jobs > 0) {
     <div id='report-results-section' class="initially-hidden">
         <p><button class='back-btn button button-primary button-large'>Back</button></p>
 		<p><h2></h2></p>
-        <p><table class="results-tbl rwd-table"></table></p>
+        <p><div class="results-div"></div></p>
     </div>
 <?php
     include('admin-rider-lookup.php');

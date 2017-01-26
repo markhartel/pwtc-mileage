@@ -7,47 +7,55 @@ if (!current_user_can('edit_published_pages')) {
 jQuery(document).ready(function($) { 
 
 	function populate_riders_table(members) {
-		$('#rider-inspect-section .riders-tbl tr').remove();
-		$('#rider-inspect-section .riders-tbl').append(
-			'<tr><th>Member ID</th><th>First Name</th><th>Last Name</th><th>Expiration Date</th><th>Actions</th></tr>');
-        members.forEach(function(item) {
-			var fmtdate = getPrettyDate(item.expir_date);
-            $('#rider-inspect-section .riders-tbl').append(
-				'<tr memberid="' + item.member_id + '">' + 
-				'<td>' + item.member_id + '</td>' +
-				'<td>' + item.first_name + '</td><td>' + item.last_name + '</td>' + 
-				'<td date="' + item.expir_date + '">' + fmtdate + '</td>' + 
-                '<td><a class="modify-btn">Edit</a>' + ' ' +
-                '<a class="remove-btn">Delete</a></td></tr>');    
-		});
-        $('#rider-inspect-section .riders-tbl .modify-btn').on('click', function(evt) {
-            evt.preventDefault();
-            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
-            var data = {
-			    'action': 'pwtc_mileage_get_rider',
-                'member_id': $(this).parent().parent().attr('memberid')
-		    };
-            $.post(action, data, modify_rider_cb);
-        });
-		$('#rider-inspect-section .riders-tbl .remove-btn').on('click', function(evt) {
-            evt.preventDefault();
-            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
-            var data = {
-			    'action': 'pwtc_mileage_remove_rider',
-                'member_id': $(this).parent().parent().attr('memberid'),
-                'nonce': '<?php echo wp_create_nonce('pwtc_mileage_remove_rider'); ?>'
-		    };
-<?php if ($plugin_options['disable_delete_confirm']) { ?>
-            $.post(action, data, remove_rider_cb);
-<?php } else { ?>
-            open_confirm_dialog(
-                'Are you sure you want to delete rider ' + data.member_id + '?', 
-                function() {
-                    $.post(action, data, remove_rider_cb);
-                }
-            );
-<?php } ?>		
-        });
+		$('#rider-inspect-section .riders-div').empty();
+        if (members.length > 0) {
+            $('#rider-inspect-section .riders-div').append('<table class="rwd-table">' +
+                '<tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Expiration Date</th><th>Actions</th></tr>' +
+                '</table>');
+            members.forEach(function(item) {
+                var fmtdate = getPrettyDate(item.expir_date);
+                $('#rider-inspect-section .riders-div table').append(
+                    '<tr memberid="' + item.member_id + '">' + 
+                    '<td data-th="ID">' + item.member_id + '</td>' +
+                    '<td data-th="First Name">' + item.first_name + 
+                    '</td><td data-th="Last Name">' + item.last_name + '</td>' + 
+                    '<td data-th="Expiration" date="' + item.expir_date + '">' + fmtdate + '</td>' + 
+                    '<td data-th="Actions"><a class="modify-btn">Edit</a>' + ' ' +
+                    '<a class="remove-btn">Delete</a></td></tr>');    
+            });
+            $('#rider-inspect-section .riders-div .modify-btn').on('click', function(evt) {
+                evt.preventDefault();
+                var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+                var data = {
+                    'action': 'pwtc_mileage_get_rider',
+                    'member_id': $(this).parent().parent().attr('memberid')
+                };
+                $.post(action, data, modify_rider_cb);
+            });
+            $('#rider-inspect-section .riders-div .remove-btn').on('click', function(evt) {
+                evt.preventDefault();
+                var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+                var data = {
+                    'action': 'pwtc_mileage_remove_rider',
+                    'member_id': $(this).parent().parent().attr('memberid'),
+                    'nonce': '<?php echo wp_create_nonce('pwtc_mileage_remove_rider'); ?>'
+                };
+    <?php if ($plugin_options['disable_delete_confirm']) { ?>
+                $.post(action, data, remove_rider_cb);
+    <?php } else { ?>
+                open_confirm_dialog(
+                    'Are you sure you want to delete rider ' + data.member_id + '?', 
+                    function() {
+                        $.post(action, data, remove_rider_cb);
+                    }
+                );
+    <?php } ?>		
+            });
+        }
+        else {
+            $('#rider-inspect-section .riders-div').append(
+                '<span class="empty-tbl">No riders found!</span>');
+        }
     }
 
 	function lookup_riders_cb(response) {
@@ -129,7 +137,7 @@ jQuery(document).ready(function($) {
             $.post(action, data, lookup_riders_cb); 
         }
         else {
-            $('#rider-inspect-section .riders-tbl tr').remove();  
+            $('#rider-inspect-section .riders-div').empty();  
         }  
     }
 
@@ -141,7 +149,7 @@ jQuery(document).ready(function($) {
     $('#rider-inspect-section .search-frm .reset-btn').on('click', function(evt) {
         evt.preventDefault();
         $("#rider-inspect-section .search-frm input[type='text']").val(''); 
-        $('#rider-inspect-section .riders-tbl tr').remove();
+        $('#rider-inspect-section .riders-div').empty();
     });
 
     $("#rider-inspect-section .add-btn").on('click', function(evt) {
@@ -232,7 +240,7 @@ if ($running_jobs > 0) {
 			</form>
 		</span></div>
 
-        <p><table class="riders-tbl pretty"></table></p>
+        <p><div class="riders-div"></div></p>
     </div>
 <?php
     include('admin-rider-lookup.php');
