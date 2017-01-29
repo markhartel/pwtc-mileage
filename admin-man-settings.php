@@ -34,9 +34,6 @@ if (count($error_msgs) > 0) {
 	<p>
 	<form class="stacked-form" method="POST">
 		<?php wp_nonce_field('pwtc_mileage_settings'); ?>
-		<span>Date Display Format</span>
-		<input type="text" name="date_display_format" id="date_display_format" 
-			value="<?php echo $plugin_options['date_display_format']; ?>" required/>
 		<span>Plugin Menu Label</span>
 		<input type="text" name="plugin_menu_label" id="plugin_menu_label" 
 			value="<?php echo $plugin_options['plugin_menu_label']; ?>" required/>

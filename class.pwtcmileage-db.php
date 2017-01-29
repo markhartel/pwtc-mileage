@@ -332,6 +332,22 @@ class PwtcMileage_DB {
 		return $meta;
 	}
 
+	public static function fetch_ride($rideid) {
+   		global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$results = $wpdb->get_results($wpdb->prepare('select ID, title, date, post_id' . 
+			' from ' . $ride_table . ' where ID = %d', $rideid), ARRAY_A);
+		return $results;
+	}
+
+	public static function rename_ride($rideid, $title) {
+   		global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$status = $wpdb->query($wpdb->prepare('update ' . $ride_table . 
+			' set title = %s where ID = %d', $title, $rideid));
+		return $status;
+	}
+
 	public static function fetch_ride_mileage($rideid) {
     	global $wpdb;
 		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;

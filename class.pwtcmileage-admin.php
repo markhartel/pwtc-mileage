@@ -90,7 +90,7 @@ class PwtcMileage_Admin {
 	public static function lookup_rides_callback() {
 		$startdate = trim($_POST['startdate']);	
 		$enddate = trim($_POST['enddate']);	
-		$title = trim($_POST['title']);	
+		$title = sanitize_text_field($_POST['title']);	
 		if (!PwtcMileage::validate_date_str($startdate)) {
 			$response = array(
 				'error' => 'Start date entry "' . $startdate . '" is invalid.'
@@ -106,6 +106,9 @@ class PwtcMileage_Admin {
 		else {
 			$rides = PwtcMileage_DB::fetch_club_rides($title, $startdate, $enddate);
 			$response = array(
+				'title' => $title,
+				'startdate' => $startdate,
+				'enddate' => $enddate,
 				'rides' => $rides);
     		echo wp_json_encode($response);
 		}
@@ -153,7 +156,7 @@ class PwtcMileage_Admin {
 
 	public static function create_ride_from_event_callback() {
 		$startdate = trim($_POST['startdate']);	
-		$title = trim($_POST['title']);	
+		$title = sanitize_text_field($_POST['title']);	
 		$postid = trim($_POST['post_id']);	
 		$status = PwtcMileage_DB::insert_ride_with_postid($title, $startdate, intval($postid));
 		if (false === $status or 0 === $status) {
@@ -178,9 +181,6 @@ class PwtcMileage_Admin {
 	}
 
 	public static function remove_ride_callback() {
-		$startdate = trim($_POST['startdate']);
-		$enddate = trim($_POST['enddate']);	
-		$title = trim($_POST['title']);	
 		$rideid = trim($_POST['ride_id']);
 		$mcnt = PwtcMileage_DB::fetch_ride_has_mileage(intval($rideid));
 		$lcnt = PwtcMileage_DB::fetch_ride_has_leaders(intval($rideid));
@@ -199,9 +199,8 @@ class PwtcMileage_Admin {
     			echo wp_json_encode($response);
 			}
 			else {
-				$rides = PwtcMileage_DB::fetch_club_rides($title, $startdate, $enddate);
 				$response = array(
-					'rides' => $rides);
+					'ride_id' => $rideid);
     			echo wp_json_encode($response);
 			}
 		}
@@ -210,8 +209,13 @@ class PwtcMileage_Admin {
 
 	public static function lookup_ridesheet_callback() {
 		$rideid = trim($_POST['ride_id']);
-		$startdate = trim($_POST['startdate']);
-		$title = trim($_POST['title']);
+		$title = '';
+		$startdate = '';
+		$results = PwtcMileage_DB::fetch_ride(intval($rideid));
+		if (count($results) > 0) {
+			$title = $results[0]['title'];
+			$startdate = $results[0]['date'];
+		}
 		$leaders = PwtcMileage_DB::fetch_ride_leaders(intval($rideid));
 		$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
 		$response = array(
@@ -581,7 +585,7 @@ class PwtcMileage_Admin {
 			if ($meta['date_idx'] >= 0) {
 				$i = $meta['date_idx'];
 				foreach( $data as $key => $row ):
-					$data[$key][$i] = date($plugin_options['date_display_format'], strtotime($row[$i]));
+					$data[$key][$i] = date('D M j Y', strtotime($row[$i]));
 				endforeach;					
 			}
 			$response = array(
@@ -985,17 +989,6 @@ class PwtcMileage_Admin {
 		$plugin_options = PwtcMileage::get_plugin_options();
 		$form_submitted = false;
 		$error_msgs = array();
-    	if (isset($_POST['date_display_format'])) {
- 			$form_submitted = true;
-			$entry = sanitize_text_field($_POST['date_display_format']);
-			if ($entry == '') {
-				array_push($error_msgs,
-					'Date Display Format field must contain a PHP date format string.');
-			}
-			else {
-				$plugin_options['date_display_format'] = $entry;
-			}
-	   	} 
     	if (isset($_POST['plugin_menu_label'])) {
 			$form_submitted = true;
 			$entry = sanitize_text_field($_POST['plugin_menu_label']);

@@ -254,13 +254,6 @@ class PwtcMileage {
 		return $name;
 	}
 
-	public static function shortcode_build_errmsg($errmsg) {
-		$out = '<div class="pwtc-mileage-report"><div class="report-caption">';
-		$out .= $errmsg;
-		$out .= '</div></div>';
-		return $out;	
-	}
-
 	public static function shortcode_build_table($meta, $data, $atts, $content = null) {
 		$plugin_options = self::get_plugin_options();
 		$hide_id = true;
@@ -271,8 +264,6 @@ class PwtcMileage {
 		if ($meta['id_idx'] >= 0 and $atts['highlight_user'] == 'on') {
 			$id = pwtc_mileage_get_member_id();
 		}
-		//$out = '<div class="pwtc-mileage-report">';
-		//$out .= '<table>';
 		$out = '<div>';  
 		$out .= '<table class="pwtc-mileage-rwd-table">';
 		if (empty($content)) {
@@ -305,7 +296,7 @@ class PwtcMileage {
 				$label = $meta['header'][$i];
 				$lbl_attr = 'data-th="' . $label . '"';
 				if ($meta['date_idx'] == $i) {
-					$fmtdate = date($plugin_options['date_display_format'], strtotime($item));
+					$fmtdate = date('D M j Y', strtotime($item));
 					$outrow .= '<td ' . $lbl_attr . '>' . $fmtdate . '</td>';
 				}
 				else if ($meta['id_idx'] === $i) {
@@ -390,6 +381,9 @@ class PwtcMileage {
 					$result[0]['last_name'] . '</span>';
 			}
 		}
+		else {
+			$out .= '<span>Unknown Rider</span>';			
+		}
 		return $out;
 	}
 
@@ -408,6 +402,9 @@ class PwtcMileage {
 				$out .= '<span>' . PwtcMileage_DB::get_lt_rider_mileage($id) . '</span>';
 			}
 		}
+		else {
+			$out .= '<span>0</span>';			
+		}
 		return $out;
 	}
 
@@ -422,6 +419,9 @@ class PwtcMileage {
 			else if ($a['type'] == 'lastyear') {
 				$out .= '<span>' . PwtcMileage_DB::get_ly_rider_led($id) . '</span>';
 			}
+		}
+		else {
+			$out .= '<span>0</span>';						
 		}
 		return $out;
 	}
@@ -489,7 +489,6 @@ class PwtcMileage {
 		$member_id = pwtc_mileage_get_member_id();
 		$out = '';
 		if ($member_id === null) {
-			//$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
 			$out = '';
 		}
 		else {
@@ -506,7 +505,6 @@ class PwtcMileage {
 		$member_id = pwtc_mileage_get_member_id();
 		$out = '';
 		if ($member_id === null) {
-			//$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
 			$out = '';
 		}
 		else {
@@ -523,7 +521,6 @@ class PwtcMileage {
 		$member_id = pwtc_mileage_get_member_id();
 		$out = '';
 		if ($member_id === null) {
-			//$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
 			$out = '';
 		}
 		else {
@@ -539,7 +536,6 @@ class PwtcMileage {
 	public static function shortcode_ly_led_rides($atts, $content = null) {
 		$member_id = pwtc_mileage_get_member_id();
 		if ($member_id === null) {
-			//$out = self::shortcode_build_errmsg('This report requires a valid logged in rider!');
 			$out = '';
 		}
 		else {
@@ -633,7 +629,6 @@ class PwtcMileage {
 
 	public static function create_default_plugin_options() {
 		$data = array(
-			'date_display_format' => 'D M j, Y', // TODO: remove this and hardcode to 'D M j Y'
 			'drop_db_on_delete' => false,
 			'plugin_menu_label' => 'Rider Mileage',
 			'plugin_menu_location' => 50,
