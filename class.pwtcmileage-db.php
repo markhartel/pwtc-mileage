@@ -318,6 +318,7 @@ class PwtcMileage_DB {
 		else {
 			$sql_stmt = 'select post_id from ' . $ride_table . ' where post_id <> 0';
 		}
+		// TODO: don't lookback further than the oldest ride in the ride table.
 		$results = pwtc_mileage_fetch_posts($sql_stmt, $lookback_date);
 		return $results;
 	}
@@ -337,6 +338,14 @@ class PwtcMileage_DB {
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
 		$results = $wpdb->get_results($wpdb->prepare('select ID, title, date, post_id' . 
 			' from ' . $ride_table . ' where ID = %d', $rideid), ARRAY_A);
+		return $results;
+	}
+
+	public static function fetch_ride_by_post_id($postid) {
+   		global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$results = $wpdb->get_results($wpdb->prepare('select ID, title, date, post_id' . 
+			' from ' . $ride_table . ' where post_id = %d', $postid), ARRAY_A);
 		return $results;
 	}
 

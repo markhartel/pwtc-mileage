@@ -102,6 +102,15 @@ table.pretty a {
   margin: 4px 0;
 }
 
+.empty-tbl {
+  font-family: Helvetica, Arial, sans-serif;
+  margin: 1em 0;
+  background: #34495E;
+  color: #fff;
+  border-radius: .4em;
+  padding: .5em 1em;  
+}
+
 .rwd-table {
   font-family: Helvetica, Arial, sans-serif;
   margin: 1em 0;

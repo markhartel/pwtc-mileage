@@ -74,7 +74,8 @@ jQuery(document).ready(function($) {
 					'action': 'pwtc_mileage_create_ride_from_event',
 					'post_id': $(this).parent().parent().attr('postid'),
 					'startdate': $(this).parent().parent().attr('ridedate'),
-					'title': $(this).parent().parent().find('td').first().html()
+					'title': $(this).parent().parent().find('td').first().html(),
+					'nonce': '<?php echo wp_create_nonce('pwtc_mileage_create_ride_from_event'); ?>'
 				};
 				$.post(action, data, create_ride_from_event_cb);
 			});
@@ -130,7 +131,8 @@ jQuery(document).ready(function($) {
 				var action = '<?php echo admin_url('admin-ajax.php'); ?>';
 				var data = {
 					'action': 'pwtc_mileage_remove_ride',
-					'ride_id': $(this).parent().parent().attr('rideid')
+					'ride_id': $(this).parent().parent().attr('rideid'),
+					'nonce': '<?php echo wp_create_nonce('pwtc_mileage_remove_ride'); ?>'
 				};
 				if (disable_delete_confirm) {
 					$.post(action, data, remove_ride_cb);
@@ -170,7 +172,8 @@ jQuery(document).ready(function($) {
 				var data = {
 					'action': 'pwtc_mileage_remove_leader',
 					'ride_id': $(this).parent().parent().attr('rideid'),
-					'member_id': $(this).parent().parent().attr('memberid')
+					'member_id': $(this).parent().parent().attr('memberid'),
+					'nonce': '<?php echo wp_create_nonce('pwtc_mileage_remove_leader'); ?>'
 				};
 				if (disable_delete_confirm) {
 					$.post(action, data, remove_leader_cb);
@@ -225,7 +228,8 @@ jQuery(document).ready(function($) {
 				var data = {
 					'action': 'pwtc_mileage_remove_mileage',
 					'ride_id': $(this).parent().parent().attr('rideid'),
-					'member_id': $(this).parent().parent().attr('memberid')
+					'member_id': $(this).parent().parent().attr('memberid'),
+					'nonce': '<?php echo wp_create_nonce('pwtc_mileage_remove_mileage'); ?>'
 				};
 				if (disable_delete_confirm) {
 					$.post(action, data, remove_mileage_cb);
@@ -479,7 +483,8 @@ jQuery(document).ready(function($) {
         var data = {
 			'action': 'pwtc_mileage_add_leader',
 			'member_id': $("#ridesheet-sheet-page .leader-section .add-frm input[name='riderid']").val(),
-			'ride_id': $("#ridesheet-sheet-page .leader-section .add-frm input[name='rideid']").val()
+			'ride_id': $("#ridesheet-sheet-page .leader-section .add-frm input[name='rideid']").val(),
+			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_add_leader'); ?>'
 		};
 		$.post(action, data, add_leader_cb);
     });
@@ -491,7 +496,8 @@ jQuery(document).ready(function($) {
 			'action': 'pwtc_mileage_add_mileage',
 			'member_id': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='riderid']").val(),
 			'ride_id': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='rideid']").val(),
-			'mileage': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val()
+			'mileage': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(),
+			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_add_mileage'); ?>'
 		};
 		$.post(action, data, add_mileage_cb);
     });
@@ -546,7 +552,8 @@ jQuery(document).ready(function($) {
         var data = {
 			'action': 'pwtc_mileage_create_ride',
 			'title': $("#ridesheet-ride-page .add-blk .add-frm input[name='title']").val(),
-			'startdate': $("#ridesheet-ride-page .add-blk .add-frm input[name='fmtdate']").val()
+			'startdate': $("#ridesheet-ride-page .add-blk .add-frm input[name='fmtdate']").val(),
+			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_create_ride'); ?>'
 		};
 		$.post(action, data, create_ride_cb);
     });
