@@ -1,4 +1,12 @@
 
+.pwtc-mileage-empty-tbl {
+  font-family: Helvetica, Arial, sans-serif;
+  margin: 1em 0;
+  background: #34495E;
+  color: #fff;
+  border-radius: .4em;
+  padding: .5em 1em;  
+}
 
 .pwtc-mileage-rwd-table {
   font-family: Helvetica, Arial, sans-serif;

@@ -265,61 +265,67 @@ class PwtcMileage {
 			$id = pwtc_mileage_get_member_id();
 		}
 		$out = '<div>';  
-		$out .= '<table class="pwtc-mileage-rwd-table">';
-		if (empty($content)) {
-			if ($atts['caption'] == 'on') {
-				$out .= '<caption>' . $meta['title'] . '</caption>';
-			}
-		}
-		else {
-			$out .= '<caption>' . do_shortcode($content) . '</caption>';
-		}
-		$out .= '<tr>';
-		$i = 0;
-		foreach( $meta['header'] as $item ):
-			if ($meta['id_idx'] === $i) {
-				if (!$hide_id) {
-					$out .= '<th>' . $item . '</th>';						
+		if (count($data) > 0) {
+			$out .= '<table class="pwtc-mileage-rwd-table">';
+			if (empty($content)) {
+				if ($atts['caption'] == 'on') {
+					$out .= '<caption>' . $meta['title'] . '</caption>';
 				}
-			} 
+			}
 			else {
-				$out .= '<th>' . $item . '</th>';
+				$out .= '<caption>' . do_shortcode($content) . '</caption>';
 			}
-			$i++;
-		endforeach;	
-		$out .= '</tr>';
-		foreach( $data as $row ):
-			$outrow = '';
+			$out .= '<tr>';
 			$i = 0;
-			$highlight = false;
-			foreach( $row as $item ):
-				$label = $meta['header'][$i];
-				$lbl_attr = 'data-th="' . $label . '"';
-				if ($meta['date_idx'] == $i) {
-					$fmtdate = date('D M j Y', strtotime($item));
-					$outrow .= '<td ' . $lbl_attr . '>' . $fmtdate . '</td>';
-				}
-				else if ($meta['id_idx'] === $i) {
-					if ($id !== null and $id == $item) {
-						$highlight = true;
-					}
+			foreach( $meta['header'] as $item ):
+				if ($meta['id_idx'] === $i) {
 					if (!$hide_id) {
-						$outrow .= '<td ' . $lbl_attr . '>' . $item . '</td>';						
+						$out .= '<th>' . $item . '</th>';						
 					}
-				}
+				} 
 				else {
-					$outrow .= '<td ' . $lbl_attr . '>' . $item . '</td>';
+					$out .= '<th>' . $item . '</th>';
 				}
 				$i++;
 			endforeach;	
-			if ($highlight) {
-				$out .= '<tr class="highlight">' . $outrow . '</tr>';
-			}
-			else {
-				$out .= '<tr>' . $outrow . '</tr>';
-			}
-		endforeach;
-		$out .= '</table></div>';
+			$out .= '</tr>';
+			foreach( $data as $row ):
+				$outrow = '';
+				$i = 0;
+				$highlight = false;
+				foreach( $row as $item ):
+					$label = $meta['header'][$i];
+					$lbl_attr = 'data-th="' . $label . '"';
+					if ($meta['date_idx'] == $i) {
+						$fmtdate = date('D M j Y', strtotime($item));
+						$outrow .= '<td ' . $lbl_attr . '>' . $fmtdate . '</td>';
+					}
+					else if ($meta['id_idx'] === $i) {
+						if ($id !== null and $id == $item) {
+							$highlight = true;
+						}
+						if (!$hide_id) {
+							$outrow .= '<td ' . $lbl_attr . '>' . $item . '</td>';						
+						}
+					}
+					else {
+						$outrow .= '<td ' . $lbl_attr . '>' . $item . '</td>';
+					}
+					$i++;
+				endforeach;	
+				if ($highlight) {
+					$out .= '<tr class="highlight">' . $outrow . '</tr>';
+				}
+				else {
+					$out .= '<tr>' . $outrow . '</tr>';
+				}
+			endforeach;
+			$out .= '</table>';
+		}
+		else {
+			$out .= '<span class="pwtc-mileage-empty-tbl">No records found!</span>';
+		}
+		$out .= '</div>';
 		return $out;
 	}
 
