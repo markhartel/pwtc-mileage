@@ -25,15 +25,15 @@ jQuery(document).ready(function($) {
 			$("#ridesheet-sheet-page .leader-div .remove-btn").hide();
 			$("#ridesheet-sheet-page .mileage-div .edit-btn").hide();
 			$("#ridesheet-sheet-page .mileage-div .remove-btn").hide();
-			$("#ridesheet-sheet-page .leader-section .add-frm input[name='lookup']").attr("disabled", "disabled");
-			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").attr("disabled", "disabled");
+			$("#ridesheet-sheet-page .leader-section .lookup-btn").attr("disabled", "disabled");
+			$("#ridesheet-sheet-page .mileage-section .lookup-btn").attr("disabled", "disabled");
 		}
 		else {
 			$("#ridesheet-sheet-page .leader-div .remove-btn").show();
        		$("#ridesheet-sheet-page .mileage-div .edit-btn").show();
        		$("#ridesheet-sheet-page .mileage-div .remove-btn").show();
-       		$("#ridesheet-sheet-page .leader-section .add-frm input[name='lookup']").removeAttr("disabled");
-       		$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").removeAttr("disabled");
+       		$("#ridesheet-sheet-page .leader-section .lookup-btn").removeAttr("disabled");
+       		$("#ridesheet-sheet-page .mileage-section .lookup-btn").removeAttr("disabled");
 		}
 	}
 
@@ -219,8 +219,10 @@ jQuery(document).ready(function($) {
 				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(
 					$(this).parent().parent().find('td').eq(2).html()
 				); 
-				$('#ridesheet-sheet-page .mileage-section .add-blk').show('slow');  
-				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").focus();         
+				$('#ridesheet-sheet-page .mileage-section .lookup-btn').hide('fast', function() {
+					$('#ridesheet-sheet-page .mileage-section .add-blk').show('slow');  
+					$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").focus();         
+				});
 			});
 			$('#ridesheet-sheet-page .mileage-div .remove-btn').on('click', function(evt) {
 				evt.preventDefault();
@@ -277,7 +279,9 @@ jQuery(document).ready(function($) {
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='rideid']").val(res.ride_id); 
 			populate_ride_leader_table(res.ride_id, res.leaders);
 			populate_ride_mileage_table(res.ride_id, res.mileage);
+			$("#ridesheet-sheet-page .leader-section .lookup-btn").show();
 			$("#ridesheet-sheet-page .leader-section .add-blk").hide(); 
+			$("#ridesheet-sheet-page .mileage-section .lookup-btn").show();
 			$("#ridesheet-sheet-page .mileage-section .add-blk").hide(); 
 			ridesheet_back_btn_cb = function() {
 				$('#ridesheet-ride-page .add-blk').hide();
@@ -306,7 +310,9 @@ jQuery(document).ready(function($) {
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='rideid']").val(res.ride_id); 
 			populate_ride_leader_table(res.ride_id, res.leaders);
 			populate_ride_mileage_table(res.ride_id, res.mileage);
+			$("#ridesheet-sheet-page .leader-section .lookup-btn").show();
 			$("#ridesheet-sheet-page .leader-section .add-blk").hide(); 
+			$("#ridesheet-sheet-page .mileage-section .lookup-btn").show();
 			$("#ridesheet-sheet-page .mileage-section .add-blk").hide(); 
 			ridesheet_back_btn_cb = function() {
 				$('#ridesheet-post-page').fadeIn('slow');
@@ -328,7 +334,9 @@ jQuery(document).ready(function($) {
 		$("#ridesheet-sheet-page .mileage-section .add-frm input[name='rideid']").val(res.ride_id); 
 		populate_ride_leader_table(res.ride_id, res.leaders);
 		populate_ride_mileage_table(res.ride_id, res.mileage);
+		$("#ridesheet-sheet-page .leader-section .lookup-btn").show();
 		$("#ridesheet-sheet-page .leader-section .add-blk").hide(); 
+		$("#ridesheet-sheet-page .mileage-section .lookup-btn").show();
 		$("#ridesheet-sheet-page .mileage-section .add-blk").hide(); 
 		ridesheet_back_btn_cb = function() {
 			$('#ridesheet-ride-page .add-blk').hide();
@@ -398,9 +406,11 @@ jQuery(document).ready(function($) {
 			open_error_dialog(res.error);
 		}
 		else {
-			$('#ridesheet-sheet-page .leader-section .add-blk').hide();
 			populate_ride_leader_table(res.ride_id, res.leaders);
-			$("#ridesheet-sheet-page .leader-section .add-frm input[name='lookup']").focus();
+			$('#ridesheet-sheet-page .leader-section .add-blk').hide('fast', function() {
+				$("#ridesheet-sheet-page .leader-section .lookup-btn").show('slow');
+				$("#ridesheet-sheet-page .leader-section .lookup-btn").focus();
+			});
 		}
 	}
 
@@ -410,9 +420,11 @@ jQuery(document).ready(function($) {
 			open_error_dialog(res.error);
 		}
 		else {
-			$('#ridesheet-sheet-page .mileage-section .add-blk').hide();
 			populate_ride_mileage_table(res.ride_id, res.mileage);
-			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").focus();
+			$('#ridesheet-sheet-page .mileage-section .add-blk').hide('fast', function() {
+				$("#ridesheet-sheet-page .mileage-section .lookup-btn").show('slow');
+				$("#ridesheet-sheet-page .mileage-section .lookup-btn").focus();
+			});
 		}
 	}
 
@@ -502,33 +514,41 @@ jQuery(document).ready(function($) {
 		$.post(action, data, add_mileage_cb);
     });
 
-	$("#ridesheet-sheet-page .leader-section .add-frm input[name='lookup']").on('click', function(evt) {
+	$("#ridesheet-sheet-page .leader-section .lookup-btn").on('click', function(evt) {
         lookup_pwtc_riders(function(riderid, name) {
             $("#ridesheet-sheet-page .leader-section .add-frm input[name='riderid']").val(riderid);
             $("#ridesheet-sheet-page .leader-section .add-frm input[name='ridername']").val(name); 
-			$('#ridesheet-sheet-page .leader-section .add-blk').show('slow'); 
-			$("#ridesheet-sheet-page .leader-section .add-frm input[type='submit']").focus();          
+			$("#ridesheet-sheet-page .leader-section .lookup-btn").hide('fast', function() {
+				$('#ridesheet-sheet-page .leader-section .add-blk').show('slow'); 
+				$("#ridesheet-sheet-page .leader-section .add-frm input[type='submit']").focus();          
+			});
         });
     });
 
 	$("#ridesheet-sheet-page .leader-section .add-frm .cancel-btn").on('click', function(evt) {
- 		$('#ridesheet-sheet-page .leader-section .add-blk').hide();           
-		$("#ridesheet-sheet-page .leader-section .add-frm input[name='lookup']").focus();
+ 		$('#ridesheet-sheet-page .leader-section .add-blk').hide('fast', function() {
+			$("#ridesheet-sheet-page .leader-section .lookup-btn").show('slow');          
+			$("#ridesheet-sheet-page .leader-section .lookup-btn").focus();
+		}); 
     });
 
-	$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").on('click', function(evt) {
+	$("#ridesheet-sheet-page .mileage-section .lookup-btn").on('click', function(evt) {
         lookup_pwtc_riders(function(riderid, name) {
             $("#ridesheet-sheet-page .mileage-section .add-frm input[name='riderid']").val(riderid);
             $("#ridesheet-sheet-page .mileage-section .add-frm input[name='ridername']").val(name); 
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(''); 
-			$('#ridesheet-sheet-page .mileage-section .add-blk').show('slow');  
-			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").focus();         
+			$("#ridesheet-sheet-page .mileage-section .lookup-btn").hide('fast', function() {
+				$('#ridesheet-sheet-page .mileage-section .add-blk').show('slow');  
+				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").focus();         
+			});
         });
     });
 
 	$("#ridesheet-sheet-page .mileage-section .add-frm .cancel-btn").on('click', function(evt) {
- 		$('#ridesheet-sheet-page .mileage-section .add-blk').hide();           
-		$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lookup']").focus();
+ 		$('#ridesheet-sheet-page .mileage-section .add-blk').hide('fast', function() {
+			$('#ridesheet-sheet-page .mileage-section .lookup-btn').show('slow');           
+			$("#ridesheet-sheet-page .mileage-section .lookup-btn").focus();
+		});
     });
 
 	$("#ridesheet-ride-page .add-btn").on('click', function(evt) {
@@ -661,37 +681,39 @@ if ($running_jobs > 0) {
 		<h2></h2>
 		<div class="leader-section">
 			<h3>Ride Leaders</h3>
-			<p><form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-				<input class="button button-primary" name="lookup" type="button" value="Lookup Leader"/>
-				<span class="add-blk initially-hidden">
-					<span>ID</span>
-					<input name="riderid" type="text" disabled/>
-					<span>Name</span>
-					<input name="ridername" type="text" disabled/>
-					<input name="rideid" type="hidden"/>
-					<input class="button button-primary" type="submit" value="Add Leader"/>
-					<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
+			<div><button class="lookup-btn button button-primary">Lookup Leader</button>
+				<span class="add-blk popup-frm initially-hidden">
+					<form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+						<span>ID</span>
+						<input name="riderid" type="text" disabled/>
+						<span>Name</span>
+						<input name="ridername" type="text" disabled/>
+						<input name="rideid" type="hidden"/>
+						<input class="button button-primary" type="submit" value="Add Leader"/>
+						<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
+					</form>
 				</span>
-			</form></p>
-			<div class="leader-div"></div>
+			</div>
+			<p><div class="leader-div"></div></p>
 		</div>
 		<div class="mileage-section">
 			<h3>Rider Mileage</h3>
-			<p><form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-				<input class="button button-primary" name="lookup" type="button" value="Lookup Rider"/>
-				<span class="add-blk initially-hidden">
-					<span>ID</span>
-					<input name="riderid" type="text" disabled/>
-					<span>Name</span>
-					<input name="ridername" type="text" disabled/>
-					<span>Mileage</span>
-					<input name="mileage" type="text" required/>
-					<input name="rideid" type="hidden"/>
-					<input class="button button-primary" type="submit" value="Add Mileage"/>
-					<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
+			<div><button class="lookup-btn button button-primary">Lookup Rider</button>
+				<span class="add-blk popup-frm initially-hidden">
+					<form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+						<span>ID</span>
+						<input name="riderid" type="text" disabled/>
+						<span>Name</span>
+						<input name="ridername" type="text" disabled/>
+						<span>Mileage</span>
+						<input name="mileage" type="text" required/>
+						<input name="rideid" type="hidden"/>
+						<input class="button button-primary" type="submit" value="Add Mileage"/>
+						<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
+					</form>
 				</span>
-			</form></p>
-			<div class="mileage-div"></div>
+			</div>
+			<p><div class="mileage-div"></div></p>
 		</div>
 	</div>
 <?php
