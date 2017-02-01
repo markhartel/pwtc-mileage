@@ -28,6 +28,8 @@ class PwtcMileage_Admin {
 			array( 'PwtcMileage_Admin', 'lookup_rides_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_create_ride', 
 			array( 'PwtcMileage_Admin', 'create_ride_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_rename_ride', 
+			array( 'PwtcMileage_Admin', 'rename_ride_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_create_ride_from_event', 
 			array( 'PwtcMileage_Admin', 'create_ride_from_event_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_ride', 
@@ -155,6 +157,40 @@ class PwtcMileage_Admin {
 					'startdate' => $startdate, 
 					'leaders' => $leaders,
 					'mileage' => $mileage);
+				echo wp_json_encode($response);
+			}
+		}
+		wp_die();
+	}
+
+	public static function rename_ride_callback() {
+		$ride_id = trim($_POST['ride_id']);	
+		$title = sanitize_text_field($_POST['title']);	
+		$nonce = $_POST['nonce'];	
+		if (!wp_verify_nonce($nonce, 'pwtc_mileage_rename_ride')) {
+			$response = array(
+				'error' => 'Access security check failed.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!PwtcMileage::validate_ride_title_str($title)) {
+			$response = array(
+				'error' => 'Title entry "' . $title . '" is invalid, must start with a letter.'
+			);
+			echo wp_json_encode($response);
+		}
+		else {
+			$status = PwtcMileage_DB::rename_ride(intval($ride_id), $title);
+			if (false === $status or 0 === $status) {
+				$response = array(
+					'error' => 'Could not rename ridesheet in database.'
+				);
+				echo wp_json_encode($response);
+			}
+			else {
+				$response = array(
+					'ride_id' => $ride_id,
+					'title' => $title);
 				echo wp_json_encode($response);
 			}
 		}

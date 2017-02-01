@@ -209,7 +209,7 @@ if ($running_jobs > 0) {
 } else {
 ?>
     <div id='rider-inspect-section'>
-        <p>
+        <p><strong>Enter search parameters to lookup riders.</strong>
         	<form class="search-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
                 <span>Member ID</span>
                 <input name="memberid" type="text"/>
@@ -222,7 +222,7 @@ if ($running_jobs > 0) {
 			</form>
         </p>
 
-        <div><button class="add-btn button button-primary button-large">New</button>
+        <p><div><button class="add-btn button button-primary button-large">New</button>
 		<span class="add-blk popup-frm initially-hidden">
 			<form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
                 <span>Member ID</span>
@@ -238,7 +238,7 @@ if ($running_jobs > 0) {
 				<input class="button button-primary" type="submit" value="Create"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
-		</span></div>
+		</span></div></p>
 
         <p><div class="riders-div"></div></p>
     </div>
