@@ -140,7 +140,7 @@ jQuery(document).ready(function($) {
 				} 
 				else {
 					open_confirm_dialog(
-						'Are you sure you want to delete ride "' + 
+						'Are you sure you want to delete ride titled "' + 
 							$(this).parent().parent().find('td').first().html() + '"?', 
 						function() {
 							$.post(action, data, remove_ride_cb);
@@ -181,7 +181,7 @@ jQuery(document).ready(function($) {
 				}
 				else {
 					open_confirm_dialog(
-						'Are you sure you want to delete ride leader ' + data.member_id + '?', 
+						'Are you sure you want to delete the leader status for rider ID ' + data.member_id + '?', 
 						function() {
 							$.post(action, data, remove_leader_cb);
 						}
@@ -240,7 +240,7 @@ jQuery(document).ready(function($) {
 				}
 				else {
 					open_confirm_dialog(
-						'Are you sure you want to delete the mileage for rider ' + data.member_id + '?', 
+						'Are you sure you want to delete the mileage for rider ID ' + data.member_id + '?', 
 						function() {
 							$.post(action, data, remove_mileage_cb);
 						}
@@ -634,7 +634,7 @@ if ($running_jobs > 0) {
 	</div>
 	<div id='ridesheet-sheet-page' class="initially-hidden">
 		<p><button class='back-btn button button-primary button-large'>Back</button></p>
-		<h2><span class="sheet-title"></span> (<span class="sheet-date"></span>)</h2>
+		<h2><span class="sheet-title"></span> - <span class="sheet-date"></span></h2>
 		<p><div><button class="rename-btn button button-primary">Rename</button>
 		<span class="rename-blk popup-frm initially-hidden">
 			<form class="rename-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">

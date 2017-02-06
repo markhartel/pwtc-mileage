@@ -18,7 +18,7 @@ jQuery(document).ready(function($) {
         if (confirm_sync) {
             evt.preventDefault();
             open_confirm_dialog(
-                'Are you sure you want to synchronize with the membership list?', 
+                'This operation will synchronize the mileage database rider list with the master membership database. Do you want to continue?', 
                 function() {
                     confirm_sync = false;
                     $('.sync-frm input[name="member_sync"]').click();
@@ -31,7 +31,7 @@ jQuery(document).ready(function($) {
         if (confirm_consolidate) {
             evt.preventDefault();
             open_confirm_dialog(
-                'Are you sure you want to perform consolidation?', 
+                'WARNING: this operation will delete all <?php echo(intval(date('Y'))-2); ?> rides in the mileage database, proceed ONLY after first exporting the mileage database. Do you want to continue?', 
                 function() {
                     confirm_consolidate = false;
                     $('.consol-frm input[name="consolidate"]').click();
@@ -44,7 +44,7 @@ jQuery(document).ready(function($) {
         if (confirm_restore) {
             evt.preventDefault();
             open_confirm_dialog(
-                'Are you sure you want to perform restore?', 
+                'WARNING: this operation will overwrite the mileage database. Do you want to continue?', 
                 function() {
                     confirm_restore = false;
                     $('.restore-frm input[name="restore"]').click();
@@ -170,20 +170,20 @@ if ($show_buttons) {
     }
 ?>
     <p>
-        <div><strong>Synchronize rider list with current membership database.</strong></div>
+        <div><strong>Synchronize rider list with master membership database.</strong></div>
         <div><form class="sync-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_member_sync'); ?>
             <input type="submit" name="member_sync" value="Synchronize" 
                 class="button button-primary button-large"/>
         </form></div><br>
-        <div><strong>Consolidate <?php echo(intval(date('Y'))-2); ?> club rides to single entry.</strong></div>
+        <div><strong>Consolidate all <?php echo(intval(date('Y'))-2); ?> club rides to single entry.</strong></div>
         <div><form class="consol-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_consolidate'); ?>
             <input type="submit" name="consolidate" value="Consolidate" 
                 class="button button-primary button-large" 
                 <?php if ($rides_to_consolidate <= 1) { echo 'disabled'; } ?>/>
         </form></div><br>
-        <div><strong>Export database tables to CSV files.</strong></div>
+        <div><strong>Export mileage database to CSV files.</strong></div>
         <div><form class="export-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_export'); ?>
             <input type="submit" name="export_members" 
@@ -199,7 +199,7 @@ if ($show_buttons) {
                 value="Leaders (<?php echo $leader_count; ?>)" 
                 class="button button-primary button-large"/>
         </form></div><br>
-        <div><strong>Restore database tables from exported CSV files.</strong></div>
+        <div><strong>Restore mileage database from exported CSV files.</strong></div>
         <div>
             <button class="restore-btn button button-primary button-large">Restore</button>
             <span class="restore-blk popup-frm initially-hidden">

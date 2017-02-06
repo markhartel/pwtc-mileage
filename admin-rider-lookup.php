@@ -64,18 +64,24 @@ jQuery(document).ready(function($) {
         height: "auto",
         width: 250,
         modal: true,
-        buttons: {
-            "OK": function() {
-                $(this).dialog("close");
-                if (window.pwtc_mileage_confirm_cb) {
-                    window.pwtc_mileage_confirm_cb();
-                    delete window.pwtc_mileage_confirm_cb;
+        buttons: [
+            {
+                text: "Cancel",
+                click: function() {
+                    $(this).dialog("close");
                 }
             },
-            Cancel: function() {
-                $(this).dialog("close");
+            {
+                text: "OK",
+                click: function() {
+                    $(this).dialog("close");
+                    if (window.pwtc_mileage_confirm_cb) {
+                        window.pwtc_mileage_confirm_cb();
+                        delete window.pwtc_mileage_confirm_cb;
+                    }
+                }
             }
-        }
+        ]
     });
 
     $("#error-dialog").dialog({
@@ -94,7 +100,7 @@ jQuery(document).ready(function($) {
 </script>
 <div id="rider-lookup-results" title="Lookup Riders">
 	<form class="lookup-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-        <span>Member ID</span>
+        <span>ID</span>
         <input type="text" name="riderid"/>
         <span>First Name</span>
         <input type="text" name="firstname"/>
@@ -107,7 +113,7 @@ jQuery(document).ready(function($) {
         <table class="lookup-tlb"></table>
     </p>
 </div>
-<div id="confirm-dialog" title="Confirmation">
+<div id="confirm-dialog" title="Confirm">
     <p></p>   
 </div>
 <div id="error-dialog" title="Error">

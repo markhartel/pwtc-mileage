@@ -188,8 +188,7 @@ if ($running_jobs > 0) {
         <h3>Individual Rider Reports</h3>
         <p>
             <button class="lookup-btn button button-primary">Lookup Rider</button>&nbsp;
-            <label class="riderid"/></label>&nbsp;
-            <label class="ridername"></label>
+            <strong><label class="riderid"/></label>&nbsp;<label class="ridername"></label></strong>
         </p>
         <div class='specific-rider'>
             <div><a href='#' report-id='ytd_rides'>Year-to-date rides</a></div>

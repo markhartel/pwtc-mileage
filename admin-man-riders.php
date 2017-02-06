@@ -44,7 +44,7 @@ jQuery(document).ready(function($) {
                 $.post(action, data, remove_rider_cb);
     <?php } else { ?>
                 open_confirm_dialog(
-                    'Are you sure you want to delete rider ' + data.member_id + '?', 
+                    'Are you sure you want to delete rider ID ' + data.member_id + '?', 
                     function() {
                         $.post(action, data, remove_rider_cb);
                     }
@@ -211,7 +211,7 @@ if ($running_jobs > 0) {
     <div id='rider-inspect-section'>
         <p><strong>Enter search parameters to lookup riders.</strong>
         	<form class="search-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-                <span>Member ID</span>
+                <span>ID</span>
                 <input name="memberid" type="text"/>
                 <span>First Name</span>
                 <input name="firstname" type="text"/>
@@ -225,7 +225,7 @@ if ($running_jobs > 0) {
         <p><div><button class="add-btn button button-primary button-large">New</button>
 		<span class="add-blk popup-frm initially-hidden">
 			<form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
-                <span>Member ID</span>
+                <span>ID</span>
                 <input name="memberid" type="text" required/>
                 <span>First Name</span>
                 <input name="firstname" type="text" required/>

@@ -336,7 +336,7 @@ class PwtcMileage_Admin {
 		}
 		else if (!PwtcMileage::validate_member_id_str($memberid)) {
 			$response = array(
-				'error' => 'Member ID entry "' . $memberid . '" is invalid, must be a 5 digit number.'
+				'error' => 'ID entry "' . $memberid . '" is invalid, must be a 5 digit number.'
 			);
 			echo wp_json_encode($response);
 		}
@@ -367,7 +367,7 @@ class PwtcMileage_Admin {
 			}
 			if ($no_overwrite) {
 				$response = array(
-					'error' => 'Member ID ' . $memberid . ' already exists.'
+					'error' => 'ID ' . $memberid . ' already exists.'
 				);
 				echo wp_json_encode($response);
 			}
