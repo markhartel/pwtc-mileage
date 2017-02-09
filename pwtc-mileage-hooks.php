@@ -38,6 +38,7 @@ function pwtc_mileage_get_member_id() {
     //return null;
 }
 
+// TODO: add the rider ID of the posted ride's first ride leader to the returned array.
 /*
 Returns an array of arrays that contains the posted rides without ridesheets. 
 The interor array contains a posted ride record structured thus:

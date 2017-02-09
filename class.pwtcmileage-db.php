@@ -486,13 +486,20 @@ class PwtcMileage_DB {
 		return $status;
 	}
 
-	public static function fetch_riders($lastname, $firstname, $memberid = '') {
+	public static function fetch_riders($lastname, $firstname, $memberid = '', $date = '') {
     	global $wpdb;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
-    	$results = $wpdb->get_results($wpdb->prepare('select * from ' . $member_table . 
+		$sql = $wpdb->prepare('select * from ' . $member_table . 
 			' where first_name like %s and last_name like %s and member_id like %s' . 
 			' order by last_name, first_name', 
-            $firstname . "%", $lastname . "%", $memberid . "%"), ARRAY_A);
+            $firstname . "%", $lastname . "%", $memberid . "%");
+		if ($date != '') {
+			$sql = $wpdb->prepare('select * from ' . $member_table . 
+				' where first_name like %s and last_name like %s and member_id like %s' . 
+				' and expir_date > %s order by last_name, first_name', 
+				$firstname . "%", $lastname . "%", $memberid . "%", $date);			
+		}
+    	$results = $wpdb->get_results($sql, ARRAY_A);
 		return $results;
 	}
 

@@ -126,13 +126,18 @@ jQuery(document).ready(function($) {
         var memberid = $("#rider-inspect-section .search-frm input[name='memberid']").val().trim();
         var lastname = $("#rider-inspect-section .search-frm input[name='lastname']").val().trim();
         var firstname = $("#rider-inspect-section .search-frm input[name='firstname']").val().trim();
+        var active = false;
+        if ($("#rider-inspect-section .search-frm input[name='active']").is(':checked')) {
+            active = true;
+        }
         if (memberid.length > 0 || lastname.length > 0 || firstname.length > 0) {
             var action = $('#rider-inspect-section .search-frm').attr('action');
             var data = {
                 'action': 'pwtc_mileage_lookup_riders',
                 'memberid': memberid,
                 'lastname': lastname,
-                'firstname': firstname
+                'firstname': firstname,
+                'active': active
             };
             $.post(action, data, lookup_riders_cb); 
         }
@@ -217,6 +222,10 @@ if ($running_jobs > 0) {
                 <input name="firstname" type="text"/>
                 <span>Last Name</span>
                 <input name="lastname" type="text"/>
+		        <span>Active Members Only</span>
+		        <span class="checkbox-wrap">
+			        <input type="checkbox" name="active"/>
+		        </span>
 				<input class="button button-primary" type="submit" value="Search"/>
 				<input class="reset-btn button button-primary" type="button" value="Reset"/>
 			</form>

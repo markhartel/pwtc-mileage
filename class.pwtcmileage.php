@@ -590,6 +590,7 @@ class PwtcMileage {
 		return $ok;
 	}
 
+	// TODO: allow ride titles to also start with a digit.
 	public static function validate_ride_title_str($title) {
 		$ok = true;
 		if (preg_match('/^[A-Za-z].*/', $title) !== 1) {
@@ -633,6 +634,7 @@ class PwtcMileage {
 	/* Plugin options access functions
 	/*************************************************************/
 
+	// TODO: add an option to specify a "grace period" for the member expiration date.
 	public static function create_default_plugin_options() {
 		$data = array(
 			'drop_db_on_delete' => false,

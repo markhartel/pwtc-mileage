@@ -305,12 +305,20 @@ class PwtcMileage_Admin {
     	if (isset($_POST['memberid'])) {
 			$memberid = sanitize_text_field($_POST['memberid']);
 		}
+		$active = 'false';
+    	if (isset($_POST['active'])) {
+			$active = trim($_POST['active']);
+		}
 		$members = null;
 		if ($memberid == '' and $firstname == '' and $lastname == '') {
 			$members = array();
 		}
 		else {
-			$members = PwtcMileage_DB::fetch_riders($lastname, $firstname, $memberid);
+			$test_date = '';
+			if ($active == 'true') {
+				$test_date = self::get_date_for_expir_check();
+			}
+			$members = PwtcMileage_DB::fetch_riders($lastname, $firstname, $memberid, $test_date);
 		}	
 		$response = array(
 			'memberid' => $memberid,
@@ -514,7 +522,7 @@ class PwtcMileage_Admin {
 			$rider = PwtcMileage_DB::fetch_rider($memberid);
 			if (count($rider) > 0) {
 				$r = $rider[0];
-				if (strtotime($r['expir_date']) < strtotime(date('Y-m-d', current_time('timestamp')))) {
+				if (strtotime($r['expir_date']) < strtotime(self::get_date_for_expir_check())) {
 					$errormsg = 'The membership of ' . $r['first_name'] . ' ' . $r['last_name'] .
 						' (' . $r['member_id'] . ') has expired.';
 				}
@@ -524,6 +532,11 @@ class PwtcMileage_Admin {
 			}
 		}
 		return $errormsg;
+	}
+
+	// Incorporate "grace period" into expiration date check.
+	public static function get_date_for_expir_check() {
+		return date('Y-m-d', current_time('timestamp'));
 	}
 
 	public static function add_leader_callback() {
@@ -869,7 +882,7 @@ class PwtcMileage_Admin {
 			$report_id = $response['report_id'];
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename=rpt_{$report_id}_{$today}.csv");
+			header("Content-Disposition: attachment; filename={$today}_{$report_id}.csv");
 			$fh = fopen('php://output', 'w');
 			self::write_export_csv_file($fh, $response['data'], $response['header']);
 			fclose($fh);
@@ -884,7 +897,7 @@ class PwtcMileage_Admin {
 			$report_id = $response['report_id'];
 			header('Content-Description: File Transfer');
 			header("Content-type: application/pdf");
-			header("Content-Disposition: attachment; filename=rpt_{$report_id}_{$today}.pdf");
+			header("Content-Disposition: attachment; filename={$today}_{$report_id}.pdf");
 			require('fpdf.php');	
 			$pdf = new FPDF();
 			self::write_export_pdf_file($pdf, $response['data'], $response['header'], $response['title']);
@@ -902,7 +915,7 @@ class PwtcMileage_Admin {
 			$today = date('Y-m-d', current_time('timestamp'));
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename=members_{$today}.csv");
+			header("Content-Disposition: attachment; filename={$today}_members.csv");
 			$fh = fopen('php://output', 'w');
 			self::write_export_csv_file($fh, PwtcMileage_DB::fetch_members_for_export());
 			fclose($fh);
@@ -916,7 +929,7 @@ class PwtcMileage_Admin {
 			$today = date('Y-m-d', current_time('timestamp'));
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename=rides_{$today}.csv");
+			header("Content-Disposition: attachment; filename={$today}_rides.csv");
 			$fh = fopen('php://output', 'w');
 			self::write_export_csv_file($fh, PwtcMileage_DB::fetch_rides_for_export());
 			fclose($fh);
@@ -930,7 +943,7 @@ class PwtcMileage_Admin {
 			$today = date('Y-m-d', current_time('timestamp'));
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename=mileage_{$today}.csv");
+			header("Content-Disposition: attachment; filename={$today}_mileage.csv");
 			$fh = fopen('php://output', 'w');
 			self::write_export_csv_file($fh, PwtcMileage_DB::fetch_mileage_for_export());
 			fclose($fh);
@@ -944,7 +957,7 @@ class PwtcMileage_Admin {
 			$today = date('Y-m-d', current_time('timestamp'));
 			header('Content-Description: File Transfer');
 			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename=leaders_{$today}.csv");
+			header("Content-Disposition: attachment; filename={$today}_leaders.csv");
 			$fh = fopen('php://output', 'w');
 			self::write_export_csv_file($fh, PwtcMileage_DB::fetch_leaders_for_export());
 			fclose($fh);
@@ -979,13 +992,13 @@ class PwtcMileage_Admin {
 			PwtcMileage_DB::job_set_status('cvs_restore', 'triggered');
 			$files = array(
 				self::generate_file_record(
-					'members_file', 'members', 'members_', PwtcMileage_DB::MEMBER_TABLE),
+					'members_file', 'members', '_members', PwtcMileage_DB::MEMBER_TABLE),
 				self::generate_file_record(
-					'rides_file', 'rides', 'rides_', PwtcMileage_DB::RIDE_TABLE),
+					'rides_file', 'rides', '_rides', PwtcMileage_DB::RIDE_TABLE),
 				self::generate_file_record(
-					'mileage_file', 'mileage', 'mileage_', PwtcMileage_DB::MILEAGE_TABLE),
+					'mileage_file', 'mileage', '_mileage', PwtcMileage_DB::MILEAGE_TABLE),
 				self::generate_file_record(
-					'leaders_file', 'leaders', 'leaders_', PwtcMileage_DB::LEADER_TABLE)
+					'leaders_file', 'leaders', '_leaders', PwtcMileage_DB::LEADER_TABLE)
 			);
 			$error = self::validate_uploaded_files($files);
 			if ($error) {
@@ -1037,11 +1050,11 @@ class PwtcMileage_Admin {
 		include('admin-man-yearend.php');
 	}
 
-	public static function generate_file_record($id, $label, $prefix, $tblname) {
+	public static function generate_file_record($id, $label, $suffix, $tblname) {
 		return array(
 			'id' => $id,
 			'label' => $label,
-			'pattern' => '/' . $prefix . '\d{4}-\d{2}-\d{2}\.csv' . '/',
+			'pattern' => '/' . '\d{4}-\d{2}-\d{2}' . $suffix . '\.csv' . '/',
 			'tblname' => $tblname
 		);
 	}
