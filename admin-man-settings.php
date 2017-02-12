@@ -1,5 +1,5 @@
 <?php
-if (!current_user_can('manage_options')) {
+if (!current_user_can($capability)) {
     return;
 }
 ?>

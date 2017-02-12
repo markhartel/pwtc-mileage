@@ -1,5 +1,5 @@
 <?php
-if (!current_user_can('edit_published_pages')) {
+if (!current_user_can($capability)) {
     return;
 }
 ?>

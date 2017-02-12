@@ -748,7 +748,7 @@ class PwtcMileage_Admin {
     	$page_title = 'View Reports';
     	$menu_title = 'View Reports';
     	$menu_slug = 'pwtc_mileage_generate_reports';
-    	$capability = 'edit_posts';
+    	$capability = PwtcMileage::VIEW_MILEAGE_CAP;
     	$function = array( 'PwtcMileage_Admin', 'page_generate_reports');
 		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_pdf'));
@@ -757,21 +757,21 @@ class PwtcMileage_Admin {
     	$page_title = 'Manage Riders';
     	$menu_title = 'Manage Riders';
     	$menu_slug = 'pwtc_mileage_manage_riders';
-    	$capability = 'edit_published_pages';
+    	$capability = PwtcMileage::EDIT_RIDERS_CAP;
     	$function = array( 'PwtcMileage_Admin', 'page_manage_riders');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
     	$page_title = 'Manage Ride Sheets';
     	$menu_title = 'Manage Ride Sheets';
     	$menu_slug = 'pwtc_mileage_manage_ride_sheets';
-    	$capability = 'edit_published_pages';
+    	$capability = PwtcMileage::EDIT_MILEAGE_CAP;
     	$function = array( 'PwtcMileage_Admin', 'page_manage_ride_sheets');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
     	$page_title = 'Database Operations';
     	$menu_title = 'Database Ops';
     	$menu_slug = 'pwtc_mileage_manage_year_end';
-    	$capability = 'manage_options';
+    	$capability = PwtcMileage::DB_OPS_CAP;
     	$function = array( 'PwtcMileage_Admin', 'page_manage_year_end');
 		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 		add_action('load-' . $page, array('PwtcMileage_Admin','download_csv'));
@@ -792,18 +792,21 @@ class PwtcMileage_Admin {
 	public static function page_manage_ride_sheets() {
 		$plugin_options = PwtcMileage::get_plugin_options();
 		$running_jobs = PwtcMileage_DB::num_running_jobs();
+		$capability = PwtcMileage::EDIT_MILEAGE_CAP;
 		include('admin-man-ridesheets.php');
 	}
 
 	public static function page_generate_reports() {
 		$plugin_options = PwtcMileage::get_plugin_options();
 		$running_jobs = PwtcMileage_DB::num_running_jobs();
+		$capability = PwtcMileage::VIEW_MILEAGE_CAP;
 		include('admin-gen-reports.php');
 	}
 
 	public static function page_manage_riders() {
 		$plugin_options = PwtcMileage::get_plugin_options();
 		$running_jobs = PwtcMileage_DB::num_running_jobs();
+		$capability = PwtcMileage::EDIT_RIDERS_CAP;
 		include('admin-man-riders.php');
 	}
 
@@ -1047,6 +1050,8 @@ class PwtcMileage_Admin {
 		$mileage_count = PwtcMileage_DB::count_mileage();
 		$leader_count = PwtcMileage_DB::count_leaders();
 
+		$capability = PwtcMileage::DB_OPS_CAP;
+
 		include('admin-man-yearend.php');
 	}
 
@@ -1180,6 +1185,7 @@ class PwtcMileage_Admin {
 			PwtcMileage::update_plugin_options($plugin_options);
 			$plugin_options = PwtcMileage::get_plugin_options();			
 		}
+		$capability = 'manage_options';
 		include('admin-man-settings.php');
 	}
 
