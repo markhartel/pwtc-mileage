@@ -2,6 +2,7 @@
 
 class PwtcMileage {
 
+	// TODO: add plugin prefix to capacity names.
 	const VIEW_MILEAGE_CAP = 'view_mileage';
 	const EDIT_MILEAGE_CAP = 'edit_mileage';
 	const EDIT_RIDERS_CAP = 'edit_riders';

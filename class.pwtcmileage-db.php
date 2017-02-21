@@ -84,6 +84,30 @@ class PwtcMileage_DB {
 		return $num_led;
 	}
 
+	public static function fetch_annual_accum_miles($outtype) {
+    	global $wpdb;
+    	$results = $wpdb->get_results(
+			'select a.member_id as member_id,' . 
+			' concat(a.last_name, \', \', a.first_name) as name,' . 
+			' a.mileage as annual, b.mileage as accum' .
+			' from ' . self::LY_MILES_VIEW . ' as a inner join ' . self::LY_LT_MILES_VIEW . ' as b' . 
+			' on a.member_id = b.member_id where a.mileage > 0 ' . 
+			' order by a.last_name, a.first_name', $outtype);
+		return $results;
+	}
+
+	public static function meta_annual_accum_miles() {
+		$thisyear = date('Y', current_time('timestamp'));
+    	$lastyear = intval($thisyear) - 1;
+		$meta = array(
+			'header' => array('ID', 'Name', 'Annual', 'Accum'),
+			'title' => '' . $lastyear . ' Annual & Accumulative Mileage',
+			'date_idx' => -1,
+			'id_idx' => 0
+		);
+		return $meta;
+	}
+
 	public static function fetch_ly_lt_achvmnt($outtype, $sort) {
     	global $wpdb;
     	$results = $wpdb->get_results(

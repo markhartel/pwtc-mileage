@@ -697,6 +697,29 @@ class PwtcMileage_Admin {
 						break;
 				}
 				break;
+			case "award_achvmnt":
+			case "award_top_miles":
+			case "award_members":
+			case "award_leaders":
+				switch ($reportid) {
+					case "award_achvmnt":
+						$meta = PwtcMileage_DB::meta_ly_lt_achvmnt();
+						$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, 'mileage');
+						break;
+					case "award_top_miles":
+						$meta = PwtcMileage_DB::meta_ly_miles();
+						$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, 'mileage desc');
+						break;
+					case "award_leaders":
+						$meta = PwtcMileage_DB::meta_ly_led();
+						$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, 'last_name, first_name');
+						break;
+					case "award_members":
+						$meta = PwtcMileage_DB::meta_annual_accum_miles();
+						$data = PwtcMileage_DB::fetch_annual_accum_miles(ARRAY_N);
+						break;
+				}			
+				break;
 			default:
 				$error = 'Report type ' . $reportid . ' not found.';
 		}
@@ -778,12 +801,12 @@ class PwtcMileage_Admin {
 
 		remove_submenu_page($parent_menu_slug, $parent_menu_slug);
 
-		$page_title = 'Settings';
-    	$menu_title = 'Settings';
+		$page_title = 'PWTC Mileage Settings';
+    	$menu_title = 'PWTC Mileage';
     	$menu_slug = 'pwtc_mileage_settings';
     	$capability = 'manage_options';
     	$function = array( 'PwtcMileage_Admin', 'page_manage_settings');
-		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+		add_submenu_page('options-general.php', $page_title, $menu_title, $capability, $menu_slug, $function);
 	}
 
 	public static function plugin_menu_page() {

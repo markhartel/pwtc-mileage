@@ -124,6 +124,26 @@ jQuery(document).ready(function($) {
         }
     });
 
+    $('#report-main-section .awards a').on('click', function(evt) {
+        evt.preventDefault();
+        if ($('#report-main-section .download-slt').val() != 'no') {
+            $('#report-main-section .download').html(
+                '<form method="post">' + 
+                '<input type="hidden" name="' + $('#report-main-section .download-slt').val() + '"/>' +
+                '<input type="hidden" name="report_id" value="' + $(this).attr('report-id') + '"/>' +
+                '</form>');
+            $('#report-main-section .download form').submit();
+        }
+        else {
+            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+            var data = {
+                'action': 'pwtc_mileage_generate_report',
+                'report_id': $(this).attr('report-id')
+            };
+            $.post(action, data, generate_report_cb);
+        }
+    });
+
     $('#report-main-section .lookup-btn').on('click', function(evt) {
         lookup_pwtc_riders(function(riderid, name) {
             $('#report-main-section .riderid').html(riderid);
@@ -172,7 +192,6 @@ if ($running_jobs > 0) {
             <div><a href='#' report-id='ytd_miles'>Year-to-date mileage</a></div>
             <div><a href='#' report-id='ly_miles'>Last year's mileage</a></div>
             <div><a href='#' report-id='lt_miles'>Lifetime mileage</a></div>
-            <div><a href='#' report-id='ly_lt_achvmnt'>Last year's achievement awards</a></div>
         </div>
         <h3>Ride Leader Reports</h3>
         <p>Sort by: 
@@ -195,6 +214,13 @@ if ($running_jobs > 0) {
             <div><a href='#' report-id='ly_rides'>Last year's rides</a></div>
             <div><a href='#' report-id='ytd_rides_led'>Year-to-date rides led</a></div>
             <div><a href='#' report-id='ly_rides_led'>Last year's rides led</a></div>
+        </div>
+        <h3><?php echo(intval(date('Y'))-1); ?> Award Reports</h3>
+        <div class='awards'>
+            <div><a href='#' report-id='award_achvmnt'>Accumulative mileage achievement</a></div>
+            <div><a href='#' report-id='award_top_miles'>Top annual mileage</a></div>
+            <div><a href='#' report-id='award_members'>Member annual and accumulative mileage</a></div>
+            <div><a href='#' report-id='award_leaders'>Ride leaders</a></div>
         </div>
         <div class='download'></div>
     </div>
