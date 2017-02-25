@@ -55,6 +55,11 @@
 .pwtc-mileage-rwd-table tr.highlight, .pwtc-mileage-rwd-table tr.highlight td { 
   background: grey; 
 }
+.pwtc-mileage-rwd-table a {
+  cursor: pointer;
+  text-decoration: underline;
+  color: #fff;
+}
 
 @media (min-width: 480px) {
   .pwtc-mileage-rwd-table td:before {

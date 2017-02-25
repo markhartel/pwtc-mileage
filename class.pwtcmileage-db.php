@@ -218,14 +218,18 @@ class PwtcMileage_DB {
 		return $meta;
 	}
 
-	public static function fetch_ly_led($outtype, $sort, $min = 0) {
+	public static function fetch_ly_led($outtype, $sort, $min = 0, $lastname_first = false) {
     	global $wpdb;
 		$where = '';
 		if ($min > 0) {
 			$where = ' where rides_led >= ' . $min . ' ';
 		}
+		$name = 'concat(first_name, \' \', last_name)';
+		if ($lastname_first) {
+			$name = 'concat(last_name, \', \', first_name)';
+		}
     	$results = $wpdb->get_results(
-			'select member_id, concat(first_name, \' \', last_name), rides_led from ' . 
+			'select member_id, ' . $name . ', rides_led from ' . 
 			self::LY_LED_VIEW . $where . ' order by ' . $sort , $outtype);
 		return $results;
 	}
@@ -349,7 +353,7 @@ class PwtcMileage_DB {
 
 	public static function meta_posts_without_rides() {
 		$meta = array(
-			'header' => array('ID', 'Title', 'Date'),
+			'header' => array('ID', 'Title', 'Date', 'Guid'),
 			'title' => 'Posted Rides without Ride Sheets',
 			'date_idx' => 2,
 			'id_idx' => 0

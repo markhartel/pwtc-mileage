@@ -637,6 +637,7 @@ class PwtcMileage_Admin {
 			case "ly_miles":
 			case "lt_miles":
 			case "ly_lt_achvmnt":
+				// TODO: Don't sort from post directly in SQL.
 				$sort = $_POST['sort'];
 				switch ($reportid) {			
 					case "ytd_miles":
@@ -659,7 +660,7 @@ class PwtcMileage_Admin {
 				break;
 			case "ytd_led":
 			case "ly_led":
-				$sort = $_POST['sort'];
+				// TODO: Don't sort from post directly in SQL.
 				$sort = $_POST['sort'];
 				switch ($reportid) {			
 					case "ytd_led":
@@ -712,7 +713,7 @@ class PwtcMileage_Admin {
 						break;
 					case "award_leaders":
 						$meta = PwtcMileage_DB::meta_ly_led();
-						$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, 'last_name, first_name');
+						$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, 'last_name, first_name', 0, true);
 						break;
 					case "award_members":
 						$meta = PwtcMileage_DB::meta_annual_accum_miles();

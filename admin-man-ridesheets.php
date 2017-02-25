@@ -57,15 +57,15 @@ jQuery(document).ready(function($) {
 					$('#ridesheet-ride-page .posts-div table').append(
 						'<tr postid="' + post[0] + '" ridedate="' + post[2] + '"><td data-th="Ride">' +
 						post[1] + '</td><td data-th="Date">' + fmtdate + '</td><td data-th="ID">' + post[0] + '</td>' +
-						' <td data-th="Actions"><a class="create-btn">Create Sheet</a></td>' + 
-						'</tr>');
+						' <td data-th="Actions"><a href="' + post[3] + '" target="_blank">View</a>' +
+						' <a class="create-btn">Create</a>' + '</td></tr>');
 				}
 				else {
 					$('#ridesheet-ride-page .posts-div table').append(
 						'<tr postid="' + post[0] + '" ridedate="' + post[2] + '"><td data-th="Ride">' +
 						post[1] + '</td><td data-th="Date">' + fmtdate + '</td>' + 
-						' <td data-th="Actions"><a class="create-btn">Create Sheet</a></td>' + 
-						'</tr>');
+						' <td data-th="Actions"><a href="' + post[3] + '" target="_blank">View</a>' +
+						' <a class="create-btn">Create</a>' + '</td></tr>');
 				} 
 			});
 			$('#ridesheet-ride-page .posts-div .create-btn').on('click', function(evt) {
@@ -78,7 +78,12 @@ jQuery(document).ready(function($) {
 					'title': $(this).parent().parent().find('td').first().html(),
 					'nonce': '<?php echo wp_create_nonce('pwtc_mileage_create_ride_from_event'); ?>'
 				};
-				$.post(action, data, lookup_ridesheet_cb);
+				open_confirm_dialog(
+					'Are you sure you want to create a ridesheet for ride titled "' + data.title + '"?', 
+					function() {
+						$.post(action, data, lookup_ridesheet_cb);
+					}
+				);
 			});
 		}
 		else {

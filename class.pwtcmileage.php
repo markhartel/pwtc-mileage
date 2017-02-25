@@ -315,7 +315,13 @@ class PwtcMileage {
 						}
 					}
 					else {
-						$outrow .= '<td ' . $lbl_attr . '>' . $item . '</td>';
+						if (0 === strpos($item, 'http://') or 0 === strpos($item, 'https://')) {
+							$outrow .= '<td ' . $lbl_attr . '><a href="' . $item . 
+								'" target="_blank">View</a></td>';
+						}
+						else {
+							$outrow .= '<td ' . $lbl_attr . '>' . $item . '</td>';
+						}
 					}
 					$i++;
 				endforeach;	

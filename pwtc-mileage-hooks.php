@@ -50,23 +50,20 @@ function pwtc_mileage_fetch_posts($select_sql, $lookback_date) {
     global $wpdb;
     $ride_post_type = 'rideevent';
     $ride_date_metakey = 'start_date';
+    $sql_part1 = 'select p.ID, p.post_title, m.meta_value as start_date, p.guid' . 
+        ' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
+        ' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
+        ' and m.meta_key = %s and (cast(m.meta_value as date) ';
+    $sql_part2 = ') and p.ID not in (' . $select_sql . ')' . ' order by m.meta_value';
     $sql_stmt = null;
     if ($lookback_date != null) {
         $sql_stmt = $wpdb->prepare(
-            'select p.ID, p.post_title, m.meta_value as start_date' . 
-            ' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
-            ' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
-            ' and m.meta_key = %s and (cast(m.meta_value as date) between %s and curdate())' . 
-            ' and p.ID not in (' . $select_sql . ')' . ' order by m.meta_value', 
+            $sql_part1 . 'between %s and curdate()' . $sql_part2, 
             $ride_post_type, $ride_date_metakey, $lookback_date);
     }
     else {
         $sql_stmt = $wpdb->prepare(
-            'select p.ID, p.post_title, m.meta_value as start_date' . 
-            ' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
-            ' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
-            ' and m.meta_key = %s and (cast(m.meta_value as date) < curdate())' . 
-            ' and p.ID not in (' . $select_sql . ')' . ' order by m.meta_value', 
+            $sql_part1 . '< curdate()' . $sql_part2, 
             $ride_post_type, $ride_date_metakey);
     }
     $results = $wpdb->get_results($sql_stmt, ARRAY_N);
