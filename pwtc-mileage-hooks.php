@@ -38,13 +38,13 @@ function pwtc_mileage_get_member_id() {
     //return null;
 }
 
-// TODO: add the rider ID of the posted ride's first ride leader to the returned array.
 /*
 Returns an array of arrays that contains the posted rides without ridesheets. 
 The interor array contains a posted ride record structured thus:
 array[0] - post ID (string)
 array[1] - title (string)
 array[2] - start date (string with PHP date format 'Y-m-d')
+array[3] - post guid (url string)
 */
 function pwtc_mileage_fetch_posts($select_sql, $lookback_date) {
     global $wpdb;
@@ -67,6 +67,40 @@ function pwtc_mileage_fetch_posts($select_sql, $lookback_date) {
             $ride_post_type, $ride_date_metakey);
     }
     $results = $wpdb->get_results($sql_stmt, ARRAY_N);
-    //return array();
     return $results;
+    //return array();
+}
+
+/*
+Returns the guid of the post. 
+(Return a null if the post cannot be found.)
+*/
+function pwtc_mileage_fetch_post_guid($post_id) {
+    $post = get_post($post_id);
+    $guid = null;
+    if ($post !== null) {
+        $guid = $post->guid;
+    }
+    return $guid;
+    //return null;
+}
+
+/*
+Returns an array of arrays that contains the ride leaders of the posted ride. 
+The interor array contains a posted ride record structured thus:
+array[0] - rider ID (string)
+array[1] - full name (string)
+*/
+function pwtc_mileage_fetch_ride_leaders($post_id) {
+    $leaders = get_field('ride_leader', $post_id);
+    $leaders_array = array();
+    if ($leaders) {
+        foreach ($leaders as $leader) {
+            $name = $leader->post_title;
+            $riderid = get_field('rider_number', $leader->ID);
+            array_push($leaders_array, array($riderid, $name));
+        }
+    }
+    return $leaders_array;
+    //return array();   
 }

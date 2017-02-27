@@ -226,6 +226,10 @@ class PwtcMileage_Admin {
 				}
 				else {
 					$ride_id = PwtcMileage_DB::get_new_ride_id();
+					$larray = pwtc_mileage_fetch_ride_leaders(intval($postid));
+					foreach ($larray as $item) {
+						PwtcMileage_DB::insert_ride_leader($ride_id, $item[0]);
+					}
 					$leaders = PwtcMileage_DB::fetch_ride_leaders($ride_id);
 					$mileage = PwtcMileage_DB::fetch_ride_mileage($ride_id);
 					$response = array(
@@ -234,6 +238,10 @@ class PwtcMileage_Admin {
 						'startdate' => $startdate, 
 						'leaders' => $leaders,
 						'mileage' => $mileage);
+					$guid = pwtc_mileage_fetch_post_guid(intval($postid));
+					if ($guid !== null) {
+						$response['post_guid'] = $guid;
+					}
 					echo wp_json_encode($response);
 				}
 			}
@@ -279,22 +287,33 @@ class PwtcMileage_Admin {
 
 	public static function lookup_ridesheet_callback() {
 		$rideid = trim($_POST['ride_id']);
-		$title = '';
-		$startdate = '';
 		$results = PwtcMileage_DB::fetch_ride(intval($rideid));
 		if (count($results) > 0) {
 			$title = $results[0]['title'];
 			$startdate = $results[0]['date'];
+			$postid = intval($results[0]['post_id']);
+			$leaders = PwtcMileage_DB::fetch_ride_leaders(intval($rideid));
+			$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
+			$response = array(
+				'startdate' => $startdate,
+				'ride_id' => $rideid,
+				'title' => $title,
+				'leaders' => $leaders,
+				'mileage' => $mileage);
+			if ($postid > 0) {
+				$guid = pwtc_mileage_fetch_post_guid($postid);
+				if ($guid !== null) {
+					$response['post_guid'] = $guid;
+				}
+			}
+			echo wp_json_encode($response);
 		}
-		$leaders = PwtcMileage_DB::fetch_ride_leaders(intval($rideid));
-		$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
-		$response = array(
-			'startdate' => $startdate,
-			'ride_id' => $rideid,
-			'title' => $title,
-			'leaders' => $leaders,
-			'mileage' => $mileage);
-    	echo wp_json_encode($response);
+		else {
+			$response = array(
+				'error' => 'Could not fetch ridesheet from database.'
+			);
+			echo wp_json_encode($response);
+		}
 		wp_die();
 	}
 

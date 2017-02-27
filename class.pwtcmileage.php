@@ -568,8 +568,8 @@ class PwtcMileage {
 
 	public static function shortcode_rides_wo_sheets($atts, $content = null) {
 		$a = self::normalize_atts($atts);
-		$meta = PwtcMileage_DB::meta_posts_without_rides();
-		$data = PwtcMileage_DB::fetch_posts_without_rides();
+		$meta = PwtcMileage_DB::meta_posts_without_rides2();
+		$data = PwtcMileage_DB::fetch_posts_without_rides2();
 		$out = self::shortcode_build_table($meta, $data, $a, $content);
 		return $out;
 	}

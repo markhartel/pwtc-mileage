@@ -283,6 +283,13 @@ jQuery(document).ready(function($) {
 			var fmtdate = getPrettyDate(res.startdate);
 			$('#ridesheet-sheet-page .sheet-title').html(res.title);
 			$('#ridesheet-sheet-page .sheet-date').html(fmtdate);
+			if (res.post_guid) {
+				$('#ridesheet-sheet-page .sheet-guid').html(
+					'<a href="' + res.post_guid + '" target="_blank">view</a>');
+			}
+			else {
+				$('#ridesheet-sheet-page .sheet-guid').html('');
+			}
 			$("#ridesheet-sheet-page .rename-blk .rename-frm input[name='rideid']").val(res.ride_id); 
 			$("#ridesheet-sheet-page .leader-section .add-frm input[name='rideid']").val(res.ride_id); 
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='rideid']").val(res.ride_id); 
@@ -639,7 +646,7 @@ if ($running_jobs > 0) {
 	</div>
 	<div id='ridesheet-sheet-page' class="initially-hidden">
 		<p><button class='back-btn button button-primary button-large'>Back</button></p>
-		<h2><span class="sheet-title"></span> - <span class="sheet-date"></span></h2>
+		<h2><span class="sheet-title"></span> - <span class="sheet-date"></span> <span class="sheet-guid"></span></h2>
 		<p><div><button class="rename-btn button button-primary">Rename</button>
 		<span class="rename-blk popup-frm initially-hidden">
 			<form class="rename-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">

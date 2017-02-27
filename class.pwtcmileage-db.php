@@ -361,6 +361,36 @@ class PwtcMileage_DB {
 		return $meta;
 	}
 
+	public static function fetch_posts_without_rides2() {
+		$rides = self::fetch_posts_without_rides();
+    	$rides_array = array();
+		foreach ($rides as $ride) {
+			$postid = $ride[0];
+			$larray = pwtc_mileage_fetch_ride_leaders(intval($postid));
+			$leaders = '';
+			$count = 0;
+			foreach ($larray as $item) {
+				if ($count > 0) {
+					$leaders .= ', ';
+				}
+				$leaders .= $item[1];
+				$count++;
+			}
+			array_push($rides_array, array($ride[0], $ride[1], $ride[2], $leaders, $ride[3]));
+		}
+		return $rides_array;
+	}
+
+	public static function meta_posts_without_rides2() {
+		$meta = array(
+			'header' => array('ID', 'Title', 'Date', 'Leaders', 'Guid'),
+			'title' => 'Posted Rides without Ride Sheets',
+			'date_idx' => 2,
+			'id_idx' => 0
+		);
+		return $meta;
+	}
+
 	public static function fetch_ride($rideid) {
    		global $wpdb;
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
