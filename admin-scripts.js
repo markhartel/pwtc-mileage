@@ -13,6 +13,7 @@ function open_confirm_dialog(msg, mycb) {
     jQuery("#confirm-dialog").dialog('open');
 }
 
+// TODO: handle case where error dialog is already open.
 function open_error_dialog(msg) {
     jQuery("#error-dialog p").html(msg);
     jQuery("#error-dialog").dialog('open');

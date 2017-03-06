@@ -40,7 +40,7 @@ jQuery(document).ready(function($) {
 	function populate_posts_table(posts) {
 		$('#ridesheet-ride-page .posts-div').empty();
 		if (posts.length > 0) {
-			$('#ridesheet-ride-page .posts-div').append('<strong>Posted rides missing ridesheets.</strong>');
+			$('#ridesheet-ride-page .posts-div').append('<strong>Posted rides with missing ridesheets.</strong>');
 			$('#ridesheet-ride-page .posts-div').append('<table class="rwd-table"></table>');
 			if (show_ride_id) {
 				$('#ridesheet-ride-page .posts-div table').append(
@@ -261,7 +261,12 @@ jQuery(document).ready(function($) {
 
 	function lookup_posts_cb(response) {
         var res = JSON.parse(response);
-		populate_posts_table(res.posts);
+		if (res.error) {
+			open_error_dialog(res.error);
+		}
+		else {
+			populate_posts_table(res.posts);
+		}
 	}   
 
 	function lookup_rides_cb(response) {
