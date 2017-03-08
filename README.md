@@ -70,6 +70,7 @@ sort_order|Blah, blah, blah|"asc" or "desc"|"asc"
 - helveticai.php *(font definition for pdf generator)*
 - helveticab.php *(font definition for pdf generator)*
 - helveticabi.php *(font definition for pdf generator)*
+- dbf_class.php *(open source DBF file reader - from [phpclasses.org](https://www.phpclasses.org/package/1302-PHP-Extract-information-from-a-DBF-database-file.html))*
 - admin-scripts.js *(javascript utility functions for admin pages)*
 - php-date-formatter.js *(javascript utility for PHP-style date formats - from [github](https://github.com/kartik-v/php-date-formatter))*
 - php-date-formatter.min.js *(minimized version of above file - from [github](https://github.com/kartik-v/php-date-formatter))*
