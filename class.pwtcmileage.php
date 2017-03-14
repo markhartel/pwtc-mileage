@@ -61,6 +61,8 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'consolidation_callback') );  
 		add_action( 'pwtc_mileage_member_sync', 
 			array( 'PwtcMileage', 'member_sync_callback') );  
+		add_action( 'pwtc_mileage_purge_nonriders', 
+			array( 'PwtcMileage', 'purge_nonriders_callback') );  
 		add_action( 'pwtc_mileage_cvs_restore', 
 			array( 'PwtcMileage', 'cvs_restore_callback') );  
 	}
@@ -78,13 +80,12 @@ class PwtcMileage {
 	/* Background action task callbacks
 	/*************************************************************/
 
-	// TODO: validate permissions!
 	public static function consolidation_callback() {
 		error_log( 'Consolidation process started.');
 		PwtcMileage_DB::job_set_status('consolidation', 'started');
 
 		$thisyear = date('Y', current_time('timestamp'));
-    	$yearbeforelast = intval($thisyear) - 2;
+		$yearbeforelast = intval($thisyear) - 2;
 		$title = 'Totals Through ' . $yearbeforelast;
 		$maxdate = '' . $yearbeforelast . '-12-31';
 
@@ -116,7 +117,6 @@ class PwtcMileage {
 		}	
 	}
 
-	// TODO: validate permissions!
 	public static function member_sync_callback() {
 		error_log( 'Membership Sync process started.');
 		PwtcMileage_DB::job_set_status('member_sync', 'started');
@@ -140,7 +140,18 @@ class PwtcMileage {
 		}
 	}
 
-	// TODO: validate permissions!
+	public static function purge_nonriders_callback() {
+		error_log( 'Purge non-riders process started.');
+		PwtcMileage_DB::job_set_status('purge_nonriders', 'started');
+		$status = PwtcMileage_DB::delete_all_nonriders();
+		if (false === $status or 0 === $status) {
+			PwtcMileage_DB::job_set_status('purge_nonriders', 'failed', 'database delete failed');
+		}
+		else {
+			PwtcMileage_DB::job_remove('purge_nonriders');
+		}
+	}
+
 	public static function updmembs_load_callback() {
 		error_log( 'Updmembs file load process started.');
 		PwtcMileage_DB::job_set_status('updmembs_load', 'started');
@@ -176,7 +187,6 @@ class PwtcMileage {
 		}
 	}
 
-	// TODO: validate permissions!
 	public static function cvs_restore_callback() {
 		error_log( 'CVS restore process started.');
 		PwtcMileage_DB::job_set_status('cvs_restore', 'started');

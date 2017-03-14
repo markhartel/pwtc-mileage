@@ -12,6 +12,7 @@ jQuery(document).ready(function($) {
 
     var confirm_consolidate = true;
     var confirm_sync = true;
+    var confirm_purge = true;
     var confirm_restore = true;
 
     $('.sync-frm').on('submit', function(evt) {
@@ -22,6 +23,19 @@ jQuery(document).ready(function($) {
                 function() {
                     confirm_sync = false;
                     $('.sync-frm input[name="member_sync"]').click();
+                }
+            );
+        }
+    });
+
+    $('.purge-frm').on('submit', function(evt) {
+        if (confirm_purge) {
+            evt.preventDefault();
+            open_confirm_dialog(
+                'This operation will purge all non-riders from the membership list. Do you want to continue?', 
+                function() {
+                    confirm_purge = false;
+                    $('.purge-frm input[name="purge_nonriders"]').click();
                 }
             );
         }
@@ -118,6 +132,26 @@ if (null !== $job_status_s) {
 ?>
     <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
 <?php
+}
+if (null !== $job_status_p) {
+    if ($job_status_p['status'] == 'triggered') {
+        $message = 'Purge non-riders action has been triggered.';
+        $notice_type = 'notice-warning';
+        $show_buttons = false;
+    } 
+    else if ($job_status_p['status'] == 'started') {
+        $message = 'Purge non-riders action is currently running.';
+        $notice_type = 'notice-warning';
+        $show_buttons = false;
+    }
+    else {
+        $message = 'Purge non-riders action failed: ' . $job_status_p['error_msg'];
+        $notice_type = 'notice-error';
+        $clear_button = true;
+    }
+?>
+    <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
+<?php
 } 
 if (null !== $job_status_c) {
     if ($job_status_c['status'] == 'triggered') {
@@ -174,6 +208,12 @@ if ($show_buttons) {
         <div><form class="sync-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_member_sync'); ?>
             <input type="submit" name="member_sync" value="Synchronize" 
+                class="button button-primary button-large"/>
+        </form></div><br>
+        <div><strong>Purge all non-riders from rider list.</strong></div>
+        <div><form class="purge-frm" method="POST">
+            <?php wp_nonce_field('pwtc_mileage_purge_nonriders'); ?>
+            <input type="submit" name="purge_nonriders" value="Purge" 
                 class="button button-primary button-large"/>
         </form></div><br>
         <div><strong>Consolidate all <?php echo(intval(date('Y'))-2); ?> club rides to single entry.</strong></div>

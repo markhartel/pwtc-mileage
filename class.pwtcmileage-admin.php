@@ -201,7 +201,6 @@ class PwtcMileage_Admin {
 		wp_die();
 	}
 
-	// TODO: validate that ride id is an integer.
 	public static function rename_ride_callback() {
 		if (!current_user_can(PwtcMileage::EDIT_MILEAGE_CAP)) {
 			$response = array(
@@ -223,6 +222,12 @@ class PwtcMileage_Admin {
 			if (!wp_verify_nonce($nonce, 'pwtc_mileage_rename_ride')) {
 				$response = array(
 					'error' => 'Nonce security check failed attempting to rename ridesheet.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_number_str($ride_id)) {
+				$response = array(
+					'error' => 'Ride ID "' . $ride_id . '" is invalid, must be nonnegative integer.'
 				);
 				echo wp_json_encode($response);
 			}
@@ -251,7 +256,6 @@ class PwtcMileage_Admin {
 		wp_die();
 	}
 
-	// TODO: validate that post id is an integer.
 	public static function create_ride_from_event_callback() {
 		if (!current_user_can(PwtcMileage::EDIT_MILEAGE_CAP)) {
 			$response = array(
@@ -274,6 +278,12 @@ class PwtcMileage_Admin {
 			if (!wp_verify_nonce($nonce, 'pwtc_mileage_create_ride_from_event')) {
 				$response = array(
 					'error' => 'Nonce security check failed attempting to create ridesheet from posted ride.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_number_str($postid)) {
+				$response = array(
+					'error' => 'Post ID "' . $postid . '" is invalid, must be nonnegative integer.'
 				);
 				echo wp_json_encode($response);
 			}
@@ -319,7 +329,6 @@ class PwtcMileage_Admin {
 		wp_die();
 	}
 
-	// TODO: validate that ride id is an integer.
 	public static function remove_ride_callback() {
 		if (!current_user_can(PwtcMileage::EDIT_MILEAGE_CAP)) {
 			$response = array(
@@ -339,6 +348,12 @@ class PwtcMileage_Admin {
 			if (!wp_verify_nonce($nonce, 'pwtc_mileage_remove_ride')) {
 				$response = array(
 					'error' => 'Access security check failed.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_number_str($rideid)) {
+				$response = array(
+					'error' => 'Ride ID "' . $rideid . '" is invalid, must be nonnegative integer.'
 				);
 				echo wp_json_encode($response);
 			}
@@ -370,7 +385,6 @@ class PwtcMileage_Admin {
 		wp_die();	
 	}
 
-	// TODO: validate that ride id is an integer.
 	public static function lookup_ridesheet_callback() {
 		if (!current_user_can(PwtcMileage::EDIT_MILEAGE_CAP)) {
 			$response = array(
@@ -386,133 +400,173 @@ class PwtcMileage_Admin {
 		}
 		else {
 			$rideid = trim($_POST['ride_id']);
-			$results = PwtcMileage_DB::fetch_ride(intval($rideid));
-			if (count($results) > 0) {
-				$title = $results[0]['title'];
-				$startdate = $results[0]['date'];
-				$postid = intval($results[0]['post_id']);
-				$leaders = PwtcMileage_DB::fetch_ride_leaders(intval($rideid));
-				$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
+			if (!PwtcMileage::validate_number_str($rideid)) {
 				$response = array(
-					'startdate' => $startdate,
-					'ride_id' => $rideid,
-					'title' => $title,
-					'leaders' => $leaders,
-					'mileage' => $mileage);
-				if ($postid > 0) {
-					$guid = pwtc_mileage_fetch_post_guid($postid);
-					if ($guid !== null) {
-						$response['post_guid'] = $guid;
-					}
-				}
+					'error' => 'Ride ID "' . $rideid . '" is invalid, must be nonnegative integer.'
+				);
 				echo wp_json_encode($response);
 			}
 			else {
-				$response = array(
-					'error' => 'Could not fetch ridesheet from database.'
-				);
-				echo wp_json_encode($response);
+				$results = PwtcMileage_DB::fetch_ride(intval($rideid));
+				if (count($results) > 0) {
+					$title = $results[0]['title'];
+					$startdate = $results[0]['date'];
+					$postid = intval($results[0]['post_id']);
+					$leaders = PwtcMileage_DB::fetch_ride_leaders(intval($rideid));
+					$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
+					$response = array(
+						'startdate' => $startdate,
+						'ride_id' => $rideid,
+						'title' => $title,
+						'leaders' => $leaders,
+						'mileage' => $mileage);
+					if ($postid > 0) {
+						$guid = pwtc_mileage_fetch_post_guid($postid);
+						if ($guid !== null) {
+							$response['post_guid'] = $guid;
+						}
+					}
+					echo wp_json_encode($response);
+				}
+				else {
+					$response = array(
+						'error' => 'Could not fetch ridesheet from database.'
+					);
+					echo wp_json_encode($response);
+				}
 			}
 		}
 		wp_die();
 	}
 
 	public static function lookup_riders_callback() {
-		$lastname = sanitize_text_field($_POST['lastname']);	
-		$firstname = sanitize_text_field($_POST['firstname']);
-		$memberid = '';
-    	if (isset($_POST['memberid'])) {
-			$memberid = sanitize_text_field($_POST['memberid']);
+		if (!current_user_can(PwtcMileage::VIEW_MILEAGE_CAP) and
+			!current_user_can(PwtcMileage::EDIT_MILEAGE_CAP) and
+			!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+			$response = array(
+				'error' => 'You are not allowed to lookup a rider.'
+			);
+			echo wp_json_encode($response);
 		}
-		$active = 'false';
-    	if (isset($_POST['active'])) {
-			$active = trim($_POST['active']);
-		}
-		$members = null;
-		if ($memberid == '' and $firstname == '' and $lastname == '') {
-			$members = array();
+		else if (!isset($_POST['lastname']) or !isset($_POST['firstname'])) {
+			$response = array(
+				'error' => 'Input parameters needed to lookup a rider are missing.'
+			);
+			echo wp_json_encode($response);
 		}
 		else {
-			$test_date = '';
-			if ($active == 'true') {
-				$test_date = self::get_date_for_expir_check();
+			$lastname = sanitize_text_field($_POST['lastname']);	
+			$firstname = sanitize_text_field($_POST['firstname']);
+			$memberid = '';
+			if (isset($_POST['memberid'])) {
+				$memberid = sanitize_text_field($_POST['memberid']);
 			}
-			$members = PwtcMileage_DB::fetch_riders($lastname, $firstname, $memberid, $test_date);
-		}	
-		$response = array(
-			'memberid' => $memberid,
-			'lastname' => $lastname,
-			'firstname' => $firstname,
-			'members' => $members);
-    	echo wp_json_encode($response);
+			$active = 'false';
+			if (isset($_POST['active'])) {
+				$active = trim($_POST['active']);
+			}
+			$members = null;
+			if ($memberid == '' and $firstname == '' and $lastname == '') {
+				$members = array();
+			}
+			else {
+				$test_date = '';
+				if ($active == 'true') {
+					$test_date = self::get_date_for_expir_check();
+				}
+				$members = PwtcMileage_DB::fetch_riders($lastname, $firstname, $memberid, $test_date);
+			}	
+			$response = array(
+				'memberid' => $memberid,
+				'lastname' => $lastname,
+				'firstname' => $firstname,
+				'members' => $members);
+			echo wp_json_encode($response);
+		}
 		wp_die();
 	}
 
 	public static function create_rider_callback() {
-		$memberid = sanitize_text_field($_POST['member_id']);	
-		$nonce = $_POST['nonce'];	
-		$lastname = sanitize_text_field($_POST['lastname']);	
-		$firstname = sanitize_text_field($_POST['firstname']);
-		$expdate = sanitize_text_field($_POST['exp_date']);
-		$mode = $_POST['mode'];
-		if (!wp_verify_nonce($nonce, 'pwtc_mileage_create_rider')) {
+		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
 			$response = array(
-				'error' => 'Access security check failed.'
+				'error' => 'You are not allowed to create a rider.'
 			);
 			echo wp_json_encode($response);
 		}
-		else if (!PwtcMileage::validate_member_id_str($memberid)) {
+		else if (!isset($_POST['member_id']) or !isset($_POST['nonce']) or
+			!isset($_POST['lastname']) or !isset($_POST['firstname']) or
+			!isset($_POST['exp_date']) or !isset($_POST['mode'])) {
 			$response = array(
-				'error' => 'ID entry "' . $memberid . '" is invalid, must be a 5 digit number.'
-			);
-			echo wp_json_encode($response);
-		}
-		else if (!PwtcMileage::validate_member_name_str($lastname)) {
-			$response = array(
-				'error' => 'Last name entry "' . $lastname . '" is invalid, must start with a letter.'
-			);
-			echo wp_json_encode($response);
-		}
-		else if (!PwtcMileage::validate_member_name_str($firstname)) {
-			$response = array(
-				'error' => 'First name entry "' . $firstname . '" is invalid, must start with a letter.'
-			);
-			echo wp_json_encode($response);
-		}
-		else if (!PwtcMileage::validate_date_str($expdate)) {
-			$response = array(
-				'error' => 'Expiration date entry "' . $expdate . '" is invalid.'
+				'error' => 'Input parameters needed to create a rider are missing.'
 			);
 			echo wp_json_encode($response);
 		}
 		else {
-			$no_overwrite = false;
-			if ($mode == 'insert') {
-				if (count(PwtcMileage_DB::fetch_rider($memberid)) > 0) {
-					$no_overwrite = true;
-				}
-			}
-			if ($no_overwrite) {
+			$memberid = sanitize_text_field($_POST['member_id']);	
+			$nonce = $_POST['nonce'];	
+			$lastname = sanitize_text_field($_POST['lastname']);	
+			$firstname = sanitize_text_field($_POST['firstname']);
+			$expdate = sanitize_text_field($_POST['exp_date']);
+			$mode = $_POST['mode'];
+			if (!wp_verify_nonce($nonce, 'pwtc_mileage_create_rider')) {
 				$response = array(
-					'error' => 'ID ' . $memberid . ' already exists.'
+					'error' => 'Access security check failed.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_member_id_str($memberid)) {
+				$response = array(
+					'error' => 'ID entry "' . $memberid . '" is invalid, must be a 5 digit number.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_member_name_str($lastname)) {
+				$response = array(
+					'error' => 'Last name entry "' . $lastname . '" is invalid, must start with a letter.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_member_name_str($firstname)) {
+				$response = array(
+					'error' => 'First name entry "' . $firstname . '" is invalid, must start with a letter.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_date_str($expdate)) {
+				$response = array(
+					'error' => 'Expiration date entry "' . $expdate . '" is invalid.'
 				);
 				echo wp_json_encode($response);
 			}
 			else {
-				$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expdate);	
-				if (false === $status or 0 === $status) {
+				$no_overwrite = false;
+				if ($mode == 'insert') {
+					if (count(PwtcMileage_DB::fetch_rider($memberid)) > 0) {
+						$no_overwrite = true;
+					}
+				}
+				if ($no_overwrite) {
 					$response = array(
-						'error' => 'Could not insert rider into database.'
+						'error' => 'ID ' . $memberid . ' already exists.'
 					);
 					echo wp_json_encode($response);
 				}
 				else {
-					$response = array(
-						'member_id' => $memberid,
-						'lastname' => $lastname,
-						'firstname' => $firstname,
-						'exp_date' => $expdate);
-					echo wp_json_encode($response);
+					$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expdate);	
+					if (false === $status or 0 === $status) {
+						$response = array(
+							'error' => 'Could not insert rider into database.'
+						);
+						echo wp_json_encode($response);
+					}
+					else {
+						$response = array(
+							'member_id' => $memberid,
+							'lastname' => $lastname,
+							'firstname' => $firstname,
+							'exp_date' => $expdate);
+						echo wp_json_encode($response);
+					}
 				}
 			}
 		}
@@ -520,34 +574,48 @@ class PwtcMileage_Admin {
 	}
 
 	public static function remove_rider_callback() {
-		$memberid = sanitize_text_field($_POST['member_id']);	
-		$nonce = $_POST['nonce'];	
-		if (!wp_verify_nonce($nonce, 'pwtc_mileage_remove_rider')) {
+		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
 			$response = array(
-				'error' => 'Access security check failed.'
+				'error' => 'You are not allowed to remove a rider.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!isset($_POST['member_id']) or !isset($_POST['nonce'])){
+			$response = array(
+				'error' => 'Input parameters needed to remove a rider are missing.'
 			);
 			echo wp_json_encode($response);
 		}
 		else {
-			$mcnt = PwtcMileage_DB::fetch_member_has_mileage($memberid);
-			$lcnt = PwtcMileage_DB::fetch_member_has_leaders($memberid);
-			if ($mcnt > 0 or $lcnt > 0) {
+			$memberid = sanitize_text_field($_POST['member_id']);	
+			$nonce = $_POST['nonce'];	
+			if (!wp_verify_nonce($nonce, 'pwtc_mileage_remove_rider')) {
 				$response = array(
-					'error' => 'Cannot delete a rider that is entered on a ridesheet.'
+					'error' => 'Access security check failed.'
 				);
 				echo wp_json_encode($response);
 			}
 			else {
-				$status = PwtcMileage_DB::delete_rider($memberid);	
-				if (false === $status or 0 === $status) {
+				$mcnt = PwtcMileage_DB::fetch_member_has_mileage($memberid);
+				$lcnt = PwtcMileage_DB::fetch_member_has_leaders($memberid);
+				if ($mcnt > 0 or $lcnt > 0) {
 					$response = array(
-						'error' => 'Could not delete rider from database.'
+						'error' => 'Cannot delete a rider that is entered on a ridesheet.'
 					);
 					echo wp_json_encode($response);
 				}
 				else {
-					$response = array('member_id' => $memberid);
-					echo wp_json_encode($response);
+					$status = PwtcMileage_DB::delete_rider($memberid);	
+					if (false === $status or 0 === $status) {
+						$response = array(
+							'error' => 'Could not delete rider from database.'
+						);
+						echo wp_json_encode($response);
+					}
+					else {
+						$response = array('member_id' => $memberid);
+						echo wp_json_encode($response);
+					}
 				}
 			}
 		}
@@ -555,80 +623,134 @@ class PwtcMileage_Admin {
 	}
 
 	public static function get_rider_callback() {
-		$memberid = sanitize_text_field($_POST['member_id']);	
-		$result = PwtcMileage_DB::fetch_rider($memberid);
-		if (count($result) == 0) {
+		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
 			$response = array(
-				'error' => 'Could not find rider ' . $memberid . '.'
+				'error' => 'You are not allowed to fetch a rider.'
 			);
-    		echo wp_json_encode($response);			
+			echo wp_json_encode($response);
+		}
+		else if (!isset($_POST['member_id'])){
+			$response = array(
+				'error' => 'Input parameters needed to fetch a rider are missing.'
+			);
+			echo wp_json_encode($response);
 		}
 		else {
-			$response = array(
-				'member_id' => $result[0]['member_id'],
-				'lastname' => $result[0]['last_name'],
-				'firstname' => $result[0]['first_name'],
-				'exp_date' => $result[0]['expir_date']);
-    		echo wp_json_encode($response);						
+			$memberid = sanitize_text_field($_POST['member_id']);	
+			$result = PwtcMileage_DB::fetch_rider($memberid);
+			if (count($result) == 0) {
+				$response = array(
+					'error' => 'Could not find rider ' . $memberid . '.'
+				);
+				echo wp_json_encode($response);			
+			}
+			else {
+				$response = array(
+					'member_id' => $result[0]['member_id'],
+					'lastname' => $result[0]['last_name'],
+					'firstname' => $result[0]['first_name'],
+					'exp_date' => $result[0]['expir_date']);
+				echo wp_json_encode($response);						
+			}
 		}	
 		wp_die();
 	}
 
 	public static function remove_leader_callback() {
-		$rideid = trim($_POST['ride_id']);
-		$memberid = trim($_POST['member_id']);
-		$nonce = $_POST['nonce'];	
-		if (!wp_verify_nonce($nonce, 'pwtc_mileage_remove_leader')) {
+		if (!current_user_can(PwtcMileage::EDIT_MILEAGE_CAP)) {
 			$response = array(
-				'error' => 'Access security check failed.'
+				'error' => 'You are not allowed to remove a leader from a ridesheet.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!isset($_POST['ride_id']) or !isset($_POST['member_id']) or !isset($_POST['nonce'])) {
+			$response = array(
+				'error' => 'Input parameters needed to remove a leader from a ridesheet are missing.'
 			);
 			echo wp_json_encode($response);
 		}
 		else {
-			$status = PwtcMileage_DB::delete_ride_leader(intval($rideid), $memberid);
-			if (false === $status or 0 === $status) {
+			$rideid = trim($_POST['ride_id']);
+			$memberid = trim($_POST['member_id']);
+			$nonce = $_POST['nonce'];	
+			if (!wp_verify_nonce($nonce, 'pwtc_mileage_remove_leader')) {
 				$response = array(
-					'error' => 'Could not delete ride leader from database.'
+					'error' => 'Access security check failed.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_number_str($rideid)) {
+				$response = array(
+					'error' => 'Ride ID "' . $rideid . '" is invalid, must be nonnegative integer.'
 				);
 				echo wp_json_encode($response);
 			}
 			else {
-				$leaders = PwtcMileage_DB::fetch_ride_leaders(intval($rideid));
-				$response = array(
-					'ride_id' => $rideid,
-					'leaders' => $leaders
-				);
-				echo wp_json_encode($response);
+				$status = PwtcMileage_DB::delete_ride_leader(intval($rideid), $memberid);
+				if (false === $status or 0 === $status) {
+					$response = array(
+						'error' => 'Could not delete ride leader from database.'
+					);
+					echo wp_json_encode($response);
+				}
+				else {
+					$leaders = PwtcMileage_DB::fetch_ride_leaders(intval($rideid));
+					$response = array(
+						'ride_id' => $rideid,
+						'leaders' => $leaders
+					);
+					echo wp_json_encode($response);
+				}
 			}
 		}
 		wp_die();
 	}
 
 	public static function remove_mileage_callback() {
-		$rideid = trim($_POST['ride_id']);
-		$memberid = trim($_POST['member_id']);
-		$nonce = $_POST['nonce'];	
-		if (!wp_verify_nonce($nonce, 'pwtc_mileage_remove_mileage')) {
+		if (!current_user_can(PwtcMileage::EDIT_MILEAGE_CAP)) {
 			$response = array(
-				'error' => 'Access security check failed.'
+				'error' => 'You are not allowed to remove mileage from a ridesheet.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!isset($_POST['ride_id']) or !isset($_POST['member_id']) or !isset($_POST['nonce'])) {
+			$response = array(
+				'error' => 'Input parameters needed to remove mileage from a ridesheet are missing.'
 			);
 			echo wp_json_encode($response);
 		}
 		else {
-			$status = PwtcMileage_DB::delete_ride_mileage(intval($rideid), $memberid);
-			if (false === $status or 0 === $status) {
+			$rideid = trim($_POST['ride_id']);
+			$memberid = trim($_POST['member_id']);
+			$nonce = $_POST['nonce'];	
+			if (!wp_verify_nonce($nonce, 'pwtc_mileage_remove_mileage')) {
 				$response = array(
-					'error' => 'Could not delete ride mileage from database.'
+					'error' => 'Access security check failed.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_number_str($rideid)) {
+				$response = array(
+					'error' => 'Ride ID "' . $rideid . '" is invalid, must be nonnegative integer.'
 				);
 				echo wp_json_encode($response);
 			}
 			else {
-				$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
-				$response = array(
-					'ride_id' => $rideid,
-					'mileage' => $mileage
-				);
-				echo wp_json_encode($response);
+				$status = PwtcMileage_DB::delete_ride_mileage(intval($rideid), $memberid);
+				if (false === $status or 0 === $status) {
+					$response = array(
+						'error' => 'Could not delete ride mileage from database.'
+					);
+					echo wp_json_encode($response);
+				}
+				else {
+					$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
+					$response = array(
+						'ride_id' => $rideid,
+						'mileage' => $mileage
+					);
+					echo wp_json_encode($response);
+				}
 			}
 		}
 		wp_die();
@@ -653,44 +775,64 @@ class PwtcMileage_Admin {
 		return $errormsg;
 	}
 
-	// Incorporate "grace period" into expiration date check.
+	// TODO: Incorporate "grace period" into expiration date check.
 	public static function get_date_for_expir_check() {
 		return date('Y-m-d', current_time('timestamp'));
 	}
 
 	public static function add_leader_callback() {
-		$rideid = trim($_POST['ride_id']);
-		$memberid = trim($_POST['member_id']);
-		$nonce = $_POST['nonce'];	
-		if (!wp_verify_nonce($nonce, 'pwtc_mileage_add_leader')) {
+		if (!current_user_can(PwtcMileage::EDIT_MILEAGE_CAP)) {
 			$response = array(
-				'error' => 'Access security check failed.'
+				'error' => 'You are not allowed to add a leader to a ridesheet.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!isset($_POST['ride_id']) or !isset($_POST['member_id']) or !isset($_POST['nonce'])) {
+			$response = array(
+				'error' => 'Input parameters needed to add a leader to a ridesheet are missing.'
 			);
 			echo wp_json_encode($response);
 		}
 		else {
-			$error = self::check_expir_date($memberid);
-			if ($error != null) {
+			$rideid = trim($_POST['ride_id']);
+			$memberid = trim($_POST['member_id']);
+			$nonce = $_POST['nonce'];	
+			if (!wp_verify_nonce($nonce, 'pwtc_mileage_add_leader')) {
 				$response = array(
-					'error' => $error
+					'error' => 'Access security check failed.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_number_str($rideid)) {
+				$response = array(
+					'error' => 'Ride ID "' . $rideid . '" is invalid, must be nonnegative integer.'
 				);
 				echo wp_json_encode($response);
 			}
 			else {
-				$status = PwtcMileage_DB::insert_ride_leader(intval($rideid), $memberid);
-				if (false === $status or 0 === $status) {
+				$error = self::check_expir_date($memberid);
+				if ($error != null) {
 					$response = array(
-						'error' => 'Could not insert ride leader into database.'
+						'error' => $error
 					);
 					echo wp_json_encode($response);
 				}
 				else {
-					$leaders = PwtcMileage_DB::fetch_ride_leaders(intval($rideid));
-					$response = array(
-						'ride_id' => $rideid,
-						'leaders' => $leaders
-					);
-					echo wp_json_encode($response);
+					$status = PwtcMileage_DB::insert_ride_leader(intval($rideid), $memberid);
+					if (false === $status or 0 === $status) {
+						$response = array(
+							'error' => 'Could not insert ride leader into database.'
+						);
+						echo wp_json_encode($response);
+					}
+					else {
+						$leaders = PwtcMileage_DB::fetch_ride_leaders(intval($rideid));
+						$response = array(
+							'ride_id' => $rideid,
+							'leaders' => $leaders
+						);
+						echo wp_json_encode($response);
+					}
 				}
 			}
 		}
@@ -698,46 +840,67 @@ class PwtcMileage_Admin {
 	}
 
 	public static function add_mileage_callback() {
-		$rideid = trim($_POST['ride_id']);
-		$memberid = trim($_POST['member_id']);
-		$mileage = trim($_POST['mileage']);
-		$nonce = $_POST['nonce'];	
-		if (!wp_verify_nonce($nonce, 'pwtc_mileage_add_mileage')) {
+		if (!current_user_can(PwtcMileage::EDIT_MILEAGE_CAP)) {
 			$response = array(
-				'error' => 'Access security check failed.'
+				'error' => 'You are not allowed to add mileage to a ridesheet.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!isset($_POST['ride_id']) or !isset($_POST['member_id']) or 
+			!isset($_POST['mileage']) or !isset($_POST['nonce'])) {
+			$response = array(
+				'error' => 'Input parameters needed to add mileage to a ridesheet are missing.'
 			);
 			echo wp_json_encode($response);
 		}
 		else {
-			$error = self::check_expir_date($memberid);
-			if ($error != null) {
+			$rideid = trim($_POST['ride_id']);
+			$memberid = trim($_POST['member_id']);
+			$mileage = trim($_POST['mileage']);
+			$nonce = $_POST['nonce'];	
+			if (!wp_verify_nonce($nonce, 'pwtc_mileage_add_mileage')) {
 				$response = array(
-					'error' => $error
+					'error' => 'Access security check failed.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_number_str($rideid)) {
+				$response = array(
+					'error' => 'Ride ID "' . $rideid . '" is invalid, must be nonnegative integer.'
 				);
 				echo wp_json_encode($response);
 			}
 			else {
-				if (!PwtcMileage::validate_mileage_str($mileage)) {
+				$error = self::check_expir_date($memberid);
+				if ($error != null) {
 					$response = array(
-						'error' => 'Mileage entry "' . $mileage . '" is invalid, must be a non-negative number.'
+						'error' => $error
 					);
 					echo wp_json_encode($response);
 				}
 				else {
-					$status = PwtcMileage_DB::insert_ride_mileage(intval($rideid), $memberid, intval($mileage));
-					if (false === $status or 0 === $status) {
+					if (!PwtcMileage::validate_mileage_str($mileage)) {
 						$response = array(
-							'error' => 'Could not insert ride mileage into database.'
+							'error' => 'Mileage entry "' . $mileage . '" is invalid, must be a non-negative number.'
 						);
 						echo wp_json_encode($response);
 					}
 					else {
-						$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
-						$response = array(
-							'ride_id' => $rideid,
-							'mileage' => $mileage
-						);
-						echo wp_json_encode($response);
+						$status = PwtcMileage_DB::insert_ride_mileage(intval($rideid), $memberid, intval($mileage));
+						if (false === $status or 0 === $status) {
+							$response = array(
+								'error' => 'Could not insert ride mileage into database.'
+							);
+							echo wp_json_encode($response);
+						}
+						else {
+							$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
+							$response = array(
+								'ride_id' => $rideid,
+								'mileage' => $mileage
+							);
+							echo wp_json_encode($response);
+						}
 					}
 				}
 			}
@@ -746,124 +909,153 @@ class PwtcMileage_Admin {
 	}
 
 	public static function generate_report() {
-		$reportid = trim($_POST['report_id']);
-		$plugin_options = PwtcMileage::get_plugin_options();
-		$error = null;
-		$data = array();
-		$meta = null;
-		switch ($reportid) {
-			case "ytd_miles":
-			case "ly_miles":
-			case "lt_miles":
-			case "ly_lt_achvmnt":
-				// TODO: Don't use sort from client directly in SQL.
-				$sort = $_POST['sort'];
-				switch ($reportid) {			
-					case "ytd_miles":
-						$meta = PwtcMileage_DB::meta_ytd_miles();
-						$data = PwtcMileage_DB::fetch_ytd_miles(ARRAY_N, $sort);
-						break;
-					case "ly_miles":
-						$meta = PwtcMileage_DB::meta_ly_miles();
-						$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, $sort);
-						break;
-					case "lt_miles":
-						$meta = PwtcMileage_DB::meta_lt_miles();
-						$data = PwtcMileage_DB::fetch_lt_miles(ARRAY_N, $sort);
-						break;
-					case "ly_lt_achvmnt":
-						$meta = PwtcMileage_DB::meta_ly_lt_achvmnt();
-						$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, $sort);
-						break;
-				}
-				break;
-			case "ytd_led":
-			case "ly_led":
-				// TODO: Don't use sort from client directly in SQL.
-				$sort = $_POST['sort'];
-				switch ($reportid) {			
-					case "ytd_led":
-						$meta = PwtcMileage_DB::meta_ytd_led();
-						$data = PwtcMileage_DB::fetch_ytd_led(ARRAY_N, $sort);
-						break;
-					case "ly_led":
-						$meta = PwtcMileage_DB::meta_ly_led();
-						$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, $sort);
-						break;
-				}
-				break;
-			case "ytd_rides":
-			case "ly_rides":
-			case "ytd_rides_led":
-			case "ly_rides_led":
-				$memberid = $_POST['member_id'];
-				$name = $_POST['name'];
-				switch ($reportid) {			
-					case "ytd_rides":
-						$meta = PwtcMileage_DB::meta_ytd_rides($name);
-						$data = PwtcMileage_DB::fetch_ytd_rides(ARRAY_N, $memberid);
-						break;
-					case "ly_rides":
-						$meta = PwtcMileage_DB::meta_ly_rides($name);
-						$data = PwtcMileage_DB::fetch_ly_rides(ARRAY_N, $memberid);
-						break;
-					case "ytd_rides_led":
-						$meta = PwtcMileage_DB::meta_ytd_rides_led($name);
-						$data = PwtcMileage_DB::fetch_ytd_rides_led(ARRAY_N, $memberid);
-						break;
-					case "ly_rides_led":
-						$meta = PwtcMileage_DB::meta_ly_rides_led($name);
-						$data = PwtcMileage_DB::fetch_ly_rides_led(ARRAY_N, $memberid);
-						break;
-				}
-				break;
-			case "award_achvmnt":
-			case "award_top_miles":
-			case "award_members":
-			case "award_leaders":
-				switch ($reportid) {
-					case "award_achvmnt":
-						$meta = PwtcMileage_DB::meta_ly_lt_achvmnt();
-						$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, 'mileage');
-						break;
-					case "award_top_miles":
-						$meta = PwtcMileage_DB::meta_ly_miles();
-						$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, 'mileage desc');
-						break;
-					case "award_leaders":
-						$meta = PwtcMileage_DB::meta_ly_led();
-						$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, 'last_name, first_name', 0, true);
-						break;
-					case "award_members":
-						$meta = PwtcMileage_DB::meta_annual_accum_miles();
-						$data = PwtcMileage_DB::fetch_annual_accum_miles(ARRAY_N);
-						break;
-				}			
-				break;
-			default:
-				$error = 'Report type ' . $reportid . ' not found.';
-		}
-		if (null === $error) {
-			if ($meta['date_idx'] >= 0) {
-				$i = $meta['date_idx'];
-				foreach( $data as $key => $row ):
-					$data[$key][$i] = date('D M j Y', strtotime($row[$i]));
-				endforeach;					
-			}
+		if (!current_user_can(PwtcMileage::VIEW_MILEAGE_CAP)) {
 			$response = array(
-				'report_id' => $reportid,
-				'title' => $meta['title'],
-				'header' => $meta['header'],
-				'data' => $data
-			);
-			return $response;			
-		}
-		else {
-			$response = array(
-				'report_id' => $reportid,
-				'error' => $error
+				'error' => 'You are not allowed to generate a mileage report.'
 			);
 			return $response;
+		}
+		else if (!isset($_POST['report_id'])) {
+			$response = array(
+				'error' => 'Input parameters needed to generate a mileage report are missing.'
+			);
+			return $response;
+		}
+		else {
+			$reportid = trim($_POST['report_id']);
+			$plugin_options = PwtcMileage::get_plugin_options();
+			$error = null;
+			$data = array();
+			$meta = null;
+			switch ($reportid) {
+				case "ytd_miles":
+				case "ly_miles":
+				case "lt_miles":
+				case "ly_lt_achvmnt":
+					if (!isset($_POST['sort'])) {
+						$error = 'Input parameters needed to generate a mileage report are missing.';
+					}
+					else {
+						// TODO: Don't use sort from client directly in SQL.
+						$sort = $_POST['sort'];
+						switch ($reportid) {			
+							case "ytd_miles":
+								$meta = PwtcMileage_DB::meta_ytd_miles();
+								$data = PwtcMileage_DB::fetch_ytd_miles(ARRAY_N, $sort);
+								break;
+							case "ly_miles":
+								$meta = PwtcMileage_DB::meta_ly_miles();
+								$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, $sort);
+								break;
+							case "lt_miles":
+								$meta = PwtcMileage_DB::meta_lt_miles();
+								$data = PwtcMileage_DB::fetch_lt_miles(ARRAY_N, $sort);
+								break;
+							case "ly_lt_achvmnt":
+								$meta = PwtcMileage_DB::meta_ly_lt_achvmnt();
+								$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, $sort);
+								break;
+						}
+					}
+					break;
+				case "ytd_led":
+				case "ly_led":
+					if (!isset($_POST['sort'])) {
+						$error = 'Input parameters needed to generate a mileage report are missing.';
+					}
+					else {
+						// TODO: Don't use sort from client directly in SQL.
+						$sort = $_POST['sort'];
+						switch ($reportid) {			
+							case "ytd_led":
+								$meta = PwtcMileage_DB::meta_ytd_led();
+								$data = PwtcMileage_DB::fetch_ytd_led(ARRAY_N, $sort);
+								break;
+							case "ly_led":
+								$meta = PwtcMileage_DB::meta_ly_led();
+								$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, $sort);
+								break;
+						}
+					}
+					break;
+				case "ytd_rides":
+				case "ly_rides":
+				case "ytd_rides_led":
+				case "ly_rides_led":
+					if (!isset($_POST['member_id']) or !isset($_POST['name'])) {
+						$error = 'Input parameters needed to generate a mileage report are missing.';
+					}
+					else {
+						$memberid = $_POST['member_id'];
+						$name = $_POST['name'];
+						switch ($reportid) {			
+							case "ytd_rides":
+								$meta = PwtcMileage_DB::meta_ytd_rides($name);
+								$data = PwtcMileage_DB::fetch_ytd_rides(ARRAY_N, $memberid);
+								break;
+							case "ly_rides":
+								$meta = PwtcMileage_DB::meta_ly_rides($name);
+								$data = PwtcMileage_DB::fetch_ly_rides(ARRAY_N, $memberid);
+								break;
+							case "ytd_rides_led":
+								$meta = PwtcMileage_DB::meta_ytd_rides_led($name);
+								$data = PwtcMileage_DB::fetch_ytd_rides_led(ARRAY_N, $memberid);
+								break;
+							case "ly_rides_led":
+								$meta = PwtcMileage_DB::meta_ly_rides_led($name);
+								$data = PwtcMileage_DB::fetch_ly_rides_led(ARRAY_N, $memberid);
+								break;
+						}
+					}
+					break;
+				case "award_achvmnt":
+				case "award_top_miles":
+				case "award_members":
+				case "award_leaders":
+					switch ($reportid) {
+						case "award_achvmnt":
+							$meta = PwtcMileage_DB::meta_ly_lt_achvmnt();
+							$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, 'mileage');
+							break;
+						case "award_top_miles":
+							$meta = PwtcMileage_DB::meta_ly_miles();
+							$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, 'mileage desc');
+							break;
+						case "award_leaders":
+							$meta = PwtcMileage_DB::meta_ly_led();
+							$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, 'last_name, first_name', 0, true);
+							break;
+						case "award_members":
+							$meta = PwtcMileage_DB::meta_annual_accum_miles();
+							$data = PwtcMileage_DB::fetch_annual_accum_miles(ARRAY_N);
+							break;
+					}			
+					break;
+				default:
+					$error = 'Report type ' . $reportid . ' not found.';
+			}
+			if (null === $error) {
+				if ($meta['date_idx'] >= 0) {
+					$i = $meta['date_idx'];
+					foreach( $data as $key => $row ):
+						$data[$key][$i] = date('D M j Y', strtotime($row[$i]));
+					endforeach;					
+				}
+				$response = array(
+					'report_id' => $reportid,
+					'title' => $meta['title'],
+					'header' => $meta['header'],
+					'data' => $data
+				);
+				return $response;			
+			}
+			else {
+				$response = array(
+					'report_id' => $reportid,
+					'error' => $error
+				);
+				return $response;
+			}
 		}
 	}
 
@@ -1022,180 +1214,199 @@ class PwtcMileage_Admin {
 	}
 
 	public static function download_report_csv() {
-		if (isset($_POST['export_csv'])) {
-			$response = self::generate_report();
-			$today = date('Y-m-d', current_time('timestamp'));
-			$report_id = $response['report_id'];
-			header('Content-Description: File Transfer');
-			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename={$today}_{$report_id}.csv");
-			$fh = fopen('php://output', 'w');
-			self::write_export_csv_file($fh, $response['data'], $response['header']);
-			fclose($fh);
-			die;
+		if (current_user_can(PwtcMileage::VIEW_MILEAGE_CAP)) {
+			if (isset($_POST['export_csv'])) {
+				$response = self::generate_report();
+				// TODO: handle case where generate_report returns an error message.
+				$today = date('Y-m-d', current_time('timestamp'));
+				$report_id = $response['report_id'];
+				header('Content-Description: File Transfer');
+				header("Content-type: text/csv");
+				header("Content-Disposition: attachment; filename={$today}_{$report_id}.csv");
+				$fh = fopen('php://output', 'w');
+				self::write_export_csv_file($fh, $response['data'], $response['header']);
+				fclose($fh);
+				die;
+			}
 		}
 	}
 
 	public static function download_report_pdf() {
-		if (isset($_POST['export_pdf'])) {
-			$response = self::generate_report();
-			$today = date('Y-m-d', current_time('timestamp'));
-			$report_id = $response['report_id'];
-			header('Content-Description: File Transfer');
-			header("Content-type: application/pdf");
-			header("Content-Disposition: attachment; filename={$today}_{$report_id}.pdf");
-			require('fpdf.php');	
-			$pdf = new FPDF();
-			self::write_export_pdf_file($pdf, $response['data'], $response['header'], $response['title']);
-			$pdf->Output();
-			die;
+		if (current_user_can(PwtcMileage::VIEW_MILEAGE_CAP)) {
+			if (isset($_POST['export_pdf'])) {
+				$response = self::generate_report();
+				// TODO: handle case where generate_report returns an error message.
+				$today = date('Y-m-d', current_time('timestamp'));
+				$report_id = $response['report_id'];
+				header('Content-Description: File Transfer');
+				header("Content-type: application/pdf");
+				header("Content-Disposition: attachment; filename={$today}_{$report_id}.pdf");
+				require('fpdf.php');	
+				$pdf = new FPDF();
+				self::write_export_pdf_file($pdf, $response['data'], $response['header'], $response['title']);
+				$pdf->Output();
+				die;
+			}
 		}
 	}
 
 	public static function download_csv() {
-		if (isset($_POST['export_members'])) {
-			if (!isset($_POST['_wpnonce']) or
-				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_export')) {
-     			die('Nonce security check failed!'); 
-			}			
-			$today = date('Y-m-d', current_time('timestamp'));
-			header('Content-Description: File Transfer');
-			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename={$today}_members.csv");
-			$fh = fopen('php://output', 'w');
-			self::write_export_csv_file($fh, PwtcMileage_DB::fetch_members_for_export());
-			fclose($fh);
-			die;
-		}
-		else if (isset($_POST['export_rides'])) {
-			if (!isset($_POST['_wpnonce']) or
-				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_export')) {
-     			die('Nonce security check failed!'); 
-			}			
-			$today = date('Y-m-d', current_time('timestamp'));
-			header('Content-Description: File Transfer');
-			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename={$today}_rides.csv");
-			$fh = fopen('php://output', 'w');
-			self::write_export_csv_file($fh, PwtcMileage_DB::fetch_rides_for_export());
-			fclose($fh);
-			die;
-		}
-		else if (isset($_POST['export_mileage'])) {
-			if (!isset($_POST['_wpnonce']) or
-				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_export')) {
-     			die('Nonce security check failed!'); 
-			}			
-			$today = date('Y-m-d', current_time('timestamp'));
-			header('Content-Description: File Transfer');
-			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename={$today}_mileage.csv");
-			$fh = fopen('php://output', 'w');
-			self::write_export_csv_file($fh, PwtcMileage_DB::fetch_mileage_for_export());
-			fclose($fh);
-			die;
-		}
-		else if (isset($_POST['export_leaders'])) {
-			if (!isset($_POST['_wpnonce']) or
-				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_export')) {
-     			die('Nonce security check failed!'); 
-			}			
-			$today = date('Y-m-d', current_time('timestamp'));
-			header('Content-Description: File Transfer');
-			header("Content-type: text/csv");
-			header("Content-Disposition: attachment; filename={$today}_leaders.csv");
-			$fh = fopen('php://output', 'w');
-			self::write_export_csv_file($fh, PwtcMileage_DB::fetch_leaders_for_export());
-			fclose($fh);
-			die;
+		if (current_user_can(PwtcMileage::DB_OPS_CAP)) {
+			if (isset($_POST['export_members'])) {
+				if (!isset($_POST['_wpnonce']) or
+					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_export')) {
+					die('Nonce security check failed!'); 
+				}			
+				$today = date('Y-m-d', current_time('timestamp'));
+				header('Content-Description: File Transfer');
+				header("Content-type: text/csv");
+				header("Content-Disposition: attachment; filename={$today}_members.csv");
+				$fh = fopen('php://output', 'w');
+				self::write_export_csv_file($fh, PwtcMileage_DB::fetch_members_for_export());
+				fclose($fh);
+				die;
+			}
+			else if (isset($_POST['export_rides'])) {
+				if (!isset($_POST['_wpnonce']) or
+					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_export')) {
+					die('Nonce security check failed!'); 
+				}			
+				$today = date('Y-m-d', current_time('timestamp'));
+				header('Content-Description: File Transfer');
+				header("Content-type: text/csv");
+				header("Content-Disposition: attachment; filename={$today}_rides.csv");
+				$fh = fopen('php://output', 'w');
+				self::write_export_csv_file($fh, PwtcMileage_DB::fetch_rides_for_export());
+				fclose($fh);
+				die;
+			}
+			else if (isset($_POST['export_mileage'])) {
+				if (!isset($_POST['_wpnonce']) or
+					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_export')) {
+					die('Nonce security check failed!'); 
+				}			
+				$today = date('Y-m-d', current_time('timestamp'));
+				header('Content-Description: File Transfer');
+				header("Content-type: text/csv");
+				header("Content-Disposition: attachment; filename={$today}_mileage.csv");
+				$fh = fopen('php://output', 'w');
+				self::write_export_csv_file($fh, PwtcMileage_DB::fetch_mileage_for_export());
+				fclose($fh);
+				die;
+			}
+			else if (isset($_POST['export_leaders'])) {
+				if (!isset($_POST['_wpnonce']) or
+					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_export')) {
+					die('Nonce security check failed!'); 
+				}			
+				$today = date('Y-m-d', current_time('timestamp'));
+				header('Content-Description: File Transfer');
+				header("Content-type: text/csv");
+				header("Content-Disposition: attachment; filename={$today}_leaders.csv");
+				$fh = fopen('php://output', 'w');
+				self::write_export_csv_file($fh, PwtcMileage_DB::fetch_leaders_for_export());
+				fclose($fh);
+				die;
+			}
 		}
 	}
 
 	public static function page_manage_year_end() {
-		$plugin_options = PwtcMileage::get_plugin_options();
-    	if (isset($_POST['consolidate'])) {
-			if (!isset($_POST['_wpnonce']) or
-				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_consolidate')) {
-     			die('Nonce security check failed!'); 
-			}			
-			PwtcMileage_DB::job_set_status('consolidation', 'triggered');
-			wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
-		}
-
-    	if (isset($_POST['member_sync'])) {
-			if (!isset($_POST['_wpnonce']) or
-				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_member_sync')) {
-     			die('Nonce security check failed!'); 
-			}			
-			PwtcMileage_DB::job_set_status('member_sync', 'triggered');
-			wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
-		}
-		if (isset($_POST['restore'])) {
-			if (!isset($_POST['_wpnonce']) or
-				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_restore')) {
-     			die('Nonce security check failed!'); 
-			}			
-			PwtcMileage_DB::job_set_status('cvs_restore', 'triggered');
-			$files = array(
-				self::generate_file_record(
-					'members_file', 'members', '_members', PwtcMileage_DB::MEMBER_TABLE),
-				self::generate_file_record(
-					'rides_file', 'rides', '_rides', PwtcMileage_DB::RIDE_TABLE),
-				self::generate_file_record(
-					'mileage_file', 'mileage', '_mileage', PwtcMileage_DB::MILEAGE_TABLE),
-				self::generate_file_record(
-					'leaders_file', 'leaders', '_leaders', PwtcMileage_DB::LEADER_TABLE)
-			);
-			$error = self::validate_uploaded_files($files);
-			if ($error) {
-				PwtcMileage_DB::job_set_status('cvs_restore', 'failed', $error);
+		if (current_user_can(PwtcMileage::DB_OPS_CAP)) {
+			$plugin_options = PwtcMileage::get_plugin_options();
+			if (isset($_POST['consolidate'])) {
+				if (!isset($_POST['_wpnonce']) or
+					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_consolidate')) {
+					die('Nonce security check failed!'); 
+				}			
+				PwtcMileage_DB::job_set_status('consolidation', 'triggered');
+				wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
 			}
-			else {
-				$error = self::move_uploaded_files($files);
+
+			if (isset($_POST['member_sync'])) {
+				if (!isset($_POST['_wpnonce']) or
+					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_member_sync')) {
+					die('Nonce security check failed!'); 
+				}			
+				PwtcMileage_DB::job_set_status('member_sync', 'triggered');
+				wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
+			}
+			if (isset($_POST['purge_nonriders'])) {
+				if (!isset($_POST['_wpnonce']) or
+					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_purge_nonriders')) {
+					die('Nonce security check failed!'); 
+				}			
+				PwtcMileage_DB::job_set_status('purge_nonriders', 'triggered');
+				wp_schedule_single_event(time(), 'pwtc_mileage_purge_nonriders');
+			}
+			if (isset($_POST['restore'])) {
+				if (!isset($_POST['_wpnonce']) or
+					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_restore')) {
+					die('Nonce security check failed!'); 
+				}			
+				PwtcMileage_DB::job_set_status('cvs_restore', 'triggered');
+				$files = array(
+					self::generate_file_record(
+						'members_file', 'members', '_members', PwtcMileage_DB::MEMBER_TABLE),
+					self::generate_file_record(
+						'rides_file', 'rides', '_rides', PwtcMileage_DB::RIDE_TABLE),
+					self::generate_file_record(
+						'mileage_file', 'mileage', '_mileage', PwtcMileage_DB::MILEAGE_TABLE),
+					self::generate_file_record(
+						'leaders_file', 'leaders', '_leaders', PwtcMileage_DB::LEADER_TABLE)
+				);
+				$error = self::validate_uploaded_files($files);
 				if ($error) {
 					PwtcMileage_DB::job_set_status('cvs_restore', 'failed', $error);
 				}
 				else {
-					wp_schedule_single_event(time(), 'pwtc_mileage_cvs_restore');
+					$error = self::move_uploaded_files($files);
+					if ($error) {
+						PwtcMileage_DB::job_set_status('cvs_restore', 'failed', $error);
+					}
+					else {
+						wp_schedule_single_event(time(), 'pwtc_mileage_cvs_restore');
+					}
 				}
 			}
-		}
-    	if (isset($_POST['clear_errs'])) {
-			if (!isset($_POST['_wpnonce']) or
-				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_clear_errs')) {
-     			die('Nonce security check failed!'); 
-			}			
-			PwtcMileage_DB::job_remove_failed();
-		}
-    	if (isset($_POST['clear_lock'])) {
-			if (!isset($_POST['_wpnonce']) or
-				!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_clear_lock')) {
-     			die('Nonce security check failed!'); 
-			}			
-			PwtcMileage_DB::job_remove_running();
-		}
-		$job_status_s = PwtcMileage_DB::job_get_status('member_sync');
-		$job_status_b = PwtcMileage_DB::job_get_status('backup');
-		$job_status_c = PwtcMileage_DB::job_get_status('consolidation');
-		$job_status_r = PwtcMileage_DB::job_get_status('cvs_restore');
-		$max_timestamp = PwtcMileage_DB::max_job_timestamp();
-		$show_clear_lock = false;
-		if ($max_timestamp !== null && time()-$max_timestamp > $plugin_options['db_lock_time_limit']) {
-			$show_clear_lock = true;
-		}
-		$thisyear = date('Y', current_time('timestamp'));
-    	$yearbeforelast = intval($thisyear) - 2;
-		$maxdate = '' . $yearbeforelast . '-12-31';
-		$rides_to_consolidate = PwtcMileage_DB::get_num_rides_before_date($maxdate);
+			if (isset($_POST['clear_errs'])) {
+				if (!isset($_POST['_wpnonce']) or
+					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_clear_errs')) {
+					die('Nonce security check failed!'); 
+				}			
+				PwtcMileage_DB::job_remove_failed();
+			}
+			if (isset($_POST['clear_lock'])) {
+				if (!isset($_POST['_wpnonce']) or
+					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_clear_lock')) {
+					die('Nonce security check failed!'); 
+				}			
+				PwtcMileage_DB::job_remove_running();
+			}
+			$job_status_s = PwtcMileage_DB::job_get_status('member_sync');
+			$job_status_p = PwtcMileage_DB::job_get_status('purge_nonriders');
+			$job_status_b = PwtcMileage_DB::job_get_status('backup');
+			$job_status_c = PwtcMileage_DB::job_get_status('consolidation');
+			$job_status_r = PwtcMileage_DB::job_get_status('cvs_restore');
+			$max_timestamp = PwtcMileage_DB::max_job_timestamp();
+			$show_clear_lock = false;
+			if ($max_timestamp !== null && time()-$max_timestamp > $plugin_options['db_lock_time_limit']) {
+				$show_clear_lock = true;
+			}
+			$thisyear = date('Y', current_time('timestamp'));
+			$yearbeforelast = intval($thisyear) - 2;
+			$maxdate = '' . $yearbeforelast . '-12-31';
+			$rides_to_consolidate = PwtcMileage_DB::get_num_rides_before_date($maxdate);
 
-		$member_count = PwtcMileage_DB::count_members();
-		$ride_count = PwtcMileage_DB::count_rides();
-		$mileage_count = PwtcMileage_DB::count_mileage();
-		$leader_count = PwtcMileage_DB::count_leaders();
+			$member_count = PwtcMileage_DB::count_members();
+			$ride_count = PwtcMileage_DB::count_rides();
+			$mileage_count = PwtcMileage_DB::count_mileage();
+			$leader_count = PwtcMileage_DB::count_leaders();
 
-		$capability = PwtcMileage::DB_OPS_CAP;
+			$capability = PwtcMileage::DB_OPS_CAP;
 
-		include('admin-man-yearend.php');
+			include('admin-man-yearend.php');
+		}	
 	}
 
 	public static function generate_file_record($id, $label, $suffix, $tblname) {

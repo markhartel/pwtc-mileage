@@ -471,6 +471,17 @@ class PwtcMileage_DB {
 		return $results;
 	}
 
+	public static function delete_all_nonriders() {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		$status = $wpdb->query('delete from ' . $member_table . 
+			' where member_id not in (select distinct member_id from ' . $leader_table . ') and' .
+			' member_id not in (select distinct member_id from ' . $mileage_table . ')');
+		return $status;
+	}
+
 	public static function delete_ride($rideid) {
     	global $wpdb;
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
