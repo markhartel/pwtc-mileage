@@ -899,6 +899,21 @@ class PwtcMileage_DB {
 		return $results;
 	}
 
+	public static function gen_new_member_id() {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		$thisyear = date('y', current_time('timestamp'));
+		$results = $wpdb->get_var('select max(convert(substring(member_id, 3), unsigned)) from ' . 			$member_table . ' where member_id like \'' . $thisyear . '%\'');
+		$member_id = "";
+		if ($results == null) {
+			$member_id = $thisyear . "001";
+		}
+		else if ($results < 999) {
+			$member_id = sprintf('%s%03d', $thisyear, ($results + 1));
+		}
+		return $member_id;
+	}
+
 	public static function create_db_tables( ) {
 		global $wpdb;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;

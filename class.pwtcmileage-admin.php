@@ -514,7 +514,8 @@ class PwtcMileage_Admin {
 				);
 				echo wp_json_encode($response);
 			}
-			else if (!PwtcMileage::validate_member_id_str($memberid)) {
+			else if (($mode == 'insert' and $memberid != '') and 
+				!PwtcMileage::validate_member_id_str($memberid)) {
 				$response = array(
 					'error' => 'ID entry "' . $memberid . '" is invalid, must be a 5 digit number.'
 				);
@@ -539,33 +540,44 @@ class PwtcMileage_Admin {
 				echo wp_json_encode($response);
 			}
 			else {
-				$no_overwrite = false;
-				if ($mode == 'insert') {
-					if (count(PwtcMileage_DB::fetch_rider($memberid)) > 0) {
-						$no_overwrite = true;
-					}
+				if ($memberid == '') {
+					$memberid = PwtcMileage_DB::gen_new_member_id();
 				}
-				if ($no_overwrite) {
+				if ($memberid == '') {
 					$response = array(
-						'error' => 'ID ' . $memberid . ' already exists.'
+						'error' => 'Cannot generate new member id.'
 					);
-					echo wp_json_encode($response);
+					echo wp_json_encode($response);					
 				}
 				else {
-					$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expdate);	
-					if (false === $status or 0 === $status) {
+					$no_overwrite = false;
+					if ($mode == 'insert') {
+						if (count(PwtcMileage_DB::fetch_rider($memberid)) > 0) {
+							$no_overwrite = true;
+						}
+					}
+					if ($no_overwrite) {
 						$response = array(
-							'error' => 'Could not insert rider into database.'
+							'error' => 'ID ' . $memberid . ' already exists.'
 						);
 						echo wp_json_encode($response);
 					}
 					else {
-						$response = array(
-							'member_id' => $memberid,
-							'lastname' => $lastname,
-							'firstname' => $firstname,
-							'exp_date' => $expdate);
-						echo wp_json_encode($response);
+						$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expdate);	
+						if (false === $status or 0 === $status) {
+							$response = array(
+								'error' => 'Could not insert rider into database.'
+							);
+							echo wp_json_encode($response);
+						}
+						else {
+							$response = array(
+								'member_id' => $memberid,
+								'lastname' => $lastname,
+								'firstname' => $firstname,
+								'exp_date' => $expdate);
+							echo wp_json_encode($response);
+						}
 					}
 				}
 			}

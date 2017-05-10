@@ -22,6 +22,9 @@ class PwtcMileage {
 	private static function init_hooks() {
 		self::$initiated = true;
 
+		add_action( 'template_redirect', 
+			array( 'PwtcMileage', 'download_riderid' ) );
+
 		// Register script and style enqueue callbacks
 		add_action( 'wp_enqueue_scripts', 
 			array( 'PwtcMileage', 'load_report_scripts' ) );
@@ -55,6 +58,8 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'shortcode_ly_led_rides'));
 		add_shortcode('pwtc_posted_rides_wo_sheets', 
 			array( 'PwtcMileage', 'shortcode_rides_wo_sheets'));
+		add_shortcode('pwtc_riderid_download', 
+			array( 'PwtcMileage', 'shortcode_riderid_download'));
 
 		// Register background action task callbacks 
 		add_action( 'pwtc_mileage_consolidation', 
@@ -66,6 +71,19 @@ class PwtcMileage {
 		add_action( 'pwtc_mileage_cvs_restore', 
 			array( 'PwtcMileage', 'cvs_restore_callback') );  
 	}
+
+	public static function download_riderid() {
+		if (isset($_POST['download_riderid'])) {
+			header('Content-Description: File Transfer');
+			header("Content-type: text/txt");
+			header("Content-Disposition: attachment; filename=rider_id.txt");
+			echo $_POST['rider_id'];
+			echo $_POST['rider_name'];
+			echo $_POST['expire_date'];
+			die;
+		}
+	}
+
 
 	/*************************************************************/
 	/* Script and style enqueue callback functions
@@ -126,6 +144,7 @@ class PwtcMileage {
 		}
 		else {
 			$results = self::update_membership_list($members);
+			pwtc_mileage_write_log ($results);
 			if ($results['insert_fail'] > 0) {
 				PwtcMileage_DB::job_set_status('member_sync', 'failed', 
 					'member database insert failed ' . $results['insert_fail'] . ' times');
@@ -694,6 +713,33 @@ class PwtcMileage {
 		$meta = PwtcMileage_DB::meta_posts_without_rides2();
 		$data = PwtcMileage_DB::fetch_posts_without_rides2();
 		$out = self::shortcode_build_table($meta, $data, $a, $content);
+		return $out;
+	}
+
+	public static function shortcode_riderid_download($atts, $content = null) {
+		$member_id = pwtc_mileage_get_member_id();
+		$out = '';
+		if ($member_id === null) {
+			$out = 'Log in to download rider ID';
+		}
+		else {
+			$result = PwtcMileage_DB::fetch_rider($member_id);
+			if (count($result) == 0) {
+				$out = 'Cannot access details for rider ' . $member_id;
+			}
+			else {
+				$lastname = $result[0]['last_name'];
+				$firstname = $result[0]['first_name'];
+				$exp_date = $result[0]['expir_date'];
+				$fmtdate = date('M Y', strtotime($exp_date));
+				$out = '<form method="POST">';
+				$out .= '<input type="submit" name="download_riderid" value="Download Rider ID"/>';
+				$out .= '<input type="hidden" name="rider_id" value="' . $member_id . '"/>';
+				$out .= '<input type="hidden" name="rider_name" value="' . $firstname . ' ' . $lastname . '"/>';
+				$out .= '<input type="hidden" name="expire_date" value="' . $fmtdate . '"/>';
+				$out .= '</form>';
+			}
+		}
 		return $out;
 	}
 
