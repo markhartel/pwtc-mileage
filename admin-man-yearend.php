@@ -14,6 +14,7 @@ jQuery(document).ready(function($) {
     var confirm_sync = true;
     var confirm_purge = true;
     var confirm_restore = true;
+    var confirm_updmembs = true;
 
     $('.sync-frm').on('submit', function(evt) {
         if (confirm_sync) {
@@ -79,6 +80,34 @@ jQuery(document).ready(function($) {
 	$(".restore-blk .cancel-btn").on('click', function(evt) {
 		$('.restore-blk').hide('slow', function() {
             $(".restore-btn").show('fast');
+        });
+    });
+
+    $('.updmembs-frm').on('submit', function(evt) {
+        if (confirm_updmembs) {
+            evt.preventDefault();
+            open_confirm_dialog(
+                'This operation will synchronize the mileage database rider list with the contents of the updmembs file. Do you want to continue?', 
+                function() {
+                    confirm_updmembs = false;
+                    $('.updmembs-frm input[name="updmembs"]').click();
+               }
+            );
+        }
+    });
+
+    $(".updmembs-btn").on('click', function(evt) {
+		$(".updmembs-frm input[type='file']").val('');
+        $(".updmembs-frm input[type='file']").next('label').html('Select file...'); 
+        $(".updmembs-btn").hide('fast', function() {
+            $('.updmembs-blk').show('slow'); 
+            $(".updmembs-frm input[name='updmembs_file']").focus();
+        })
+    });
+
+	$(".updmembs-blk .cancel-btn").on('click', function(evt) {
+		$('.updmembs-blk').hide('slow', function() {
+            $(".updmembs-btn").show('fast');
         });
     });
 
@@ -193,6 +222,26 @@ if (null !== $job_status_r) {
     <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
 <?php
 }
+if (null !== $job_status_u) {
+    if ($job_status_u['status'] == 'triggered') {
+        $message = 'Updmembs load action has been triggered.';
+        $notice_type = 'notice-warning';
+        $show_buttons = false;
+    } 
+    else if ($job_status_u['status'] == 'started') {
+        $message = 'Updmembs load action is currently running.';
+        $notice_type = 'notice-warning';
+        $show_buttons = false;
+    }
+    else {
+        $message = 'Updmembs load action failed: ' . $job_status_u['error_msg'];
+        $notice_type = 'notice-error';
+        $clear_button = true;
+    }
+?>
+    <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
+<?php
+}
 if ($show_buttons) {
     if ($clear_button) {
 ?>
@@ -210,6 +259,20 @@ if ($show_buttons) {
             <input type="submit" name="member_sync" value="Synchronize" 
                 class="button button-primary button-large"/>
         </form></div><br>
+        <div><strong>Synchronize rider list with contents of updmembs file.</strong></div>
+        <div>
+            <button class="updmembs-btn button button-primary button-large">Synchronize</button>
+            <span class="updmembs-blk popup-frm initially-hidden">
+			<form class="updmembs-frm stacked-form" method="post" enctype="multipart/form-data">
+                <?php wp_nonce_field('pwtc_mileage_updmembs'); ?>
+                <span>Updmembs</span>
+                <input id="select-updmembs-file" class="inputfile" type="file" name="updmembs_file" multiple="false" accept=".dbf"/>
+                <label for="select-updmembs-file" class="button">Select file...</label>
+				<input class="button button-primary" type="submit" name="updmembs" value="Synchronize"/>
+				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
+			</form>
+		    </span>
+        </div><br>
         <div><strong>Purge all non-riders from rider list.</strong></div>
         <div><form class="purge-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_purge_nonriders'); ?>

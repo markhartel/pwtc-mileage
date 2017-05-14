@@ -70,16 +70,30 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'purge_nonriders_callback') );  
 		add_action( 'pwtc_mileage_cvs_restore', 
 			array( 'PwtcMileage', 'cvs_restore_callback') );  
+		add_action( 'pwtc_mileage_updmembs_load', 
+			array( 'PwtcMileage', 'updmembs_load_callback') );  
 	}
 
 	public static function download_riderid() {
 		if (isset($_POST['download_riderid'])) {
 			header('Content-Description: File Transfer');
-			header("Content-type: text/txt");
-			header("Content-Disposition: attachment; filename=rider_id.txt");
-			echo $_POST['rider_id'];
-			echo $_POST['rider_name'];
-			echo $_POST['expire_date'];
+			header("Content-type: application/pdf");
+			header("Content-Disposition: attachment; filename=rider_card.pdf");
+			require('fpdf.php');	
+			$pdf = new FPDF();
+			//$pdf = new FPDF('P','mm',array(55, 85));
+			$pdf->AddPage();
+			//$pdf->SetMargins(0, 0);
+			$pdf->Rect(0, 0, 85, 55);
+			$pdf->SetFont('Arial', 'I', 18);
+			$pdf->Text(40, 23, $_POST['rider_name']);
+			$pdf->SetFont('Arial', '', 14);
+			$pdf->Text(50, 34, $_POST['rider_id']);
+			$pdf->Text(59, 50, $_POST['expire_date']);
+			$pdf->SetFont('Arial', '', 5);
+			$pdf->Text(50, 38, 'MEMBER ID');
+			$pdf->Text(59, 54, 'EXPIRES');
+			$pdf->Output();
 			die;
 		}
 	}

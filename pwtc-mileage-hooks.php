@@ -32,7 +32,12 @@ function pwtc_mileage_get_member_id() {
     if ( 0 == $current_user->ID ) {
         $id = null;
     } else {
-        $id = get_field('rider_number', 'user_' . $current_user->ID);
+        //$id = get_field('rider_number', 'user_' . $current_user->ID);
+        $result = PwtcMileage_DB::fetch_riders_by_name(trim($current_user->user_lastname), 
+            trim($current_user->user_firstname));
+        if (count($result) == 1) {
+            $id = $result[0]['member_id'];
+        }
     }
     return $id;
     //return null;
@@ -86,19 +91,31 @@ function pwtc_mileage_fetch_post_guid($post_id) {
 }
 
 /*
-Returns an array of arrays that contains the ride leaders of the posted ride. 
-The interor array contains a posted ride record structured thus:
-array[0] - rider ID (string)
-array[1] - full name (string)
+Returns an array that contains the rider ids of the ride leaders of the posted ride. 
 */
-function pwtc_mileage_fetch_ride_leaders($post_id) {
+function pwtc_mileage_fetch_ride_leader_ids($post_id) {
+    $leaders = get_field('ride_leader', $post_id);
+    $leaders_array = array();
+    if ($leaders) {
+        foreach ($leaders as $leader) {
+            $riderid = get_field('rider_number', $leader->ID);
+            array_push($leaders_array, $riderid);
+        }
+    }
+    return $leaders_array;
+    //return array();   
+}
+
+/*
+Returns an array that contains the names of the ride leaders of the posted ride. 
+*/
+function pwtc_mileage_fetch_ride_leader_names($post_id) {
     $leaders = get_field('ride_leader', $post_id);
     $leaders_array = array();
     if ($leaders) {
         foreach ($leaders as $leader) {
             $name = $leader->post_title;
-            $riderid = get_field('rider_number', $leader->ID);
-            array_push($leaders_array, array($riderid, $name));
+            array_push($leaders_array, $name);
         }
     }
     return $leaders_array;

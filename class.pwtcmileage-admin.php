@@ -305,9 +305,12 @@ class PwtcMileage_Admin {
 					}
 					else {
 						$ride_id = PwtcMileage_DB::get_new_ride_id();
-						$larray = pwtc_mileage_fetch_ride_leaders(intval($postid));
+						$larray = pwtc_mileage_fetch_ride_leader_ids(intval($postid));
 						foreach ($larray as $item) {
-							PwtcMileage_DB::insert_ride_leader($ride_id, $item[0]);
+							$result = PwtcMileage_DB::fetch_rider($item);
+							if (count($result) > 0) {
+								PwtcMileage_DB::insert_ride_leader($ride_id, $item);
+							}
 						}
 						$leaders = PwtcMileage_DB::fetch_ride_leaders($ride_id);
 						$mileage = PwtcMileage_DB::fetch_ride_mileage($ride_id);
@@ -1092,7 +1095,7 @@ class PwtcMileage_Admin {
     	$position = $plugin_options['plugin_menu_location'];
 		add_menu_page($page_title, $menu_title, $capability, $parent_menu_slug, $function, $icon_url, $position);
 
-    	$page_title = 'View Reports';
+    	$page_title = $plugin_options['plugin_menu_label'] . ' - View Reports';
     	$menu_title = 'View Reports';
     	$menu_slug = 'pwtc_mileage_generate_reports';
     	$capability = PwtcMileage::VIEW_MILEAGE_CAP;
@@ -1101,21 +1104,21 @@ class PwtcMileage_Admin {
 		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_pdf'));
 		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_csv'));
 
-    	$page_title = 'Manage Riders';
+    	$page_title = $plugin_options['plugin_menu_label'] . ' - Manage Riders';
     	$menu_title = 'Manage Riders';
     	$menu_slug = 'pwtc_mileage_manage_riders';
     	$capability = PwtcMileage::EDIT_RIDERS_CAP;
     	$function = array( 'PwtcMileage_Admin', 'page_manage_riders');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
-    	$page_title = 'Manage Ride Sheets';
+    	$page_title = $plugin_options['plugin_menu_label'] . ' - Manage Ride Sheets';
     	$menu_title = 'Manage Ride Sheets';
     	$menu_slug = 'pwtc_mileage_manage_ride_sheets';
     	$capability = PwtcMileage::EDIT_MILEAGE_CAP;
     	$function = array( 'PwtcMileage_Admin', 'page_manage_ride_sheets');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
-    	$page_title = 'Database Operations';
+    	$page_title = $plugin_options['plugin_menu_label'] . ' - Database Operations';
     	$menu_title = 'Database Ops';
     	$menu_slug = 'pwtc_mileage_manage_year_end';
     	$capability = PwtcMileage::DB_OPS_CAP;
@@ -1125,8 +1128,8 @@ class PwtcMileage_Admin {
 
 		remove_submenu_page($parent_menu_slug, $parent_menu_slug);
 
-		$page_title = 'PWTC Mileage Settings';
-    	$menu_title = 'PWTC Mileage';
+		$page_title = $plugin_options['plugin_menu_label'] . ' - Settings';
+    	$menu_title = $plugin_options['plugin_menu_label'];
     	$menu_slug = 'pwtc_mileage_settings';
     	$capability = 'manage_options';
     	$function = array( 'PwtcMileage_Admin', 'page_manage_settings');
@@ -1381,6 +1384,26 @@ class PwtcMileage_Admin {
 					}
 				}
 			}
+			if (isset($_POST['updmembs'])) {
+				if (!isset($_POST['_wpnonce']) or
+					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_updmembs')) {
+					die('Nonce security check failed!'); 
+				}	
+				PwtcMileage_DB::job_set_status('updmembs_load', 'triggered');
+				$error = self::validate_uploaded_dbf_file();
+				if ($error) {
+					PwtcMileage_DB::job_set_status('updmembs_load', 'failed', $error);
+				}
+				else {
+					$error = self::move_uploaded_dbf_file();
+					if ($error) {
+						PwtcMileage_DB::job_set_status('updmembs_load', 'failed', $error);
+					}
+					else {
+						wp_schedule_single_event(time(), 'pwtc_mileage_updmembs_load');
+					}
+				}
+			}		
 			if (isset($_POST['clear_errs'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_clear_errs')) {
@@ -1400,6 +1423,7 @@ class PwtcMileage_Admin {
 			$job_status_b = PwtcMileage_DB::job_get_status('backup');
 			$job_status_c = PwtcMileage_DB::job_get_status('consolidation');
 			$job_status_r = PwtcMileage_DB::job_get_status('cvs_restore');
+			$job_status_u = PwtcMileage_DB::job_get_status('updmembs_load');
 			$max_timestamp = PwtcMileage_DB::max_job_timestamp();
 			$show_clear_lock = false;
 			if ($max_timestamp !== null && time()-$max_timestamp > $plugin_options['db_lock_time_limit']) {
@@ -1466,6 +1490,35 @@ class PwtcMileage_Admin {
 				$errmsg = $file['label'] . ' file upload could not be moved';
 				break;
 			}
+		}
+		return $errmsg;
+	}
+
+	public static function validate_uploaded_dbf_file() {
+		$errmsg = null;
+		// TODO: validate that $_FILES['updmembs_file'] exists
+		if ($_FILES['updmembs_file']['size'] == 0) {
+			$errmsg = 'Updmembs file empty or not selected';
+		}
+		else if ($_FILES['updmembs_file']['error'] != UPLOAD_ERR_OK) {
+			$errmsg = 'Updmembs file upload error code ' . $_FILES['updmembs_file']['error'];
+		}
+		else if (preg_match('/updmembs\.dbf/', $_FILES['updmembs_file']['name']) !== 1) {
+			$errmsg = 'Updmembs file name pattern mismatch';
+		}
+		return $errmsg;
+	}
+
+	public static function move_uploaded_dbf_file() {
+		$errmsg = null;
+		$upload_dir = wp_upload_dir();
+		$plugin_upload_dir = $upload_dir['basedir'] . '/pwtc_mileage';
+		if (!file_exists($plugin_upload_dir)) {
+    		wp_mkdir_p($plugin_upload_dir);
+		}
+		$uploadfile = $plugin_upload_dir . '/updmembs.dbf';
+		if (!move_uploaded_file($_FILES['updmembs_file']['tmp_name'], $uploadfile)) {
+			$errmsg = 'Updmembs file upload could not be moved';
 		}
 		return $errmsg;
 	}

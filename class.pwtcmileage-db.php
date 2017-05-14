@@ -366,14 +366,14 @@ class PwtcMileage_DB {
     	$rides_array = array();
 		foreach ($rides as $ride) {
 			$postid = $ride[0];
-			$larray = pwtc_mileage_fetch_ride_leaders(intval($postid));
+			$larray = pwtc_mileage_fetch_ride_leader_names(intval($postid));
 			$leaders = '';
 			$count = 0;
 			foreach ($larray as $item) {
 				if ($count > 0) {
 					$leaders .= ', ';
 				}
-				$leaders .= $item[1];
+				$leaders .= $item;
 				$count++;
 			}
 			array_push($rides_array, array($ride[0], $ride[1], $ride[2], $leaders, $ride[3]));
@@ -568,6 +568,16 @@ class PwtcMileage_DB {
 				' and expir_date > %s order by last_name, first_name', 
 				$firstname . "%", $lastname . "%", $memberid . "%", $date);			
 		}
+    	$results = $wpdb->get_results($sql, ARRAY_A);
+		return $results;
+	}
+
+	public static function fetch_riders_by_name($lastname, $firstname) {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		$sql = $wpdb->prepare('select * from ' . $member_table . 
+			' where first_name like %s and last_name like %s' . 
+			' order by expir_date', $firstname, $lastname);
     	$results = $wpdb->get_results($sql, ARRAY_A);
 		return $results;
 	}
