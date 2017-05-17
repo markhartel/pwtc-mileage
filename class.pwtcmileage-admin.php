@@ -166,7 +166,7 @@ class PwtcMileage_Admin {
 			}
 			else if (!PwtcMileage::validate_ride_title_str($title)) {
 				$response = array(
-					'error' => 'Title entry "' . $title . '" is invalid, must start with a letter.'
+					'error' => 'Title entry "' . $title . '" is invalid, must start with a letter or digit.'
 				);
 				echo wp_json_encode($response);
 			}
@@ -233,7 +233,7 @@ class PwtcMileage_Admin {
 			}
 			else if (!PwtcMileage::validate_ride_title_str($title)) {
 				$response = array(
-					'error' => 'Title entry "' . $title . '" is invalid, must start with a letter.'
+					'error' => 'Title entry "' . $title . '" is invalid, must start with a letter or digit.'
 				);
 				echo wp_json_encode($response);
 			}
@@ -273,6 +273,7 @@ class PwtcMileage_Admin {
 		else {
 			$startdate = trim($_POST['startdate']);	
 			$title = sanitize_text_field($_POST['title']);	
+			// TODO: validate posted ride title and start date strings.
 			$postid = trim($_POST['post_id']);
 			$nonce = $_POST['nonce'];	
 			if (!wp_verify_nonce($nonce, 'pwtc_mileage_create_ride_from_event')) {
@@ -790,9 +791,10 @@ class PwtcMileage_Admin {
 		return $errormsg;
 	}
 
-	// TODO: Incorporate "grace period" into expiration date check.
 	public static function get_date_for_expir_check() {
-		return date('Y-m-d', current_time('timestamp'));
+		$plugin_options = PwtcMileage::get_plugin_options();
+		$time = $plugin_options['expire_grace_period'] * 24 * 60 * 60; // convert grace period from days to seconds
+		return date('Y-m-d', current_time('timestamp') - $time);
 	}
 
 	public static function add_leader_callback() {
@@ -1232,15 +1234,22 @@ class PwtcMileage_Admin {
 		if (current_user_can(PwtcMileage::VIEW_MILEAGE_CAP)) {
 			if (isset($_POST['export_csv'])) {
 				$response = self::generate_report();
-				// TODO: handle case where generate_report returns an error message.
-				$today = date('Y-m-d', current_time('timestamp'));
-				$report_id = $response['report_id'];
-				header('Content-Description: File Transfer');
-				header("Content-type: text/csv");
-				header("Content-Disposition: attachment; filename={$today}_{$report_id}.csv");
-				$fh = fopen('php://output', 'w');
-				self::write_export_csv_file($fh, $response['data'], $response['header']);
-				fclose($fh);
+				if (isset($response['error'])) {
+					header('Content-Description: File Transfer');
+					header("Content-type: text/txt");
+					header("Content-Disposition: attachment; filename=error.txt");
+					echo $response['error'];
+				}
+				else {
+					$today = date('Y-m-d', current_time('timestamp'));
+					$report_id = $response['report_id'];
+					header('Content-Description: File Transfer');
+					header("Content-type: text/csv");
+					header("Content-Disposition: attachment; filename={$today}_{$report_id}.csv");
+					$fh = fopen('php://output', 'w');
+					self::write_export_csv_file($fh, $response['data'], $response['header']);
+					fclose($fh);
+				}
 				die;
 			}
 		}
@@ -1250,16 +1259,23 @@ class PwtcMileage_Admin {
 		if (current_user_can(PwtcMileage::VIEW_MILEAGE_CAP)) {
 			if (isset($_POST['export_pdf'])) {
 				$response = self::generate_report();
-				// TODO: handle case where generate_report returns an error message.
-				$today = date('Y-m-d', current_time('timestamp'));
-				$report_id = $response['report_id'];
-				header('Content-Description: File Transfer');
-				header("Content-type: application/pdf");
-				header("Content-Disposition: attachment; filename={$today}_{$report_id}.pdf");
-				require('fpdf.php');	
-				$pdf = new FPDF();
-				self::write_export_pdf_file($pdf, $response['data'], $response['header'], $response['title']);
-				$pdf->Output();
+				if (isset($response['error'])) {
+					header('Content-Description: File Transfer');
+					header("Content-type: text/txt");
+					header("Content-Disposition: attachment; filename=error.txt");
+					echo $response['error'];
+				}
+				else {
+					$today = date('Y-m-d', current_time('timestamp'));
+					$report_id = $response['report_id'];
+					header('Content-Description: File Transfer');
+					header("Content-type: application/pdf");
+					header("Content-Disposition: attachment; filename={$today}_{$report_id}.pdf");
+					require('fpdf.php');	
+					$pdf = new FPDF();
+					self::write_export_pdf_file($pdf, $response['data'], $response['header'], $response['title']);
+					$pdf->Output();
+				}
 				die;
 			}
 		}
@@ -1456,19 +1472,27 @@ class PwtcMileage_Admin {
 
 	public static function validate_uploaded_files($files) {
 		$errmsg = null;
-		// TODO: validate that $_FILES[$file['id']] exists
-    	foreach ( $files as $file ) {
-			if ($_FILES[$file['id']]['size'] == 0) {
-				$errmsg = $file['label'] . ' file empty or not selected';
-				break;
-			}
-			else if ($_FILES[$file['id']]['error'] != UPLOAD_ERR_OK) {
-				$errmsg = $file['label'] . ' file upload error code ' . $_FILES[$file]['error'];
-				break;
-			}
-			else if (preg_match($file['pattern'], $_FILES[$file['id']]['name']) !== 1) {
-				$errmsg = $file['label'] . ' file name pattern mismatch';
-				break;
+		if (empty($_FILES)) {
+			$errmsg = 'Input parameters needed to upload files are missing';
+		}
+		else {	
+			foreach ( $files as $file ) {
+				if (!isset($_FILES[$file['id']])) {
+					$errmsg = $file['id'] . ' input parameter needed to upload file is missing';
+					break;
+				}
+				else if ($_FILES[$file['id']]['size'] == 0) {
+					$errmsg = $file['label'] . ' file empty or not selected';
+					break;
+				}
+				else if ($_FILES[$file['id']]['error'] != UPLOAD_ERR_OK) {
+					$errmsg = $file['label'] . ' file upload error code ' . $_FILES[$file]['error'];
+					break;
+				}
+				else if (preg_match($file['pattern'], $_FILES[$file['id']]['name']) !== 1) {
+					$errmsg = $file['label'] . ' file name pattern mismatch';
+					break;
+				}
 			}
 		}
 
@@ -1496,15 +1520,22 @@ class PwtcMileage_Admin {
 
 	public static function validate_uploaded_dbf_file() {
 		$errmsg = null;
-		// TODO: validate that $_FILES['updmembs_file'] exists
-		if ($_FILES['updmembs_file']['size'] == 0) {
-			$errmsg = 'Updmembs file empty or not selected';
+		if (empty($_FILES)) {
+			$errmsg = 'Input parameters needed to upload files are missing';
 		}
-		else if ($_FILES['updmembs_file']['error'] != UPLOAD_ERR_OK) {
-			$errmsg = 'Updmembs file upload error code ' . $_FILES['updmembs_file']['error'];
-		}
-		else if (preg_match('/updmembs\.dbf/', $_FILES['updmembs_file']['name']) !== 1) {
-			$errmsg = 'Updmembs file name pattern mismatch';
+		else {	
+			if (!isset($_FILES['updmembs_file'])) {
+				$errmsg = 'Updmembs input parameter needed to upload file is missing';
+			}
+			else if ($_FILES['updmembs_file']['size'] == 0) {
+				$errmsg = 'Updmembs file empty or not selected';
+			}
+			else if ($_FILES['updmembs_file']['error'] != UPLOAD_ERR_OK) {
+				$errmsg = 'Updmembs file upload error code ' . $_FILES['updmembs_file']['error'];
+			}
+			else if (preg_match('/updmembs\.dbf/', $_FILES['updmembs_file']['name']) !== 1) {
+				$errmsg = 'Updmembs file name pattern mismatch';
+			}
 		}
 		return $errmsg;
 	}
@@ -1563,6 +1594,17 @@ class PwtcMileage_Admin {
 			}
 			else {
 				$plugin_options['db_lock_time_limit'] = intval($entry);
+			}
+    	} 
+    	if (isset($_POST['expire_grace_period'])) {
+			$form_submitted = true;
+			$entry = sanitize_text_field($_POST['expire_grace_period']);
+			if (!PwtcMileage::validate_number_str($entry)) {
+				array_push($error_msgs,
+					'Expiration Grace Period field must contain a non-negative number.');
+			}
+			else {
+				$plugin_options['expire_grace_period'] = intval($entry);
 			}
     	} 
     	if (isset($_POST['ride_lookback_date'])) {

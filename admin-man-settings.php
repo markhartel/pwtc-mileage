@@ -43,9 +43,12 @@ if (count($error_msgs) > 0) {
 		<span>Posted Ride Maximum Lookback Date</span>
 		<input type="text" name="ride_lookback_date" id="ride_lookback_date" 
 			value="<?php echo $plugin_options['ride_lookback_date']; ?>"/>
-		<span>Database Job Lock Time Limit</span>
+		<span>Database Job Lock Time Limit (seconds)</span>
 		<input type="text" name="db_lock_time_limit" id="db_lock_time_limit" 
 			value="<?php echo $plugin_options['db_lock_time_limit']; ?>"/>
+		<span>Expiration Grace Period (days)</span>
+		<input type="text" name="expire_grace_period" id="expire_grace_period" 
+			value="<?php echo $plugin_options['expire_grace_period']; ?>"/>
 		<span>Disable Member Expiration Check</span>
 		<span class="checkbox-wrap">
 			<input type="checkbox" name="disable_expir_check" id="disable_expir_check" 

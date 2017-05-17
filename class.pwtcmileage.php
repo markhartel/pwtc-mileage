@@ -81,12 +81,14 @@ class PwtcMileage {
 			header("Content-Disposition: attachment; filename=rider_card.pdf");
 			require('fpdf.php');	
 			$pdf = new FPDF();
-			//$pdf = new FPDF('P','mm',array(55, 85));
 			$pdf->AddPage();
-			//$pdf->SetMargins(0, 0);
 			$pdf->Rect(0, 0, 85, 55);
+			$pdf->Image(PWTC_MILEAGE__PLUGIN_DIR . 'pwtc_logo.png', 2, 10, 20, 20);
+			$pdf->SetFont('Arial', '', 20);
+			$pdf->Text(2, 40, 'PWTC');
+			$pdf->SetXY(23, 15);
 			$pdf->SetFont('Arial', 'I', 18);
-			$pdf->Text(40, 23, $_POST['rider_name']);
+			$pdf->Cell(60, 10, $_POST['rider_name'], 0, 0,'C');
 			$pdf->SetFont('Arial', '', 14);
 			$pdf->Text(50, 34, $_POST['rider_id']);
 			$pdf->Text(59, 50, $_POST['expire_date']);
@@ -785,10 +787,9 @@ class PwtcMileage {
 		return $ok;
 	}
 
-	// TODO: allow ride titles to also start with a digit.
 	public static function validate_ride_title_str($title) {
 		$ok = true;
-		if (preg_match('/^[A-Za-z].*/', $title) !== 1) {
+		if (preg_match('/^[A-Za-z0-9].*/', $title) !== 1) {
 			$ok = false;
 		}
 		return $ok;
@@ -829,7 +830,6 @@ class PwtcMileage {
 	/* Plugin options access functions
 	/*************************************************************/
 
-	// TODO: add an option to specify a "grace period" for the member expiration date.
 	public static function create_default_plugin_options() {
 		$data = array(
 			'drop_db_on_delete' => false,
@@ -839,6 +839,7 @@ class PwtcMileage {
 			'disable_expir_check' => false,
 			'disable_delete_confirm' => false,
 			'show_ride_ids' => false,
+			'expire_grace_period' => 60,
 			'db_lock_time_limit' => 60);
 		add_option('pwtc_mileage_options', $data);
 	}
