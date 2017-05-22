@@ -273,12 +273,23 @@ class PwtcMileage_Admin {
 		else {
 			$startdate = trim($_POST['startdate']);	
 			$title = sanitize_text_field($_POST['title']);	
-			// TODO: validate posted ride title and start date strings.
 			$postid = trim($_POST['post_id']);
 			$nonce = $_POST['nonce'];	
 			if (!wp_verify_nonce($nonce, 'pwtc_mileage_create_ride_from_event')) {
 				$response = array(
 					'error' => 'Nonce security check failed attempting to create ridesheet from posted ride.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_ride_title_str($title)) {
+				$response = array(
+					'error' => 'Title entry "' . $title . '" is invalid, must start with a letter or digit.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if (!PwtcMileage::validate_date_str($startdate)) {
+				$response = array(
+					'error' => 'Start date entry "' . $startdate . '" is invalid.'
 				);
 				echo wp_json_encode($response);
 			}
@@ -953,24 +964,27 @@ class PwtcMileage_Admin {
 						$error = 'Input parameters needed to generate a mileage report are missing.';
 					}
 					else {
-						// TODO: Don't use sort from client directly in SQL.
 						$sort = $_POST['sort'];
+						$sortby = 'mileage desc';
+						if ($sort == 'name') {
+							$sortby = 'last_name, first_name';
+						}
 						switch ($reportid) {			
 							case "ytd_miles":
 								$meta = PwtcMileage_DB::meta_ytd_miles();
-								$data = PwtcMileage_DB::fetch_ytd_miles(ARRAY_N, $sort);
+								$data = PwtcMileage_DB::fetch_ytd_miles(ARRAY_N, $sortby);
 								break;
 							case "ly_miles":
 								$meta = PwtcMileage_DB::meta_ly_miles();
-								$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, $sort);
+								$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, $sortby);
 								break;
 							case "lt_miles":
 								$meta = PwtcMileage_DB::meta_lt_miles();
-								$data = PwtcMileage_DB::fetch_lt_miles(ARRAY_N, $sort);
+								$data = PwtcMileage_DB::fetch_lt_miles(ARRAY_N, $sortby);
 								break;
 							case "ly_lt_achvmnt":
 								$meta = PwtcMileage_DB::meta_ly_lt_achvmnt();
-								$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, $sort);
+								$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, $sortby);
 								break;
 						}
 					}
@@ -981,16 +995,19 @@ class PwtcMileage_Admin {
 						$error = 'Input parameters needed to generate a mileage report are missing.';
 					}
 					else {
-						// TODO: Don't use sort from client directly in SQL.
 						$sort = $_POST['sort'];
+						$sortby = 'rides_led desc';
+						if ($sort == 'name') {
+							$sortby = 'last_name, first_name';
+						}
 						switch ($reportid) {			
 							case "ytd_led":
 								$meta = PwtcMileage_DB::meta_ytd_led();
-								$data = PwtcMileage_DB::fetch_ytd_led(ARRAY_N, $sort);
+								$data = PwtcMileage_DB::fetch_ytd_led(ARRAY_N, $sortby);
 								break;
 							case "ly_led":
 								$meta = PwtcMileage_DB::meta_ly_led();
-								$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, $sort);
+								$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, $sortby);
 								break;
 						}
 					}

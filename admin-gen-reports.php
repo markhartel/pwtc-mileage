@@ -184,8 +184,8 @@ if ($running_jobs > 0) {
         <h3>Ride Mileage Reports</h3>
         <p>Sort by: 
             <select class='mileage-sort-slt'>
-                <option value="last_name, first_name">Name</option> 
-                <option value="mileage desc" selected>Mileage</option>
+                <option value="name">Name</option> 
+                <option value="mileage" selected>Mileage</option>
             </select>
         </p>
         <div class='ride-mileage'>
@@ -196,8 +196,8 @@ if ($running_jobs > 0) {
         <h3>Ride Leader Reports</h3>
         <p>Sort by: 
             <select class='leader-sort-slt'>
-                <option value="last_name, first_name">Name</option> 
-                <option value="rides_led desc" selected>Rides Led</option>
+                <option value="name">Name</option> 
+                <option value="rides_led" selected>Rides Led</option>
             </select>
         </p>
         <div class='ride-leader'>

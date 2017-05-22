@@ -14,7 +14,6 @@ if ( !function_exists( 'add_action' ) ) {
 
 define( 'PWTC_MILEAGE__VERSION', '1.1' );
 define( 'PWTC_MILEAGE__MINIMUM_WP_VERSION', '3.2' );
-//define( 'PWTC_MILEAGE__MINIMUM_WP_VERSION', '9.1' );
 define( 'PWTC_MILEAGE__PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'PWTC_MILEAGE__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 

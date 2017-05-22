@@ -335,18 +335,18 @@ class PwtcMileage_DB {
 		global $wpdb;
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
 		$plugin_options = PwtcMileage::get_plugin_options();
-		$lookback_date = null;
-		$sql_stmt = null;
+		$thisyear = date('Y', current_time('timestamp'));
+		$lastyear = intval($thisyear) - 1;
+		$lookback_date = '' . $lastyear . '-01-01';
 		if ($plugin_options['ride_lookback_date'] != '') {
-			$lookback_date = $plugin_options['ride_lookback_date'];
-			$sql_stmt = $wpdb->prepare(
-				'select post_id from ' . $ride_table . ' where post_id <> 0 and date >= %s',
-				$lookback_date);
+			$option_date = $plugin_options['ride_lookback_date'];
+			if (strtotime($option_date) > strtotime($lookback_date)) {
+				$lookback_date = $option_date;
+			}
 		}
-		else {
-			$sql_stmt = 'select post_id from ' . $ride_table . ' where post_id <> 0';
-		}
-		// TODO: don't lookback further than the oldest ride in the ride table.
+		$sql_stmt = $wpdb->prepare(
+			'select post_id from ' . $ride_table . ' where post_id <> 0 and date >= %s',
+			$lookback_date);
 		$results = pwtc_mileage_fetch_posts($sql_stmt, $lookback_date);
 		return $results;
 	}

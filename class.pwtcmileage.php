@@ -2,11 +2,10 @@
 
 class PwtcMileage {
 
-	// TODO: add plugin prefix to capacity names.
-	const VIEW_MILEAGE_CAP = 'view_mileage';
-	const EDIT_MILEAGE_CAP = 'edit_mileage';
-	const EDIT_RIDERS_CAP = 'edit_riders';
-	const DB_OPS_CAP = 'mileage_db_ops';
+	const VIEW_MILEAGE_CAP = 'pwtc_view_mileage';
+	const EDIT_MILEAGE_CAP = 'pwtc_edit_mileage';
+	const EDIT_RIDERS_CAP = 'pwtc_edit_riders';
+	const DB_OPS_CAP = 'pwtc_mileage_db_ops';
 
     private static $initiated = false;
 
@@ -916,7 +915,8 @@ class PwtcMileage {
 	public static function plugin_activation() {
 		error_log( 'PWTC Mileage plugin activated' );
 		if ( version_compare( $GLOBALS['wp_version'], PWTC_MILEAGE__MINIMUM_WP_VERSION, '<' ) ) {
-			//TODO: Implement version check fail abort
+			deactivate_plugins(plugin_basename(__FILE__));
+			wp_die('PWTC Mileage plugin requires Wordpress version of at least ' . PWTC_MILEAGE__MINIMUM_WP_VERSION);
 		}
 		PwtcMileage_DB::create_db_tables();
 		PwtcMileage_DB::create_db_views();
