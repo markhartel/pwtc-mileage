@@ -114,7 +114,6 @@ class PwtcMileage {
 	/*************************************************************/
 
 	public static function consolidation_callback() {
-		error_log( 'Consolidation process started.');
 		PwtcMileage_DB::job_set_status('consolidation', 'started');
 
 		$thisyear = date('Y', current_time('timestamp'));
@@ -140,8 +139,13 @@ class PwtcMileage {
 				$rideid = PwtcMileage_DB::get_new_ride_id();
 				if (isset($rideid) and is_int($rideid)) {
 					$status = PwtcMileage_DB::rollup_ridesheets($rideid, $maxdate);
-					error_log(var_export($status, true));
-					PwtcMileage_DB::job_remove('consolidation');
+					PwtcMileage_DB::job_set_status('consolidation', 'success', 
+						$status['m_inserts'] . ' mileages inserted, ' . 
+						$status['m_deletes'] . ' mileages deleted, ' . 
+						$status['l_inserts'] . ' leaders inserted, ' . 
+						$status['l_deletes'] . ' leaders deleted, ' . 
+						'1 ridesheet inserted, ' . 
+						$status['r_deletes'] . ' ridesheets deleted');
 				}
 				else {
 					PwtcMileage_DB::job_set_status('consolidation', 'failed', 'new ridesheet ID is invalid');
@@ -151,7 +155,6 @@ class PwtcMileage {
 	}
 
 	public static function member_sync_callback() {
-		error_log( 'Membership Sync process started.');
 		PwtcMileage_DB::job_set_status('member_sync', 'started');
 		$members = pwtc_mileage_fetch_membership();
 		if (count($members) == 0) {
@@ -159,35 +162,40 @@ class PwtcMileage {
 		}
 		else {
 			$results = self::update_membership_list($members);
-			pwtc_mileage_write_log ($results);
 			if ($results['insert_fail'] > 0) {
 				PwtcMileage_DB::job_set_status('member_sync', 'failed', 
-					'member database insert failed ' . $results['insert_fail'] . ' times');
+					$results['insert_fail'] . ' failed updates, ' . 
+					$results['validate_fail'] . ' failed validations, ' . 
+					$results['insert_succeed'] . ' members updated, ' .
+					$results['duplicate_record'] . ' duplicates found');
 			}
 			else if ($results['validate_fail'] > 0) {
 				PwtcMileage_DB::job_set_status('member_sync', 'failed', 
-					'member validation failed ' . $results['validate_fail'] . ' times');
+					$results['validate_fail'] . ' failed validations, ' .
+					$results['insert_succeed'] . ' members updated, ' .
+					$results['duplicate_record'] . ' duplicates found');
 			}
 			else {
-				PwtcMileage_DB::job_remove('member_sync');
+				PwtcMileage_DB::job_set_status('member_sync', 'success', 
+					$results['insert_succeed'] . ' members updated, ' . 
+					$results['duplicate_record'] . ' duplicates found');
 			}	
 		}
 	}
 
 	public static function purge_nonriders_callback() {
-		error_log( 'Purge non-riders process started.');
 		PwtcMileage_DB::job_set_status('purge_nonriders', 'started');
 		$status = PwtcMileage_DB::delete_all_nonriders();
 		if (false === $status or 0 === $status) {
 			PwtcMileage_DB::job_set_status('purge_nonriders', 'failed', 'database delete failed');
 		}
 		else {
-			PwtcMileage_DB::job_remove('purge_nonriders');
+			PwtcMileage_DB::job_set_status('purge_nonriders', 'success', 
+				$status . ' riders deleted');
 		}
 	}
 
 	public static function updmembs_load_callback() {
-		error_log( 'Updmembs file load process started.');
 		PwtcMileage_DB::job_set_status('updmembs_load', 'started');
 		$upload_dir = wp_upload_dir();
 		$plugin_upload_dir = $upload_dir['basedir'] . '/pwtc_mileage';
@@ -196,7 +204,6 @@ class PwtcMileage {
 			PwtcMileage_DB::job_set_status('updmembs_load', 'failed', 'updmembs.dbf file does not exist');
 		}
 		else {
-			//error_log('members_file: ' . $members_file);	
 			include('dbf_class.php');
 			// TODO: add error detection to dbf_class.
 			$dbf = new dbf_class($members_file);
@@ -204,14 +211,21 @@ class PwtcMileage {
 				$results = self::process_updmembs_file($dbf);
 				if ($results['insert_fail'] > 0) {
 					PwtcMileage_DB::job_set_status('updmembs_load', 'failed', 
-						'member database insert failed ' . $results['insert_fail'] . ' times');
+						$results['insert_fail'] . 'failed updates, ' . 
+						$results['validate_fail'] . ' failed validations, ' . 
+						$results['insert_succeed'] . ' members updated, ' .
+						$results['duplicate_record'] . ' duplicates found');
 				}
 				else if ($results['validate_fail'] > 0) {
 					PwtcMileage_DB::job_set_status('updmembs_load', 'failed', 
-						'member validation failed ' . $results['validate_fail'] . ' times');
+						$results['validate_fail'] . ' failed validations, ' .
+						$results['insert_succeed'] . ' members updated, ' .
+						$results['duplicate_record'] . ' duplicates found');
 				}
 				else {
-					PwtcMileage_DB::job_remove('updmembs_load');
+					PwtcMileage_DB::job_set_status('updmembs_load', 'success', 
+						$results['insert_succeed'] . ' members updated, ' . 
+						$results['duplicate_record'] . ' duplicates found');
 				}	
 			}
 			else {
@@ -222,7 +236,6 @@ class PwtcMileage {
 	}
 
 	public static function cvs_restore_callback() {
-		error_log( 'CVS restore process started.');
 		PwtcMileage_DB::job_set_status('cvs_restore', 'started');
 		$upload_dir = wp_upload_dir();
 		$plugin_upload_dir = $upload_dir['basedir'] . '/pwtc_mileage';
@@ -248,23 +261,36 @@ class PwtcMileage {
 			$rides_url = $plugin_upload_url . '/' . PwtcMileage_DB::RIDE_TABLE . '.csv';
 			$mileage_url = $plugin_upload_url . '/' . PwtcMileage_DB::MILEAGE_TABLE . '.csv';
 			$leaders_url = $plugin_upload_url . '/' . PwtcMileage_DB::LEADER_TABLE . '.csv';
-			error_log('members_url: ' . $members_url);
-			error_log('rides_url: ' . $rides_url);
-			error_log('mileage_url: ' . $mileage_url);
-			error_log('leaders_url: ' . $leaders_url);
 
-			PwtcMileage_DB::delete_database_for_restore();
+			$delete_l = PwtcMileage_DB::delete_leaders_for_restore();
+			$delete_m = PwtcMileage_DB::delete_mileage_for_restore();
+			$delete_r = PwtcMileage_DB::delete_rides_for_restore();
+			$delete_p = PwtcMileage_DB::delete_members_for_restore();
+
 			PwtcMileage_DB::load_members_for_restore($members_url);
 			PwtcMileage_DB::load_rides_for_restore($rides_url);
 			PwtcMileage_DB::load_mileage_for_restore($mileage_url);
 			PwtcMileage_DB::load_leaders_for_restore($leaders_url);
+
+			$load_p = PwtcMileage_DB::count_members();
+			$load_r = PwtcMileage_DB::count_rides();
+			$load_m = PwtcMileage_DB::count_mileage();
+			$load_l = PwtcMileage_DB::count_leaders();
 
 			unlink($members_file);
 			unlink($rides_file);
 			unlink($mileage_file);
 			unlink($leaders_file);
 
-			PwtcMileage_DB::job_remove('cvs_restore');
+			PwtcMileage_DB::job_set_status('cvs_restore', 'success', 
+				$delete_l . ' leaders deleted, ' . 
+				$delete_m . ' mileage deleted, ' . 
+				$delete_r . ' ridesheets deleted, ' . 
+				$delete_p . ' members deleted, ' . 
+				$load_p . ' members loaded, ' . 
+				$load_r . ' ridesheets loaded, ' . 
+				$load_m . ' mileage loaded, ' . 
+				$load_l . ' leaders loaded');
 		}	
 	}
 
@@ -304,6 +330,7 @@ class PwtcMileage {
 				$status = self::update_member_item($hashmap, $memberid, $firstname, $lastname, $expirdate);
 				switch ($status) {
 					case "val_fail":
+						pwtc_mileage_write_log($row);
 						$val_fail_count++;
 						break;
 					case "dup_rec":
@@ -317,10 +344,6 @@ class PwtcMileage {
 				}
 			}
 		}		
-		error_log('val_fail_count: ' . $val_fail_count);
-		error_log('ins_fail_count: ' . $ins_fail_count);
-		error_log('ins_succ_count: ' . $ins_succ_count);
-		error_log('dup_rec_count: ' . $dup_rec_count);
 		return array('validate_fail' => $val_fail_count,
 			'insert_fail' => $ins_fail_count,
 			'insert_succeed' => $ins_succ_count,
@@ -390,10 +413,6 @@ class PwtcMileage {
 					$ins_succ_count++;
 			}
 		}
-		error_log('val_fail_count: ' . $val_fail_count);
-		error_log('ins_fail_count: ' . $ins_fail_count);
-		error_log('ins_succ_count: ' . $ins_succ_count);
-		error_log('dup_rec_count: ' . $dup_rec_count);
 		return array('validate_fail' => $val_fail_count,
 			'insert_fail' => $ins_fail_count,
 			'insert_succeed' => $ins_succ_count,
@@ -861,7 +880,7 @@ class PwtcMileage {
 		$admin->add_cap(self::EDIT_MILEAGE_CAP);
 		$admin->add_cap(self::EDIT_RIDERS_CAP);
 		$admin->add_cap(self::DB_OPS_CAP);
-		error_log('PWTC Mileage plugin added capabilities to administrator role');
+		pwtc_mileage_write_log('PWTC Mileage plugin added capabilities to administrator role');
 	}
 
 	public static function remove_caps_admin_role() {
@@ -870,7 +889,7 @@ class PwtcMileage {
 		$admin->remove_cap(self::EDIT_MILEAGE_CAP);
 		$admin->remove_cap(self::EDIT_RIDERS_CAP);
 		$admin->remove_cap(self::DB_OPS_CAP);
-		error_log('PWTC Mileage plugin removed capabilities from administrator role');
+		pwtc_mileage_write_log('PWTC Mileage plugin removed capabilities from administrator role');
 	}
 
 	public static function create_stat_role() {
@@ -878,14 +897,14 @@ class PwtcMileage {
 		if ($stat === null) {
 			$subscriber = get_role('subscriber');
 			$stat = add_role('statistician', 'Statistician', $subscriber->capabilities);
-			error_log('PWTC Mileage plugin added statistician role');
+			pwtc_mileage_write_log('PWTC Mileage plugin added statistician role');
 		}
 		if ($stat !== null) {
 			$stat->add_cap(self::VIEW_MILEAGE_CAP);
 			$stat->add_cap(self::EDIT_MILEAGE_CAP);
 			$stat->add_cap(self::EDIT_RIDERS_CAP);
 			$stat->add_cap(self::DB_OPS_CAP);
-			error_log('PWTC Mileage plugin added capabilities to statistician role');
+			pwtc_mileage_write_log('PWTC Mileage plugin added capabilities to statistician role');
 		}
 	}
 
@@ -897,13 +916,13 @@ class PwtcMileage {
 			$stat->remove_cap(self::EDIT_MILEAGE_CAP);
 			$stat->remove_cap(self::EDIT_RIDERS_CAP);
 			$stat->remove_cap(self::DB_OPS_CAP);
-			error_log('PWTC Mileage plugin removed capabilities from statistician role');
+			pwtc_mileage_write_log('PWTC Mileage plugin removed capabilities from statistician role');
 		}
 		else {
 			$stat = get_role('statistician');
 			if ($stat !== null) {
 				remove_role('statistician');
-				error_log('PWTC Mileage plugin removed statistician role');
+				pwtc_mileage_write_log('PWTC Mileage plugin removed statistician role');
 			}
 		}
 	}
@@ -913,7 +932,7 @@ class PwtcMileage {
 	/*************************************************************/
 
 	public static function plugin_activation() {
-		error_log( 'PWTC Mileage plugin activated' );
+		pwtc_mileage_write_log( 'PWTC Mileage plugin activated' );
 		if ( version_compare( $GLOBALS['wp_version'], PWTC_MILEAGE__MINIMUM_WP_VERSION, '<' ) ) {
 			deactivate_plugins(plugin_basename(__FILE__));
 			wp_die('PWTC Mileage plugin requires Wordpress version of at least ' . PWTC_MILEAGE__MINIMUM_WP_VERSION);
@@ -929,14 +948,14 @@ class PwtcMileage {
 	}
 
 	public static function plugin_deactivation( ) {
-		error_log( 'PWTC Mileage plugin deactivated' );
+		pwtc_mileage_write_log( 'PWTC Mileage plugin deactivated' );
 		//self::delete_plugin_options();
 		self::remove_caps_admin_role();
 		self::remove_stat_role();
 	}
 
 	public static function plugin_uninstall() {
-		error_log( 'PWTC Mileage plugin uninstall' );	
+		pwtc_mileage_write_log( 'PWTC Mileage plugin uninstall' );	
 		$plugin_options = self::get_plugin_options();
 		if ($plugin_options['drop_db_on_delete']) {
 			PwtcMileage_DB::drop_db_views();	

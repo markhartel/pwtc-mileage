@@ -650,32 +650,6 @@ class PwtcMileage_DB {
 		return $status;
 	}
 
-	public static function delete_database_for_restore() {
-    	global $wpdb;
-		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
-		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
-		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
-		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
-		$errcnt = 0;
-		$status = $wpdb->query('delete from ' . $leader_table);
-		if (false === $status or 0 === $status) {
-			$errcnt++;
-		}
-		$status = $wpdb->query('delete from ' . $mileage_table);
-		if (false === $status or 0 === $status) {
-			$errcnt++;
-		}
-		$status = $wpdb->query('delete from ' . $ride_table);
-		if (false === $status or 0 === $status) {
-			$errcnt++;
-		}
-		$status = $wpdb->query('delete from ' . $member_table);
-		if (false === $status or 0 === $status) {
-			$errcnt++;
-		}
-		return $errcnt;
-	}
-
 	public static function fetch_members_for_export() {
     	global $wpdb;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
@@ -687,12 +661,9 @@ class PwtcMileage_DB {
 
 	public static function insert_members_for_restore($data) {
     	global $wpdb;
-		error_log('enter insert_members_for_restore');		
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
-		//error_log('members file contents');
 		$errcnt = 0;
 		foreach ( $data as $item ) {
-			//error_log($item[0] . ',' . $item[1] . ',' . $item[2] . ',' . $item[3]);
 			$status = $wpdb->query($wpdb->prepare('insert into ' . $member_table .
 				' (member_id, first_name, last_name, expir_date) values (%s, %s, %s, %s)',
 				$item[0], $item[1], $item[2], $item[3]));
@@ -700,8 +671,14 @@ class PwtcMileage_DB {
 				$errcnt++;
 			}
 		}
-		error_log('exit insert_members_for_restore');		
 		return $errcnt;
+	}
+
+	public static function delete_members_for_restore() {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		$status = $wpdb->query('delete from ' . $member_table);
+		return $status;
 	}
 
 	public static function load_members_for_restore($filename) {
@@ -726,10 +703,8 @@ class PwtcMileage_DB {
 	public static function insert_rides_for_restore($data) {
     	global $wpdb;
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
-		//error_log('rides file contents');
 		$errcnt = 0;
 		foreach ( $data as $item ) {
-			//error_log($item[0] . ',' . $item[1] . ',' . $item[2] . ',' . $item[3]);
 			$status = $wpdb->query($wpdb->prepare('insert into ' . $ride_table .
 				' (ID, title, date, post_id) values (%d, %s, %s, %d)', 
 				intval($item[0]), $item[1], $item[2], intval($item[3])));
@@ -738,6 +713,13 @@ class PwtcMileage_DB {
 			}
 		}
 		return $errcnt;
+	}
+
+	public static function delete_rides_for_restore() {
+    	global $wpdb;
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
+		$status = $wpdb->query('delete from ' . $ride_table);
+		return $status;
 	}
 
 	public static function load_rides_for_restore($filename) {
@@ -762,10 +744,8 @@ class PwtcMileage_DB {
 	public static function insert_mileage_for_restore($data) {
     	global $wpdb;
 		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
-		//error_log('mileage file contents');
 		$errcnt = 0;
 		foreach ( $data as $item ) {
-			//error_log($item[0] . ',' . $item[1] . ',' . $item[2]);
 			$status = $wpdb->query($wpdb->prepare('insert into ' . $mileage_table . 
 				' (ride_id, member_id, mileage) values (%d, %s, %d)', 
 				intval($item[0]), $item[1], intval($item[2])));
@@ -774,6 +754,13 @@ class PwtcMileage_DB {
 			}
 		}
 		return $errcnt;
+	}
+
+	public static function delete_mileage_for_restore() {
+    	global $wpdb;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		$status = $wpdb->query('delete from ' . $mileage_table);
+		return $status;
 	}
 
 	public static function load_mileage_for_restore($filename) {
@@ -798,10 +785,8 @@ class PwtcMileage_DB {
 	public static function insert_leaders_for_restore($data) {
     	global $wpdb;
 		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
-		//error_log('leaders file contents');
 		$errcnt = 0;
 		foreach ( $data as $item ) {
-			//error_log($item[0] . ',' . $item[1] . ',' . $item[2]);
 			$status = $wpdb->query($wpdb->prepare('insert into ' . $leader_table . 
 				' (ride_id, member_id, rides_led) values (%d, %s, %d)', 
 				intval($item[0]), $item[1], intval($item[2])));
@@ -812,6 +797,13 @@ class PwtcMileage_DB {
 		return $errcnt;
 	}
 
+	public static function delete_leaders_for_restore() {
+    	global $wpdb;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$status = $wpdb->query('delete from ' . $leader_table);
+		return $status;
+	}
+
 	public static function load_leaders_for_restore($filename) {
     	global $wpdb;
 		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
@@ -820,6 +812,13 @@ class PwtcMileage_DB {
 			" OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n'" . 
 			" (ride_id, member_id, rides_led)");
 		return $status;
+	}
+
+	public static function job_get_all_status() {
+    	global $wpdb;
+		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
+		$result = $wpdb->get_results('select * from ' . $jobs_table, ARRAY_A);
+		return $result;
 	}
 
 	public static function job_get_status($jobid) {
@@ -870,6 +869,14 @@ class PwtcMileage_DB {
 		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
 		$status = $wpdb->query($wpdb->prepare('delete from ' . $jobs_table . 
 			' where status = %s', 'failed'));
+		return $status;
+	} 
+
+	public static function job_remove_success() {
+    	global $wpdb;
+		$jobs_table = $wpdb->prefix . self::JOBS_TABLE;
+		$status = $wpdb->query($wpdb->prepare('delete from ' . $jobs_table . 
+			' where status = %s', 'success'));
 		return $status;
 	} 
 
@@ -939,7 +946,7 @@ class PwtcMileage_DB {
 			' expir_date DATE NOT NULL,' . 
 			' constraint pk_' . $member_table . ' PRIMARY KEY (member_id))');
 		if (false === $result) {
-			error_log( 'Could not create table ' . $member_table . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create table ' . $member_table . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create table if not exists ' . $ride_table .
@@ -949,7 +956,7 @@ class PwtcMileage_DB {
 			' post_id BIGINT UNSIGNED NOT NULL DEFAULT 0,' . 
 			' constraint pk_' . $ride_table . ' PRIMARY KEY (ID))');
 		if (false === $result) {
-			error_log( 'Could not create table ' . $ride_table . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create table ' . $ride_table . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create table if not exists ' . $mileage_table . 
@@ -960,7 +967,7 @@ class PwtcMileage_DB {
 			' constraint fk_' . $mileage_table . '_member_id FOREIGN KEY (member_id) REFERENCES ' . $member_table . ' (member_id),' . 
 			' constraint fk_' . $mileage_table . '_ride_id FOREIGN KEY (ride_id) REFERENCES ' . $ride_table . ' (ID))');
 		if (false === $result) {
-			error_log( 'Could not create table ' . $mileage_table . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create table ' . $mileage_table . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create table if not exists ' . $leader_table . 
@@ -972,7 +979,7 @@ class PwtcMileage_DB {
 			' constraint fk_' . $leader_table . '_ride_id FOREIGN KEY (ride_id) REFERENCES ' . 
 			$ride_table . ' (ID))');
 		if (false === $result) {
-			error_log( 'Could not create table ' . $leader_table . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create table ' . $leader_table . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create table if not exists ' . $jobs_table . 
@@ -982,7 +989,7 @@ class PwtcMileage_DB {
 			' error_msg TEXT,' . 
 			' constraint pk_' . $jobs_table . ' PRIMARY KEY (job_id))');
 		if (false === $result) {
-			error_log( 'Could not create table ' . $jobs_table . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create table ' . $jobs_table . ': ' . $wpdb->last_error);
 		}
 	}
 
@@ -999,7 +1006,7 @@ class PwtcMileage_DB {
 			' from ' . $member_table . ' as c inner join ' . $mileage_table . ' as m on c.member_id = m.member_id' . 
 			' group by m.member_id');
 		if (false === $result) {
-			error_log( 'Could not create view ' . self::LT_MILES_VIEW . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create view ' . self::LT_MILES_VIEW . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::YTD_MILES_VIEW . 
@@ -1010,7 +1017,7 @@ class PwtcMileage_DB {
 			' where r.date >= DATE_FORMAT(CURDATE(), \'%Y-01-01\')' . 
 			' group by m.member_id');
 		if (false === $result) {
-			error_log( 'Could not create view ' . self::YTD_MILES_VIEW . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create view ' . self::YTD_MILES_VIEW . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::LY_MILES_VIEW . 
@@ -1022,7 +1029,7 @@ class PwtcMileage_DB {
 			' and DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), \'%Y-12-31\')' . 
 			' group by m.member_id');
 		if (false === $result) {
-			error_log( 'Could not create view ' . self::LY_MILES_VIEW . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create view ' . self::LY_MILES_VIEW . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::LY_LT_MILES_VIEW . 
@@ -1033,7 +1040,7 @@ class PwtcMileage_DB {
 			' where r.date < DATE_FORMAT(CURDATE(), \'%Y-01-01\')' . 
 			' group by m.member_id');
 		if (false === $result) {
-			error_log( 'Could not create view ' . self::LY_LT_MILES_VIEW . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create view ' . self::LY_LT_MILES_VIEW . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::YBL_LT_MILES_VIEW . 
@@ -1044,7 +1051,7 @@ class PwtcMileage_DB {
 			' where r.date < DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), \'%Y-01-01\')' . 
 			' group by m.member_id');
 		if (false === $result) {
-			error_log( 'Could not create view ' . self::YBL_LT_MILES_VIEW . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create view ' . self::YBL_LT_MILES_VIEW . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::LY_LT_ACHVMNT_VIEW . 
@@ -1053,7 +1060,7 @@ class PwtcMileage_DB {
 			' from ' . self::LY_LT_MILES_VIEW . ' as a inner join ' . self::YBL_LT_MILES_VIEW . ' as b on a.member_id = b.member_id' . 
 			' where floor(a.mileage/10000) > floor(b.mileage/10000)');
 		if (false === $result) {
-			error_log( 'Could not create view ' . self::LY_LT_ACHVMNT_VIEW . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create view ' . self::LY_LT_ACHVMNT_VIEW . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::YTD_RIDES_LED_VIEW . 
@@ -1063,7 +1070,7 @@ class PwtcMileage_DB {
 			' where r.date >= DATE_FORMAT(CURDATE(), \'%Y-01-01\')' . 
 			' order by r.date');
 		if (false === $result) {
-			error_log( 'Could not create view ' . self::YTD_RIDES_LED_VIEW . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create view ' . self::YTD_RIDES_LED_VIEW . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::LY_RIDES_LED_VIEW . 
@@ -1074,7 +1081,7 @@ class PwtcMileage_DB {
 			' and DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), \'%Y-12-31\')' . 
 			' order by r.date');
 		if (false === $result) {
-			error_log( 'Could not create view ' . self::LY_RIDES_LED_VIEW . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create view ' . self::LY_RIDES_LED_VIEW . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::YTD_LED_VIEW . 
@@ -1085,7 +1092,7 @@ class PwtcMileage_DB {
 			' where r.date >= DATE_FORMAT(CURDATE(), \'%Y-01-01\')' . 
 			' group by l.member_id');
 		if (false === $result) {
-			error_log( 'Could not create view ' . self::YTD_LED_VIEW . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create view ' . self::YTD_LED_VIEW . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::LY_LED_VIEW . 
@@ -1097,7 +1104,7 @@ class PwtcMileage_DB {
 			' and DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), \'%Y-12-31\')' . 
 			' group by l.member_id');
 		if (false === $result) {
-			error_log( 'Could not create view ' . self::LY_LED_VIEW . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create view ' . self::LY_LED_VIEW . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::YTD_RIDES_VIEW . 
@@ -1107,7 +1114,7 @@ class PwtcMileage_DB {
 			' where r.date >= DATE_FORMAT(CURDATE(), \'%Y-01-01\')' . 
 			' order by r.date'); 
 		if (false === $result) {
-			error_log( 'Could not create view ' . self::YTD_RIDES_VIEW . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create view ' . self::YTD_RIDES_VIEW . ': ' . $wpdb->last_error);
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::LY_RIDES_VIEW . 
@@ -1118,7 +1125,7 @@ class PwtcMileage_DB {
 			' and DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), \'%Y-12-31\')' . 
 			' order by r.date');
 		if (false === $result) {
-			error_log( 'Could not create view ' . self::LY_RIDES_VIEW . ': ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not create view ' . self::LY_RIDES_VIEW . ': ' . $wpdb->last_error);
 		}
 	}
 
@@ -1132,7 +1139,7 @@ class PwtcMileage_DB {
 
 		$result = $wpdb->query('drop table if exists ' . $leader_table . ', ' . $mileage_table . ', ' . $ride_table . ', ' . $member_table . ', ' . $jobs_table);
 		if (false === $result) {
-			error_log( 'Could not drop tables: ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not drop tables: ' . $wpdb->last_error);
 		}
 	}
 
@@ -1143,7 +1150,7 @@ class PwtcMileage_DB {
 			', ' . self::YBL_LT_MILES_VIEW . ', ' . self::LY_LT_MILES_VIEW . ', ' . self::LY_MILES_VIEW . ', ' . self::YTD_MILES_VIEW . 
 			', ' . self::LT_MILES_VIEW);
 		if (false === $result) {
-			error_log( 'Could not drop views: ' . $wpdb->last_error);
+			pwtc_mileage_write_log( 'Could not drop views: ' . $wpdb->last_error);
 		}
 	}
    

@@ -135,113 +135,41 @@ jQuery(document).ready(function($) {
 		.on('blur', function(){ $input.removeClass('has-focus'); });
 	});
 
-    $('.sync-frm input[name="member_sync"]').focus();
+    $('.updmembs-btn').focus();
 
  });
 </script>
 <div class="wrap">
 	<h1><?= esc_html(get_admin_page_title()); ?></h1>
 <?php
-if (null !== $job_status_s) {
-    if ($job_status_s['status'] == 'triggered') {
-        $message = 'Synchronize action has been triggered.';
+foreach ( $job_status as $status ) {
+    if ($status['status'] == 'triggered') {
+        $message = $status['job_id'] . ' action has been triggered.';
         $notice_type = 'notice-warning';
         $show_buttons = false;
     } 
-    else if ($job_status_s['status'] == 'started') {
-        $message = 'Synchronize action is currently running.';
+    else if ($status['status'] == 'started') {
+        $message = $status['job_id'] . ' action is currently running.';
         $notice_type = 'notice-warning';
         $show_buttons = false;
     }
-    else {
-        $message = 'Synchronize action failed: ' . $job_status_s['error_msg'];
+    else if ($status['status'] == 'failed') {
+        $message = $status['job_id'] . ' action failed: ' . $status['error_msg'];
         $notice_type = 'notice-error';
         $clear_button = true;
     }
+    else {
+        $message = $status['job_id'] . ' action success: ' . $status['error_msg'];
+        $notice_type = 'notice-success';
+        $clear_button = true;
+    }
 ?>
-    <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
+    <div class="notice <?php echo $notice_type; ?>">
+        <p><strong><?php echo $message; ?></strong></p>
+    </div>
 <?php
 }
-if (null !== $job_status_p) {
-    if ($job_status_p['status'] == 'triggered') {
-        $message = 'Purge non-riders action has been triggered.';
-        $notice_type = 'notice-warning';
-        $show_buttons = false;
-    } 
-    else if ($job_status_p['status'] == 'started') {
-        $message = 'Purge non-riders action is currently running.';
-        $notice_type = 'notice-warning';
-        $show_buttons = false;
-    }
-    else {
-        $message = 'Purge non-riders action failed: ' . $job_status_p['error_msg'];
-        $notice_type = 'notice-error';
-        $clear_button = true;
-    }
-?>
-    <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
-<?php
-} 
-if (null !== $job_status_c) {
-    if ($job_status_c['status'] == 'triggered') {
-        $message = 'Consolidation action has been triggered.';
-        $notice_type = 'notice-warning';
-        $show_buttons = false;
-    } 
-    else if ($job_status_c['status'] == 'started') {
-        $message = 'Consolidation action is currently running.';
-        $notice_type = 'notice-warning';
-        $show_buttons = false;
-    }
-    else {
-        $message = 'Consolidation action failed: ' . $job_status_c['error_msg'];
-        $notice_type = 'notice-error';
-        $clear_button = true;
-    }
-?>
-    <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
-<?php
-}
-if (null !== $job_status_r) {
-    if ($job_status_r['status'] == 'triggered') {
-        $message = 'Restore action has been triggered.';
-        $notice_type = 'notice-warning';
-        $show_buttons = false;
-    } 
-    else if ($job_status_r['status'] == 'started') {
-        $message = 'Restore action is currently running.';
-        $notice_type = 'notice-warning';
-        $show_buttons = false;
-    }
-    else {
-        $message = 'Restore action failed: ' . $job_status_r['error_msg'];
-        $notice_type = 'notice-error';
-        $clear_button = true;
-    }
-?>
-    <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
-<?php
-}
-if (null !== $job_status_u) {
-    if ($job_status_u['status'] == 'triggered') {
-        $message = 'Updmembs load action has been triggered.';
-        $notice_type = 'notice-warning';
-        $show_buttons = false;
-    } 
-    else if ($job_status_u['status'] == 'started') {
-        $message = 'Updmembs load action is currently running.';
-        $notice_type = 'notice-warning';
-        $show_buttons = false;
-    }
-    else {
-        $message = 'Updmembs load action failed: ' . $job_status_u['error_msg'];
-        $notice_type = 'notice-error';
-        $clear_button = true;
-    }
-?>
-    <div class="notice <?php echo $notice_type; ?>"><p><strong><?php echo $message; ?></strong></p></div>
-<?php
-}
+
 if ($show_buttons) {
     if ($clear_button) {
 ?>
@@ -253,12 +181,14 @@ if ($show_buttons) {
     }
 ?>
     <p>
+<?php if (false) { ?>
         <div><strong>Synchronize rider list with master membership database.</strong></div>
         <div><form class="sync-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_member_sync'); ?>
             <input type="submit" name="member_sync" value="Synchronize" 
                 class="button button-primary button-large"/>
         </form></div><br>
+<?php } ?>
         <div><strong>Synchronize rider list with contents of updmembs file.</strong></div>
         <div>
             <button class="updmembs-btn button button-primary button-large">Synchronize</button>
@@ -273,13 +203,15 @@ if ($show_buttons) {
 			</form>
 		    </span>
         </div><br>
-        <div><strong>Purge all non-riders from rider list.</strong></div>
+ <?php if (false) { ?>
+       <div><strong>Purge all non-riders from rider list.</strong></div>
         <div><form class="purge-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_purge_nonriders'); ?>
             <input type="submit" name="purge_nonriders" value="Purge" 
                 class="button button-primary button-large"/>
         </form></div><br>
-        <div><strong>Consolidate all <?php echo(intval(date('Y'))-2); ?> club rides to single entry.</strong></div>
+ <?php } ?>
+       <div><strong>Consolidate all <?php echo(intval(date('Y'))-2); ?> club rides to single entry.</strong></div>
         <div><form class="consol-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_consolidate'); ?>
             <input type="submit" name="consolidate" value="Consolidate" 

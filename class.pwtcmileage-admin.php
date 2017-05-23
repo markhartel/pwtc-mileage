@@ -1365,7 +1365,7 @@ class PwtcMileage_Admin {
 			if (isset($_POST['consolidate'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_consolidate')) {
-					die('Nonce security check failed!'); 
+					wp_die('Nonce security check failed!'); 
 				}			
 				PwtcMileage_DB::job_set_status('consolidation', 'triggered');
 				wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
@@ -1374,7 +1374,7 @@ class PwtcMileage_Admin {
 			if (isset($_POST['member_sync'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_member_sync')) {
-					die('Nonce security check failed!'); 
+					wp_die('Nonce security check failed!'); 
 				}			
 				PwtcMileage_DB::job_set_status('member_sync', 'triggered');
 				wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
@@ -1382,7 +1382,7 @@ class PwtcMileage_Admin {
 			if (isset($_POST['purge_nonriders'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_purge_nonriders')) {
-					die('Nonce security check failed!'); 
+					wp_die('Nonce security check failed!'); 
 				}			
 				PwtcMileage_DB::job_set_status('purge_nonriders', 'triggered');
 				wp_schedule_single_event(time(), 'pwtc_mileage_purge_nonriders');
@@ -1390,7 +1390,7 @@ class PwtcMileage_Admin {
 			if (isset($_POST['restore'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_restore')) {
-					die('Nonce security check failed!'); 
+					wp_die('Nonce security check failed!'); 
 				}			
 				PwtcMileage_DB::job_set_status('cvs_restore', 'triggered');
 				$files = array(
@@ -1420,7 +1420,7 @@ class PwtcMileage_Admin {
 			if (isset($_POST['updmembs'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_updmembs')) {
-					die('Nonce security check failed!'); 
+					wp_die('Nonce security check failed!'); 
 				}	
 				PwtcMileage_DB::job_set_status('updmembs_load', 'triggered');
 				$error = self::validate_uploaded_dbf_file();
@@ -1440,23 +1440,21 @@ class PwtcMileage_Admin {
 			if (isset($_POST['clear_errs'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_clear_errs')) {
-					die('Nonce security check failed!'); 
+					wp_die('Nonce security check failed!'); 
 				}			
 				PwtcMileage_DB::job_remove_failed();
+				PwtcMileage_DB::job_remove_success();
 			}
 			if (isset($_POST['clear_lock'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_clear_lock')) {
-					die('Nonce security check failed!'); 
+					wp_die('Nonce security check failed!'); 
 				}			
 				PwtcMileage_DB::job_remove_running();
 			}
-			$job_status_s = PwtcMileage_DB::job_get_status('member_sync');
-			$job_status_p = PwtcMileage_DB::job_get_status('purge_nonriders');
-			$job_status_b = PwtcMileage_DB::job_get_status('backup');
-			$job_status_c = PwtcMileage_DB::job_get_status('consolidation');
-			$job_status_r = PwtcMileage_DB::job_get_status('cvs_restore');
-			$job_status_u = PwtcMileage_DB::job_get_status('updmembs_load');
+
+			$job_status = PwtcMileage_DB::job_get_all_status();
+
 			$max_timestamp = PwtcMileage_DB::max_job_timestamp();
 			$show_clear_lock = false;
 			if ($max_timestamp !== null && time()-$max_timestamp > $plugin_options['db_lock_time_limit']) {
@@ -1520,13 +1518,11 @@ class PwtcMileage_Admin {
 		$errmsg = null;
 		$upload_dir = wp_upload_dir();
 		$plugin_upload_dir = $upload_dir['basedir'] . '/pwtc_mileage';
-		//error_log('plugin_upload_dir: ' . $plugin_upload_dir);
 		if (!file_exists($plugin_upload_dir)) {
     		wp_mkdir_p($plugin_upload_dir);
 		}
 		foreach ( $files as $file ) {
 			$uploadfile = $plugin_upload_dir . '/' . $file['tblname'] . '.csv';
-			//error_log('moved file: ' . $uploadfile);
 			if (!move_uploaded_file($_FILES[$file['id']]['tmp_name'], $uploadfile)) {
 				$errmsg = $file['label'] . ' file upload could not be moved';
 				break;
@@ -1550,7 +1546,7 @@ class PwtcMileage_Admin {
 			else if ($_FILES['updmembs_file']['error'] != UPLOAD_ERR_OK) {
 				$errmsg = 'Updmembs file upload error code ' . $_FILES['updmembs_file']['error'];
 			}
-			else if (preg_match('/updmembs\.dbf/', $_FILES['updmembs_file']['name']) !== 1) {
+			else if (preg_match('/UPDMEMBS\.DBF/', $_FILES['updmembs_file']['name']) !== 1) {
 				$errmsg = 'Updmembs file name pattern mismatch';
 			}
 		}
