@@ -1367,7 +1367,7 @@ class PwtcMileage_Admin {
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_consolidate')) {
 					wp_die('Nonce security check failed!'); 
 				}			
-				PwtcMileage_DB::job_set_status('consolidation', 'triggered');
+				PwtcMileage_DB::job_set_status(PwtcMileage::RIDE_MERGE_ACT, PwtcMileage_DB::TRIGGERED_STATUS);
 				wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
 			}
 
@@ -1376,7 +1376,7 @@ class PwtcMileage_Admin {
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_member_sync')) {
 					wp_die('Nonce security check failed!'); 
 				}			
-				PwtcMileage_DB::job_set_status('member_sync', 'triggered');
+				PwtcMileage_DB::job_set_status(PwtcMileage::MEMBER_SYNC_ACT, PwtcMileage_DB::TRIGGERED_STATUS);
 				wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
 			}
 			if (isset($_POST['purge_nonriders'])) {
@@ -1384,7 +1384,7 @@ class PwtcMileage_Admin {
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_purge_nonriders')) {
 					wp_die('Nonce security check failed!'); 
 				}			
-				PwtcMileage_DB::job_set_status('purge_nonriders', 'triggered');
+				PwtcMileage_DB::job_set_status(PwtcMileage::RIDER_PURGE_ACT, PwtcMileage_DB::TRIGGERED_STATUS);
 				wp_schedule_single_event(time(), 'pwtc_mileage_purge_nonriders');
 			}
 			if (isset($_POST['restore'])) {
@@ -1392,7 +1392,7 @@ class PwtcMileage_Admin {
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_restore')) {
 					wp_die('Nonce security check failed!'); 
 				}			
-				PwtcMileage_DB::job_set_status('cvs_restore', 'triggered');
+				PwtcMileage_DB::job_set_status(PwtcMileage::DB_RESTORE_ACT, PwtcMileage_DB::TRIGGERED_STATUS);
 				$files = array(
 					self::generate_file_record(
 						'members_file', 'members', '_members', PwtcMileage_DB::MEMBER_TABLE),
@@ -1405,12 +1405,12 @@ class PwtcMileage_Admin {
 				);
 				$error = self::validate_uploaded_files($files);
 				if ($error) {
-					PwtcMileage_DB::job_set_status('cvs_restore', 'failed', $error);
+					PwtcMileage_DB::job_set_status(PwtcMileage::DB_RESTORE_ACT, PwtcMileage_DB::FAILED_STATUS, $error);
 				}
 				else {
 					$error = self::move_uploaded_files($files);
 					if ($error) {
-						PwtcMileage_DB::job_set_status('cvs_restore', 'failed', $error);
+						PwtcMileage_DB::job_set_status(PwtcMileage::DB_RESTORE_ACT, PwtcMileage_DB::FAILED_STATUS, $error);
 					}
 					else {
 						wp_schedule_single_event(time(), 'pwtc_mileage_cvs_restore');
@@ -1422,15 +1422,15 @@ class PwtcMileage_Admin {
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_updmembs')) {
 					wp_die('Nonce security check failed!'); 
 				}	
-				PwtcMileage_DB::job_set_status('updmembs_load', 'triggered');
+				PwtcMileage_DB::job_set_status(PwtcMileage::MEMBER_SYNC_ACT, PwtcMileage_DB::TRIGGERED_STATUS);
 				$error = self::validate_uploaded_dbf_file();
 				if ($error) {
-					PwtcMileage_DB::job_set_status('updmembs_load', 'failed', $error);
+					PwtcMileage_DB::job_set_status(PwtcMileage::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, $error);
 				}
 				else {
 					$error = self::move_uploaded_dbf_file();
 					if ($error) {
-						PwtcMileage_DB::job_set_status('updmembs_load', 'failed', $error);
+						PwtcMileage_DB::job_set_status(PwtcMileage::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, $error);
 					}
 					else {
 						wp_schedule_single_event(time(), 'pwtc_mileage_updmembs_load');

@@ -18,7 +18,7 @@ TBD
 TBD
 ### Manage Ride Sheets
 TBD
-### Year-End Ops
+### Datebase Ops
 TBD
 ### Settings
 TBD
@@ -77,3 +77,4 @@ sort_order|Blah, blah, blah|"asc" or "desc"|"asc"
 - admin-style.css *(stylesheet for admin pages)*
 - reports-style.css *(stylesheet for report shortcodes)*
 - datepicker.css *(stylesheet for Wordpress jQueryUI datepicker - from [github](https://github.com/stuttter/wp-datepicker-styling))*
+- pwtc_logo.png *(image for membership card generation)*

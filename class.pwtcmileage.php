@@ -7,6 +7,11 @@ class PwtcMileage {
 	const EDIT_RIDERS_CAP = 'pwtc_edit_riders';
 	const DB_OPS_CAP = 'pwtc_mileage_db_ops';
 
+	const MEMBER_SYNC_ACT = 'Synchronize';
+	const RIDE_MERGE_ACT = 'Consolidate';
+	const DB_RESTORE_ACT = 'Restore';
+	const RIDER_PURGE_ACT = 'Purge';
+
     private static $initiated = false;
 
 	public static function init() {
@@ -114,7 +119,7 @@ class PwtcMileage {
 	/*************************************************************/
 
 	public static function consolidation_callback() {
-		PwtcMileage_DB::job_set_status('consolidation', 'started');
+		PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT, PwtcMileage_DB::STARTED_STATUS);
 
 		$thisyear = date('Y', current_time('timestamp'));
 		$yearbeforelast = intval($thisyear) - 2;
@@ -123,23 +128,23 @@ class PwtcMileage {
 
 		$num_rides = PwtcMileage_DB::get_num_rides_before_date($maxdate);	
 		if ($num_rides == 0) {
-			PwtcMileage_DB::job_set_status('consolidation', 'failed', 
+			PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT, PwtcMileage_DB::FAILED_STATUS, 
 				'no ridesheets were found for ' . $yearbeforelast);
 		}
 		else if ($num_rides == 1) {
-			PwtcMileage_DB::job_set_status('consolidation', 'failed', 
+			PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT, PwtcMileage_DB::FAILED_STATUS, 
 				'' . $yearbeforelast . ' ridesheets are already consolidated');
 		}
 		else {
 			$status = PwtcMileage_DB::insert_ride($title, $maxdate);
 			if (false === $status or 0 === $status) {
-				PwtcMileage_DB::job_set_status('consolidation', 'failed', 'could not insert new ridesheet');
+				PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT,PwtcMileage_DB::FAILED_STATUS, 'could not insert new ridesheet');
 			}
 			else {
 				$rideid = PwtcMileage_DB::get_new_ride_id();
 				if (isset($rideid) and is_int($rideid)) {
 					$status = PwtcMileage_DB::rollup_ridesheets($rideid, $maxdate);
-					PwtcMileage_DB::job_set_status('consolidation', 'success', 
+					PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
 						$status['m_inserts'] . ' mileages inserted, ' . 
 						$status['m_deletes'] . ' mileages deleted, ' . 
 						$status['l_inserts'] . ' leaders inserted, ' . 
@@ -148,35 +153,35 @@ class PwtcMileage {
 						$status['r_deletes'] . ' ridesheets deleted');
 				}
 				else {
-					PwtcMileage_DB::job_set_status('consolidation', 'failed', 'new ridesheet ID is invalid');
+					PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT, PwtcMileage_DB::FAILED_STATUS, 'new ridesheet ID is invalid');
 				}
 			}
 		}	
 	}
 
 	public static function member_sync_callback() {
-		PwtcMileage_DB::job_set_status('member_sync', 'started');
+		PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::STARTED_STATUS);
 		$members = pwtc_mileage_fetch_membership();
 		if (count($members) == 0) {
-			PwtcMileage_DB::job_set_status('member_sync', 'failed', 'no members in membership list');
+			PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 'no members in membership list');
 		}
 		else {
 			$results = self::update_membership_list($members);
 			if ($results['insert_fail'] > 0) {
-				PwtcMileage_DB::job_set_status('member_sync', 'failed', 
+				PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 
 					$results['insert_fail'] . ' failed updates, ' . 
 					$results['validate_fail'] . ' failed validations, ' . 
 					$results['insert_succeed'] . ' members updated, ' .
 					$results['duplicate_record'] . ' duplicates found');
 			}
 			else if ($results['validate_fail'] > 0) {
-				PwtcMileage_DB::job_set_status('member_sync', 'failed', 
+				PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 
 					$results['validate_fail'] . ' failed validations, ' .
 					$results['insert_succeed'] . ' members updated, ' .
 					$results['duplicate_record'] . ' duplicates found');
 			}
 			else {
-				PwtcMileage_DB::job_set_status('member_sync', 'success', 
+				PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
 					$results['insert_succeed'] . ' members updated, ' . 
 					$results['duplicate_record'] . ' duplicates found');
 			}	
@@ -184,24 +189,24 @@ class PwtcMileage {
 	}
 
 	public static function purge_nonriders_callback() {
-		PwtcMileage_DB::job_set_status('purge_nonriders', 'started');
+		PwtcMileage_DB::job_set_status(RIDER_PURGE_ACT, PwtcMileage_DB::STARTED_STATUS);
 		$status = PwtcMileage_DB::delete_all_nonriders();
 		if (false === $status or 0 === $status) {
-			PwtcMileage_DB::job_set_status('purge_nonriders', 'failed', 'database delete failed');
+			PwtcMileage_DB::job_set_status(RIDER_PURGE_ACT, PwtcMileage_DB::FAILED_STATUS, 'database delete failed');
 		}
 		else {
-			PwtcMileage_DB::job_set_status('purge_nonriders', 'success', 
+			PwtcMileage_DB::job_set_status(RIDER_PURGE_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
 				$status . ' riders deleted');
 		}
 	}
 
 	public static function updmembs_load_callback() {
-		PwtcMileage_DB::job_set_status('updmembs_load', 'started');
+		PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::STARTED_STATUS);
 		$upload_dir = wp_upload_dir();
 		$plugin_upload_dir = $upload_dir['basedir'] . '/pwtc_mileage';
 		$members_file = $plugin_upload_dir . '/updmembs.dbf';
 		if (!file_exists($members_file)) {
-			PwtcMileage_DB::job_set_status('updmembs_load', 'failed', 'updmembs.dbf file does not exist');
+			PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 'updmembs.dbf file does not exist');
 		}
 		else {
 			include('dbf_class.php');
@@ -210,33 +215,33 @@ class PwtcMileage {
 			if (self::validate_updmembs_file($dbf)) {
 				$results = self::process_updmembs_file($dbf);
 				if ($results['insert_fail'] > 0) {
-					PwtcMileage_DB::job_set_status('updmembs_load', 'failed', 
+					PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 
 						$results['insert_fail'] . 'failed updates, ' . 
 						$results['validate_fail'] . ' failed validations, ' . 
 						$results['insert_succeed'] . ' members updated, ' .
 						$results['duplicate_record'] . ' duplicates found');
 				}
 				else if ($results['validate_fail'] > 0) {
-					PwtcMileage_DB::job_set_status('updmembs_load', 'failed', 
+					PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 
 						$results['validate_fail'] . ' failed validations, ' .
 						$results['insert_succeed'] . ' members updated, ' .
 						$results['duplicate_record'] . ' duplicates found');
 				}
 				else {
-					PwtcMileage_DB::job_set_status('updmembs_load', 'success', 
+					PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
 						$results['insert_succeed'] . ' members updated, ' . 
 						$results['duplicate_record'] . ' duplicates found');
 				}	
 			}
 			else {
-				PwtcMileage_DB::job_set_status('updmembs_load', 'failed', 'invalid dbf file');
+				PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 'invalid dbf file');
 			}
 			unlink($members_file);
 		}
 	}
 
 	public static function cvs_restore_callback() {
-		PwtcMileage_DB::job_set_status('cvs_restore', 'started');
+		PwtcMileage_DB::job_set_status(self::DB_RESTORE_ACT, PwtcMileage_DB::STARTED_STATUS);
 		$upload_dir = wp_upload_dir();
 		$plugin_upload_dir = $upload_dir['basedir'] . '/pwtc_mileage';
 		$members_file = $plugin_upload_dir . '/' . PwtcMileage_DB::MEMBER_TABLE . '.csv';
@@ -244,16 +249,16 @@ class PwtcMileage {
 		$mileage_file = $plugin_upload_dir . '/' . PwtcMileage_DB::MILEAGE_TABLE . '.csv';
 		$leaders_file = $plugin_upload_dir . '/' . PwtcMileage_DB::LEADER_TABLE . '.csv';
 		if (!file_exists($members_file)) {
-			PwtcMileage_DB::job_set_status('cvs_restore', 'failed', 'members upload file does not exist');
+			PwtcMileage_DB::job_set_status(self::DB_RESTORE_ACT, PwtcMileage_DB::FAILED_STATUS, 'members upload file does not exist');
 		}
 		else if (!file_exists($rides_file)) {
-			PwtcMileage_DB::job_set_status('cvs_restore', 'failed', 'rides upload file does not exist');
+			PwtcMileage_DB::job_set_status(self::DB_RESTORE_ACT, PwtcMileage_DB::FAILED_STATUS, 'rides upload file does not exist');
 		}
 		else if (!file_exists($mileage_file)) {
-			PwtcMileage_DB::job_set_status('cvs_restore', 'failed', 'mileage upload file does not exist');
+			PwtcMileage_DB::job_set_status(self::DB_RESTORE_ACT, PwtcMileage_DB::FAILED_STATUS, 'mileage upload file does not exist');
 		}
 		else if (!file_exists($leaders_file)) {
-			PwtcMileage_DB::job_set_status('cvs_restore', 'failed', 'leaders upload file does not exist');
+			PwtcMileage_DB::job_set_status(self::DB_RESTORE_ACT, PwtcMileage_DB::FAILED_STATUS, 'leaders upload file does not exist');
 		}
 		else {
 			$plugin_upload_url = $upload_dir['baseurl'] . '/pwtc_mileage';
@@ -282,7 +287,7 @@ class PwtcMileage {
 			unlink($mileage_file);
 			unlink($leaders_file);
 
-			PwtcMileage_DB::job_set_status('cvs_restore', 'success', 
+			PwtcMileage_DB::job_set_status(self::DB_RESTORE_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
 				$delete_l . ' leaders deleted, ' . 
 				$delete_m . ' mileage deleted, ' . 
 				$delete_r . ' ridesheets deleted, ' . 
@@ -937,8 +942,16 @@ class PwtcMileage {
 			deactivate_plugins(plugin_basename(__FILE__));
 			wp_die('PWTC Mileage plugin requires Wordpress version of at least ' . PWTC_MILEAGE__MINIMUM_WP_VERSION);
 		}
-		PwtcMileage_DB::create_db_tables();
-		PwtcMileage_DB::create_db_views();
+		$errs = PwtcMileage_DB::create_db_tables();
+		if ($errs > 0) {
+			deactivate_plugins(plugin_basename(__FILE__));
+			wp_die('PWTC Mileage plugin could not create database tables');			
+		}
+		$errs = PwtcMileage_DB::create_db_views();
+		if ($errs > 0) {
+			deactivate_plugins(plugin_basename(__FILE__));
+			wp_die('PWTC Mileage plugin could not create database views');			
+		}
 		if (self::get_plugin_options() === false) {
 			//self::delete_plugin_options();
 			self::create_default_plugin_options();

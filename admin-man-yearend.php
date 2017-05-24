@@ -143,29 +143,33 @@ jQuery(document).ready(function($) {
 	<h1><?= esc_html(get_admin_page_title()); ?></h1>
 <?php
 foreach ( $job_status as $status ) {
-    if ($status['status'] == 'triggered') {
-        $message = $status['job_id'] . ' action has been triggered.';
+    if ($status['status'] == PwtcMileage_DB::TRIGGERED_STATUS) {
+        $message = $status['job_id'] . ' action triggered';
+        $detail = '';
         $notice_type = 'notice-warning';
         $show_buttons = false;
     } 
-    else if ($status['status'] == 'started') {
-        $message = $status['job_id'] . ' action is currently running.';
+    else if ($status['status'] == PwtcMileage_DB::STARTED_STATUS) {
+        $message = $status['job_id'] . ' action running';
+        $detail = '';
         $notice_type = 'notice-warning';
         $show_buttons = false;
     }
-    else if ($status['status'] == 'failed') {
-        $message = $status['job_id'] . ' action failed: ' . $status['error_msg'];
+    else if ($status['status'] == PwtcMileage_DB::FAILED_STATUS) {
+        $message = $status['job_id'] . ' action failed';
+        $detail = ' - ' . $status['error_msg'];
         $notice_type = 'notice-error';
         $clear_button = true;
     }
     else {
-        $message = $status['job_id'] . ' action success: ' . $status['error_msg'];
+        $message = $status['job_id'] . ' action success';
+        $detail = ' - ' . $status['error_msg'];
         $notice_type = 'notice-success';
         $clear_button = true;
     }
 ?>
     <div class="notice <?php echo $notice_type; ?>">
-        <p><strong><?php echo $message; ?></strong></p>
+        <p><strong><?php echo $message; ?></strong><?php echo $detail; ?></p>
     </div>
 <?php
 }
@@ -175,7 +179,7 @@ if ($show_buttons) {
 ?>
         <div><form class="clear-frm" method="POST">
         	<?php wp_nonce_field('pwtc_mileage_clear_errs'); ?>
-            <input type="submit" name="clear_errs" value="Clear Errors" class="button">
+            <input type="submit" name="clear_errs" value="Clear Messages" class="button">
         </form></div>
 <?php        
     }
