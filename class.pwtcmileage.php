@@ -210,30 +210,35 @@ class PwtcMileage {
 		}
 		else {
 			include('dbf_class.php');
-			// TODO: add error detection to dbf_class.
-			$dbf = new dbf_class($members_file);
-			if (self::validate_updmembs_file($dbf)) {
-				$results = self::process_updmembs_file($dbf);
-				if ($results['insert_fail'] > 0) {
-					PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 
-						$results['insert_fail'] . 'failed updates, ' . 
-						$results['validate_fail'] . ' failed validations, ' . 
-						$results['insert_succeed'] . ' members updated, ' .
-						$results['duplicate_record'] . ' duplicates found');
-				}
-				else if ($results['validate_fail'] > 0) {
-					PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 
-						$results['validate_fail'] . ' failed validations, ' .
-						$results['insert_succeed'] . ' members updated, ' .
-						$results['duplicate_record'] . ' duplicates found');
+			try {			
+				$dbf = new dbf_class($members_file);
+				if (self::validate_updmembs_file($dbf)) {
+					$results = self::process_updmembs_file($dbf);
+					if ($results['insert_fail'] > 0) {
+						PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 
+							$results['insert_fail'] . 'failed updates, ' . 
+							$results['validate_fail'] . ' failed validations, ' . 
+							$results['insert_succeed'] . ' members updated, ' .
+							$results['duplicate_record'] . ' duplicates found');
+					}
+					else if ($results['validate_fail'] > 0) {
+						PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 
+							$results['validate_fail'] . ' failed validations, ' .
+							$results['insert_succeed'] . ' members updated, ' .
+							$results['duplicate_record'] . ' duplicates found');
+					}
+					else {
+						PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
+							$results['insert_succeed'] . ' members updated, ' . 
+							$results['duplicate_record'] . ' duplicates found');
+					}	
 				}
 				else {
-					PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
-						$results['insert_succeed'] . ' members updated, ' . 
-						$results['duplicate_record'] . ' duplicates found');
-				}	
-			}
-			else {
+					PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 'invalid dbf file contents');
+				}
+			} 
+			catch (Exception $e) {
+				pwtc_mileage_write_log('Exception thrown from dbf_class: ' . $e->getMessage());
 				PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 'invalid dbf file');
 			}
 			unlink($members_file);
