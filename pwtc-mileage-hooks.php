@@ -9,6 +9,7 @@ array[2] - last name (string)
 array[3] - expiration date (string with PHP date format 'Y-m-d')
 */
 function pwtc_mileage_fetch_membership() {
+    /*
     $users = get_users();
     $users_array = array();
     foreach ( $users as $item ) {
@@ -19,7 +20,8 @@ function pwtc_mileage_fetch_membership() {
         array_push($users_array, array($memberid, $firstname, $lastname, $expirdate));
     }
     return $users_array;
-    //return array();
+    */
+    return array();
 }
 
 /*
