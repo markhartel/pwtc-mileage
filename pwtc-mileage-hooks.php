@@ -32,7 +32,6 @@ function pwtc_mileage_get_member_id() {
     if ( 0 == $current_user->ID ) {
         $id = null;
     } else {
-        //$id = get_field('rider_number', 'user_' . $current_user->ID);
         $result = PwtcMileage_DB::fetch_riders_by_name(trim($current_user->user_lastname), 
             trim($current_user->user_firstname));
         if (count($result) == 1) {
@@ -55,13 +54,15 @@ function pwtc_mileage_fetch_posts($select_sql, $lookback_date) {
     global $wpdb;
     $ride_post_type = 'rideevent';
     $ride_date_metakey = 'start_date';
+    //$ride_post_type = 'scheduled_rides';
+    //$ride_date_metakey = 'date';
     $sql_stmt = $wpdb->prepare(
-        'select p.ID, p.post_title, m.meta_value as start_date, p.guid' . 
+        'select p.ID, p.post_title, date_format(m.meta_value, %s) as start_date, p.guid' . 
         ' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
         ' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
         ' and m.meta_key = %s and (cast(m.meta_value as date) between %s and curdate())' . 
         ' and p.ID not in (' . $select_sql . ') order by m.meta_value', 
-        $ride_post_type, $ride_date_metakey, $lookback_date);
+        '%Y-%m-%d', $ride_post_type, $ride_date_metakey, $lookback_date);
     $results = $wpdb->get_results($sql_stmt, ARRAY_N);
     return $results;
     //return array();
@@ -85,6 +86,22 @@ function pwtc_mileage_fetch_post_guid($post_id) {
 Returns an array that contains the rider ids of the ride leaders of the posted ride. 
 */
 function pwtc_mileage_fetch_ride_leader_ids($post_id) {
+    /*
+    $leaders = get_field('leaders', $post_id);
+    $leaders_array = array();
+    if ($leaders) {
+        foreach ($leaders as $leader) {
+ 	        $fname = get_user_meta($leader['ID'], 'first_name', true);
+ 	        $lname = get_user_meta($leader['ID'], 'last_name', true);
+            $result = PwtcMileage_DB::fetch_riders_by_name(trim($lname), trim($fname));
+            if (count($result) == 1) {
+                $id = $result[0]['member_id'];
+                array_push($leaders_array, $id);
+            }
+        }
+    }
+    return $leaders_array;
+    */
     $leaders = get_field('ride_leader', $post_id);
     $leaders_array = array();
     if ($leaders) {
@@ -101,6 +118,19 @@ function pwtc_mileage_fetch_ride_leader_ids($post_id) {
 Returns an array that contains the names of the ride leaders of the posted ride. 
 */
 function pwtc_mileage_fetch_ride_leader_names($post_id) {
+    /*
+    $leaders = get_field('leaders', $post_id);
+    $leaders_array = array();
+    if ($leaders) {
+        foreach ($leaders as $leader) {
+ 	        $fname = get_user_meta($leader['ID'], 'first_name', true);
+ 	        $lname = get_user_meta($leader['ID'], 'last_name', true);
+            $name = $fname . ' ' . $lname;
+            array_push($leaders_array, $name);
+        }
+    }
+    return $leaders_array;
+    */
     $leaders = get_field('ride_leader', $post_id);
     $leaders_array = array();
     if ($leaders) {

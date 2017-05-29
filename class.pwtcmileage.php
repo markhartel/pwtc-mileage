@@ -34,12 +34,16 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'load_report_scripts' ) );
 
 		// Register shortcode callbacks
+		add_shortcode('pwtc_rider_report', 
+			array( 'PwtcMileage', 'shortcode_rider_report'));
+/*
 		add_shortcode('pwtc_rider_name', 
 			array( 'PwtcMileage', 'shortcode_rider_name'));
 		add_shortcode('pwtc_rider_mileage', 
 			array( 'PwtcMileage', 'shortcode_rider_mileage'));
 		add_shortcode('pwtc_rider_led', 
 			array( 'PwtcMileage', 'shortcode_rider_led'));
+*/
 		add_shortcode('pwtc_achievement_last_year', 
 			array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
 		add_shortcode('pwtc_mileage_year_to_date', 
@@ -575,6 +579,37 @@ class PwtcMileage {
 	/* Shortcode report generation functions
 	/*************************************************************/
 
+	public static function shortcode_rider_report($atts) {
+		$out = '';
+		$id = pwtc_mileage_get_member_id();
+		if ($id != null) {
+			$out .= '<p>';
+			$result = PwtcMileage_DB::fetch_rider($id);
+			if (count($result) > 0) {
+				$out .= $result[0]['first_name'] . ' ' . $result[0]['last_name'];
+			}
+			else {
+				$out .= 'Member ' . $id;
+			}
+			$out .= ', you have ridden <strong>';
+			$out .= PwtcMileage_DB::get_ytd_rider_mileage($id);
+			$out .= '</strong> miles with the club so far this year. Last year you rode <strong>';
+			$out .= PwtcMileage_DB::get_ly_rider_mileage($id);
+			$out .= '</strong> miles. Your total lifetime club mileage is <strong>';
+			$out .= PwtcMileage_DB::get_lt_rider_mileage($id);
+			$out .= '</strong> miles. You have led <strong>';
+			$out .= PwtcMileage_DB::get_ytd_rider_led($id);
+			$out .= '</strong> club rides so far this year. Last year you led <strong>';
+			$out .= PwtcMileage_DB::get_ly_rider_led($id);
+			$out .= '</strong> rides.</p>';
+		}
+		else {
+			$out .= '<p>Please login to see your club rider report.</p>';
+		}
+		return $out;
+	}
+
+/*
 	public static function shortcode_rider_name($atts) {
 		$out = '';
 		$id = pwtc_mileage_get_member_id();
@@ -629,6 +664,7 @@ class PwtcMileage {
 		}
 		return $out;
 	}
+*/
 
 	public static function shortcode_ly_lt_achvmnt($atts, $content = null) {
 		$a = self::normalize_atts($atts);
