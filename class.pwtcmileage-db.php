@@ -89,6 +89,27 @@ class PwtcMileage_DB {
 		return $num_led;
 	}
 
+	public static function fetch_member_duplicates($outtype) {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+    	$results = $wpdb->get_results(
+			'select distinct a.first_name as first_name, a.last_name as last_name' . 
+			' from ' . $member_table . ' as a inner join ' . $member_table . ' as b' . 
+			' where a.first_name like b.first_name and a.last_name like b.last_name' . 
+			' and a.member_id <> b.member_id order by a.last_name, a.first_name', $outtype);
+		return $results;
+	}
+
+	public static function meta_member_duplicates() {
+		$meta = array(
+			'header' => array('First Name', 'Last Name'),
+			'title' => 'Members With Duplicate Names',
+			'date_idx' => -1,
+			'id_idx' => -1
+		);
+		return $meta;		
+	}
+
 	public static function fetch_annual_accum_miles($outtype) {
     	global $wpdb;
     	$results = $wpdb->get_results(

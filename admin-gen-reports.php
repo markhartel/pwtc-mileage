@@ -144,6 +144,26 @@ jQuery(document).ready(function($) {
         }
     });
 
+    $('#report-main-section .members a').on('click', function(evt) {
+        evt.preventDefault();
+        if ($('#report-main-section .download-slt').val() != 'no') {
+            $('#report-main-section .download').html(
+                '<form method="post">' + 
+                '<input type="hidden" name="' + $('#report-main-section .download-slt').val() + '"/>' +
+                '<input type="hidden" name="report_id" value="' + $(this).attr('report-id') + '"/>' +
+                '</form>');
+            $('#report-main-section .download form').submit();
+        }
+        else {
+            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+            var data = {
+                'action': 'pwtc_mileage_generate_report',
+                'report_id': $(this).attr('report-id')
+            };
+            $.post(action, data, generate_report_cb);
+        }
+    });
+
     $('#report-main-section .lookup-btn').on('click', function(evt) {
         lookup_pwtc_riders(function(riderid, name) {
             $('#report-main-section .riderid').html(riderid);
@@ -221,6 +241,12 @@ if ($running_jobs > 0) {
             <div><a href='#' report-id='award_top_miles'>Top annual mileage</a></div>
             <div><a href='#' report-id='award_members'>Member annual and accumulative mileage</a></div>
             <div><a href='#' report-id='award_leaders'>Ride leaders</a></div>
+        </div>
+        <h3>Member Reports</h3>
+        <div class='members'>
+            <div><a href='#' report-id='exp_members'>Expired members</a></div>
+            <div><a href='#' report-id='dup_members'>Duplicate members</a></div>
+            <div><a href='#' report-id='members_no_miles'>Members with no mileage</a></div>
         </div>
         <div class='download'></div>
     </div>

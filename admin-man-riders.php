@@ -235,7 +235,7 @@ if ($running_jobs > 0) {
 		<span class="add-blk popup-frm initially-hidden">
 			<form class="add-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
                 <span>ID</span>
-                <input name="memberid" type="text"/>
+                <input name="memberid" type="text" required/>
                 <span>First Name</span>
                 <input name="firstname" type="text" required/>
                 <span>Last Name</span>

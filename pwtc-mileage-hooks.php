@@ -26,20 +26,26 @@ function pwtc_mileage_fetch_membership() {
 
 /*
 Returns a string that contains the member ID of the logged on user.
-(Return a null if the user is not logged on or his member ID is not set.)
+(Throws an exception if the user is not logged on or his member ID is not set.)
 */
 function pwtc_mileage_get_member_id() {
     $id = null;
     $current_user = wp_get_current_user();
     if ( 0 == $current_user->ID ) {
-        $id = null;
-    } else {
+        throw new Exception('notloggedin');
+    }
+    else {
         $result = PwtcMileage_DB::fetch_riders_by_name(trim($current_user->user_lastname), 
             trim($current_user->user_firstname));
-        if (count($result) == 1) {
-            $id = $result[0]['member_id'];
+        $count = count($result);
+        if ($count == 0) {
+            throw new Exception('idnotfound');
         }
-    }
+        else if ($count > 1) {
+            throw new Exception('multidfound');
+        }
+        $id = $result[0]['member_id'];
+   }
     return $id;
     //return null;
 }

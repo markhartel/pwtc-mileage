@@ -555,9 +555,11 @@ class PwtcMileage_Admin {
 				echo wp_json_encode($response);
 			}
 			else {
+				/*
 				if ($memberid == '') {
 					$memberid = PwtcMileage_DB::gen_new_member_id();
 				}
+				*/
 				if ($memberid == '') {
 					$response = array(
 						'error' => 'Cannot generate new member id.'
@@ -1064,6 +1066,14 @@ class PwtcMileage_Admin {
 							$data = PwtcMileage_DB::fetch_annual_accum_miles(ARRAY_N);
 							break;
 					}			
+					break;
+				case "dup_members":
+					switch ($reportid) {
+						case "dup_members":
+							$meta = PwtcMileage_DB::meta_member_duplicates();
+							$data = PwtcMileage_DB::fetch_member_duplicates(ARRAY_N);
+							break;
+					}
 					break;
 				default:
 					$error = 'Report type ' . $reportid . ' not found.';

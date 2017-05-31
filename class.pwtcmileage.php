@@ -458,7 +458,11 @@ class PwtcMileage {
 		}
 		$id = null;
 		if ($meta['id_idx'] >= 0 and $atts['highlight_user'] == 'on') {
-			$id = pwtc_mileage_get_member_id();
+			try {
+				$id = pwtc_mileage_get_member_id();
+			}
+			catch (Exception $e) {
+			}
 		}
 		$out = '<div>';  
 		if (count($data) > 0) {
@@ -580,10 +584,9 @@ class PwtcMileage {
 	/*************************************************************/
 
 	public static function shortcode_rider_report($atts) {
-		$out = '';
-		$id = pwtc_mileage_get_member_id();
-		if ($id != null) {
-			$out .= '<p>';
+		$out = '<div>';
+		try {
+			$id = pwtc_mileage_get_member_id();
 			$result = PwtcMileage_DB::fetch_rider($id);
 			if (count($result) > 0) {
 				$out .= $result[0]['first_name'] . ' ' . $result[0]['last_name'];
@@ -601,11 +604,24 @@ class PwtcMileage {
 			$out .= PwtcMileage_DB::get_ytd_rider_led($id);
 			$out .= '</strong> club rides so far this year. Last year you led <strong>';
 			$out .= PwtcMileage_DB::get_ly_rider_led($id);
-			$out .= '</strong> rides.</p>';
+			$out .= '</strong> rides.';
 		}
-		else {
-			$out .= '<p>Please login to see your club rider report.</p>';
+		catch (Exception $e) { 
+			switch ($e->getMessage()) {
+				case "notloggedin":
+					$out .= 'Please login to see your club rider report.';
+					break;
+				case "idnotfound":
+					$out .= 'Cannot show club rider report, rider ID not found.';
+					break;
+				case "multidfound":
+					$out .= 'Cannot show club rider report, multiple rider IDs found.';
+					break;
+				default:
+					$out .= 'Cannot show club rider report, unknown error.';
+			}
 		}
+		$out .= '</div>';
 		return $out;
 	}
 
@@ -726,66 +742,119 @@ class PwtcMileage {
 	}
 
 	public static function shortcode_ytd_rides($atts, $content = null) {
-		$member_id = pwtc_mileage_get_member_id();
-		$out = '';
-		if ($member_id === null) {
-			$out = '';
-		}
-		else {
+		$out = '<div>';
+		try {
+			$member_id = pwtc_mileage_get_member_id();
 			$name = self::get_rider_name($member_id);
 			$a = self::normalize_atts($atts);
 			$meta = PwtcMileage_DB::meta_ytd_rides($name);
 			$data = PwtcMileage_DB::fetch_ytd_rides(ARRAY_N, $member_id);
-			$out = self::shortcode_build_table($meta, $data, $a, $content);
+			$out .= self::shortcode_build_table($meta, $data, $a, $content);
 		}
+		catch (Exception $e) {
+			switch ($e->getMessage()) {
+				case "notloggedin":
+					$out .= 'Please login to view your year-to-date rides.';
+					break;
+				case "idnotfound":
+					$out .= 'Cannot view your year-to-date rides, rider ID not found.';
+					break;
+				case "multidfound":
+					$out .= 'Cannot view your year-to-date rides, multiple rider IDs found.';
+					break;
+				default:
+					$out .= 'Cannot view your year-to-date rides, unknown error.';
+			}
+		}
+		$out .= '</div>';
 		return $out;
 	}
 
 	public static function shortcode_ly_rides($atts, $content = null) {
-		$member_id = pwtc_mileage_get_member_id();
-		$out = '';
-		if ($member_id === null) {
-			$out = '';
-		}
-		else {
+		$out = '<div>';
+		try {
+			$member_id = pwtc_mileage_get_member_id();
 			$name = self::get_rider_name($member_id);
 			$a = self::normalize_atts($atts);
 			$meta = PwtcMileage_DB::meta_ly_rides($name);
 			$data = PwtcMileage_DB::fetch_ly_rides(ARRAY_N, $member_id);
-			$out = self::shortcode_build_table($meta, $data, $a, $content);
+			$out .= self::shortcode_build_table($meta, $data, $a, $content);
 		}
+		catch (Exception $e) {
+			switch ($e->getMessage()) {
+				case "notloggedin":
+					$out .= 'Please login to view your last year rides.';
+					break;
+				case "idnotfound":
+					$out .= 'Cannot view your last year rides, rider ID not found.';
+					break;
+				case "multidfound":
+					$out .= 'Cannot view your last year rides, multiple rider IDs found.';
+					break;
+				default:
+					$out .= 'Cannot view your last year rides, unknown error.';
+			}
+		}
+		$out .= '</div>';
 		return $out;
 	}
 
 	public static function shortcode_ytd_led_rides($atts, $content = null) {
-		$member_id = pwtc_mileage_get_member_id();
-		$out = '';
-		if ($member_id === null) {
-			$out = '';
-		}
-		else {
+		$out = '<div>';
+		try {
+			$member_id = pwtc_mileage_get_member_id();
 			$name = self::get_rider_name($member_id);
 			$a = self::normalize_atts($atts);
 			$meta = PwtcMileage_DB::meta_ytd_rides_led($name);
 			$data = PwtcMileage_DB::fetch_ytd_rides_led(ARRAY_N, $member_id);
-			$out = self::shortcode_build_table($meta, $data, $a, $content);
+			$out .= self::shortcode_build_table($meta, $data, $a, $content);
 		}
+		catch (Exception $e) {
+			switch ($e->getMessage()) {
+				case "notloggedin":
+					$out .= 'Please login to view your year-to-date rides led.';
+					break;
+				case "idnotfound":
+					$out .= 'Cannot view your year-to-date rides led, rider ID not found.';
+					break;
+				case "multidfound":
+					$out .= 'Cannot view your year-to-date rides led, multiple rider IDs found.';
+					break;
+				default:
+					$out .= 'Cannot view your year-to-date rides led, unknown error.';
+			}
+		}
+		$out .= '</div>';
 		return $out;
 	}
 
 	public static function shortcode_ly_led_rides($atts, $content = null) {
-		$member_id = pwtc_mileage_get_member_id();
-		if ($member_id === null) {
-			$out = '';
-		}
-		else {
+		$out = '<div>';
+		try {
+			$member_id = pwtc_mileage_get_member_id();
 			$name = self::get_rider_name($member_id);
 			$a = self::normalize_atts($atts);
 			$meta = PwtcMileage_DB::meta_ly_rides_led($name);
 			$data = PwtcMileage_DB::fetch_ly_rides_led(ARRAY_N, $member_id);
-			$out = self::shortcode_build_table($meta, $data, $a, $content);
-			return $out;
+			$out .= self::shortcode_build_table($meta, $data, $a, $content);
 		}
+		catch (Exception $e) {
+			switch ($e->getMessage()) {
+				case "notloggedin":
+					$out .= 'Please login to view your last year rides led.';
+					break;
+				case "idnotfound":
+					$out .= 'Cannot view your last year rides led, rider ID not found.';
+					break;
+				case "multidfound":
+					$out .= 'Cannot view your last year rides led, multiple rider IDs found.';
+					break;
+				default:
+					$out .= 'Cannot view your last year rides led, unknown error.';
+			}
+		}
+		$out .= '</div>';
+		return $out;
 	}
 
 	public static function shortcode_rides_wo_sheets($atts, $content = null) {
@@ -797,15 +866,13 @@ class PwtcMileage {
 	}
 
 	public static function shortcode_riderid_download($atts, $content = null) {
-		$member_id = pwtc_mileage_get_member_id();
-		$out = '';
-		if ($member_id === null) {
-			$out = 'Log in to download rider ID';
-		}
-		else {
+		$out = '<div>';
+		try {
+			$member_id = pwtc_mileage_get_member_id();
 			$result = PwtcMileage_DB::fetch_rider($member_id);
 			if (count($result) == 0) {
-				$out = 'Cannot access details for rider ' . $member_id;
+				$out = 'Cannot download rider card, fetch of details for rider ' . $member_id . 
+					' failed.';
 			}
 			else {
 				$lastname = $result[0]['last_name'];
@@ -813,13 +880,29 @@ class PwtcMileage {
 				$exp_date = $result[0]['expir_date'];
 				$fmtdate = date('M Y', strtotime($exp_date));
 				$out = '<form method="POST">';
-				$out .= '<input type="submit" name="download_riderid" value="Download Rider ID"/>';
+				$out .= '<input type="submit" name="download_riderid" value="Download Rider Card"/>';
 				$out .= '<input type="hidden" name="rider_id" value="' . $member_id . '"/>';
 				$out .= '<input type="hidden" name="rider_name" value="' . $firstname . ' ' . $lastname . '"/>';
 				$out .= '<input type="hidden" name="expire_date" value="' . $fmtdate . '"/>';
 				$out .= '</form>';
 			}
 		}
+		catch (Exception $e) {
+			switch ($e->getMessage()) {
+				case "notloggedin":
+					$out .= 'Please login to download rider card.';
+					break;
+				case "idnotfound":
+					$out .= 'Cannot download rider card, rider ID not found.';
+					break;
+				case "multidfound":
+					$out .= 'Cannot download rider card, multiple rider IDs found.';
+					break;
+				default:
+					$out .= 'Cannot download rider card, unknown error.';
+			}
+		}
+		$out .= '</div>';
 		return $out;
 	}
 
