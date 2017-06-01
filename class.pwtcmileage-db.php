@@ -89,7 +89,21 @@ class PwtcMileage_DB {
 		return $num_led;
 	}
 
-	public static function fetch_member_duplicates($outtype) {
+	public static function fetch_member_duplicates() {
+		$dup_array = array();
+		$results = self::fetch_member_dups(ARRAY_N);
+		foreach ($results as $item) {
+			$ids = '';
+			$riders = self::fetch_riders_by_name($item[1], $item[0]);
+			foreach ($riders as $rider) {
+				$ids .= $rider['member_id'] . ' ';
+			}
+			array_push($dup_array, array($item[0], $item[1], $ids));
+		}
+		return $dup_array;
+	}
+
+	public static function fetch_member_dups($outtype) {
     	global $wpdb;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
     	$results = $wpdb->get_results(
@@ -102,7 +116,7 @@ class PwtcMileage_DB {
 
 	public static function meta_member_duplicates() {
 		$meta = array(
-			'header' => array('First Name', 'Last Name'),
+			'header' => array('First Name', 'Last Name', 'IDs'),
 			'title' => 'Members With Duplicate Names',
 			'date_idx' => -1,
 			'id_idx' => -1

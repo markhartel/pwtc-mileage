@@ -94,13 +94,15 @@ function pwtc_mileage_fetch_post_guid($post_id) {
 Returns an array that contains the rider ids of the ride leaders of the posted ride. 
 */
 function pwtc_mileage_fetch_ride_leader_ids($post_id) {
+    // TODO: This did not work on pwtc.com site, troubleshoot.
     /*
     $leaders = get_field('leaders', $post_id);
     $leaders_array = array();
     if ($leaders) {
+        pwtc_mileage_write_log($leaders);
         foreach ($leaders as $leader) {
- 	        $fname = get_user_meta($leader['ID'], 'first_name', true);
- 	        $lname = get_user_meta($leader['ID'], 'last_name', true);
+ 	        $fname = get_user_meta($leader->ID, 'first_name', true);
+ 	        $lname = get_user_meta($leader->ID, 'last_name', true);
             $result = PwtcMileage_DB::fetch_riders_by_name(trim($lname), trim($fname));
             if (count($result) == 1) {
                 $id = $result[0]['member_id'];
@@ -113,6 +115,7 @@ function pwtc_mileage_fetch_ride_leader_ids($post_id) {
     $leaders = get_field('ride_leader', $post_id);
     $leaders_array = array();
     if ($leaders) {
+        //pwtc_mileage_write_log($leaders);
         foreach ($leaders as $leader) {
             $riderid = get_field('rider_number', $leader->ID);
             array_push($leaders_array, $riderid);
@@ -126,13 +129,15 @@ function pwtc_mileage_fetch_ride_leader_ids($post_id) {
 Returns an array that contains the names of the ride leaders of the posted ride. 
 */
 function pwtc_mileage_fetch_ride_leader_names($post_id) {
+    // TODO: This did not work on pwtc.com site, troubleshoot.
     /*
     $leaders = get_field('leaders', $post_id);
     $leaders_array = array();
     if ($leaders) {
+        pwtc_mileage_write_log($leaders);
         foreach ($leaders as $leader) {
- 	        $fname = get_user_meta($leader['ID'], 'first_name', true);
- 	        $lname = get_user_meta($leader['ID'], 'last_name', true);
+ 	        $fname = get_user_meta($leader->ID, 'first_name', true);
+ 	        $lname = get_user_meta($leader->ID, 'last_name', true);
             $name = $fname . ' ' . $lname;
             array_push($leaders_array, $name);
         }
@@ -142,6 +147,7 @@ function pwtc_mileage_fetch_ride_leader_names($post_id) {
     $leaders = get_field('ride_leader', $post_id);
     $leaders_array = array();
     if ($leaders) {
+        //pwtc_mileage_write_log($leaders);
         foreach ($leaders as $leader) {
             $name = $leader->post_title;
             array_push($leaders_array, $name);
@@ -149,6 +155,42 @@ function pwtc_mileage_fetch_ride_leader_names($post_id) {
     }
     return $leaders_array;
     //return array();   
+}
+
+function pwtc_mileage_create_stat_role() {
+    $stat = get_role('statistician');
+    if ($stat === null) {
+        $subscriber = get_role('subscriber');
+        $stat = add_role('statistician', 'Statistician', $subscriber->capabilities);
+        //$stat = add_role('statistician', 'Statistician');
+        pwtc_mileage_write_log('PWTC Mileage plugin added statistician role');
+    }
+    if ($stat !== null) {
+        $stat->add_cap(PwtcMileage::VIEW_MILEAGE_CAP);
+        $stat->add_cap(PwtcMileage::EDIT_MILEAGE_CAP);
+        $stat->add_cap(PwtcMileage::EDIT_RIDERS_CAP);
+        $stat->add_cap(PwtcMileage::DB_OPS_CAP);
+        pwtc_mileage_write_log('PWTC Mileage plugin added capabilities to statistician role');
+    }    
+}
+
+function pwtc_mileage_remove_stat_role() {
+    $users = get_users(array('role' => 'statistician'));
+    if (count($users) > 0) {
+        $stat = get_role('statistician');
+        $stat->remove_cap(PwtcMileage::VIEW_MILEAGE_CAP);
+        $stat->remove_cap(PwtcMileage::EDIT_MILEAGE_CAP);
+        $stat->remove_cap(PwtcMileage::EDIT_RIDERS_CAP);
+        $stat->remove_cap(PwtcMileage::DB_OPS_CAP);
+        pwtc_mileage_write_log('PWTC Mileage plugin removed capabilities from statistician role');
+    }
+    else {
+        $stat = get_role('statistician');
+        if ($stat !== null) {
+            remove_role('statistician');
+            pwtc_mileage_write_log('PWTC Mileage plugin removed statistician role');
+        }
+    }
 }
 
 if (!function_exists('pwtc_mileage_write_log')) {

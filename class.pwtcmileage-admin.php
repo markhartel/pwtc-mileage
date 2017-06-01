@@ -1071,7 +1071,7 @@ class PwtcMileage_Admin {
 					switch ($reportid) {
 						case "dup_members":
 							$meta = PwtcMileage_DB::meta_member_duplicates();
-							$data = PwtcMileage_DB::fetch_member_duplicates(ARRAY_N);
+							$data = PwtcMileage_DB::fetch_member_duplicates();
 							break;
 					}
 					break;

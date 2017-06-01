@@ -306,7 +306,7 @@ jQuery(document).ready(function($) {
 			$("#ridesheet-sheet-page .leader-section .add-blk").hide(); 
 			$("#ridesheet-sheet-page .mileage-section .lookup-btn").show();
 			$("#ridesheet-sheet-page .mileage-section .add-blk").hide(); 
-			set_ridesheet_lock(res.title.startsWith('Totals Through '));
+			set_ridesheet_lock(res.title.startsWith('['));
 			$('#ridesheet-ride-page').hide('fast', function() {
 				$('#ridesheet-sheet-page').fadeIn('slow');
 				$('#ridesheet-sheet-page .back-btn').focus();

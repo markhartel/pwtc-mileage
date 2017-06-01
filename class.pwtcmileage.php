@@ -114,6 +114,7 @@ class PwtcMileage {
 	/*************************************************************/
 
 	public static function load_report_scripts() {
+		// TODO: shortcode report table colors did not render correctly on pwtc.com site, troubleshoot.
         wp_enqueue_style('pwtc_mileage_report_css', 
 			PWTC_MILEAGE__PLUGIN_URL . 'reports-style.css' );
 	}
@@ -127,7 +128,7 @@ class PwtcMileage {
 
 		$thisyear = date('Y', current_time('timestamp'));
 		$yearbeforelast = intval($thisyear) - 2;
-		$title = 'Totals Through ' . $yearbeforelast;
+		$title = '[Totals Through ' . $yearbeforelast . ']';
 		$maxdate = '' . $yearbeforelast . '-12-31';
 
 		$num_rides = PwtcMileage_DB::get_num_rides_before_date($maxdate);	
@@ -1021,41 +1022,6 @@ class PwtcMileage {
 		pwtc_mileage_write_log('PWTC Mileage plugin removed capabilities from administrator role');
 	}
 
-	public static function create_stat_role() {
-		$stat = get_role('statistician');
-		if ($stat === null) {
-			$subscriber = get_role('subscriber');
-			$stat = add_role('statistician', 'Statistician', $subscriber->capabilities);
-			pwtc_mileage_write_log('PWTC Mileage plugin added statistician role');
-		}
-		if ($stat !== null) {
-			$stat->add_cap(self::VIEW_MILEAGE_CAP);
-			$stat->add_cap(self::EDIT_MILEAGE_CAP);
-			$stat->add_cap(self::EDIT_RIDERS_CAP);
-			$stat->add_cap(self::DB_OPS_CAP);
-			pwtc_mileage_write_log('PWTC Mileage plugin added capabilities to statistician role');
-		}
-	}
-
-	public static function remove_stat_role() {
-		$users = get_users(array('role' => 'statistician'));
-		if (count($users) > 0) {
-			$stat = get_role('statistician');
-			$stat->remove_cap(self::VIEW_MILEAGE_CAP);
-			$stat->remove_cap(self::EDIT_MILEAGE_CAP);
-			$stat->remove_cap(self::EDIT_RIDERS_CAP);
-			$stat->remove_cap(self::DB_OPS_CAP);
-			pwtc_mileage_write_log('PWTC Mileage plugin removed capabilities from statistician role');
-		}
-		else {
-			$stat = get_role('statistician');
-			if ($stat !== null) {
-				remove_role('statistician');
-				pwtc_mileage_write_log('PWTC Mileage plugin removed statistician role');
-			}
-		}
-	}
-
 	/*************************************************************/
 	/* Plugin installation and removal functions
 	/*************************************************************/
@@ -1081,14 +1047,14 @@ class PwtcMileage {
 			self::create_default_plugin_options();
 		}
 		self::add_caps_admin_role();
-		self::create_stat_role();
+		pwtc_mileage_create_stat_role();
 	}
 
 	public static function plugin_deactivation( ) {
 		pwtc_mileage_write_log( 'PWTC Mileage plugin deactivated' );
 		//self::delete_plugin_options();
 		self::remove_caps_admin_role();
-		self::remove_stat_role();
+		pwtc_mileage_remove_stat_role();
 	}
 
 	public static function plugin_uninstall() {
