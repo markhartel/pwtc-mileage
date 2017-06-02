@@ -487,7 +487,7 @@ class PwtcMileage_Admin {
 			else {
 				$test_date = '';
 				if ($active == 'true') {
-					$test_date = self::get_date_for_expir_check();
+					$test_date = PwtcMileage::get_date_for_expir_check();
 				}
 				$members = PwtcMileage_DB::fetch_riders($lastname, $firstname, $memberid, $test_date);
 			}	
@@ -792,7 +792,7 @@ class PwtcMileage_Admin {
 			$rider = PwtcMileage_DB::fetch_rider($memberid);
 			if (count($rider) > 0) {
 				$r = $rider[0];
-				if (strtotime($r['expir_date']) < strtotime(self::get_date_for_expir_check())) {
+				if (strtotime($r['expir_date']) < strtotime(PwtcMileage::get_date_for_expir_check())) {
 					$errormsg = 'The membership of ' . $r['first_name'] . ' ' . $r['last_name'] .
 						' (' . $r['member_id'] . ') has expired.';
 				}
@@ -802,12 +802,6 @@ class PwtcMileage_Admin {
 			}
 		}
 		return $errormsg;
-	}
-
-	public static function get_date_for_expir_check() {
-		$plugin_options = PwtcMileage::get_plugin_options();
-		$time = $plugin_options['expire_grace_period'] * 24 * 60 * 60; // convert grace period from days to seconds
-		return date('Y-m-d', current_time('timestamp') - $time);
 	}
 
 	public static function add_leader_callback() {

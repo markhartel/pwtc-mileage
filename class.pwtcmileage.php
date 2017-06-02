@@ -585,6 +585,7 @@ class PwtcMileage {
 	/*************************************************************/
 
 	public static function shortcode_rider_report($atts) {
+    	$a = shortcode_atts(array('type' => 'both'), $atts);
 		$out = '<div>';
 		try {
 			$id = pwtc_mileage_get_member_id();
@@ -595,17 +596,28 @@ class PwtcMileage {
 			else {
 				$out .= 'Member ' . $id;
 			}
-			$out .= ', you have ridden <strong>';
-			$out .= PwtcMileage_DB::get_ytd_rider_mileage($id);
-			$out .= '</strong> miles with the club so far this year. Last year you rode <strong>';
-			$out .= PwtcMileage_DB::get_ly_rider_mileage($id);
-			$out .= '</strong> miles. Your total lifetime club mileage is <strong>';
-			$out .= PwtcMileage_DB::get_lt_rider_mileage($id);
-			$out .= '</strong> miles. You have led <strong>';
-			$out .= PwtcMileage_DB::get_ytd_rider_led($id);
-			$out .= '</strong> club rides so far this year. Last year you led <strong>';
-			$out .= PwtcMileage_DB::get_ly_rider_led($id);
-			$out .= '</strong> rides.';
+			$out .= ', ';
+			if ($a['type'] == 'mileage' or $a['type'] == 'both') {
+				$out .= 'you have ridden <strong>';
+				$out .= PwtcMileage_DB::get_ytd_rider_mileage($id);
+				$out .= '</strong> miles with the club so far this year. Last year you rode <strong>';
+				$out .= PwtcMileage_DB::get_ly_rider_mileage($id);
+				$out .= '</strong> miles. Your total lifetime club mileage is <strong>';
+				$out .= PwtcMileage_DB::get_lt_rider_mileage($id);
+				$out .= '</strong> miles.';
+			}
+			if ($a['type'] == 'leader' or $a['type'] == 'both') {
+				if ($a['type'] == 'both') {
+					$out .= ' You have led <strong>';
+				}
+				else {
+					$out .= 'you have led <strong>';
+				}
+				$out .= PwtcMileage_DB::get_ytd_rider_led($id);
+				$out .= '</strong> club rides so far this year. Last year you led <strong>';
+				$out .= PwtcMileage_DB::get_ly_rider_led($id);
+				$out .= '</strong> rides.';
+			}
 		}
 		catch (Exception $e) { 
 			switch ($e->getMessage()) {
@@ -905,6 +917,12 @@ class PwtcMileage {
 		}
 		$out .= '</div>';
 		return $out;
+	}
+
+	public static function get_date_for_expir_check() {
+		$plugin_options = self::get_plugin_options();
+		$time = $plugin_options['expire_grace_period'] * 24 * 60 * 60; // convert grace period from days to seconds
+		return date('Y-m-d', current_time('timestamp') - $time);
 	}
 
 	/*************************************************************/

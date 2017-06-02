@@ -393,7 +393,7 @@ class PwtcMileage_DB {
 
 	public static function meta_posts_without_rides() {
 		$meta = array(
-			'header' => array('ID', 'Title', 'Date', 'Guid'),
+			'header' => array('ID', 'Title', 'Date', 'URL'),
 			'title' => 'Posted Rides without Ride Sheets',
 			'date_idx' => 2,
 			'id_idx' => 0
@@ -423,7 +423,7 @@ class PwtcMileage_DB {
 
 	public static function meta_posts_without_rides2() {
 		$meta = array(
-			'header' => array('ID', 'Title', 'Date', 'Leaders', 'Guid'),
+			'header' => array('ID', 'Title', 'Date', 'Leaders', 'URL'),
 			'title' => 'Posted Rides without Ride Sheets',
 			'date_idx' => 2,
 			'id_idx' => 0
@@ -612,12 +612,17 @@ class PwtcMileage_DB {
 		return $results;
 	}
 
-	public static function fetch_riders_by_name($lastname, $firstname) {
+	public static function fetch_riders_by_name($lastname, $firstname, $date = '') {
     	global $wpdb;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
 		$sql = $wpdb->prepare('select * from ' . $member_table . 
 			' where first_name like %s and last_name like %s' . 
 			' order by expir_date', $firstname, $lastname);
+		if ($date != '') {
+			$sql = $wpdb->prepare('select * from ' . $member_table . 
+				' where first_name like %s and last_name like %s' . 
+				' and expir_date > %s', $firstname, $lastname, $date);
+		}
     	$results = $wpdb->get_results($sql, ARRAY_A);
 		return $results;
 	}

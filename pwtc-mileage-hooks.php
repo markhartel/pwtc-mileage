@@ -35,8 +35,9 @@ function pwtc_mileage_get_member_id() {
         throw new Exception('notloggedin');
     }
     else {
+        $test_date = PwtcMileage::get_date_for_expir_check();
         $result = PwtcMileage_DB::fetch_riders_by_name(trim($current_user->user_lastname), 
-            trim($current_user->user_firstname));
+            trim($current_user->user_firstname), $test_date);
         $count = count($result);
         if ($count == 0) {
             throw new Exception('idnotfound');
@@ -103,7 +104,8 @@ function pwtc_mileage_fetch_ride_leader_ids($post_id) {
         foreach ($leaders as $leader) {
  	        $fname = get_user_meta($leader->ID, 'first_name', true);
  	        $lname = get_user_meta($leader->ID, 'last_name', true);
-            $result = PwtcMileage_DB::fetch_riders_by_name(trim($lname), trim($fname));
+            $test_date = PwtcMileage::get_date_for_expir_check();
+            $result = PwtcMileage_DB::fetch_riders_by_name(trim($lname), trim($fname), $test_date);
             if (count($result) == 1) {
                 $id = $result[0]['member_id'];
                 array_push($leaders_array, $id);
