@@ -176,18 +176,21 @@ class PwtcMileage {
 				PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 
 					$results['insert_fail'] . ' failed updates, ' . 
 					$results['validate_fail'] . ' failed validations, ' . 
-					$results['insert_succeed'] . ' members updated, ' .
+					$results['insert_succeed'] . ' members inserted, ' .
+					$results['update_succeed'] . ' members updated, ' .
 					$results['duplicate_record'] . ' duplicates found');
 			}
 			else if ($results['validate_fail'] > 0) {
 				PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 
 					$results['validate_fail'] . ' failed validations, ' .
-					$results['insert_succeed'] . ' members updated, ' .
+					$results['insert_succeed'] . ' members inserted, ' .
+					$results['update_succeed'] . ' members updated, ' .
 					$results['duplicate_record'] . ' duplicates found');
 			}
 			else {
 				PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
-					$results['insert_succeed'] . ' members updated, ' . 
+					$results['insert_succeed'] . ' members inserted, ' . 
+					$results['update_succeed'] . ' members updated, ' .
 					$results['duplicate_record'] . ' duplicates found');
 			}	
 		}
@@ -223,18 +226,21 @@ class PwtcMileage {
 						PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 
 							$results['insert_fail'] . 'failed updates, ' . 
 							$results['validate_fail'] . ' failed validations, ' . 
-							$results['insert_succeed'] . ' members updated, ' .
+							$results['insert_succeed'] . ' members inserted, ' .
+							$results['update_succeed'] . ' members updated, ' .
 							$results['duplicate_record'] . ' duplicates found');
 					}
 					else if ($results['validate_fail'] > 0) {
 						PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 
 							$results['validate_fail'] . ' failed validations, ' .
-							$results['insert_succeed'] . ' members updated, ' .
+							$results['insert_succeed'] . ' members inserted, ' .
+							$results['update_succeed'] . ' members updated, ' .
 							$results['duplicate_record'] . ' duplicates found');
 					}
 					else {
 						PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
-							$results['insert_succeed'] . ' members updated, ' . 
+							$results['insert_succeed'] . ' members inserted, ' . 
+							$results['update_succeed'] . ' members updated, ' .
 							$results['duplicate_record'] . ' duplicates found');
 					}	
 				}
@@ -332,6 +338,7 @@ class PwtcMileage {
 		$val_fail_count = 0;
 		$ins_fail_count = 0;
 		$ins_succ_count = 0;
+		$upd_succ_count = 0;
 		$dup_rec_count = 0;
 		$hashmap = self::create_member_hashmap();
     	$num_rec = $dbf->dbf_num_rec;
@@ -354,14 +361,19 @@ class PwtcMileage {
 					case "ins_fail":
 						$ins_fail_count++;
 						break;
-					default:
+					case "insert":
 						$ins_succ_count++;
+						break;
+					case "update":
+						$upd_succ_count++;
+						break;
 				}
 			}
 		}		
 		return array('validate_fail' => $val_fail_count,
 			'insert_fail' => $ins_fail_count,
 			'insert_succeed' => $ins_succ_count,
+			'update_succeed' => $upd_succ_count,
 			'duplicate_record' => $dup_rec_count);
 	}
 
@@ -387,25 +399,26 @@ class PwtcMileage {
 		else if (!self::validate_date_str($expirdate)) {
 			return 'val_fail';
 		}
-		else {
-			if (array_key_exists($memberid, $hashmap)) {
-				$rider = $hashmap[$memberid];
-				if ($firstname == $rider[1] and $lastname == $rider[2] and $expirdate == $rider[3]) {
-					return 'dup_rec';
-				}
+		$result = 'insert';
+		if (array_key_exists($memberid, $hashmap)) {
+			$rider = $hashmap[$memberid];
+			if ($firstname == $rider[1] and $lastname == $rider[2] and $expirdate == $rider[3]) {
+				return 'dup_rec';
 			}
-			$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expirdate);	
-			if (false === $status or 0 === $status) {
-				return 'ins_fail';
-			}
+			$result = 'update';
 		}
-		return '';
+		$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expirdate);	
+		if (false === $status or 0 === $status) {
+			return 'ins_fail';
+		}
+		return $result;
 	}
 
 	public static function update_membership_list($members) {
 		$val_fail_count = 0;
 		$ins_fail_count = 0;
 		$ins_succ_count = 0;
+		$upd_succ_count = 0;
 		$dup_rec_count = 0;
 		$hashmap = self::create_member_hashmap();
 		foreach ( $members as $item ) {
@@ -424,13 +437,18 @@ class PwtcMileage {
 				case "ins_fail":
 					$ins_fail_count++;
 					break;
-				default:
+				case "insert":
 					$ins_succ_count++;
+					break;
+				case "update":
+					$upd_succ_count++;
+					break;
 			}
 		}
 		return array('validate_fail' => $val_fail_count,
 			'insert_fail' => $ins_fail_count,
 			'insert_succeed' => $ins_succ_count,
+			'update_succeed' => $upd_succ_count,
 			'duplicate_record' => $dup_rec_count);
 	}
 
