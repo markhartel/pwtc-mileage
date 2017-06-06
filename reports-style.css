@@ -53,13 +53,14 @@
   padding: 0em .5em;
 }
 .pwtc-mileage-rwd-table th, .pwtc-mileage-rwd-table tr, .pwtc-mileage-rwd-table td { 
-  background: #34495E;
+  background: #34495E !important;
 }
 .pwtc-mileage-rwd-table tr.highlight, .pwtc-mileage-rwd-table tr.highlight td { 
-  background: grey; 
+  background: grey !important; 
 }
 .pwtc-mileage-rwd-table a {
   cursor: pointer;
+  text-decoration: underline;
   color: #fff;
 }
 

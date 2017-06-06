@@ -114,7 +114,6 @@ class PwtcMileage {
 	/*************************************************************/
 
 	public static function load_report_scripts() {
-		// TODO: shortcode report table colors did not render correctly on pwtc.com site, troubleshoot.
         wp_enqueue_style('pwtc_mileage_report_css', 
 			PWTC_MILEAGE__PLUGIN_URL . 'reports-style.css' );
 	}

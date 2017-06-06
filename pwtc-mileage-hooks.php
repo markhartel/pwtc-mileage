@@ -95,15 +95,16 @@ function pwtc_mileage_fetch_post_guid($post_id) {
 Returns an array that contains the rider ids of the ride leaders of the posted ride. 
 */
 function pwtc_mileage_fetch_ride_leader_ids($post_id) {
-    // TODO: This did not work on pwtc.com site, troubleshoot.
     /*
-    $leaders = get_field('leaders', $post_id);
+    $leaders = get_field('ride_leaders', $post_id);
     $leaders_array = array();
     if ($leaders) {
         pwtc_mileage_write_log($leaders);
         foreach ($leaders as $leader) {
- 	        $fname = get_user_meta($leader->ID, 'first_name', true);
- 	        $lname = get_user_meta($leader->ID, 'last_name', true);
+            $fname = $leader['user_firstname'];
+            $lname = $leader['user_lastname'];
+ 	        //$fname = get_user_meta($leader->ID, 'first_name', true);
+ 	        //$lname = get_user_meta($leader->ID, 'last_name', true);
             $test_date = PwtcMileage::get_date_for_expir_check();
             $result = PwtcMileage_DB::fetch_riders_by_name(trim($lname), trim($fname), $test_date);
             if (count($result) == 1) {
@@ -131,15 +132,16 @@ function pwtc_mileage_fetch_ride_leader_ids($post_id) {
 Returns an array that contains the names of the ride leaders of the posted ride. 
 */
 function pwtc_mileage_fetch_ride_leader_names($post_id) {
-    // TODO: This did not work on pwtc.com site, troubleshoot.
     /*
-    $leaders = get_field('leaders', $post_id);
+    $leaders = get_field('ride_leaders', $post_id);
     $leaders_array = array();
     if ($leaders) {
         pwtc_mileage_write_log($leaders);
         foreach ($leaders as $leader) {
- 	        $fname = get_user_meta($leader->ID, 'first_name', true);
- 	        $lname = get_user_meta($leader->ID, 'last_name', true);
+            $fname = $leader['user_firstname'];
+            $lname = $leader['user_lastname'];
+ 	        //$fname = get_user_meta($leader->ID, 'first_name', true);
+ 	        //$lname = get_user_meta($leader->ID, 'last_name', true);
             $name = $fname . ' ' . $lname;
             array_push($leaders_array, $name);
         }
