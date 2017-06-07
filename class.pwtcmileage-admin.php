@@ -1118,14 +1118,12 @@ class PwtcMileage_Admin {
     	$position = $plugin_options['plugin_menu_location'];
 		add_menu_page($page_title, $menu_title, $capability, $parent_menu_slug, $function, $icon_url, $position);
 
-    	$page_title = $plugin_options['plugin_menu_label'] . ' - View Reports';
-    	$menu_title = 'View Reports';
-    	$menu_slug = 'pwtc_mileage_generate_reports';
-    	$capability = PwtcMileage::VIEW_MILEAGE_CAP;
-    	$function = array( 'PwtcMileage_Admin', 'page_generate_reports');
-		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
-		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_pdf'));
-		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_csv'));
+    	$page_title = $plugin_options['plugin_menu_label'] . ' - Manage Ride Sheets';
+    	$menu_title = 'Manage Ride Sheets';
+    	$menu_slug = 'pwtc_mileage_manage_ride_sheets';
+    	$capability = PwtcMileage::EDIT_MILEAGE_CAP;
+    	$function = array( 'PwtcMileage_Admin', 'page_manage_ride_sheets');
+		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
     	$page_title = $plugin_options['plugin_menu_label'] . ' - Manage Riders';
     	$menu_title = 'Manage Riders';
@@ -1134,12 +1132,14 @@ class PwtcMileage_Admin {
     	$function = array( 'PwtcMileage_Admin', 'page_manage_riders');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
-    	$page_title = $plugin_options['plugin_menu_label'] . ' - Manage Ride Sheets';
-    	$menu_title = 'Manage Ride Sheets';
-    	$menu_slug = 'pwtc_mileage_manage_ride_sheets';
-    	$capability = PwtcMileage::EDIT_MILEAGE_CAP;
-    	$function = array( 'PwtcMileage_Admin', 'page_manage_ride_sheets');
-		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+    	$page_title = $plugin_options['plugin_menu_label'] . ' - View Reports';
+    	$menu_title = 'View Reports';
+    	$menu_slug = 'pwtc_mileage_generate_reports';
+    	$capability = PwtcMileage::VIEW_MILEAGE_CAP;
+    	$function = array( 'PwtcMileage_Admin', 'page_generate_reports');
+		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_pdf'));
+		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_csv'));
 
     	$page_title = $plugin_options['plugin_menu_label'] . ' - Database Operations';
     	$menu_title = 'Database Ops';

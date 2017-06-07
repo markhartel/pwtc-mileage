@@ -6,6 +6,7 @@ $message = '';
 $notice_type = '';
 $show_buttons = true;
 $clear_button = false;
+$show_purge = false;
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
@@ -207,7 +208,7 @@ if ($show_buttons) {
 			</form>
 		    </span>
         </div><br>
- <?php if (false) { ?>
+ <?php if ($show_purge) { ?>
        <div><strong>Purge all non-riders from rider list.</strong></div>
         <div><form class="purge-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_purge_nonriders'); ?>

@@ -193,13 +193,13 @@ class PwtcMileage {
 	}
 
 	public static function purge_nonriders_callback() {
-		PwtcMileage_DB::job_set_status(RIDER_PURGE_ACT, PwtcMileage_DB::STARTED_STATUS);
+		PwtcMileage_DB::job_set_status(self::RIDER_PURGE_ACT, PwtcMileage_DB::STARTED_STATUS);
 		$status = PwtcMileage_DB::delete_all_nonriders();
 		if (false === $status or 0 === $status) {
-			PwtcMileage_DB::job_set_status(RIDER_PURGE_ACT, PwtcMileage_DB::FAILED_STATUS, 'database delete failed');
+			PwtcMileage_DB::job_set_status(self::RIDER_PURGE_ACT, PwtcMileage_DB::FAILED_STATUS, 'database delete failed');
 		}
 		else {
-			PwtcMileage_DB::job_set_status(RIDER_PURGE_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
+			PwtcMileage_DB::job_set_status(self::RIDER_PURGE_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
 				$status . ' riders deleted');
 		}
 	}
