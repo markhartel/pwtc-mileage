@@ -20,9 +20,7 @@ class PwtcMileage {
 		}
 	}
 
-	/**
-	 * Initializes WordPress hooks
-	 */
+	// Initializes plugin WordPress hooks.
 	private static function init_hooks() {
 		self::$initiated = true;
 
@@ -107,7 +105,6 @@ class PwtcMileage {
 			die;
 		}
 	}
-
 
 	/*************************************************************/
 	/* Script and style enqueue callback functions
@@ -314,6 +311,10 @@ class PwtcMileage {
 		}	
 	}
 
+	/*************************************************************/
+	/* Background action task utility functions.
+	/*************************************************************/
+
 	public static function validate_updmembs_file($dbf) {
 		if ($dbf->dbf_num_field < 4) {
 			return false;
@@ -452,9 +453,10 @@ class PwtcMileage {
 	}
 
 	/*************************************************************/
-	/* Shortcode utility functions
+	/* Shortcode report table utility functions.
 	/*************************************************************/
 
+	// Returns a rider's display name (first and last) given the rider ID.
 	public static function get_rider_name($id) {
 		$rider = PwtcMileage_DB::fetch_rider($id);
 		$name = '';
@@ -468,6 +470,7 @@ class PwtcMileage {
 		return $name;
 	}
 
+	// Generates the HTML for a shortcode report table.
 	public static function shortcode_build_table($meta, $data, $atts, $content = null) {
 		$plugin_options = self::get_plugin_options();
 		$hide_id = true;
@@ -553,6 +556,7 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the default attribute object for a shortcode report table.
 	public static function normalize_atts($atts) {
     	$a = shortcode_atts(array(
         		'show_id' => 'off',
@@ -565,6 +569,7 @@ class PwtcMileage {
 		return $a;
 	}
 
+	// Generates the SQL 'order by' clause from a shortcode mileage report table attribute object.
 	public static function build_mileage_sort($atts) {
 		$order = 'asc';
 		if ($atts['sort_order'] == 'desc') {
@@ -577,6 +582,7 @@ class PwtcMileage {
 		return $sort;
 	}
 
+	// Generates the SQL 'order by' clause from a shortcode leader report table attribute object.
 	public static function build_rides_led_sort($atts) {
 		$order = 'asc';
 		if ($atts['sort_order'] == 'desc') {
@@ -589,6 +595,7 @@ class PwtcMileage {
 		return $sort;
 	}
 
+	// Gets the minimum value from a shortcode report table attribute object.
 	public static function get_minimum_val($atts) {
 		$min = 0;
 		if ($atts['minimum'] > 0) {
@@ -600,7 +607,8 @@ class PwtcMileage {
 	/*************************************************************/
 	/* Shortcode report generation functions
 	/*************************************************************/
-
+ 
+	// Generates the [pwtc_rider_report] shortcode.
 	public static function shortcode_rider_report($atts) {
     	$a = shortcode_atts(array('type' => 'both'), $atts);
 		$out = '<div>';
@@ -712,6 +720,7 @@ class PwtcMileage {
 	}
 */
 
+	// Generates the [pwtc_achievement_last_year] shortcode.
 	public static function shortcode_ly_lt_achvmnt($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$sort = self::build_mileage_sort($a);
@@ -721,6 +730,7 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the [pwtc_mileage_year_to_date] shortcode.
 	public static function shortcode_ytd_miles($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$sort = self::build_mileage_sort($a);
@@ -731,6 +741,7 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the [pwtc_mileage_last_year] shortcode.
 	public static function shortcode_ly_miles($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$sort = self::build_mileage_sort($a);
@@ -741,6 +752,7 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the [pwtc_mileage_lifetime] shortcode.
 	public static function shortcode_lt_miles($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$sort = self::build_mileage_sort($a);
@@ -751,6 +763,7 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the [pwtc_rides_led_year_to_date] shortcode.
 	public static function shortcode_ytd_led($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$sort = self::build_rides_led_sort($a);
@@ -761,6 +774,7 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the [pwtc_rides_led_last_year] shortcode.
 	public static function shortcode_ly_led($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$sort = self::build_rides_led_sort($a);
@@ -771,6 +785,7 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the [pwtc_rides_year_to_date] shortcode.
 	public static function shortcode_ytd_rides($atts, $content = null) {
 		$out = '<div>';
 		try {
@@ -800,6 +815,7 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the [pwtc_rides_last_year] shortcode.
 	public static function shortcode_ly_rides($atts, $content = null) {
 		$out = '<div>';
 		try {
@@ -829,6 +845,7 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the [pwtc_led_rides_year_to_date] shortcode.
 	public static function shortcode_ytd_led_rides($atts, $content = null) {
 		$out = '<div>';
 		try {
@@ -858,6 +875,7 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the [pwtc_led_rides_last_year] shortcode.
 	public static function shortcode_ly_led_rides($atts, $content = null) {
 		$out = '<div>';
 		try {
@@ -887,6 +905,7 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the [pwtc_posted_rides_wo_sheets] shortcode.
 	public static function shortcode_rides_wo_sheets($atts, $content = null) {
 		$a = self::normalize_atts($atts);
 		$meta = PwtcMileage_DB::meta_posts_without_rides2();
@@ -895,6 +914,7 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the [pwtc_riderid_download] shortcode.
 	public static function shortcode_riderid_download($atts, $content = null) {
 		$out = '<div>';
 		try {
@@ -934,12 +954,6 @@ class PwtcMileage {
 		}
 		$out .= '</div>';
 		return $out;
-	}
-
-	public static function get_date_for_expir_check() {
-		$plugin_options = self::get_plugin_options();
-		$time = $plugin_options['expire_grace_period'] * 24 * 60 * 60; // convert grace period from days to seconds
-		return date('Y-m-d', current_time('timestamp') - $time);
 	}
 
 	/*************************************************************/
@@ -1008,7 +1022,6 @@ class PwtcMileage {
 		return $ok;
 	}
 
-
 	/*************************************************************/
 	/* Plugin options access functions
 	/*************************************************************/
@@ -1039,6 +1052,16 @@ class PwtcMileage {
 		update_option('pwtc_mileage_options', $data);
 	}
 
+	public static function get_date_for_expir_check() {
+		$plugin_options = self::get_plugin_options();
+		$time = $plugin_options['expire_grace_period'] * 24 * 60 * 60; // convert grace period from days to seconds
+		return date('Y-m-d', current_time('timestamp') - $time);
+	}
+
+	/*************************************************************/
+	/* Plugin capabilities management functions for admin role.
+	/*************************************************************/
+
 	public static function add_caps_admin_role() {
 		$admin = get_role('administrator');
 		$admin->add_cap(self::VIEW_MILEAGE_CAP);
@@ -1058,7 +1081,7 @@ class PwtcMileage {
 	}
 
 	/*************************************************************/
-	/* Plugin installation and removal functions
+	/* Plugin installation and removal functions.
 	/*************************************************************/
 
 	public static function plugin_activation() {
