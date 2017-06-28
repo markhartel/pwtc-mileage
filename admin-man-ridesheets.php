@@ -40,7 +40,7 @@ jQuery(document).ready(function($) {
 	function populate_posts_table(posts) {
 		$('#ridesheet-ride-page .posts-div').empty();
 		if (posts.length > 0) {
-			$('#ridesheet-ride-page .posts-div').append('<strong>Posted rides with missing ridesheets.</strong>');
+			$('#ridesheet-ride-page .posts-div').append('<strong>Posted rides that are missing ridesheets.</strong>');
 			$('#ridesheet-ride-page .posts-div').append('<table class="rwd-table"></table>');
 			if (show_ride_id) {
 				$('#ridesheet-ride-page .posts-div table').append(
@@ -620,6 +620,7 @@ if ($running_jobs > 0) {
 		<p><button class="post-btn button button-primary button-large">Show Missing</button>
 		<div class="posts-div initially-hidden"></div></p>
 
+        <div class='search-sec'>
 		<p><strong>Enter search parameters to lookup ridesheets.</strong>
 		<form class="ride-search-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 			<span>Title</span>
@@ -633,6 +634,7 @@ if ($running_jobs > 0) {
 			<input class="button button-primary" type="submit" value="Search"/>
 			<input class="reset-btn button button-primary" type="button" value="Reset"/>
 		</form></p>	
+		</div>
 
 		<p><div><button class="add-btn button button-primary button-large">New</button>
 		<span class="add-blk popup-frm initially-hidden">
@@ -651,7 +653,9 @@ if ($running_jobs > 0) {
 	</div>
 	<div id='ridesheet-sheet-page' class="initially-hidden">
 		<p><button class='back-btn button button-primary button-large'>Back</button></p>
-		<h2><span class="sheet-title"></span> - <span class="sheet-date"></span> <span class="sheet-guid"></span></h2>
+		<div class='report-sec'>
+		<h3>Ridesheet</h3>
+		<h3><span class="sheet-title"></span> - <span class="sheet-date"></span> <span class="sheet-guid"></span></h3>
 		<p><div><button class="rename-btn button button-primary">Rename</button>
 		<span class="rename-blk popup-frm initially-hidden">
 			<form class="rename-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
@@ -662,7 +666,8 @@ if ($running_jobs > 0) {
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
 		</span></div></p>
-		<div class="leader-section">
+		</div>
+		<div class="leader-section report-sec">
 			<h3>Ride Leaders</h3>
 			<div><button class="lookup-btn button button-primary">Lookup Leader</button>
 				<span class="add-blk popup-frm initially-hidden">
@@ -679,7 +684,7 @@ if ($running_jobs > 0) {
 			</div>
 			<p><div class="leader-div"></div></p>
 		</div>
-		<div class="mileage-section">
+		<div class="mileage-section report-sec">
 			<h3>Rider Mileage</h3>
 			<div><button class="lookup-btn button button-primary">Lookup Rider</button>
 				<span class="add-blk popup-frm initially-hidden">

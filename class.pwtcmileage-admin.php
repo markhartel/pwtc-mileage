@@ -1183,15 +1183,6 @@ class PwtcMileage_Admin {
 		include('admin-man-riders.php');
 	}
 
-	public static function write_export_csv_file($fp, $data, $header = null) {
-		if ($header != null) {
-			fputcsv($fp, $header);
-		}
-		foreach ($data as $item) {
-    		fputcsv($fp, $item);
-		}		
-	}
-
 	public static function write_export_pdf_file($pdf, $data, $header, $title) {
 		$rows_per_page = 40;
 		$table_width = 190;
@@ -1268,7 +1259,7 @@ class PwtcMileage_Admin {
 					header("Content-type: text/csv");
 					header("Content-Disposition: attachment; filename={$today}_{$report_id}.csv");
 					$fh = fopen('php://output', 'w');
-					self::write_export_csv_file($fh, $response['data'], $response['header']);
+					PwtcMileage::write_export_csv_file($fh, $response['data'], $response['header']);
 					fclose($fh);
 				}
 				die;
@@ -1314,7 +1305,7 @@ class PwtcMileage_Admin {
 				header("Content-type: text/csv");
 				header("Content-Disposition: attachment; filename={$today}_members.csv");
 				$fh = fopen('php://output', 'w');
-				self::write_export_csv_file($fh, PwtcMileage_DB::fetch_members_for_export());
+				PwtcMileage::write_export_csv_file($fh, PwtcMileage_DB::fetch_members_for_export());
 				fclose($fh);
 				die;
 			}
@@ -1328,7 +1319,7 @@ class PwtcMileage_Admin {
 				header("Content-type: text/csv");
 				header("Content-Disposition: attachment; filename={$today}_rides.csv");
 				$fh = fopen('php://output', 'w');
-				self::write_export_csv_file($fh, PwtcMileage_DB::fetch_rides_for_export());
+				PwtcMileage::write_export_csv_file($fh, PwtcMileage_DB::fetch_rides_for_export());
 				fclose($fh);
 				die;
 			}
@@ -1342,7 +1333,7 @@ class PwtcMileage_Admin {
 				header("Content-type: text/csv");
 				header("Content-Disposition: attachment; filename={$today}_mileage.csv");
 				$fh = fopen('php://output', 'w');
-				self::write_export_csv_file($fh, PwtcMileage_DB::fetch_mileage_for_export());
+				PwtcMileage::write_export_csv_file($fh, PwtcMileage_DB::fetch_mileage_for_export());
 				fclose($fh);
 				die;
 			}
@@ -1356,7 +1347,7 @@ class PwtcMileage_Admin {
 				header("Content-type: text/csv");
 				header("Content-Disposition: attachment; filename={$today}_leaders.csv");
 				$fh = fopen('php://output', 'w');
-				self::write_export_csv_file($fh, PwtcMileage_DB::fetch_leaders_for_export());
+				PwtcMileage::write_export_csv_file($fh, PwtcMileage_DB::fetch_leaders_for_export());
 				fclose($fh);
 				die;
 			}
@@ -1550,9 +1541,9 @@ class PwtcMileage_Admin {
 			else if ($_FILES['updmembs_file']['error'] != UPLOAD_ERR_OK) {
 				$errmsg = 'Updmembs file upload error code ' . $_FILES['updmembs_file']['error'];
 			}
-			else if (preg_match('/UPDMEMBS\.DBF/', $_FILES['updmembs_file']['name']) !== 1) {
-				$errmsg = 'Updmembs file name pattern mismatch';
-			}
+//			else if (preg_match('/UPDMEMBS\.DBF/', $_FILES['updmembs_file']['name']) !== 1) {
+//				$errmsg = 'Updmembs file name pattern mismatch';
+//			}
 		}
 		return $errmsg;
 	}

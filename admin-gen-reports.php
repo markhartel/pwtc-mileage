@@ -201,6 +201,7 @@ if ($running_jobs > 0) {
                 <option value="export_csv">CSV file</option>
             </select>
         </p>
+        <div class='report-sec'>
         <h3>Ride Mileage Reports</h3>
         <p>Sort by: 
             <select class='mileage-sort-slt'>
@@ -213,6 +214,8 @@ if ($running_jobs > 0) {
             <div><a href='#' report-id='ly_miles'>Last year's mileage</a></div>
             <div><a href='#' report-id='lt_miles'>Lifetime mileage</a></div>
         </div>
+        </div>
+        <div class='report-sec'>
         <h3>Ride Leader Reports</h3>
         <p>Sort by: 
             <select class='leader-sort-slt'>
@@ -224,6 +227,8 @@ if ($running_jobs > 0) {
             <div><a href='#' report-id='ytd_led'>Year-to-date ride leaders</a></div>
             <div><a href='#' report-id='ly_led'>Last year's ride leaders</a></div>
         </div>
+        </div>
+        <div class='report-sec'>
         <h3>Individual Rider Reports</h3>
         <p>
             <button class="lookup-btn button button-primary">Lookup Rider</button>&nbsp;
@@ -235,6 +240,8 @@ if ($running_jobs > 0) {
             <div><a href='#' report-id='ytd_rides_led'>Year-to-date rides led</a></div>
             <div><a href='#' report-id='ly_rides_led'>Last year's rides led</a></div>
         </div>
+        </div>
+        <div class='report-sec'>
         <h3><?php echo(intval(date('Y'))-1); ?> Award Reports</h3>
         <div class='awards'>
             <div><a href='#' report-id='award_achvmnt'>Accumulative mileage achievement</a></div>
@@ -242,11 +249,12 @@ if ($running_jobs > 0) {
             <div><a href='#' report-id='award_members'>Member annual and accumulative mileage</a></div>
             <div><a href='#' report-id='award_leaders'>Ride leaders</a></div>
         </div>
+        </div>
+        <div class='report-sec'>
         <h3>Member Reports</h3>
         <div class='members'>
-            <div><a href='#' report-id='exp_members'>Expired members</a></div>
             <div><a href='#' report-id='dup_members'>Duplicate members</a></div>
-            <div><a href='#' report-id='members_no_miles'>Members with no mileage</a></div>
+        </div>
         </div>
         <div class='download'></div>
     </div>

@@ -77,7 +77,7 @@ class PwtcMileage {
 		add_action( 'pwtc_mileage_cvs_restore', 
 			array( 'PwtcMileage', 'cvs_restore_callback') );  
 		add_action( 'pwtc_mileage_updmembs_load', 
-			array( 'PwtcMileage', 'updmembs_load_callback') );  
+			array( 'PwtcMileage', 'updmembs_load_callback2') );  
 	}
 
 	public static function download_riderid() {
@@ -252,6 +252,55 @@ class PwtcMileage {
 		}
 	}
 
+	public static function updmembs_load_callback2() {
+		PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::STARTED_STATUS);
+		$upload_dir = wp_upload_dir();
+		$plugin_upload_dir = $upload_dir['basedir'] . '/pwtc_mileage';
+		$members_file = $plugin_upload_dir . '/updmembs.dbf';
+		$members_csv = $plugin_upload_dir . '/updmembs.csv';
+		$plugin_upload_url = $upload_dir['baseurl'] . '/pwtc_mileage';
+		$members_url = $plugin_upload_url . '/updmembs.csv';
+		if (!file_exists($members_file)) {
+			PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 'updmembs.dbf file does not exist');
+		}
+		else {
+			include('dbf_class.php');
+			try {			
+				$dbf = new dbf_class($members_file);
+				if (self::validate_updmembs_file($dbf)) {
+					$results = self::process_updmembs_file2($dbf);
+					$fh = fopen($members_csv, 'w');
+					self::write_export_csv_file($fh, $results['data']);
+					fclose($fh);					
+					$status = PwtcMileage_DB::load_members_for_update($members_url);
+					if ($results['id_val_fail'] > 0 or $results['lname_val_fail'] > 0 or
+						$results['fname_val_fail'] > 0 or $results['expir_val_fail'] > 0) {
+						PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, 
+							PwtcMileage_DB::SUCCESS_STATUS, 
+							'updmembs file loaded, ' . $results['id_val_fail'] . ' invalid IDs, ' . 
+							$results['fname_val_fail'] . ' invalid first names, ' .
+							$results['lname_val_fail'] . ' invalid last names, ' .
+							$results['expir_val_fail'] . ' invalid expiration dates');	
+					}
+					else {
+						PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, 
+							PwtcMileage_DB::SUCCESS_STATUS, 
+							'updmembs file loaded, no validation errors');	
+					}
+					unlink($members_csv);
+				}
+				else {
+					PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 'invalid dbf file contents');
+				}
+			} 
+			catch (Exception $e) {
+				pwtc_mileage_write_log('Exception thrown from dbf_class: ' . $e->getMessage());
+				PwtcMileage_DB::job_set_status(self::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, 'invalid dbf file');
+			}
+			unlink($members_file);
+		}
+	}
+
 	public static function cvs_restore_callback() {
 		PwtcMileage_DB::job_set_status(self::DB_RESTORE_ACT, PwtcMileage_DB::STARTED_STATUS);
 		$upload_dir = wp_upload_dir();
@@ -375,6 +424,62 @@ class PwtcMileage {
 			'insert_succeed' => $ins_succ_count,
 			'update_succeed' => $upd_succ_count,
 			'duplicate_record' => $dup_rec_count);
+	}
+
+	public static function process_updmembs_file2($dbf) {
+		$id_val_fail = 0;
+		$fname_val_fail = 0;
+		$lname_val_fail = 0;
+		$expir_val_fail = 0;
+		$data = array();
+    	$num_rec = $dbf->dbf_num_rec;
+		for ($i=0; $i<$num_rec; $i++) {
+			if ($row = $dbf->getRow($i)) {
+				$memberid = trim($row[0]);
+				$firstname = trim($row[1]);
+				$lastname = trim($row[2]);
+				$date = trim($row[3]);
+				$expirdate = substr($date, 0, 4) . '-' . substr($date, 4, 2) . '-' . substr($date, 6, 2);
+				$val_fail = false;
+				if (!self::validate_member_id_str($memberid)) {
+					$id_val_fail++;
+					$val_fail = true;
+				}
+				else if (!self::validate_member_name_str($lastname)) {
+					$lname_val_fail++;
+					$val_fail = true;
+				}
+				else if (!self::validate_member_name_str($firstname)) {
+					$fname_val_fail++;
+					$val_fail = true;
+				}
+				else if (!self::validate_date_str($expirdate)) {
+					$expir_val_fail++;
+					$val_fail = true;
+				}
+				else {
+					array_push($data, array($memberid, $firstname, $lastname, $expirdate));
+				}
+				if ($val_fail) {
+					pwtc_mileage_write_log('Updmembs file record validation failure:');
+					pwtc_mileage_write_log($row);
+				}
+			}	
+		}		
+		return array('id_val_fail' => $id_val_fail,
+			'lname_val_fail' => $lname_val_fail,
+			'fname_val_fail' => $fname_val_fail,
+			'expir_val_fail' => $expir_val_fail,
+			'data' => $data);
+	}
+
+	public static function write_export_csv_file($fp, $data, $header = null) {
+		if ($header != null) {
+			fputcsv($fp, $header);
+		}
+		foreach ($data as $item) {
+    		fputcsv($fp, $item);
+		}		
 	}
 
 	public static function create_member_hashmap() {

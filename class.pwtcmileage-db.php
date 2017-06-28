@@ -736,6 +736,16 @@ class PwtcMileage_DB {
 		return $status;
 	}
 
+	public static function load_members_for_update($filename) {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		$status = $wpdb->query("LOAD DATA LOCAL INFILE '" . $filename . "'" . 
+			" REPLACE INTO TABLE " . $member_table . " FIELDS TERMINATED BY ','" . 
+			" OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n'" . 
+			" (member_id, first_name, last_name, expir_date)");
+		return $status;
+	}
+
 	public static function fetch_rides_for_export() {
     	global $wpdb;
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
@@ -1014,9 +1024,10 @@ class PwtcMileage_DB {
 			' (member_id VARCHAR(5) NOT NULL,' . 
 			' ride_id BIGINT UNSIGNED NOT NULL,' . 
 			' mileage INT UNSIGNED NOT NULL,' . 
-			' constraint pk_' . $mileage_table . ' PRIMARY KEY (member_id, ride_id),' . 
-			' constraint fk_' . $mileage_table . '_member_id FOREIGN KEY (member_id) REFERENCES ' . $member_table . ' (member_id),' . 
-			' constraint fk_' . $mileage_table . '_ride_id FOREIGN KEY (ride_id) REFERENCES ' . $ride_table . ' (ID))');
+			' constraint pk_' . $mileage_table . ' PRIMARY KEY (member_id, ride_id)' . 
+			//', constraint fk_' . $mileage_table . '_member_id FOREIGN KEY (member_id) REFERENCES ' . $member_table . ' (member_id)' . 
+			//', constraint fk_' . $mileage_table . '_ride_id FOREIGN KEY (ride_id) REFERENCES ' . $ride_table . ' (ID)' . 
+			')');
 		if (false === $result) {
 			pwtc_mileage_write_log( 'Could not create table ' . $mileage_table . ': ' . $wpdb->last_error);
 			$err_cnt++;
@@ -1026,10 +1037,10 @@ class PwtcMileage_DB {
 			' (member_id VARCHAR(5) NOT NULL,' . 
 			' ride_id BIGINT UNSIGNED NOT NULL,' . 
 			' rides_led INT UNSIGNED NOT NULL,' . 
-			' constraint pk_' . $leader_table . ' PRIMARY KEY (member_id, ride_id),' . 
-			' constraint fk_' . $leader_table . '_member_id FOREIGN KEY (member_id) REFERENCES ' . $member_table . ' (member_id),' . 
-			' constraint fk_' . $leader_table . '_ride_id FOREIGN KEY (ride_id) REFERENCES ' . 
-			$ride_table . ' (ID))');
+			' constraint pk_' . $leader_table . ' PRIMARY KEY (member_id, ride_id)' . 
+			//', constraint fk_' . $leader_table . '_member_id FOREIGN KEY (member_id) REFERENCES ' . $member_table . ' (member_id)' . 
+			//', constraint fk_' . $leader_table . '_ride_id FOREIGN KEY (ride_id) REFERENCES ' . $ride_table . ' (ID)' . 
+			')');
 		if (false === $result) {
 			pwtc_mileage_write_log( 'Could not create table ' . $leader_table . ': ' . $wpdb->last_error);
 			$err_cnt++;

@@ -214,6 +214,7 @@ if ($running_jobs > 0) {
 } else {
 ?>
     <div id='rider-inspect-section'>
+        <div class='search-sec'>
         <p><strong>Enter search parameters to lookup riders.</strong>
         	<form class="search-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
                 <span>ID</span>
@@ -230,6 +231,7 @@ if ($running_jobs > 0) {
 				<input class="reset-btn button button-primary" type="button" value="Reset"/>
 			</form>
         </p>
+        </div>
 
         <p><div><button class="add-btn button button-primary button-large">New</button>
 		<span class="add-blk popup-frm initially-hidden">
