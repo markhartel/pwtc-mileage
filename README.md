@@ -2,7 +2,13 @@
 This is a Wordpress plugin used to record, manage and report the mileage of riders in the [Portland Wheelmen Touring Club](http://pwtc.com).
 
 ## Installation
-Download this GitHub distribution as a zip file, login to the pwtc.com Wordpress website as admin and upload this zip file as a new plugin. This plugin will be named "PWTC Mileage",activate it from the Plugins management page. After activation, this plugin will createfive new tables and twelve new views in the Wordpress database. A "Rider Mileage" menu groupwill be added to the admin menu bar and shortcodes created to allow you to add mileage-related content to your pages. A new user role named "statistician" will be created to allows a user access to the "Rider Mileage" menu group pages.
+Download this GitHub distribution as a zip file, login to the pwtc.com Wordpress website as 
+admin and upload this zip file as a new plugin. This plugin will be named **PWTC Mileage**,
+activate it from the Plugins management page. After activation, this plugin will create
+five new tables and twelve new views in the Wordpress database. A **Rider Mileage** menu group
+will be added to the admin menu bar and shortcodes created to allow you to add mileage-related 
+content to your pages. A new user role named **statistician** will be created to allows 
+a user access to the **Rider Mileage** menu group pages.
 ### Plugin Uninstall
 TBD
 
@@ -23,9 +29,11 @@ TBD
 TBD
 
 ### Mileage Report Shortcodes
-`[pwtc_mileage_year_to_date]`
-`[pwtc_mileage_last_year]`
-`[pwtc_mileage_lifetime]`
+`[pwtc_mileage_year_to_date]` *Display year-to-date mileage for riders*
+
+`[pwtc_mileage_last_year]` *Display last year's mileage for riders*
+
+`[pwtc_mileage_lifetime]` *Display lifetime mileage for riders*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
@@ -37,18 +45,34 @@ sort_by|table sort type|"mileage", "name"|"mileage"
 minimum|minimum mileage to display|number|1
 
 ### Ride Leader Report Shortcodes
-`[pwtc_rides_led_year_to_date]`
-`[pwtc_rides_led_last_year]`
-`[pwtc_posted_rides_wo_sheets]`
+`[pwtc_rides_led_year_to_date]` *Display year-to-date number of rides lead by riders*
+
+`[pwtc_rides_led_last_year]` *Display last year's number of rides lead by riders*
+
+Argument|Description|Values|Default
+--------|-----------|------|-------
+caption|show table caption|"on" or "off"|"on"
+show_id|show rider ids|"on", "off"|"off"
+highlight_user|highlight row for logged-in user|"on", "off"|"on"
+sort_order|table sort order|"asc", "desc"|"asc"
+sort_by|table sort type|"rides_led", "name"|"rides_led"
+minimum|minimum number of rides led to display|number|1
+
+`[pwtc_posted_rides_wo_sheets]` *Display posted rides that are missing ridesheets*
 
 ### Individual Rider Report Shortcodes
 `[pwtc_rider_report]`
+
 Argument|Description|Values|Default
 --------|-----------|------|-------
 type|Blah, blah, blah|"both", "mileage", "leader"|"both"
+
 `[pwtc_rides_year_to_date]`
+
 `[pwtc_rides_last_year]`
+
 `[pwtc_led_rides_year_to_date]`
+
 `[pwtc_led_rides_last_year]`
 
 ## Package Files Used By This Plugin
