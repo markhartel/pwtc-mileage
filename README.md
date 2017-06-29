@@ -29,15 +29,15 @@ TBD
 TBD
 
 ### Mileage Report Shortcodes
-`[pwtc_mileage_year_to_date]` *Display year-to-date mileage for riders*
+`[pwtc_mileage_year_to_date]` *displays year-to-date mileage for riders*
 
-`[pwtc_mileage_last_year]` *Display last year's mileage for riders*
+`[pwtc_mileage_last_year]` *displays last year's mileage for riders*
 
-`[pwtc_mileage_lifetime]` *Display lifetime mileage for riders*
+`[pwtc_mileage_lifetime]` *displays lifetime mileage for riders*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
-caption|show table caption|"on" or "off"|"on"
+caption|show table caption|"on", "off"|"on"
 show_id|show rider ids|"on", "off"|"off"
 highlight_user|highlight row for logged-in user|"on", "off"|"on"
 sort_order|table sort order|"asc", "desc"|"asc"
@@ -45,40 +45,48 @@ sort_by|table sort type|"mileage", "name"|"mileage"
 minimum|minimum mileage to display|number|1
 
 ### Ride Leader Report Shortcodes
-`[pwtc_rides_led_year_to_date]` *Display year-to-date number of rides lead by riders*
+`[pwtc_rides_led_year_to_date]` *displays year-to-date number of rides lead by riders*
 
-`[pwtc_rides_led_last_year]` *Display last year's number of rides lead by riders*
+`[pwtc_rides_led_last_year]` *displays last year's number of rides lead by riders*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
-caption|show table caption|"on" or "off"|"on"
+caption|show table caption|"on", "off"|"on"
 show_id|show rider ids|"on", "off"|"off"
 highlight_user|highlight row for logged-in user|"on", "off"|"on"
 sort_order|table sort order|"asc", "desc"|"asc"
 sort_by|table sort type|"rides_led", "name"|"rides_led"
 minimum|minimum number of rides led to display|number|1
 
-`[pwtc_posted_rides_wo_sheets]` *Display posted rides that are missing ridesheets*
-
-### Individual Rider Report Shortcodes
-`[pwtc_rider_report]`
+`[pwtc_posted_rides_wo_sheets]` *displays posted rides that are missing ridesheets*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
-type|Blah, blah, blah|"both", "mileage", "leader"|"both"
+caption|show table caption|"on", "off"|"on"
 
-`[pwtc_rides_year_to_date]`
+### Individual Rider Report Shortcodes
+`[pwtc_rider_report]` *displays mileage and leader info for logged-in user*
 
-`[pwtc_rides_last_year]`
+Argument|Description|Values|Default
+--------|-----------|------|-------
+type|display mileage or leader info|"both", "mileage", "leader"|"both"
 
-`[pwtc_led_rides_year_to_date]`
+`[pwtc_rides_year_to_date]` *displays year-to-date rides ridden by logged-in user*
 
-`[pwtc_led_rides_last_year]`
+`[pwtc_rides_last_year]` *displays last year's rides ridden by logged-in user*
+
+`[pwtc_led_rides_year_to_date]` *displays year-to-date rides led by logged-in user*
+
+`[pwtc_led_rides_last_year]` *displays last year's rides led by logged-in user*
+
+Argument|Description|Values|Default
+--------|-----------|------|-------
+caption|show table caption|"on", "off"|"on"
 
 ## Package Files Used By This Plugin
-- README.md *(this file)*
-- pwtc-mileage.php *(plugin definition file)*
-- pwtc-mileage-hooks.php *(plugin membership hooks file)*
+- `README.md` *this file*
+- `pwtc-mileage.php` *plugin definition file*
+- `pwtc-mileage-hooks.php` *plugin membership hooks file*
 - class.pwtcmileage.php *(PHP class with non-admin server-side logic)*
 - class.pwtcmileage-db.php *(PHP class with db access logic)*
 - class.pwtcmileage-admin.php *(PHP class with admin server-side logic)*
