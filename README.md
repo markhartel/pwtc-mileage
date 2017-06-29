@@ -1,58 +1,57 @@
 # PWTC Mileage 
-A Wordpress plugin to record, manage and report the mileage of riders in the [Portland Wheelmen Touring Club](http://pwtc.com).
+This is a Wordpress plugin used to record, manage and report the mileage of riders in the [Portland Wheelmen Touring Club](http://pwtc.com).
 
 ## Installation
-TBD
-### Database Schema 
-TBD
-### Plugin Setup
-TBD
+Download this GitHub distribution as a zip file, login to the pwtc.com Wordpress website as admin and upload this zip file as a new plugin. This plugin will be named "PWTC Mileage",activate it from the Plugins management page. After activation, this plugin will createfive new tables and twelve new views in the Wordpress database. A "Rider Mileage" menu groupwill be added to the admin menu bar and shortcodes created to allow you to add mileage-related content to your pages. A new user role named "statistician" will be created to allows a user access to the "Rider Mileage" menu group pages.
 ### Plugin Uninstall
 TBD
 
-## Administration Pages
+## Rider Mileage Menu Group Pages
 TBD
-### View Reports
+### Manage Ride Sheets
 TBD
 ### Manage Riders
 TBD
-### Manage Ride Sheets
+### View Reports
 TBD
 ### Datebase Ops
 TBD
 ### Settings
 TBD
 
-## Report Shortcodes
+## Rider Mileage Report Shortcodes
 TBD
 
-Argument|Description|Values|Default
---------|-----------|------|-------
-caption|Blah, blah, blah|"on" or "off"|"on"
-show_id|Blah, blah, blah|"on" or "off"|"off"
-highlight_user|Blah, blah, blah|"on" or "off"|"on"
-sort_order|Blah, blah, blah|"asc" or "desc"|"asc"
-
-### Mileage Reports
-`[pwtc_achievement_last_year]`
+### Mileage Report Shortcodes
 `[pwtc_mileage_year_to_date]`
 `[pwtc_mileage_last_year]`
 `[pwtc_mileage_lifetime]`
 
-### Ride Leader Reports
+Argument|Description|Values|Default
+--------|-----------|------|-------
+caption|show table caption|"on" or "off"|"on"
+show_id|show rider ids|"on", "off"|"off"
+highlight_user|highlight row for logged-in user|"on", "off"|"on"
+sort_order|table sort order|"asc", "desc"|"asc"
+sort_by|table sort type|"mileage", "name"|"mileage"
+minimum|minimum mileage to display|number|1
+
+### Ride Leader Report Shortcodes
 `[pwtc_rides_led_year_to_date]`
 `[pwtc_rides_led_last_year]`
+`[pwtc_posted_rides_wo_sheets]`
 
-### Individual Ride Reports
+### Individual Rider Report Shortcodes
+`[pwtc_rider_report]`
+Argument|Description|Values|Default
+--------|-----------|------|-------
+type|Blah, blah, blah|"both", "mileage", "leader"|"both"
 `[pwtc_rides_year_to_date]`
 `[pwtc_rides_last_year]`
 `[pwtc_led_rides_year_to_date]`
 `[pwtc_led_rides_last_year]`
 
-### Administrative Reports
-`[pwtc_posted_rides_wo_sheets]`
-
-## Package Files
+## Package Files Used By This Plugin
 - README.md *(this file)*
 - pwtc-mileage.php *(plugin definition file)*
 - pwtc-mileage-hooks.php *(plugin membership hooks file)*
