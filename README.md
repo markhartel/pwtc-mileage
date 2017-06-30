@@ -2,7 +2,7 @@
 This is a Wordpress plugin used to record, manage and report the mileage of riders in the [Portland Wheelmen Touring Club](http://pwtc.com).
 
 ## Installation
-Download this GitHub distribution as a zip file, login to the pwtc.com Wordpress website as 
+Download this distribution as a zip file, login to the pwtc.com Wordpress website as 
 admin and upload this zip file as a new plugin. This plugin will be named **PWTC Mileage**,
 activate it from the Plugins management page. After activation, this plugin will create
 five new tables and twelve new views in the Wordpress database. A **Rider Mileage** menu group
@@ -10,30 +10,39 @@ will be added to the admin menu bar and shortcodes created to allow you to add m
 content to your pages. A new user role named **statistician** will be created to allows 
 a user access to the **Rider Mileage** menu group pages.
 ### Plugin Uninstall
-TBD
+Deactivate and then delete the **PWTC Mileage** plugin from the Plugins management page.
+Normally, the **PWTC Mileage** database tables and views will **not** be dropped. To
+force a drop of these tables and views when the plugin is deleted, select the 
+"Drop Tables/Views Upon Plugin Delete" option on the Rider Mileage Settings page.
+**Warning:** all mileage data stored in the tables will be lost if you choose this option.
 
 ## Rider Mileage Menu Group Pages
-TBD
+This menu group is added to the Wordpress admin menu bar. Users with the **administrator**
+and **statistician** roles will have the right to access these menu items.
 ### Manage Ride Sheets
-TBD
+This menu page allows a user to create, edit and delete ridesheets. A ridesheet records 
+the leaders of a ride and the mileage of the riders. The title and date of the ride is
+also recorded.
 ### Manage Riders
-TBD
+This menu page allows a user to create, edit and delete riders.
 ### View Reports
-TBD
+This menu page allows a user to view and download rider mileage reports.
 ### Datebase Ops
-TBD
+This menu page allows a user to perform batch operations on the mileage database.
 ### Settings
-TBD
+This menu page allows a user to adjust **PWTC Mileage** plugin settings. It is only
+available to users with the **administrator** role and is located under the **Settings** 
+admin menu group as the **Rider Mileage** menu item.
 
 ## Rider Mileage Report Shortcodes
 TBD
 
 ### Mileage Report Shortcodes
-`[pwtc_mileage_year_to_date]` *displays year-to-date mileage for riders*
+`[pwtc_mileage_year_to_date]` *displays year-to-date mileage for all riders*
 
-`[pwtc_mileage_last_year]` *displays last year's mileage for riders*
+`[pwtc_mileage_last_year]` *displays last year's mileage for all riders*
 
-`[pwtc_mileage_lifetime]` *displays lifetime mileage for riders*
+`[pwtc_mileage_lifetime]` *displays lifetime mileage for all riders*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
@@ -41,13 +50,15 @@ caption|show table caption|"on", "off"|"on"
 show_id|show rider ids|"on", "off"|"off"
 highlight_user|highlight row for logged-in user|"on", "off"|"on"
 sort_order|table sort order|"asc", "desc"|"asc"
-sort_by|table sort type|"mileage", "name"|"mileage"
+sort_by|table sort by mileage or name|"mileage", "name"|"mileage"
 minimum|minimum mileage to display|number|1
 
-### Ride Leader Report Shortcodes
-`[pwtc_rides_led_year_to_date]` *displays year-to-date number of rides lead by riders*
+Example: `[pwtc_mileage_year_to_date caption="off"]`
 
-`[pwtc_rides_led_last_year]` *displays last year's number of rides lead by riders*
+### Ride Leader Report Shortcodes
+`[pwtc_rides_led_year_to_date]` *displays year-to-date number of rides led by all riders*
+
+`[pwtc_rides_led_last_year]` *displays last year's number of rides led by all riders*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
@@ -55,7 +66,7 @@ caption|show table caption|"on", "off"|"on"
 show_id|show rider ids|"on", "off"|"off"
 highlight_user|highlight row for logged-in user|"on", "off"|"on"
 sort_order|table sort order|"asc", "desc"|"asc"
-sort_by|table sort type|"rides_led", "name"|"rides_led"
+sort_by|table sort by number of rides led or name|"rides_led", "name"|"rides_led"
 minimum|minimum number of rides led to display|number|1
 
 `[pwtc_posted_rides_wo_sheets]` *displays posted rides that are missing ridesheets*
