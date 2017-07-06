@@ -14,11 +14,11 @@ Deactivate and then delete the **PWTC Mileage** plugin from the Plugins manageme
 Normally, the **PWTC Mileage** database tables and views will **not** be dropped. To
 force a drop of these tables and views when the plugin is deleted, select the 
 "Drop Tables/Views Upon Plugin Delete" option on the Rider Mileage Settings page.
-**Warning:** all mileage data stored in the tables will be lost if you choose this option.
+**Warning:** all mileage data stored in these tables will be lost if you choose this option.
 
-## Rider Mileage Menu Group Pages
+## Rider Mileage Admin Pages
 This menu group is added to the Wordpress admin menu bar. Users with the **administrator**
-and **statistician** roles will have the right to access these menu items.
+and **statistician** roles will have the right to access these menu pages.
 ### Manage Ride Sheets
 This menu page allows a user to create, edit and delete ridesheets. A ridesheet records 
 the leaders of a ride and the mileage of the riders. The title and date of the ride is
@@ -30,19 +30,24 @@ This menu page allows a user to view and download rider mileage reports.
 ### Datebase Ops
 This menu page allows a user to perform batch operations on the mileage database.
 ### Settings
-This menu page allows a user to adjust **PWTC Mileage** plugin settings. It is only
+This menu page allows a user to adjust the **PWTC Mileage** plugin settings. It is only
 available to users with the **administrator** role and is located under the **Settings** 
-admin menu group as the **Rider Mileage** menu item.
+admin menu group as a menu item labeled **Rider Mileage**.
 
 ## Rider Mileage Report Shortcodes
-TBD
+These shortcodes allow users to insert rider mileage related content into Wordpress
+pages. For example, if you place the following text string into your page content, it will 
+render as a table that displays all riders and their mileage (ordered by name) that 
+have ridden more than 99 miles this year:
+
+`[pwtc_mileage_year_to_date sort_by="name" minimum="100"]`
 
 ### Mileage Report Shortcodes
-`[pwtc_mileage_year_to_date]` *displays year-to-date mileage for all riders*
+`[pwtc_mileage_year_to_date]` *tabular display of year-to-date mileage for all riders*
 
-`[pwtc_mileage_last_year]` *displays last year's mileage for all riders*
+`[pwtc_mileage_last_year]` *tabular display of last year's mileage for all riders*
 
-`[pwtc_mileage_lifetime]` *displays lifetime mileage for all riders*
+`[pwtc_mileage_lifetime]` *tabular display of lifetime mileage for all riders*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
@@ -53,12 +58,10 @@ sort_order|table sort order|"asc", "desc"|"asc"
 sort_by|table sort by mileage or name|"mileage", "name"|"mileage"
 minimum|minimum mileage to display|number|1
 
-Example: `[pwtc_mileage_year_to_date caption="off"]`
-
 ### Ride Leader Report Shortcodes
-`[pwtc_rides_led_year_to_date]` *displays year-to-date number of rides led by all riders*
+`[pwtc_rides_led_year_to_date]` *tabular display of year-to-date number of rides led by all riders*
 
-`[pwtc_rides_led_last_year]` *displays last year's number of rides led by all riders*
+`[pwtc_rides_led_last_year]` *tabular display of last year's number of rides led by all riders*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
@@ -69,30 +72,99 @@ sort_order|table sort order|"asc", "desc"|"asc"
 sort_by|table sort by number of rides led or name|"rides_led", "name"|"rides_led"
 minimum|minimum number of rides led to display|number|1
 
-`[pwtc_posted_rides_wo_sheets]` *displays posted rides that are missing ridesheets*
+`[pwtc_posted_rides_wo_sheets]` *tabular display of posted rides that are missing ridesheets*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
 caption|show table caption|"on", "off"|"on"
 
 ### Individual Rider Report Shortcodes
-`[pwtc_rider_report]` *displays mileage and leader info for logged-in user*
+`[pwtc_rider_report]` *textual display of mileage and leader info for logged-in user*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
 type|display mileage or leader info|"both", "mileage", "leader"|"both"
 
-`[pwtc_rides_year_to_date]` *displays year-to-date rides ridden by logged-in user*
+`[pwtc_rides_year_to_date]` *tabular display of year-to-date rides ridden by logged-in user*
 
-`[pwtc_rides_last_year]` *displays last year's rides ridden by logged-in user*
+`[pwtc_rides_last_year]` *tabular display of last year's rides ridden by logged-in user*
 
-`[pwtc_led_rides_year_to_date]` *displays year-to-date rides led by logged-in user*
+`[pwtc_led_rides_year_to_date]` *tabular display of year-to-date rides led by logged-in user*
 
-`[pwtc_led_rides_last_year]` *displays last year's rides led by logged-in user*
+`[pwtc_led_rides_last_year]` *tabular display of last year's rides led by logged-in user*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
 caption|show table caption|"on", "off"|"on"
+
+## Rider Mileage Database Schema
+The following tables and views are created by this plugin to...
+
+### Table `pwtc_membership`
+TBD
+
+Table Column|Description|Data Type|Comment
+------------|-----------|---------|-------
+member_id|rider membership ID|varchar(5)|key
+last_name|rider last name|text| 
+first_name|rider first name|text| 
+expir_date|rider membership expiration date|date| 
+
+### Table `pwtc_club_rides`
+TBD
+
+Table Column|Description|Data Type|Comment
+------------|-----------|---------|-------
+ID|club ride ID|bigint(20)|key, auto increment, unsigned
+title|club ride title|text| 
+date|club ride event date|date| 
+post_id|ID of posted ride|bigint(20)|unsigned, default(0)
+
+### Table `pwtc_ride_mileage`
+TBD
+
+Table Column|Description|Data Type|Comment
+------------|-----------|---------|-------
+member_id|rider membership ID|varchar(5)|key
+ride_id|club ride ID|bigint(20)|key, unsigned
+mileage|rider's mileage for this ride|int(10)|unsigned
+
+### Table `pwtc_ride_leaders`
+TBD
+
+Table Column|Description|Data Type|Comment
+------------|-----------|---------|-------
+member_id|rider membership ID|varchar(5)|key
+ride_id|club ride ID|bigint(20)|key, unsigned
+rides_led|rider led this ride|int(10)|unsigned
+
+### Table `pwtc_running_jobs`
+TBD
+
+Table Column|Description|Data Type|Comment
+------------|-----------|---------|-------
+job_id|ID of job|varchar(20)|key
+status|status of job|text| 
+timestamp|job start time|bigint(20)|unsigned
+error_msg|job termination message|text| 
+
+### Views
+TBD
+
+View|Description
+----|-----------
+`pwtc_lt_miles_vw`|lifetime mileage view
+`pwtc_ytd_miles_vw`|year-to-date mileage view
+`pwtc_ly_miles_vw`|last year's mileage view
+`pwtc_ly_lt_miles_vw`|last year's lifetime mileage view
+`pwtc_ybl_lt_miles_vw`|year before last's lifetime mileage view
+`pwtc_ly_lt_achvmnt_vw`|last year's lifetime achiviement view
+`pwtc_ytd_rides_led_vw`|year-to-date rides led list view
+`pwtc_ly_rides_led_vw`|last year's rides led list view
+`pwtc_ytd_led_vw`|year-to-date number of rides led view
+`pwtc_ly_led_vw`|last year's number of rides led view
+`pwtc_ytd_rides_vw`|year-to-date rides ridden list view
+`pwtc_ly_rides_vw`|last year's rides ridden list view
 
 ## Package Files Used By This Plugin
 - `README.md` *this file*
