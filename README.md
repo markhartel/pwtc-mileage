@@ -14,7 +14,8 @@ Deactivate and then delete the **PWTC Mileage** plugin from the Plugins manageme
 Normally, the **PWTC Mileage** database tables and views will **not** be dropped. To
 force a drop of these tables and views when the plugin is deleted, select the 
 "Drop Tables/Views Upon Plugin Delete" option on the Rider Mileage Settings page.
-**Warning:** all mileage data stored in these tables will be lost if you choose this option.
+**Warning:** all mileage data stored in these tables will be lost if you choose this option
+and delete the plugin.
 
 ## Rider Mileage Admin Pages
 This menu group is added to the Wordpress admin menu bar. Users with the **administrator**
@@ -30,15 +31,15 @@ This menu page allows a user to view and download rider mileage reports.
 ### Datebase Ops
 This menu page allows a user to perform batch operations on the mileage database.
 ### Settings
-This menu page allows a user to adjust the **PWTC Mileage** plugin settings. It is only
+This menu page allows a user to adjust the settings of this plugin. It is only
 available to users with the **administrator** role and is located under the **Settings** 
 admin menu group as a menu item labeled **Rider Mileage**.
 
 ## Rider Mileage Report Shortcodes
 These shortcodes allow users to insert rider mileage related content into Wordpress
 pages. For example, if you place the following text string into your page content, it will 
-render as a table that displays all riders and their mileage (ordered by name) that 
-have ridden more than 99 miles this year:
+render as a table that displays all riders and their mileage (ordered by rider name) that 
+have ridden at least 100 miles this year:
 
 `[pwtc_mileage_year_to_date sort_by="name" minimum="100"]`
 
@@ -51,11 +52,11 @@ have ridden more than 99 miles this year:
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
-caption|show table caption|"on", "off"|"on"
-show_id|show rider ids|"on", "off"|"off"
-highlight_user|highlight row for logged-in user|"on", "off"|"on"
-sort_order|table sort order|"asc", "desc"|"asc"
-sort_by|table sort by mileage or name|"mileage", "name"|"mileage"
+caption|show the table caption|"on", "off"|"on"
+show_id|show the ID of riders|"on", "off"|"off"
+highlight_user|highlight the row of the logged-in user|"on", "off"|"on"
+sort_order|control the table sort ordering|"asc", "desc"|"asc"
+sort_by|sort the table by mileage or name|"mileage", "name"|"mileage"
 minimum|minimum mileage to display|number|1
 
 ### Ride Leader Report Shortcodes
@@ -65,18 +66,18 @@ minimum|minimum mileage to display|number|1
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
-caption|show table caption|"on", "off"|"on"
-show_id|show rider ids|"on", "off"|"off"
-highlight_user|highlight row for logged-in user|"on", "off"|"on"
-sort_order|table sort order|"asc", "desc"|"asc"
-sort_by|table sort by number of rides led or name|"rides_led", "name"|"rides_led"
+caption|show the table caption|"on", "off"|"on"
+show_id|show the ID of riders|"on", "off"|"off"
+highlight_user|highlight the row of the logged-in user|"on", "off"|"on"
+sort_order|control the table sort ordering|"asc", "desc"|"asc"
+sort_by|sort the table by number of rides led or name|"rides_led", "name"|"rides_led"
 minimum|minimum number of rides led to display|number|1
 
 `[pwtc_posted_rides_wo_sheets]` *tabular display of posted rides that are missing ridesheets*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
-caption|show table caption|"on", "off"|"on"
+caption|show the table caption|"on", "off"|"on"
 
 ### Individual Rider Report Shortcodes
 `[pwtc_rider_report]` *textual display of mileage and leader info for logged-in user*
@@ -95,12 +96,12 @@ type|display mileage or leader info|"both", "mileage", "leader"|"both"
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
-caption|show table caption|"on", "off"|"on"
+caption|show the table caption|"on", "off"|"on"
 
 ## Rider Mileage Database Schema
-The following tables and views are created by this plugin to...
+The following tables and views are created by this plugin:
 
-Table `pwtc_membership` ...
+Table `pwtc_membership` is used to contain ...
 
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
@@ -109,7 +110,7 @@ last_name|rider last name|text|
 first_name|rider first name|text| 
 expir_date|rider membership expiration date|date| 
 
-Table `pwtc_club_rides` ...
+Table `pwtc_club_rides` is used to contain ...
 
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
@@ -118,7 +119,7 @@ title|club ride title|text|
 date|club ride event date|date| 
 post_id|ID of posted ride|bigint(20)|unsigned, default(0)
 
-Table `pwtc_ride_mileage` ...
+Table `pwtc_ride_mileage` is used to contain ...
 
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
@@ -126,7 +127,7 @@ member_id|rider membership ID|varchar(5)|key
 ride_id|club ride ID|bigint(20)|key, unsigned
 mileage|rider's mileage for this ride|int(10)|unsigned
 
-Table `pwtc_ride_leaders` ...
+Table `pwtc_ride_leaders` is used to contain ...
 
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
@@ -134,7 +135,7 @@ member_id|rider membership ID|varchar(5)|key
 ride_id|club ride ID|bigint(20)|key, unsigned
 rides_led|rider led this ride|int(10)|unsigned
 
-Table `pwtc_running_jobs` ...
+Table `pwtc_running_jobs` is used to contain ...
 
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
@@ -143,7 +144,7 @@ status|status of job|text|
 timestamp|job start time|bigint(20)|unsigned
 error_msg|job termination message|text| 
 
-Views ...
+The following views are used to generate rider mileage and leader reports:
 - `pwtc_lt_miles_vw` *lifetime mileage view*
 - `pwtc_ytd_miles_vw` *year-to-date mileage view*
 - `pwtc_ly_miles_vw` *last year's mileage view*
