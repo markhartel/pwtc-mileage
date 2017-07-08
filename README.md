@@ -100,9 +100,7 @@ caption|show table caption|"on", "off"|"on"
 ## Rider Mileage Database Schema
 The following tables and views are created by this plugin to...
 
-### Table `pwtc_membership`
-TBD
-
+Table `pwtc_membership` ...
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
 member_id|rider membership ID|varchar(5)|key
@@ -110,9 +108,7 @@ last_name|rider last name|text|
 first_name|rider first name|text| 
 expir_date|rider membership expiration date|date| 
 
-### Table `pwtc_club_rides`
-TBD
-
+Table `pwtc_club_rides` ...
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
 ID|club ride ID|bigint(20)|key, auto increment, unsigned
@@ -120,27 +116,21 @@ title|club ride title|text|
 date|club ride event date|date| 
 post_id|ID of posted ride|bigint(20)|unsigned, default(0)
 
-### Table `pwtc_ride_mileage`
-TBD
-
+Table `pwtc_ride_mileage` ...
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
 member_id|rider membership ID|varchar(5)|key
 ride_id|club ride ID|bigint(20)|key, unsigned
 mileage|rider's mileage for this ride|int(10)|unsigned
 
-### Table `pwtc_ride_leaders`
-TBD
-
+Table `pwtc_ride_leaders` ...
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
 member_id|rider membership ID|varchar(5)|key
 ride_id|club ride ID|bigint(20)|key, unsigned
 rides_led|rider led this ride|int(10)|unsigned
 
-### Table `pwtc_running_jobs`
-TBD
-
+Table `pwtc_running_jobs` ...
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
 job_id|ID of job|varchar(20)|key
@@ -148,23 +138,19 @@ status|status of job|text|
 timestamp|job start time|bigint(20)|unsigned
 error_msg|job termination message|text| 
 
-### Views
-TBD
-
-View|Description
-----|-----------
-`pwtc_lt_miles_vw`|lifetime mileage view
-`pwtc_ytd_miles_vw`|year-to-date mileage view
-`pwtc_ly_miles_vw`|last year's mileage view
-`pwtc_ly_lt_miles_vw`|last year's lifetime mileage view
-`pwtc_ybl_lt_miles_vw`|year before last's lifetime mileage view
-`pwtc_ly_lt_achvmnt_vw`|last year's lifetime achiviement view
-`pwtc_ytd_rides_led_vw`|year-to-date rides led list view
-`pwtc_ly_rides_led_vw`|last year's rides led list view
-`pwtc_ytd_led_vw`|year-to-date number of rides led view
-`pwtc_ly_led_vw`|last year's number of rides led view
-`pwtc_ytd_rides_vw`|year-to-date rides ridden list view
-`pwtc_ly_rides_vw`|last year's rides ridden list view
+Views ...
+- `pwtc_lt_miles_vw` *lifetime mileage view*
+- `pwtc_ytd_miles_vw` *year-to-date mileage view*
+- `pwtc_ly_miles_vw` *last year's mileage view*
+- `pwtc_ly_lt_miles_vw` *last year's lifetime mileage view*
+- `pwtc_ybl_lt_miles_vw` *year before last's lifetime mileage view*
+- `pwtc_ly_lt_achvmnt_vw` *last year's lifetime achiviement view*
+- `pwtc_ytd_rides_led_vw` *year-to-date rides led list view*
+- `pwtc_ly_rides_led_vw` *last year's rides led list view*
+- `pwtc_ytd_led_vw` *year-to-date number of rides led view*
+- `pwtc_ly_led_vw` *last year's number of rides led view*
+- `pwtc_ytd_rides_vw` *year-to-date rides ridden list view*
+- `pwtc_ly_rides_vw` *last year's rides ridden list view*
 
 ## Package Files Used By This Plugin
 - `README.md` *this file*
