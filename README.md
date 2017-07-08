@@ -101,6 +101,7 @@ caption|show table caption|"on", "off"|"on"
 The following tables and views are created by this plugin to...
 
 Table `pwtc_membership` ...
+
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
 member_id|rider membership ID|varchar(5)|key
@@ -109,6 +110,7 @@ first_name|rider first name|text|
 expir_date|rider membership expiration date|date| 
 
 Table `pwtc_club_rides` ...
+
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
 ID|club ride ID|bigint(20)|key, auto increment, unsigned
@@ -117,6 +119,7 @@ date|club ride event date|date|
 post_id|ID of posted ride|bigint(20)|unsigned, default(0)
 
 Table `pwtc_ride_mileage` ...
+
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
 member_id|rider membership ID|varchar(5)|key
@@ -124,6 +127,7 @@ ride_id|club ride ID|bigint(20)|key, unsigned
 mileage|rider's mileage for this ride|int(10)|unsigned
 
 Table `pwtc_ride_leaders` ...
+
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
 member_id|rider membership ID|varchar(5)|key
@@ -131,6 +135,7 @@ ride_id|club ride ID|bigint(20)|key, unsigned
 rides_led|rider led this ride|int(10)|unsigned
 
 Table `pwtc_running_jobs` ...
+
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
 job_id|ID of job|varchar(20)|key
