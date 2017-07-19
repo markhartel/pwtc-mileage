@@ -9,7 +9,7 @@ array[2] - last name (string)
 array[3] - expiration date (string with PHP date format 'Y-m-d')
 */
 function pwtc_mileage_fetch_membership() {
-    /*
+/*
     $users = get_users();
     $users_array = array();
     foreach ( $users as $item ) {
@@ -20,7 +20,7 @@ function pwtc_mileage_fetch_membership() {
         array_push($users_array, array($memberid, $firstname, $lastname, $expirdate));
     }
     return $users_array;
-    */
+*/
     return array();
 }
 
@@ -46,9 +46,8 @@ function pwtc_mileage_get_member_id() {
             throw new Exception('multidfound');
         }
         $id = $result[0]['member_id'];
-   }
+    }
     return $id;
-    //return null;
 }
 
 /*
@@ -61,10 +60,10 @@ array[3] - post guid (url string)
 */
 function pwtc_mileage_fetch_posts($select_sql, $lookback_date) {
     global $wpdb;
-    $ride_post_type = 'rideevent';
-    $ride_date_metakey = 'start_date';
-    //$ride_post_type = 'scheduled_rides';
-    //$ride_date_metakey = 'date';
+    //$ride_post_type = 'rideevent';
+    //$ride_date_metakey = 'start_date';
+    $ride_post_type = 'scheduled_rides';
+    $ride_date_metakey = 'date';
     $sql_stmt = $wpdb->prepare(
         'select p.ID, p.post_title, date_format(m.meta_value, %s) as start_date, p.guid' . 
         ' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
@@ -74,7 +73,6 @@ function pwtc_mileage_fetch_posts($select_sql, $lookback_date) {
         '%Y-%m-%d', $ride_post_type, $ride_date_metakey, $lookback_date);
     $results = $wpdb->get_results($sql_stmt, ARRAY_N);
     return $results;
-    //return array();
 }
 
 /*
@@ -88,23 +86,20 @@ function pwtc_mileage_fetch_post_guid($post_id) {
         $guid = $post->guid;
     }
     return $guid;
-    //return null;
 }
 
 /*
 Returns an array that contains the rider ids of the ride leaders of the posted ride. 
 */
 function pwtc_mileage_fetch_ride_leader_ids($post_id) {
-    /*
-    $leaders = get_field('ride_leaders', $post_id);
     $leaders_array = array();
+
+    $leaders = get_field('ride_leaders', $post_id);
     if ($leaders) {
-        pwtc_mileage_write_log($leaders);
+        //pwtc_mileage_write_log($leaders);
         foreach ($leaders as $leader) {
             $fname = $leader['user_firstname'];
             $lname = $leader['user_lastname'];
- 	        //$fname = get_user_meta($leader->ID, 'first_name', true);
- 	        //$lname = get_user_meta($leader->ID, 'last_name', true);
             $test_date = PwtcMileage::get_date_for_expir_check();
             $result = PwtcMileage_DB::fetch_riders_by_name(trim($lname), trim($fname), $test_date);
             if (count($result) == 1) {
@@ -113,10 +108,9 @@ function pwtc_mileage_fetch_ride_leader_ids($post_id) {
             }
         }
     }
-    return $leaders_array;
-    */
+
+/*
     $leaders = get_field('ride_leader', $post_id);
-    $leaders_array = array();
     if ($leaders) {
         //pwtc_mileage_write_log($leaders);
         foreach ($leaders as $leader) {
@@ -124,17 +118,17 @@ function pwtc_mileage_fetch_ride_leader_ids($post_id) {
             array_push($leaders_array, $riderid);
         }
     }
+*/
     return $leaders_array;
-    //return array();   
 }
 
 /*
 Returns an array that contains the names of the ride leaders of the posted ride. 
 */
 function pwtc_mileage_fetch_ride_leader_names($post_id) {
-    /*
-    $leaders = get_field('ride_leaders', $post_id);
     $leaders_array = array();
+
+    $leaders = get_field('ride_leaders', $post_id);
     if ($leaders) {
         pwtc_mileage_write_log($leaders);
         foreach ($leaders as $leader) {
@@ -146,10 +140,9 @@ function pwtc_mileage_fetch_ride_leader_names($post_id) {
             array_push($leaders_array, $name);
         }
     }
-    return $leaders_array;
-    */
+
+/*    
     $leaders = get_field('ride_leader', $post_id);
-    $leaders_array = array();
     if ($leaders) {
         //pwtc_mileage_write_log($leaders);
         foreach ($leaders as $leader) {
@@ -157,16 +150,16 @@ function pwtc_mileage_fetch_ride_leader_names($post_id) {
             array_push($leaders_array, $name);
         }
     }
+*/
     return $leaders_array;
-    //return array();   
 }
 
 function pwtc_mileage_create_stat_role() {
     $stat = get_role('statistician');
     if ($stat === null) {
-        $subscriber = get_role('subscriber');
-        $stat = add_role('statistician', 'Statistician', $subscriber->capabilities);
-        //$stat = add_role('statistician', 'Statistician');
+        //$subscriber = get_role('subscriber');
+        //$stat = add_role('statistician', 'Statistician', $subscriber->capabilities);
+        $stat = add_role('statistician', 'Statistician');
         pwtc_mileage_write_log('PWTC Mileage plugin added statistician role');
     }
     if ($stat !== null) {
