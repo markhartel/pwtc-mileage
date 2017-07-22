@@ -16,7 +16,9 @@ jQuery(document).ready(function($) {
 	var disable_delete_confirm = true;
 <?php } else { ?>
 	var disable_delete_confirm = false;
-<?php } ?>		
+<?php } ?>	
+
+	var show_guid = true;	
 
 	function set_ridesheet_lock(locked) {
 		if (locked) {
@@ -53,19 +55,23 @@ jQuery(document).ready(function($) {
 			var fmt = new DateFormatter();
 			posts.forEach(function(post) {
 				var fmtdate = getPrettyDate(post[2]);
+				guidlink = '';
+				if (show_guid) {
+					guidlink = '<a href="' + post[3] + '" target="_blank">View</a> ';
+				}
 				if (show_ride_id) {
 					$('#ridesheet-ride-page .posts-div table').append(
 						'<tr postid="' + post[0] + '" ridedate="' + post[2] + '"><td data-th="Ride">' +
 						post[1] + '</td><td data-th="Date">' + fmtdate + '</td><td data-th="ID">' + post[0] + '</td>' +
-						' <td data-th="Actions"><a href="' + post[3] + '" target="_blank">View</a>' +
-						' <a class="create-btn">Create</a>' + '</td></tr>');
+						' <td data-th="Actions">' + guidlink +
+						'<a class="create-btn">Create</a>' + '</td></tr>');
 				}
 				else {
 					$('#ridesheet-ride-page .posts-div table').append(
 						'<tr postid="' + post[0] + '" ridedate="' + post[2] + '"><td data-th="Ride">' +
 						post[1] + '</td><td data-th="Date">' + fmtdate + '</td>' + 
-						' <td data-th="Actions"><a href="' + post[3] + '" target="_blank">View</a>' +
-						' <a class="create-btn">Create</a>' + '</td></tr>');
+						' <td data-th="Actions">' + guidlink +
+						'<a class="create-btn">Create</a>' + '</td></tr>');
 				} 
 			});
 			$('#ridesheet-ride-page .posts-div .create-btn').on('click', function(evt) {
@@ -288,7 +294,7 @@ jQuery(document).ready(function($) {
 			var fmtdate = getPrettyDate(res.startdate);
 			$('#ridesheet-sheet-page .sheet-title').html(res.title);
 			$('#ridesheet-sheet-page .sheet-date').html(fmtdate);
-			if (res.post_guid) {
+			if (show_guid && res.post_guid) {
 				$('#ridesheet-sheet-page .sheet-guid').html(
 					'<a href="' + res.post_guid + '" target="_blank">view</a>');
 			}
