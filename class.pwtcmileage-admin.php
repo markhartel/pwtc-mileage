@@ -1083,6 +1083,8 @@ class PwtcMileage_Admin {
 					'report_id' => $reportid,
 					'title' => $meta['title'],
 					'header' => $meta['header'],
+					'width' => $meta['width'],
+					'align' => $meta['align'],
 					'data' => $data
 				);
 				return $response;			
@@ -1183,10 +1185,11 @@ class PwtcMileage_Admin {
 		include('admin-man-riders.php');
 	}
 
-	public static function write_export_pdf_file($pdf, $data, $header, $title) {
+	public static function write_export_pdf_file($pdf, $data, $header, $title, $width, $align) {
 		$rows_per_page = 40;
 		$table_width = 190;
 		$tcell_width = $table_width/count($header);
+		$tcell_align = 'C';
 		$pdf->SetAutoPageBreak(false);
 		$pdf->SetFont('Arial', '', 14);
 		if (count($data) == 0) {
@@ -1221,8 +1224,13 @@ class PwtcMileage_Admin {
 					$pdf->SetDrawColor(128,0,0);
 					$pdf->SetLineWidth(.3);
 					$pdf->SetFont('','B');
+					$col_count = 0;
 					foreach ( $header as $item ) {
+						if (count($width) > 0) {
+							$tcell_width = $table_width*($width[$col_count]/100.0);
+						}
 						$pdf->Cell($tcell_width,7,$item,1,0,'C',true);
+						$col_count++;
 					}
 					$pdf->Ln();
 					$pdf->SetFillColor(224,235,255);
@@ -1231,8 +1239,16 @@ class PwtcMileage_Admin {
 					$row_count = 0;
 					$page_count++;
 				}
+				$col_count = 0;
 				foreach ( $datum as $col ) {
-					$pdf->Cell($tcell_width,6,$col,'LR',0,'C',$fill);
+					if (count($width) > 0) {
+						$tcell_width = $table_width*($width[$col_count]/100.0);
+					}
+					if (count($align) > 0) {
+						$tcell_align = $align[$col_count];
+					}
+					$pdf->Cell($tcell_width,6,$col,'LR',0,$tcell_align,$fill);
+					$col_count++;
 				}
 				$pdf->Ln();
 				$fill = !$fill;
@@ -1285,7 +1301,8 @@ class PwtcMileage_Admin {
 					header("Content-Disposition: attachment; filename={$today}_{$report_id}.pdf");
 					require('fpdf.php');	
 					$pdf = new FPDF();
-					self::write_export_pdf_file($pdf, $response['data'], $response['header'], $response['title']);
+					self::write_export_pdf_file($pdf, $response['data'], $response['header'], 
+						$response['title'], $response['width'], $response['align']);
 					$pdf->Output();
 				}
 				die;

@@ -117,6 +117,8 @@ class PwtcMileage_DB {
 	public static function meta_member_duplicates() {
 		$meta = array(
 			'header' => array('First Name', 'Last Name', 'IDs'),
+			'width' => array(30, 30, 40),
+			'align' => array('L', 'L', 'L'),
 			'title' => 'Members With Duplicate Names',
 			'date_idx' => -1,
 			'id_idx' => -1
@@ -141,6 +143,8 @@ class PwtcMileage_DB {
     	$lastyear = intval($thisyear) - 1;
 		$meta = array(
 			'header' => array('ID', 'Name', 'Annual', 'Accum'),
+			'width' => array(15, 55, 15, 15),
+			'align' => array('C', 'L', 'R', 'R'),
 			'title' => '' . $lastyear . ' Annual & Accumulative Mileage',
 			'date_idx' => -1,
 			'id_idx' => 0
@@ -161,6 +165,8 @@ class PwtcMileage_DB {
     	$lastyear = intval($thisyear) - 1;
 		$meta = array(
 			'header' => array('ID', 'Name', 'Mileage', 'Award'),
+			'width' => array(15, 55, 15, 15),
+			'align' => array('C', 'L', 'R', 'R'),
 			'title' => '' . $lastyear . ' Lifetime Mileage Achievement',
 			'date_idx' => -1,
 			'id_idx' => 0
@@ -183,6 +189,8 @@ class PwtcMileage_DB {
 	public static function meta_ytd_miles() {
 		$meta = array(
 			'header' => array('ID', 'Name', 'Mileage'),
+			'width' => array(20, 60, 20),
+			'align' => array('C', 'L', 'R'),
 			'title' => 'Year-to-date Rider Mileage',
 			'date_idx' => -1,
 			'id_idx' => 0
@@ -207,6 +215,8 @@ class PwtcMileage_DB {
     	$lastyear = intval($thisyear) - 1;
 		$meta = array(
 			'header' => array('ID', 'Name', 'Mileage'),
+			'width' => array(20, 60, 20),
+			'align' => array('C', 'L', 'R'),
 			'title' => $lastyear . ' Rider Mileage',
 			'date_idx' => -1,
 			'id_idx' => 0
@@ -229,6 +239,8 @@ class PwtcMileage_DB {
 	public static function meta_lt_miles() {
 		$meta = array(
 			'header' => array('ID', 'Name', 'Mileage'),
+			'width' => array(20, 60, 20),
+			'align' => array('C', 'L', 'R'),
 			'title' => 'Lifetime Rider Mileage',
 			'date_idx' => -1,
 			'id_idx' => 0
@@ -251,6 +263,8 @@ class PwtcMileage_DB {
 	public static function meta_ytd_led() {
 		$meta = array(
 			'header' => array('ID', 'Name', 'Rides Led'),
+			'width' => array(20, 60, 20),
+			'align' => array('C', 'L', 'R'),
 			'title' => 'Year-to-date Rides Led',
 			'date_idx' => -1,
 			'id_idx' => 0
@@ -279,6 +293,8 @@ class PwtcMileage_DB {
     	$lastyear = intval($thisyear) - 1;
 		$meta = array(
 			'header' => array('ID', 'Name', 'Rides Led'),
+			'width' => array(20, 60, 20),
+			'align' => array('C', 'L', 'R'),
 			'title' => $lastyear . ' Rides Led',
 			'date_idx' => -1,
 			'id_idx' => 0
@@ -297,6 +313,8 @@ class PwtcMileage_DB {
 	public static function meta_ytd_rides($name = '') {
 		$meta = array(
 			'header' => array('Title', 'Date', 'Mileage'),
+			'width' => array(60, 25, 15),
+			'align' => array('L', 'R', 'R'),
 			'title' => 'Year-to-date Rides by ' . $name,
 			'date_idx' => 1,
 			'id_idx' => -1
@@ -317,6 +335,8 @@ class PwtcMileage_DB {
     	$lastyear = intval($thisyear) - 1;
 		$meta = array(
 			'header' => array('Title', 'Date', 'Mileage'),
+			'width' => array(60, 25, 15),
+			'align' => array('L', 'R', 'R'),
 			'title' => $lastyear . ' Rides by ' . $name,
 			'date_idx' => 1,
 			'id_idx' => -1
@@ -335,6 +355,8 @@ class PwtcMileage_DB {
 	public static function meta_ytd_rides_led($name = '') {
 		$meta = array(
 			'header' => array('Title', 'Date'),
+			'width' => array(70, 30),
+			'align' => array('L', 'R'),
 			'title' => 'Year-to-date Rides Led by ' . $name,
 			'date_idx' => 1,
 			'id_idx' => -1
@@ -355,6 +377,8 @@ class PwtcMileage_DB {
     	$lastyear = intval($thisyear) - 1;
 		$meta = array(
 			'header' => array('Title', 'Date'),
+			'width' => array(70, 30),
+			'align' => array('L', 'R'),
 			'title' => $lastyear . ' Rides Led by ' . $name,
 			'date_idx' => 1,
 			'id_idx' => -1
@@ -394,6 +418,8 @@ class PwtcMileage_DB {
 	public static function meta_posts_without_rides() {
 		$meta = array(
 			'header' => array('ID', 'Title', 'Date', 'URL'),
+			'width' => array(),
+			'align' => array(),
 			'title' => 'Posted Rides without Ride Sheets',
 			'date_idx' => 2,
 			'id_idx' => 0
@@ -424,6 +450,8 @@ class PwtcMileage_DB {
 	public static function meta_posts_without_rides2() {
 		$meta = array(
 			'header' => array('ID', 'Title', 'Date', 'Leaders', 'URL'),
+			'width' => array(),
+			'align' => array(),
 			'title' => 'Posted Rides without Ride Sheets',
 			'date_idx' => 2,
 			'id_idx' => 0
