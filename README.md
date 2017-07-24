@@ -104,6 +104,8 @@ Argument|Description|Values|Default
 --------|-----------|------|-------
 caption|show the table caption|on, off|on
 
+`[pwtc_riderid_download]` *enables download of logged-in user's rider ID card*
+
 ## Rider Mileage Database Schema
 The following tables and views are created by this plugin:
 

@@ -1026,8 +1026,8 @@ class PwtcMileage {
 			$member_id = pwtc_mileage_get_member_id();
 			$result = PwtcMileage_DB::fetch_rider($member_id);
 			if (count($result) == 0) {
-				$out = 'Cannot download rider card, fetch of details for rider ' . $member_id . 
-					' failed.';
+				$out = 'Cannot download rider ID card, fetch of details for rider ' . 
+					$member_id . ' failed.';
 			}
 			else {
 				$lastname = $result[0]['last_name'];
@@ -1035,7 +1035,7 @@ class PwtcMileage {
 				$exp_date = $result[0]['expir_date'];
 				$fmtdate = date('M Y', strtotime($exp_date));
 				$out = '<form method="POST">';
-				$out .= '<input type="submit" name="download_riderid" value="Download Rider Card"/>';
+				$out .= '<input class="dark button" type="submit" name="download_riderid" value="Download ID"/>';
 				$out .= '<input type="hidden" name="rider_id" value="' . $member_id . '"/>';
 				$out .= '<input type="hidden" name="rider_name" value="' . $firstname . ' ' . $lastname . '"/>';
 				$out .= '<input type="hidden" name="expire_date" value="' . $fmtdate . '"/>';
@@ -1045,16 +1045,16 @@ class PwtcMileage {
 		catch (Exception $e) {
 			switch ($e->getMessage()) {
 				case "notloggedin":
-					$out .= 'Please login to download rider card.';
+					$out .= 'Please login to download rider ID card.';
 					break;
 				case "idnotfound":
-					$out .= 'Cannot download rider card, rider ID not found.';
+					$out .= 'Cannot download rider ID card, rider ID not found.';
 					break;
 				case "multidfound":
-					$out .= 'Cannot download rider card, multiple rider IDs found.';
+					$out .= 'Cannot download rider ID card, multiple rider IDs found.';
 					break;
 				default:
-					$out .= 'Cannot download rider card, unknown error.';
+					$out .= 'Cannot download rider ID card, unknown error.';
 			}
 		}
 		$out .= '</div>';
