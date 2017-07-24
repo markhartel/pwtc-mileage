@@ -151,18 +151,18 @@ timestamp|job start time|bigint(20)|unsigned
 error_msg|job termination message|text| 
 
 The following views are used to generate rider mileage and leader reports:
-- `pwtc_lt_miles_vw` *lifetime mileage view*
-- `pwtc_ytd_miles_vw` *year-to-date mileage view*
-- `pwtc_ly_miles_vw` *last year's mileage view*
-- `pwtc_ly_lt_miles_vw` *last year's lifetime mileage view*
-- `pwtc_ybl_lt_miles_vw` *year before last's lifetime mileage view*
-- `pwtc_ly_lt_achvmnt_vw` *last year's lifetime achiviement view*
-- `pwtc_ytd_rides_led_vw` *year-to-date rides led list view*
-- `pwtc_ly_rides_led_vw` *last year's rides led list view*
-- `pwtc_ytd_led_vw` *year-to-date number of rides led view*
-- `pwtc_ly_led_vw` *last year's number of rides led view*
-- `pwtc_ytd_rides_vw` *year-to-date rides ridden list view*
-- `pwtc_ly_rides_vw` *last year's rides ridden list view*
+- `pwtc_lt_miles_vw` *view of member lifetime mileage*
+- `pwtc_ytd_miles_vw` *view of member year-to-date mileage*
+- `pwtc_ly_miles_vw` *view of member last year mileage*
+- `pwtc_ly_lt_miles_vw` *view of member lifetime mileage as of the end of last year*
+- `pwtc_ybl_lt_miles_vw` *view of member lifetime mileage as of the end of the year before last*
+- `pwtc_ly_lt_achvmnt_vw` *view of member lifetime achiviement as of the end of last year*
+- `pwtc_ytd_rides_led_vw` *view of member year-to-date rides led list*
+- `pwtc_ly_rides_led_vw` *view of member last year rides led list*
+- `pwtc_ytd_led_vw` *view of member year-to-date number of rides led*
+- `pwtc_ly_led_vw` *view of member last year number of rides led*
+- `pwtc_ytd_rides_vw` *view of member year-to-date rides ridden list*
+- `pwtc_ly_rides_vw` *view of member last year rides ridden list*
 
 ## Package Files Used By This Plugin
 - `README.md` *this file*
