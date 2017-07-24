@@ -27,9 +27,15 @@ also recorded.
 ### Manage Riders
 This menu page allows a user to create, edit and delete riders.
 ### View Reports
-This menu page allows a user to view and download rider mileage reports.
+This menu page allows a user to view and download rider mileage reports. Available 
+download formats are PDF and CSV files.
 ### Datebase Ops
 This menu page allows a user to perform batch operations on the mileage database.
+Available operations are:
+- Synchronize rider list with contents of updmembs file
+- Consolidate all club rides older than two years to single entry
+- Export mileage database to CSV files
+- Restore mileage database from exported CSV files
 ### Settings
 This menu page allows a user to adjust the settings of this plugin. It is only
 available to users with the **administrator** role and is located under the **Settings** 
@@ -52,12 +58,12 @@ have ridden at least 100 miles this year:
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
-caption|show the table caption|"on", "off"|"on"
-show_id|show the ID of riders|"on", "off"|"off"
-highlight_user|highlight the row of the logged-in user|"on", "off"|"on"
-sort_order|control the table sort ordering|"asc", "desc"|"asc"
-sort_by|sort the table by mileage or name|"mileage", "name"|"mileage"
-minimum|minimum mileage to display|number|1
+caption|show the table caption|on, off|on
+show_id|show the ID of riders|on, off|off
+highlight_user|highlight the row of the logged-in user|on, off|on
+sort_order|control the table sort ordering|asc, desc|asc
+sort_by|sort the table by mileage or name|mileage, name|mileage
+minimum|minimum mileage to display|(number)|1
 
 ### Ride Leader Report Shortcodes
 `[pwtc_rides_led_year_to_date]` *tabular display of year-to-date number of rides led by all riders*
@@ -66,25 +72,25 @@ minimum|minimum mileage to display|number|1
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
-caption|show the table caption|"on", "off"|"on"
-show_id|show the ID of riders|"on", "off"|"off"
-highlight_user|highlight the row of the logged-in user|"on", "off"|"on"
-sort_order|control the table sort ordering|"asc", "desc"|"asc"
-sort_by|sort the table by number of rides led or name|"rides_led", "name"|"rides_led"
-minimum|minimum number of rides led to display|number|1
+caption|show the table caption|on, off|on
+show_id|show the ID of riders|on, off|off
+highlight_user|highlight the row of the logged-in user|on, off|on
+sort_order|control the table sort ordering|asc, desc|asc
+sort_by|sort the table by number of rides led or name|rides_led, name|rides_led
+minimum|minimum number of rides led to display|(number)|1
 
 `[pwtc_posted_rides_wo_sheets]` *tabular display of posted rides that are missing ridesheets*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
-caption|show the table caption|"on", "off"|"on"
+caption|show the table caption|on, off|on
 
 ### Individual Rider Report Shortcodes
 `[pwtc_rider_report]` *textual display of mileage and leader info for logged-in user*
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
-type|display mileage or leader info|"both", "mileage", "leader"|"both"
+type|display mileage or leader info|both, mileage, leader|both
 
 `[pwtc_rides_year_to_date]` *tabular display of year-to-date rides ridden by logged-in user*
 
@@ -96,7 +102,7 @@ type|display mileage or leader info|"both", "mileage", "leader"|"both"
 
 Argument|Description|Values|Default
 --------|-----------|------|-------
-caption|show the table caption|"on", "off"|"on"
+caption|show the table caption|on, off|on
 
 ## Rider Mileage Database Schema
 The following tables and views are created by this plugin:
