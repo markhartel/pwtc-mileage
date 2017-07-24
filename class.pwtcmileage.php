@@ -1026,7 +1026,7 @@ class PwtcMileage {
 			$member_id = pwtc_mileage_get_member_id();
 			$result = PwtcMileage_DB::fetch_rider($member_id);
 			if (count($result) == 0) {
-				$out = 'Cannot download rider ID card, fetch of details for rider ' . 
+				$out .= 'Cannot download rider ID card, fetch of details for rider ' . 
 					$member_id . ' failed.';
 			}
 			else {
@@ -1034,7 +1034,7 @@ class PwtcMileage {
 				$firstname = $result[0]['first_name'];
 				$exp_date = $result[0]['expir_date'];
 				$fmtdate = date('M Y', strtotime($exp_date));
-				$out = '<form method="POST">';
+				$out .= '<form method="POST">';
 				$out .= '<input class="dark button" type="submit" name="download_riderid" value="Download ID"/>';
 				$out .= '<input type="hidden" name="rider_id" value="' . $member_id . '"/>';
 				$out .= '<input type="hidden" name="rider_name" value="' . $firstname . ' ' . $lastname . '"/>';
