@@ -7,7 +7,7 @@ admin and upload this zip file as a new plugin. This plugin will be named **PWTC
 activate it from the Plugins management page. After activation, this plugin will create
 five new tables and twelve new views in the Wordpress database. A **Rider Mileage** menu group
 will be added to the admin menu bar and shortcodes created to allow you to add mileage-related 
-content to your pages. A new user role named **statistician** will be created to allows 
+content to your pages. A new user role named **statistician** will be created to allow 
 a user access to the **Rider Mileage** menu group pages.
 ### Plugin Uninstall
 Deactivate and then delete the **PWTC Mileage** plugin from the Plugins management page.
@@ -28,7 +28,12 @@ also recorded.
 This menu page allows a user to create, edit and delete riders.
 ### View Reports
 This menu page allows a user to view and download rider mileage reports. Available 
-download formats are PDF and CSV files.
+download formats are PDF and CSV files. Available reports are:
+- Year-to-date, last year and lifetime mileages for all riders
+- Year-to-date and last year number of rides led for all riders
+- Year-to-date and last year rides attended for individual riders
+- Year-to-date and last year rides led for individual riders
+- last year's achievement awards
 ### Datebase Ops
 This menu page allows a user to perform batch operations on the mileage database.
 Available operations are:

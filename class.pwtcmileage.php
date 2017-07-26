@@ -752,7 +752,7 @@ class PwtcMileage {
 		catch (Exception $e) { 
 			switch ($e->getMessage()) {
 				case "notloggedin":
-					$out .= 'Please login to see your club rider report.';
+					$out .= 'Please log in to see your club rider report.';
 					break;
 				case "idnotfound":
 					$out .= 'Cannot show club rider report, rider ID not found.';
@@ -904,7 +904,7 @@ class PwtcMileage {
 		catch (Exception $e) {
 			switch ($e->getMessage()) {
 				case "notloggedin":
-					$out .= 'Please login to view your year-to-date rides.';
+					$out .= 'Please log in to view your year-to-date rides.';
 					break;
 				case "idnotfound":
 					$out .= 'Cannot view your year-to-date rides, rider ID not found.';
@@ -934,7 +934,7 @@ class PwtcMileage {
 		catch (Exception $e) {
 			switch ($e->getMessage()) {
 				case "notloggedin":
-					$out .= 'Please login to view your last year rides.';
+					$out .= 'Please log in to view your last year rides.';
 					break;
 				case "idnotfound":
 					$out .= 'Cannot view your last year rides, rider ID not found.';
@@ -964,7 +964,7 @@ class PwtcMileage {
 		catch (Exception $e) {
 			switch ($e->getMessage()) {
 				case "notloggedin":
-					$out .= 'Please login to view your year-to-date rides led.';
+					$out .= 'Please log in to view your year-to-date rides led.';
 					break;
 				case "idnotfound":
 					$out .= 'Cannot view your year-to-date rides led, rider ID not found.';
@@ -994,7 +994,7 @@ class PwtcMileage {
 		catch (Exception $e) {
 			switch ($e->getMessage()) {
 				case "notloggedin":
-					$out .= 'Please login to view your last year rides led.';
+					$out .= 'Please log in to view your last year rides led.';
 					break;
 				case "idnotfound":
 					$out .= 'Cannot view your last year rides led, rider ID not found.';
@@ -1045,7 +1045,7 @@ class PwtcMileage {
 		catch (Exception $e) {
 			switch ($e->getMessage()) {
 				case "notloggedin":
-					$out .= 'Please login to download rider ID card.';
+					$out .= 'Please log in to download your rider ID card.';
 					break;
 				case "idnotfound":
 					$out .= 'Cannot download rider ID card, rider ID not found.';
