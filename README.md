@@ -110,7 +110,7 @@ caption|show the table caption|on, off|on
 The following MySQL database tables and views are created by this plugin.
 They are created in the same database instance as the Wordpress tables.
 
-Table `pwtc_membership` is used to contain rider information.
+Table `pwtc_membership` contains rider information.
 
 Table Column|Description|Data Type|Comment
 ------------|-----------|---------|-------
@@ -167,7 +167,7 @@ The following views are used to generate rider mileage and leader reports:
 - `pwtc_ytd_rides_vw` *member year-to-date rides ridden list*
 - `pwtc_ly_rides_vw` *member last year rides ridden list*
 
-## Package Files Used By This Plugin
+## Files Used By This Plugin
 - `README.md` *this file*
 - `pwtc-mileage.php` *plugin definition file*
 - `pwtc-mileage-hooks.php` *plugin membership hooks file*
