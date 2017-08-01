@@ -954,6 +954,7 @@ class PwtcMileage_Admin {
 			switch ($reportid) {
 				case "ytd_miles":
 				case "ly_miles":
+				case "pre_ly_miles":
 				case "lt_miles":
 				case "ly_lt_achvmnt":
 					if (!isset($_POST['sort'])) {
@@ -974,6 +975,10 @@ class PwtcMileage_Admin {
 								$meta = PwtcMileage_DB::meta_ly_miles();
 								$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, $sortby);
 								break;
+							case "pre_ly_miles":
+								$meta = PwtcMileage_DB::meta_pre_ly_miles();
+								$data = PwtcMileage_DB::fetch_pre_ly_miles(ARRAY_N, $sortby);
+								break;
 							case "lt_miles":
 								$meta = PwtcMileage_DB::meta_lt_miles();
 								$data = PwtcMileage_DB::fetch_lt_miles(ARRAY_N, $sortby);
@@ -987,6 +992,7 @@ class PwtcMileage_Admin {
 					break;
 				case "ytd_led":
 				case "ly_led":
+				case "pre_ly_led":
 					if (!isset($_POST['sort'])) {
 						$error = 'Input parameters needed to generate a mileage report are missing.';
 					}
@@ -1004,6 +1010,10 @@ class PwtcMileage_Admin {
 							case "ly_led":
 								$meta = PwtcMileage_DB::meta_ly_led();
 								$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, $sortby);
+								break;
+							case "pre_ly_led":
+								$meta = PwtcMileage_DB::meta_pre_ly_led();
+								$data = PwtcMileage_DB::fetch_pre_ly_led(ARRAY_N, $sortby);
 								break;
 						}
 					}

@@ -18,6 +18,7 @@ class PwtcMileage_DB {
 	const LY_RIDES_LED_VIEW = 'pwtc_ly_rides_led_vw';		// last year's rides led list view
 	const YTD_LED_VIEW = 'pwtc_ytd_led_vw';					// year-to-date number of rides led view 
 	const LY_LED_VIEW = 'pwtc_ly_led_vw';					// last year's number of rides led view
+	const PRE_LY_LED_VIEW = 'pwtc_pre_ly_led_vw';			// pre-last year's number of rides led view
 	const YTD_RIDES_VIEW = 'pwtc_ytd_rides_vw';				// year-to-date rides ridden list view
 	const LY_RIDES_VIEW = 'pwtc_ly_rides_vw';				// last year's rides ridden list view
 
@@ -224,6 +225,32 @@ class PwtcMileage_DB {
 		return $meta;
 	}
 
+	public static function fetch_pre_ly_miles($outtype, $sort, $min = 0) {
+    	global $wpdb;
+		$where = '';
+		if ($min > 0) {
+			$where = ' where mileage >= ' . $min . ' ';
+		}
+    	$results = $wpdb->get_results(
+			'select member_id, concat(first_name, \' \', last_name), mileage from ' . 
+			self::YBL_LT_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
+		return $results;
+	}
+
+	public static function meta_pre_ly_miles() {
+		$thisyear = date('Y', current_time('timestamp'));
+    	$lastyear = intval($thisyear) - 1;
+		$meta = array(
+			'header' => array('ID', 'Name', 'Mileage'),
+			'width' => array(20, 60, 20),
+			'align' => array('C', 'L', 'R'),
+			'title' => 'Pre-' . $lastyear . ' Rider Mileage',
+			'date_idx' => -1,
+			'id_idx' => 0
+		);
+		return $meta;
+	}
+
 	public static function fetch_lt_miles($outtype, $sort, $min = 0) {
     	global $wpdb;
 		$where = '';
@@ -296,6 +323,32 @@ class PwtcMileage_DB {
 			'width' => array(20, 60, 20),
 			'align' => array('C', 'L', 'R'),
 			'title' => $lastyear . ' Rides Led',
+			'date_idx' => -1,
+			'id_idx' => 0
+		);
+		return $meta;
+	}
+
+	public static function fetch_pre_ly_led($outtype, $sort, $min = 0) {
+    	global $wpdb;
+		$where = '';
+		if ($min > 0) {
+			$where = ' where rides_led >= ' . $min . ' ';
+		}
+    	$results = $wpdb->get_results(
+			'select member_id, concat(first_name, \' \', last_name), rides_led from ' . 
+			self::PRE_LY_LED_VIEW . $where . ' order by ' . $sort , $outtype);
+		return $results;
+	}
+
+	public static function meta_pre_ly_led() {
+		$thisyear = date('Y', current_time('timestamp'));
+    	$lastyear = intval($thisyear) - 1;
+		$meta = array(
+			'header' => array('ID', 'Name', 'Rides Led'),
+			'width' => array(20, 60, 20),
+			'align' => array('C', 'L', 'R'),
+			'title' => 'Pre-' . $lastyear . ' Rides Led',
 			'date_idx' => -1,
 			'id_idx' => 0
 		);
@@ -1213,6 +1266,18 @@ class PwtcMileage_DB {
 			$err_cnt++;
 		}
 
+		$result = $wpdb->query('create or replace view ' . self::PRE_LY_LED_VIEW . 
+			'(member_id, first_name, last_name, rides_led)' . 
+			' as select c.member_id, c.first_name, c.last_name, SUM(l.rides_led)' . 
+			' from ((' . $leader_table . ' as l inner join ' . $member_table . ' as c on c.member_id = l.member_id)' . 
+			' inner join ' . $ride_table . ' as r on l.ride_id = r.ID)' . 
+			' where r.date < DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), \'%Y-01-01\')' . 
+			' group by l.member_id');
+		if (false === $result) {
+			pwtc_mileage_write_log( 'Could not create view ' . self::PRE_LY_LED_VIEW . ': ' . $wpdb->last_error);
+			$err_cnt++;
+		}
+
 		$result = $wpdb->query('create or replace view ' . self::YTD_RIDES_VIEW . 
 			' (title, date, mileage, member_id)' . 
 			' as select r.title, r.date, m.mileage, m.member_id' . 
@@ -1255,7 +1320,7 @@ class PwtcMileage_DB {
 
 	public static function drop_db_views( ) {
 		global $wpdb;
-		$result = $wpdb->query('drop view if exists ' . self::LY_RIDES_VIEW . ', ' . self::YTD_RIDES_VIEW . ', ' . self::LY_LED_VIEW . 
+		$result = $wpdb->query('drop view if exists ' . self::LY_RIDES_VIEW . ', ' . self::YTD_RIDES_VIEW . ', ' . self::LY_LED_VIEW . ', ' . self::PRE_LY_LED_VIEW .
 			', ' . self::YTD_LED_VIEW . ', ' . self::LY_RIDES_LED_VIEW . ', ' . self::YTD_RIDES_LED_VIEW . ', ' . self::LY_LT_ACHVMNT_VIEW . 
 			', ' . self::YBL_LT_MILES_VIEW . ', ' . self::LY_LT_MILES_VIEW . ', ' . self::LY_MILES_VIEW . ', ' . self::YTD_MILES_VIEW . 
 			', ' . self::LT_MILES_VIEW);

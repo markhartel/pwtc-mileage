@@ -211,7 +211,8 @@ if ($running_jobs > 0) {
         </p>
         <div class='ride-mileage'>
             <div><a href='#' report-id='ytd_miles'>Year-to-date mileage</a></div>
-            <div><a href='#' report-id='ly_miles'>Last year's mileage</a></div>
+            <div><a href='#' report-id='ly_miles'><?php echo(intval(date('Y'))-1); ?> mileage</a></div>
+            <div><a href='#' report-id='pre_ly_miles'>Pre-<?php echo(intval(date('Y'))-1); ?> mileage</a></div>
             <div><a href='#' report-id='lt_miles'>Lifetime mileage</a></div>
         </div>
         </div>
@@ -225,7 +226,8 @@ if ($running_jobs > 0) {
         </p>
         <div class='ride-leader'>
             <div><a href='#' report-id='ytd_led'>Year-to-date ride leaders</a></div>
-            <div><a href='#' report-id='ly_led'>Last year's ride leaders</a></div>
+            <div><a href='#' report-id='ly_led'><?php echo(intval(date('Y'))-1); ?> ride leaders</a></div>
+            <div><a href='#' report-id='pre_ly_led'>Pre-<?php echo(intval(date('Y'))-1); ?> ride leaders</a></div>
         </div>
         </div>
         <div class='report-sec'>
@@ -236,9 +238,9 @@ if ($running_jobs > 0) {
         </p>
         <div class='specific-rider'>
             <div><a href='#' report-id='ytd_rides'>Year-to-date rides</a></div>
-            <div><a href='#' report-id='ly_rides'>Last year's rides</a></div>
+            <div><a href='#' report-id='ly_rides'><?php echo(intval(date('Y'))-1); ?> rides</a></div>
             <div><a href='#' report-id='ytd_rides_led'>Year-to-date rides led</a></div>
-            <div><a href='#' report-id='ly_rides_led'>Last year's rides led</a></div>
+            <div><a href='#' report-id='ly_rides_led'><?php echo(intval(date('Y'))-1); ?> rides led</a></div>
         </div>
         </div>
         <div class='report-sec'>
