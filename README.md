@@ -22,7 +22,7 @@ This menu group is added to the Wordpress admin menu bar. Users with the **admin
 and **statistician** roles will have the right to access these menu pages.
 ### Manage Ride Sheets
 This menu page allows a user to create, edit and delete ridesheets. A ridesheet records 
-the leaders of a ride and the mileage of the riders. The title and date of the ride is
+the leaders of a scheduled ride and the mileage of the riders. The title and date of the ride is
 also recorded.
 ### Manage Riders
 This menu page allows a user to create, edit and delete riders.
@@ -114,6 +114,8 @@ caption|show the table caption|on, off|on
 ## Rider Mileage Database Schema
 The following MySQL database tables and views are created by this plugin.
 They are created in the same database instance as the Wordpress tables.
+All table names (but not view names) are prepended with the Wordpress database 
+table prefix, by default this is "wp_".
 
 Table `pwtc_membership` contains rider information.
 
@@ -159,18 +161,19 @@ timestamp|job start time|bigint(20)|unsigned
 error_msg|job termination message|text| 
 
 The following views are used to generate rider mileage and leader reports:
-- `pwtc_lt_miles_vw` *member lifetime mileage*
-- `pwtc_ytd_miles_vw` *member year-to-date mileage*
-- `pwtc_ly_miles_vw` *member last year mileage*
-- `pwtc_ly_lt_miles_vw` *member lifetime mileage as of the end of last year*
-- `pwtc_ybl_lt_miles_vw` *member lifetime mileage as of the end of the year before last*
-- `pwtc_ly_lt_achvmnt_vw` *member lifetime achiviement as of the end of last year*
-- `pwtc_ytd_rides_led_vw` *member year-to-date rides led list*
-- `pwtc_ly_rides_led_vw` *member last year rides led list*
-- `pwtc_ytd_led_vw` *member year-to-date number of rides led*
-- `pwtc_ly_led_vw` *member last year number of rides led*
-- `pwtc_ytd_rides_vw` *member year-to-date rides ridden list*
-- `pwtc_ly_rides_vw` *member last year rides ridden list*
+- `pwtc_lt_miles_vw` *lifetime mileage for all members*
+- `pwtc_ytd_miles_vw` *year-to-date mileage for all members*
+- `pwtc_ly_miles_vw` *last year mileage for all members*
+- `pwtc_ly_lt_miles_vw` *lifetime mileage as of the end of last year for all members*
+- `pwtc_ybl_lt_miles_vw` *lifetime mileage as of the end of the year before last for all members*
+- `pwtc_ly_lt_achvmnt_vw` *lifetime achiviement as of the end of last year for all members*
+- `pwtc_ytd_led_vw` *year-to-date number of rides led for all members*
+- `pwtc_ly_led_vw` *last year number of rides led for all members*
+- `pwtc_pre_ly_led_vw` *number of rides led as of the end of the year before last for all members*
+- `pwtc_ytd_rides_vw` *year-to-date rides ridden for all members*
+- `pwtc_ly_rides_vw` *last year rides ridden for all members*
+- `pwtc_ytd_rides_led_vw` *year-to-date rides led for all members*
+- `pwtc_ly_rides_led_vw` *last year rides led for all members*
 
 ## Files Used By This Plugin
 - `README.md` *this file*

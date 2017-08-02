@@ -292,7 +292,7 @@ class PwtcMileage_DB {
 			'header' => array('ID', 'Name', 'Rides Led'),
 			'width' => array(20, 60, 20),
 			'align' => array('C', 'L', 'R'),
-			'title' => 'Year-to-date Rides Led',
+			'title' => 'Year-to-date Ride Leaders',
 			'date_idx' => -1,
 			'id_idx' => 0
 		);
@@ -322,7 +322,7 @@ class PwtcMileage_DB {
 			'header' => array('ID', 'Name', 'Rides Led'),
 			'width' => array(20, 60, 20),
 			'align' => array('C', 'L', 'R'),
-			'title' => $lastyear . ' Rides Led',
+			'title' => $lastyear . ' Ride Leaders',
 			'date_idx' => -1,
 			'id_idx' => 0
 		);
@@ -348,7 +348,7 @@ class PwtcMileage_DB {
 			'header' => array('ID', 'Name', 'Rides Led'),
 			'width' => array(20, 60, 20),
 			'align' => array('C', 'L', 'R'),
-			'title' => 'Pre-' . $lastyear . ' Rides Led',
+			'title' => 'Pre-' . $lastyear . ' Ride Leaders',
 			'date_idx' => -1,
 			'id_idx' => 0
 		);
@@ -368,7 +368,7 @@ class PwtcMileage_DB {
 			'header' => array('Title', 'Date', 'Mileage'),
 			'width' => array(60, 25, 15),
 			'align' => array('L', 'R', 'R'),
-			'title' => 'Year-to-date Rides by ' . $name,
+			'title' => 'Year-to-date Rides Ridden by ' . $name,
 			'date_idx' => 1,
 			'id_idx' => -1
 		);
@@ -390,7 +390,7 @@ class PwtcMileage_DB {
 			'header' => array('Title', 'Date', 'Mileage'),
 			'width' => array(60, 25, 15),
 			'align' => array('L', 'R', 'R'),
-			'title' => $lastyear . ' Rides by ' . $name,
+			'title' => $lastyear . ' Rides Ridden by ' . $name,
 			'date_idx' => 1,
 			'id_idx' => -1
 		);
