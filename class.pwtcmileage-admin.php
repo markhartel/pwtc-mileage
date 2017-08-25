@@ -951,6 +951,7 @@ class PwtcMileage_Admin {
 			$error = null;
 			$data = array();
 			$meta = null;
+			$state = null;
 			switch ($reportid) {
 				case "ytd_miles":
 				case "ly_miles":
@@ -962,6 +963,11 @@ class PwtcMileage_Admin {
 					}
 					else {
 						$sort = $_POST['sort'];
+						$state = array(
+							'action' => 'pwtc_mileage_generate_report',
+							'report_id' => $reportid,
+							'sort' => $sort
+						);						
 						$sortby = 'mileage desc';
 						if ($sort == 'name') {
 							$sortby = 'last_name, first_name';
@@ -998,6 +1004,11 @@ class PwtcMileage_Admin {
 					}
 					else {
 						$sort = $_POST['sort'];
+						$state = array(
+							'action' => 'pwtc_mileage_generate_report',
+							'report_id' => $reportid,
+							'sort' => $sort
+						);						
 						$sortby = 'rides_led desc';
 						if ($sort == 'name') {
 							$sortby = 'last_name, first_name';
@@ -1028,6 +1039,12 @@ class PwtcMileage_Admin {
 					else {
 						$memberid = $_POST['member_id'];
 						$name = $_POST['name'];
+						$state = array(
+							'action' => 'pwtc_mileage_generate_report',
+							'report_id' => $reportid,
+							'member_id' => $memberid,
+							'name' => $name
+						);						
 						switch ($reportid) {			
 							case "ytd_rides":
 								$meta = PwtcMileage_DB::meta_ytd_rides($name);
@@ -1052,6 +1069,10 @@ class PwtcMileage_Admin {
 				case "award_top_miles":
 				case "award_members":
 				case "award_leaders":
+					$state = array(
+						'action' => 'pwtc_mileage_generate_report',
+						'report_id' => $reportid
+					);						
 					switch ($reportid) {
 						case "award_achvmnt":
 							$meta = PwtcMileage_DB::meta_ly_lt_achvmnt();
@@ -1072,6 +1093,10 @@ class PwtcMileage_Admin {
 					}			
 					break;
 				case "dup_members":
+					$state = array(
+						'action' => 'pwtc_mileage_generate_report',
+						'report_id' => $reportid
+					);						
 					switch ($reportid) {
 						case "dup_members":
 							$meta = PwtcMileage_DB::meta_member_duplicates();
@@ -1091,6 +1116,7 @@ class PwtcMileage_Admin {
 				}
 				$response = array(
 					'report_id' => $reportid,
+					'state' => $state,
 					'title' => $meta['title'],
 					'header' => $meta['header'],
 					'width' => $meta['width'],

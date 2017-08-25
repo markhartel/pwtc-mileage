@@ -285,38 +285,71 @@ jQuery(document).ready(function($) {
 		}
 	}   
 
+	function show_ridesheet_section(ride_id, startdate, title, post_guid, mileage, leaders) {
+		var fmtdate = getPrettyDate(startdate);
+		$('#ridesheet-sheet-page .sheet-title').html(title);
+		$('#ridesheet-sheet-page .sheet-date').html(fmtdate);
+		if (show_guid && post_guid) {
+			$('#ridesheet-sheet-page .sheet-guid').html(
+				'<a href="' + post_guid + '" target="_blank">view</a>');
+		}
+		else {
+			$('#ridesheet-sheet-page .sheet-guid').html('');
+		}
+		$("#ridesheet-sheet-page .rename-blk .rename-frm input[name='rideid']").val(ride_id); 
+		$("#ridesheet-sheet-page .leader-section .add-frm input[name='rideid']").val(ride_id); 
+		$("#ridesheet-sheet-page .mileage-section .add-frm input[name='rideid']").val(ride_id); 
+		populate_ride_leader_table(ride_id, leaders);
+		populate_ride_mileage_table(ride_id, mileage);
+		$("#ridesheet-sheet-page .rename-btn").show();
+		$("#ridesheet-sheet-page .rename-blk").hide(); 
+		$("#ridesheet-sheet-page .leader-section .lookup-btn").show();
+		$("#ridesheet-sheet-page .leader-section .add-blk").hide(); 
+		$("#ridesheet-sheet-page .mileage-section .lookup-btn").show();
+		$("#ridesheet-sheet-page .mileage-section .add-blk").hide(); 
+		set_ridesheet_lock(title.startsWith('['));
+		$('#ridesheet-ride-page').hide('fast', function() {
+			$('#ridesheet-sheet-page').fadeIn('slow');
+			$('#ridesheet-sheet-page .back-btn').focus();
+		});
+	}
+
+	function return_main_section() {
+		$('#ridesheet-sheet-page').hide('fast', function() {
+			load_ride_table();
+			load_posts_without_rides();
+			$('#ridesheet-ride-page .add-blk').hide();
+			$('#ridesheet-ride-page .add-btn').show();
+			$('#ridesheet-ride-page').fadeIn('slow');
+		});
+	}
+
 	function lookup_ridesheet_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
 			open_error_dialog(res.error);
 		}
 		else {
-			var fmtdate = getPrettyDate(res.startdate);
-			$('#ridesheet-sheet-page .sheet-title').html(res.title);
-			$('#ridesheet-sheet-page .sheet-date').html(fmtdate);
-			if (show_guid && res.post_guid) {
-				$('#ridesheet-sheet-page .sheet-guid').html(
-					'<a href="' + res.post_guid + '" target="_blank">view</a>');
+			show_ridesheet_section(res.ride_id, res.startdate, res.title, res.post_guid, 
+				res.mileage, res.leaders);
+			if (history.pushState) {
+				var state = {
+					'action': 'pwtc_mileage_lookup_ridesheet',
+					'ride_id': res.ride_id
+				};
+				history.pushState(state, '');
 			}
-			else {
-				$('#ridesheet-sheet-page .sheet-guid').html('');
-			}
-			$("#ridesheet-sheet-page .rename-blk .rename-frm input[name='rideid']").val(res.ride_id); 
-			$("#ridesheet-sheet-page .leader-section .add-frm input[name='rideid']").val(res.ride_id); 
-			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='rideid']").val(res.ride_id); 
-			populate_ride_leader_table(res.ride_id, res.leaders);
-			populate_ride_mileage_table(res.ride_id, res.mileage);
-			$("#ridesheet-sheet-page .rename-btn").show();
-			$("#ridesheet-sheet-page .rename-blk").hide(); 
-			$("#ridesheet-sheet-page .leader-section .lookup-btn").show();
-			$("#ridesheet-sheet-page .leader-section .add-blk").hide(); 
-			$("#ridesheet-sheet-page .mileage-section .lookup-btn").show();
-			$("#ridesheet-sheet-page .mileage-section .add-blk").hide(); 
-			set_ridesheet_lock(res.title.startsWith('['));
-			$('#ridesheet-ride-page').hide('fast', function() {
-				$('#ridesheet-sheet-page').fadeIn('slow');
-				$('#ridesheet-sheet-page .back-btn').focus();
-			});
+		}
+	}
+
+	function restore_ridesheet_cb(response) {
+        var res = JSON.parse(response);
+		if (res.error) {
+			open_error_dialog(res.error);
+		}
+		else {
+			show_ridesheet_section(res.ride_id, res.startdate, res.title, res.post_guid, 
+				res.mileage, res.leaders);
 		}
 	}
 
@@ -347,19 +380,14 @@ jQuery(document).ready(function($) {
 		var title = $("#ridesheet-ride-page .ride-search-frm input[name='title']").val().trim();
 		var startdate = $("#ridesheet-ride-page .ride-search-frm input[name='fmtdate']").val().trim();
 		var enddate = $("#ridesheet-ride-page .ride-search-frm input[name='tofmtdate']").val().trim();
-        if (title.length > 0 || startdate.length > 0 || enddate.length > 0) {
-			var action = $('#ridesheet-ride-page .ride-search-frm').attr('action');
-			var data = {
-				'action': 'pwtc_mileage_lookup_rides',
-				'title': title,
-				'startdate': startdate,
-				'enddate': enddate
-			};
-			$.post(action, data, lookup_rides_cb);
-		}
-		else {
-			$('#ridesheet-ride-page .rides-div').empty();
-		}
+		var action = $('#ridesheet-ride-page .ride-search-frm').attr('action');
+		var data = {
+			'action': 'pwtc_mileage_lookup_rides',
+			'title': title,
+			'startdate': startdate,
+			'enddate': enddate
+		};
+		$.post(action, data, lookup_rides_cb);
 	}
 
 	function remove_leader_cb(response) {
@@ -419,13 +447,13 @@ jQuery(document).ready(function($) {
 	}
 
 	$('#ridesheet-sheet-page .back-btn').on('click', function(evt) {
-		$('#ridesheet-sheet-page').hide('fast', function() {
-			load_ride_table();
-			load_posts_without_rides();
-			$('#ridesheet-ride-page .add-blk').hide();
-			$('#ridesheet-ride-page .add-btn').show();
-			$('#ridesheet-ride-page').fadeIn('slow');
-		});
+        //evt.preventDefault();
+        if (history.pushState) {
+			history.back();
+		}
+		else {
+			return_main_section();
+		}
 	});
 
     $('#ridesheet-ride-page .ride-search-frm').on('submit', function(evt) {
@@ -605,6 +633,33 @@ jQuery(document).ready(function($) {
 	}).on( "change", function() {
         fromDate.datepicker("option", "maxDate", getDate(this));
     });
+
+    if (history.pushState) {
+		$(window).on('popstate', function(evt) {
+			var state = evt.originalEvent.state;
+			if (state !== null) {
+				//console.log("Popstate event, state is " + JSON.stringify(state));
+				var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+				$.post(action, state, restore_ridesheet_cb);
+			}
+			else {
+				//console.log("Popstate event, state is null.");
+				return_main_section();
+			}
+		});
+	}
+    else {
+        //console.log("history.pushState is not supported");
+    }
+
+	var d = $("#ridesheet-ride-page .ride-search-frm input[name='date']").val().trim();
+	if (d.length > 0) {
+		$("#ridesheet-ride-page .ride-search-frm input[name='fmtdate']").val(getInternalDate(d));
+	}
+	d = $("#ridesheet-ride-page .ride-search-frm input[name='todate']").val().trim();
+	if (d.length > 0) {
+		$("#ridesheet-ride-page .ride-search-frm input[name='tofmtdate']").val(getInternalDate(d));
+	}
 
 	$("#ridesheet-ride-page .post-btn").focus();
 	load_posts_without_rides();

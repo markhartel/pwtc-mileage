@@ -32,18 +32,41 @@ jQuery(document).ready(function($) {
         }
     }
 
+    function show_report_section(title, header, data) {
+        $('#report-results-section h2').html(title);
+        populate_report_table(data, header);
+        $('#report-main-section').hide('fast', function() {
+            $('#report-results-section').fadeIn('slow');
+            $('#report-results-section .back-btn').focus(); 
+        });
+    }
+
+    function return_main_section() {
+        $('#report-results-section').fadeOut('slow', function() {
+            $('#report-main-section').show('fast');
+        });        
+    }
+
 	function generate_report_cb(response) {
         var res = JSON.parse(response);
         if (res.error) {
             open_error_dialog(res.error);
         }
         else {
-            $('#report-results-section h2').html(res.title);
-            populate_report_table(res.data, res.header);
-	        $('#report-main-section').hide('fast', function() {
-                $('#report-results-section').fadeIn('slow');
-                $('#report-results-section .back-btn').focus();                
-            });
+            show_report_section(res.title, res.header, res.data);
+            if (history.pushState) {
+                history.pushState(res.state, '');
+            }
+        }
+	}   
+
+	function restore_report_cb(response) {
+        var res = JSON.parse(response);
+        if (res.error) {
+            open_error_dialog(res.error);
+        }
+        else {
+            show_report_section(res.title, res.header, res.data);
         }
 	}   
 
@@ -172,13 +195,34 @@ jQuery(document).ready(function($) {
     });
 
     $('#report-results-section .back-btn').on('click', function(evt) {
-        evt.preventDefault();
-        $('#report-results-section').fadeOut('slow', function() {
-	        $('#report-main-section').show('fast');
-        });
+        //evt.preventDefault();
+        if (history.pushState) {
+            history.back();
+        }
+        else {
+            return_main_section();
+        }
     });
 
     $('#report-main-section .download-slt').focus();
+
+    if (history.pushState) {
+        $(window).on('popstate', function(evt) {
+            var state = evt.originalEvent.state;
+            if (state !== null) {
+                //console.log("Popstate event, state is " + JSON.stringify(state));
+                var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+                $.post(action, state, restore_report_cb);
+            }
+            else {
+                //console.log("Popstate event, state is null.");
+                return_main_section();
+            }
+        });
+    }
+    else {
+        //console.log("history.pushState is not supported");
+    }
 
 });
 </script>
