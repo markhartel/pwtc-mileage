@@ -464,7 +464,15 @@ class PwtcMileage_DB {
 		$sql_stmt = $wpdb->prepare(
 			'select post_id from ' . $ride_table . ' where post_id <> 0 and date >= %s',
 			$lookback_date);
-		$results = pwtc_mileage_fetch_posts($sql_stmt, $lookback_date);
+
+		$rides = pwtc_mileage_fetch_posts($sql_stmt, $lookback_date);
+    	$results = array();
+		foreach ($rides as $ride) {
+			$postid = $ride[0];
+			$url = get_permalink(intval($postid));
+			array_push($results, array($ride[0], $ride[1], $ride[2], $url));
+		}
+
 		return $results;
 	}
 
