@@ -1076,7 +1076,7 @@ class PwtcMileage_Admin {
 					switch ($reportid) {
 						case "award_achvmnt":
 							$meta = PwtcMileage_DB::meta_ly_lt_achvmnt();
-							$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, 'mileage');
+							$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, 'nachievement, last_name, first_name');
 							break;
 						case "award_top_miles":
 							$meta = PwtcMileage_DB::meta_ly_miles();
