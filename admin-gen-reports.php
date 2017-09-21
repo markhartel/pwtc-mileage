@@ -58,6 +58,7 @@ jQuery(document).ready(function($) {
                 history.pushState(res.state, '');
             }
         }
+        $('body').removeClass('waiting');
 	}   
 
 	function restore_report_cb(response) {
@@ -68,6 +69,7 @@ jQuery(document).ready(function($) {
         else {
             show_report_section(res.title, res.header, res.data);
         }
+        $('body').removeClass('waiting');
 	}   
 
     $('#report-main-section .ride-mileage a').on('click', function(evt) {
@@ -89,6 +91,7 @@ jQuery(document).ready(function($) {
                 'report_id': $(this).attr('report-id'),
                 'sort': $('#report-main-section .mileage-sort-slt').val()
             };
+            $('body').addClass('waiting');
             $.post(action, data, generate_report_cb);
         }
     });
@@ -112,6 +115,7 @@ jQuery(document).ready(function($) {
                 'report_id': $(this).attr('report-id'),
                 'sort': $('#report-main-section .leader-sort-slt').val()
             };
+            $('body').addClass('waiting');
             $.post(action, data, generate_report_cb);
         }
     });
@@ -142,6 +146,7 @@ jQuery(document).ready(function($) {
                     'member_id': memberid,
                     'name': $('#report-main-section .ridername').html()
                 };
+                $('body').addClass('waiting');
                 $.post(action, data, generate_report_cb);
             }
         }
@@ -163,6 +168,7 @@ jQuery(document).ready(function($) {
                 'action': 'pwtc_mileage_generate_report',
                 'report_id': $(this).attr('report-id')
             };
+            $('body').addClass('waiting');
             $.post(action, data, generate_report_cb);
         }
     });
@@ -183,6 +189,7 @@ jQuery(document).ready(function($) {
                 'action': 'pwtc_mileage_generate_report',
                 'report_id': $(this).attr('report-id')
             };
+            $('body').addClass('waiting');
             $.post(action, data, generate_report_cb);
         }
     });
@@ -212,6 +219,7 @@ jQuery(document).ready(function($) {
             if (state !== null) {
                 //console.log("Popstate event, state is " + JSON.stringify(state));
                 var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+                $('body').addClass('waiting');
                 $.post(action, state, restore_report_cb);
             }
             else {

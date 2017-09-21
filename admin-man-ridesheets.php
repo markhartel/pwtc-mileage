@@ -87,6 +87,7 @@ jQuery(document).ready(function($) {
 				open_confirm_dialog(
 					'Are you sure you want to create a ridesheet for ride titled "' + data.title + '"?', 
 					function() {
+						$('body').addClass('waiting');
 						$.post(action, data, lookup_ridesheet_cb);
 					}
 				);
@@ -136,6 +137,7 @@ jQuery(document).ready(function($) {
 					'action': 'pwtc_mileage_lookup_ridesheet',
 					'ride_id': $(this).parent().parent().attr('rideid')
 				};
+				$('body').addClass('waiting');
 				$.post(action, data, lookup_ridesheet_cb);
 			});
 			$('#ridesheet-ride-page .rides-div .remove-btn').on('click', function(evt) {
@@ -147,6 +149,7 @@ jQuery(document).ready(function($) {
 					'nonce': '<?php echo wp_create_nonce('pwtc_mileage_remove_ride'); ?>'
 				};
 				if (disable_delete_confirm) {
+					$('body').addClass('waiting');
 					$.post(action, data, remove_ride_cb);
 				} 
 				else {
@@ -154,6 +157,7 @@ jQuery(document).ready(function($) {
 						'Are you sure you want to delete ride titled "' + 
 							$(this).parent().parent().find('td').first().html() + '"?', 
 						function() {
+							$('body').addClass('waiting');
 							$.post(action, data, remove_ride_cb);
 						}
 					);
@@ -188,12 +192,14 @@ jQuery(document).ready(function($) {
 					'nonce': '<?php echo wp_create_nonce('pwtc_mileage_remove_leader'); ?>'
 				};
 				if (disable_delete_confirm) {
+					$('body').addClass('waiting');
 					$.post(action, data, remove_leader_cb);
 				}
 				else {
 					open_confirm_dialog(
 						'Are you sure you want to delete the leader status for rider ID ' + data.member_id + '?', 
 						function() {
+							$('body').addClass('waiting');
 							$.post(action, data, remove_leader_cb);
 						}
 					);
@@ -247,12 +253,14 @@ jQuery(document).ready(function($) {
 					'nonce': '<?php echo wp_create_nonce('pwtc_mileage_remove_mileage'); ?>'
 				};
 				if (disable_delete_confirm) {
+					$('body').addClass('waiting');
 					$.post(action, data, remove_mileage_cb);
 				}
 				else {
 					open_confirm_dialog(
 						'Are you sure you want to delete the mileage for rider ID ' + data.member_id + '?', 
 						function() {
+							$('body').addClass('waiting');
 							$.post(action, data, remove_mileage_cb);
 						}
 					);
@@ -273,6 +281,7 @@ jQuery(document).ready(function($) {
 		else {
 			populate_posts_table(res.posts);
 		}
+		$('body').removeClass('waiting');
 	}   
 
 	function lookup_rides_cb(response) {
@@ -283,6 +292,7 @@ jQuery(document).ready(function($) {
 		else {
 			populate_ridesheet_table(res.rides);
 		}
+		$('body').removeClass('waiting');
 	}   
 
 	function show_ridesheet_section(ride_id, startdate, title, post_guid, mileage, leaders) {
@@ -340,6 +350,7 @@ jQuery(document).ready(function($) {
 				history.pushState(state, '');
 			}
 		}
+		$('body').removeClass('waiting');
 	}
 
 	function restore_ridesheet_cb(response) {
@@ -351,6 +362,7 @@ jQuery(document).ready(function($) {
 			show_ridesheet_section(res.ride_id, res.startdate, res.title, res.post_guid, 
 				res.mileage, res.leaders);
 		}
+		$('body').removeClass('waiting');
 	}
 
 	function rename_ridesheet_cb(response) {
@@ -363,9 +375,11 @@ jQuery(document).ready(function($) {
 			$("#ridesheet-sheet-page .rename-btn").show();
 			$("#ridesheet-sheet-page .rename-blk").hide(); 
 		}
+		$('body').removeClass('waiting');
 	}
 
 	function remove_ride_cb(response) {
+		$('body').removeClass('waiting');
 		var res = JSON.parse(response);
 		if (res.error) {
 			open_error_dialog(res.error);
@@ -388,6 +402,7 @@ jQuery(document).ready(function($) {
 				'startdate': startdate,
 				'enddate': enddate
 			};
+			$('body').addClass('waiting');
 			$.post(action, data, lookup_rides_cb);
 		}		
 		else {		
@@ -403,6 +418,7 @@ jQuery(document).ready(function($) {
 		else {
 			populate_ride_leader_table(res.ride_id, res.leaders);
 		}
+		$('body').removeClass('waiting');
 	}
 
 	function remove_mileage_cb(response) {
@@ -413,6 +429,7 @@ jQuery(document).ready(function($) {
 		else {
 			populate_ride_mileage_table(res.ride_id, res.mileage);
 		}
+		$('body').removeClass('waiting');
 	}
 
 	function add_leader_cb(response) {
@@ -427,6 +444,7 @@ jQuery(document).ready(function($) {
 				$("#ridesheet-sheet-page .leader-section .lookup-btn").focus();
 			});
 		}
+		$('body').removeClass('waiting');
 	}
 
 	function add_mileage_cb(response) {
@@ -441,6 +459,7 @@ jQuery(document).ready(function($) {
 				$("#ridesheet-sheet-page .mileage-section .lookup-btn").focus();
 			});
 		}
+		$('body').removeClass('waiting');
 	}
 
 	function load_posts_without_rides() {
@@ -448,6 +467,7 @@ jQuery(document).ready(function($) {
         var data = {
 			'action': 'pwtc_mileage_lookup_posts'
 		};
+		$('body').addClass('waiting');
 		$.post(action, data, lookup_posts_cb);
 	}
 
@@ -483,6 +503,7 @@ jQuery(document).ready(function($) {
 			'ride_id': $("#ridesheet-sheet-page .leader-section .add-frm input[name='rideid']").val(),
 			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_add_leader'); ?>'
 		};
+		$('body').addClass('waiting');
 		$.post(action, data, add_leader_cb);
     });
 
@@ -496,6 +517,7 @@ jQuery(document).ready(function($) {
 			'mileage': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(),
 			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_add_mileage'); ?>'
 		};
+		$('body').addClass('waiting');
 		$.post(action, data, add_mileage_cb);
     });
 
@@ -560,6 +582,7 @@ jQuery(document).ready(function($) {
 			'title': $("#ridesheet-sheet-page .rename-blk .rename-frm input[name='title']").val(),
 			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_rename_ride'); ?>'
 		};
+		$('body').addClass('waiting');
 		$.post(action, data, rename_ridesheet_cb);
     });
 
@@ -598,6 +621,7 @@ jQuery(document).ready(function($) {
 			'startdate': $("#ridesheet-ride-page .add-blk .add-frm input[name='fmtdate']").val(),
 			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_create_ride'); ?>'
 		};
+		$('body').addClass('waiting');
 		$.post(action, data, lookup_ridesheet_cb);
     });
 
@@ -645,6 +669,7 @@ jQuery(document).ready(function($) {
 			if (state !== null) {
 				//console.log("Popstate event, state is " + JSON.stringify(state));
 				var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+				$('body').addClass('waiting');
 				$.post(action, state, restore_ridesheet_cb);
 			}
 			else {
