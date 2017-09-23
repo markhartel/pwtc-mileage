@@ -207,6 +207,8 @@ jQuery(document).ready(function($) {
         $.post(action, data, create_rider_cb);
     });
 
+    $("#rider-inspect-section .search-frm input[type='text']").val('');
+    
     $("#rider-inspect-section .search-frm input[name='memberid']").focus();
 
 });
