@@ -591,16 +591,16 @@ class PwtcMileage {
 			}
 		}
 		$out = '<div>';  
+		$out .= '<table class="pwtc-mileage-rwd-table">';
+		if (empty($content)) {
+			if ($atts['caption'] == 'on') {
+				$out .= '<caption>' . $meta['title'] . '</caption>';
+			}
+		}
+		else {
+			$out .= '<caption>' . do_shortcode($content) . '</caption>';
+		}
 		if (count($data) > 0) {
-			$out .= '<table class="pwtc-mileage-rwd-table">';
-			if (empty($content)) {
-				if ($atts['caption'] == 'on') {
-					$out .= '<caption>' . $meta['title'] . '</caption>';
-				}
-			}
-			else {
-				$out .= '<caption>' . do_shortcode($content) . '</caption>';
-			}
 			$out .= '<tr>';
 			$i = 0;
 			foreach( $meta['header'] as $item ):
@@ -652,11 +652,11 @@ class PwtcMileage {
 					$out .= '<tr>' . $outrow . '</tr>';
 				}
 			endforeach;
-			$out .= '</table>';
 		}
 		else {
-			$out .= '<span class="pwtc-mileage-empty-tbl">No records found!</span>';
+			$out .= '<tr><td data-th="Data">No records found!</td></tr>';
 		}
+		$out .= '</table>';
 		$out .= '</div>';
 		return $out;
 	}

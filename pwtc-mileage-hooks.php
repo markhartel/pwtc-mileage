@@ -24,28 +24,151 @@ function pwtc_mileage_fetch_membership() {
     return array();
 }
 
+/*
+Given the user's email address, this function looks up the CiviCRM contact record 
+and returns it's rider ID. Null is returned if no rider ID is set or is valid. Before this
+function is used you must first initialize the CiviCRM API by calling civicrm_initialize().
+*/
 function pwtc_mileage_fetch_civi_member_id($email) {
     $member_id = null;
-    $result = civicrm_api3('contact', 'get', array(
-        'sequential' => 1,
-        'email' => $email
-    ));
-    if ($result['values']) {
-        $contact_id = $result['values'][0]['contact_id'];
-        $result = civicrm_api3('CustomValue', 'get', array(
+    if (function_exists('civicrm_api3')) {
+        $result = civicrm_api3('contact', 'get', array(
             'sequential' => 1,
-            'entity_id' => $contact_id,
-            'return.custom_5' => 1
+            'email' => $email
         ));
         if ($result['values']) {
-            $member_id = trim($result['values'][0]['latest']);
-            if (strlen($member_id) == 0) {
-                $member_id = null;    
+            $contact_id = $result['values'][0]['contact_id'];
+            $result = civicrm_api3('CustomValue', 'get', array(
+                'sequential' => 1,
+                'entity_id' => $contact_id,
+                'return.custom_5' => 1
+            ));
+            if ($result['values']) {
+                $member_id = trim($result['values'][0]['latest']);
+                if (strlen($member_id) == 0) {
+                    $member_id = null;    
+                }
+                else {
+                    if (PwtcMileage::validate_member_id_str($member_id)) {
+                        $result = PwtcMileage_DB::fetch_rider($member_id); 
+                        if (count($result) == 0) {
+                            $member_id = null;
+                        } 
+                    } 
+                    else {
+                        $member_id = null;
+                    }   
+                }
             }
         }
     }
     return $member_id;
 }
+
+/*
+Given a CiviCRM contact ID, this function looks up the contact record 
+and uses it's information to insert a new rider into the mileage database and
+assign a rider ID. Should a rider ID already be assigned to the contact record
+then the existing rider's information is only updated. Returns null if
+successful, otherwise returns an error message string. Before this
+function is used you must first initialize the CiviCRM API by calling civicrm_initialize().
+*/
+function pwtc_mileage_civi_update_rider($contact_id, $update_only=false) {
+    $errormsg = null;
+    if (function_exists('civicrm_api3')) {
+        $result = civicrm_api3('contact', 'get', array(
+            'sequential' => 1,
+            'id' => $contact_id
+        ));
+        if ($result['values']) {
+            $firstname = trim($result['values'][0]['first_name']);
+            $lastname = trim($result['values'][0]['last_name']);
+            $expdate = "";
+            $memberships = civicrm_api3('Membership', 'get', array(
+                'sequential' => 1,
+                'contact_id' => $contact_id,
+            ));  
+            if ($memberships['values']) {
+                foreach ($memberships['values'] as $membership) {
+                    if (isset($membership['end_date'])) {
+                        if (strlen($expdate) == 0) {
+                            $expdate = $membership['end_date'];
+                        }
+                        else {
+                            $expdate = max($expdate, $membership['end_date']);
+                        }
+                    }
+                }
+            }          
+            if (PwtcMileage::validate_date_str($expdate) and 
+                PwtcMileage::validate_member_name_str($firstname) and 
+                PwtcMileage::validate_member_name_str($lastname)) {
+                $result = civicrm_api3('CustomValue', 'get', array(
+                    'sequential' => 1,
+                    'entity_id' => $contact_id,
+                    'return.custom_5' => 1
+                ));
+                $member_id = "";
+                if ($result['values']) {
+                    $member_id = trim($result['values'][0]['latest']);
+                }
+                if (strlen($member_id) == 0) {
+                    if (!$update_only) {
+                        $member_id = PwtcMileage_DB::gen_new_member_id();
+                        if (PwtcMileage::validate_member_id_str($member_id)) {
+                            $result = PwtcMileage_DB::fetch_rider($member_id); 
+                            if (count($result) == 0) {
+                                $status = PwtcMileage_DB::insert_rider(
+                                    $member_id, $lastname, $firstname, $expdate);
+                                if (false === $status or 0 === $status) {
+                                    $errormsg = "Cannot insert new rider into mileage database.";
+                                }
+                                else {
+                                    $result = civicrm_api3('CustomValue', 'create', array(
+                                        'sequential' => 1,
+                                        'entity_id' => $contact_id,
+                                        'custom_5' => $member_id
+                                    ));
+                                }
+                            }
+                            else {
+                                $errormsg = "Generated rider ID already in mileage database.";
+                            }
+                        }
+                        else {
+                            $errormsg = "Generated rider ID not valid.";
+                        }
+                    }
+                }
+                else {
+                    if (PwtcMileage::validate_member_id_str($member_id)) {
+                        $result = PwtcMileage_DB::fetch_rider($member_id); 
+                        if (count($result) == 1) {
+                            PwtcMileage_DB::insert_rider(
+                                $member_id, $lastname, $firstname, $expdate);
+                        }
+                        else {
+                            $errormsg = "Rider ID not found in mileage database.";
+                        }
+                    }
+                    else {
+                        $errormsg = "CiviCRM rider ID not valid.";
+                    }
+                }
+            }
+            else {
+                $errormsg = "Rider detail information not valid.";
+            }
+        }
+        else {
+            $errormsg = "CiviCRM contact not found.";  
+        }
+    }
+    else {
+        $errormsg = "CiviCRM not installed.";
+    }
+    return $errormsg;
+}    
 
 /*
 Returns a string that contains the member ID of the logged on user.
@@ -58,24 +181,26 @@ function pwtc_mileage_get_member_id() {
         throw new Exception('notloggedin');
     }
     else {
-        civicrm_initialize();
-        $id = pwtc_mileage_fetch_civi_member_id($current_user->user_email);
-        if (!$id) {
-            throw new Exception('idnotfound');
+        if (function_exists('civicrm_initialize')) {
+            civicrm_initialize();
+            $id = pwtc_mileage_fetch_civi_member_id($current_user->user_email);
+            if (!$id) {
+                throw new Exception('idnotfound');
+            }
         }
-/*
-        $test_date = PwtcMileage::get_date_for_expir_check();
-        $result = PwtcMileage_DB::fetch_riders_by_name(trim($current_user->user_lastname), 
-            trim($current_user->user_firstname), $test_date);
-        $count = count($result);
-        if ($count == 0) {
-            throw new Exception('idnotfound');
+        else {
+            $test_date = PwtcMileage::get_date_for_expir_check();
+            $result = PwtcMileage_DB::fetch_riders_by_name(trim($current_user->user_lastname), 
+                trim($current_user->user_firstname), $test_date);
+            $count = count($result);
+            if ($count == 0) {
+                throw new Exception('idnotfound');
+            }
+            else if ($count > 1) {
+                throw new Exception('multidfound');
+            }
+            $id = $result[0]['member_id'];
         }
-        else if ($count > 1) {
-            throw new Exception('multidfound');
-        }
-        $id = $result[0]['member_id'];
-*/
     }
     return $id;
 }
@@ -109,38 +234,43 @@ Returns an array that contains the rider ids of the ride leaders of the posted r
 */
 function pwtc_mileage_fetch_ride_leader_ids($post_id) {
     $leaders_array = array();
-    $leaders = get_field('ride_leaders', $post_id);
-    if ($leaders) {
-        //pwtc_mileage_write_log($leaders);
-        civicrm_initialize();
-        foreach ($leaders as $leader) {
-            $id = pwtc_mileage_fetch_civi_member_id($leader['user_email']);
-            if ($id) {
-                array_push($leaders_array, $id);
+    if (function_exists('get_field')) {
+        $leaders = get_field('ride_leaders', $post_id);
+        if ($leaders) {
+            //pwtc_mileage_write_log($leaders);
+            if (function_exists('civicrm_initialize')) {
+                civicrm_initialize();
+                foreach ($leaders as $leader) {
+                    $id = pwtc_mileage_fetch_civi_member_id($leader['user_email']);
+                    if ($id) {
+                        array_push($leaders_array, $id);
+                    }
+                }
             }
-            /*
-            $fname = $leader['user_firstname'];
-            $lname = $leader['user_lastname'];
-            $test_date = PwtcMileage::get_date_for_expir_check();
-            $result = PwtcMileage_DB::fetch_riders_by_name(trim($lname), trim($fname), $test_date);
-            if (count($result) == 1) {
-                $id = $result[0]['member_id'];
-                array_push($leaders_array, $id);
+            else {
+                $test_date = PwtcMileage::get_date_for_expir_check();
+                foreach ($leaders as $leader) {
+                    $fname = $leader['user_firstname'];
+                    $lname = $leader['user_lastname'];
+                    $result = PwtcMileage_DB::fetch_riders_by_name(trim($lname), trim($fname), $test_date);
+                    if (count($result) == 1) {
+                        $id = $result[0]['member_id'];
+                        array_push($leaders_array, $id);
+                    }
+                }                    
             }
-            */
         }
-    }
-
 /*
-    $leaders = get_field('ride_leader', $post_id);
-    if ($leaders) {
-        //pwtc_mileage_write_log($leaders);
-        foreach ($leaders as $leader) {
-            $riderid = get_field('rider_number', $leader->ID);
-            array_push($leaders_array, $riderid);
+        $leaders = get_field('ride_leader', $post_id);
+        if ($leaders) {
+            //pwtc_mileage_write_log($leaders);
+            foreach ($leaders as $leader) {
+                $riderid = get_field('rider_number', $leader->ID);
+                array_push($leaders_array, $riderid);
+            }
         }
-    }
 */
+    }
     return $leaders_array;
 }
 
@@ -149,29 +279,30 @@ Returns an array that contains the names of the ride leaders of the posted ride.
 */
 function pwtc_mileage_fetch_ride_leader_names($post_id) {
     $leaders_array = array();
-    $leaders = get_field('ride_leaders', $post_id);
-    if ($leaders) {
-        //pwtc_mileage_write_log($leaders);
-        foreach ($leaders as $leader) {
-            $fname = $leader['user_firstname'];
-            $lname = $leader['user_lastname'];
- 	        //$fname = get_user_meta($leader->ID, 'first_name', true);
- 	        //$lname = get_user_meta($leader->ID, 'last_name', true);
-            $name = $fname . ' ' . $lname;
-            array_push($leaders_array, $name);
+    if (function_exists('get_field')) {
+        $leaders = get_field('ride_leaders', $post_id);
+        if ($leaders) {
+            //pwtc_mileage_write_log($leaders);
+            foreach ($leaders as $leader) {
+                $fname = $leader['user_firstname'];
+                $lname = $leader['user_lastname'];
+                //$fname = get_user_meta($leader->ID, 'first_name', true);
+                //$lname = get_user_meta($leader->ID, 'last_name', true);
+                $name = $fname . ' ' . $lname;
+                array_push($leaders_array, $name);
+            }
         }
-    }
-
 /*    
-    $leaders = get_field('ride_leader', $post_id);
-    if ($leaders) {
-        //pwtc_mileage_write_log($leaders);
-        foreach ($leaders as $leader) {
-            $name = $leader->post_title;
-            array_push($leaders_array, $name);
+        $leaders = get_field('ride_leader', $post_id);
+        if ($leaders) {
+            //pwtc_mileage_write_log($leaders);
+            foreach ($leaders as $leader) {
+                $name = $leader->post_title;
+                array_push($leaders_array, $name);
+            }
         }
-    }
 */
+    }
     return $leaders_array;
 }
 
