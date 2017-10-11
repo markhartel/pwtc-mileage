@@ -73,6 +73,7 @@ then the existing rider's information is only updated. Returns null if
 successful, otherwise returns an error message string. Before this
 function is used you must first initialize the CiviCRM API by calling civicrm_initialize().
 */
+//TODO: use email instead of contact ID for lookup?
 function pwtc_mileage_civi_update_rider($contact_id, $update_only=false) {
     $errormsg = null;
     if (function_exists('civicrm_api3')) {
@@ -83,11 +84,11 @@ function pwtc_mileage_civi_update_rider($contact_id, $update_only=false) {
         if ($result['values']) {
             $firstname = trim($result['values'][0]['first_name']);
             $lastname = trim($result['values'][0]['last_name']);
-            $expdate = "";
             $memberships = civicrm_api3('Membership', 'get', array(
                 'sequential' => 1,
                 'contact_id' => $contact_id,
-            ));  
+            ));
+            $expdate = ""; 
             if ($memberships['values']) {
                 foreach ($memberships['values'] as $membership) {
                     if (isset($membership['end_date'])) {
@@ -99,7 +100,10 @@ function pwtc_mileage_civi_update_rider($contact_id, $update_only=false) {
                         }
                     }
                 }
-            }          
+            } 
+            if (strlen($expdate) == 0) {  
+                $expdate = date('Y-m-d', current_time('timestamp'));
+            }       
             if (PwtcMileage::validate_date_str($expdate) and 
                 PwtcMileage::validate_member_name_str($firstname) and 
                 PwtcMileage::validate_member_name_str($lastname)) {
