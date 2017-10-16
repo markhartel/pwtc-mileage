@@ -35,15 +35,9 @@ class PwtcMileage {
 		add_shortcode('pwtc_rider_report', 
 			array( 'PwtcMileage', 'shortcode_rider_report'));
 /*
-		add_shortcode('pwtc_rider_name', 
-			array( 'PwtcMileage', 'shortcode_rider_name'));
-		add_shortcode('pwtc_rider_mileage', 
-			array( 'PwtcMileage', 'shortcode_rider_mileage'));
-		add_shortcode('pwtc_rider_led', 
-			array( 'PwtcMileage', 'shortcode_rider_led'));
-*/
 		add_shortcode('pwtc_achievement_last_year', 
 			array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
+*/
 		add_shortcode('pwtc_mileage_year_to_date', 
 			array( 'PwtcMileage', 'shortcode_ytd_miles'));
 		add_shortcode('pwtc_mileage_last_year', 
@@ -763,65 +757,13 @@ class PwtcMileage {
 		return $out;
 	}
 
-/*
-	public static function shortcode_rider_name($atts) {
-		$out = '';
-		$id = pwtc_mileage_get_member_id();
-		if ($id != null) {
-			$result = PwtcMileage_DB::fetch_rider($id);
-			if (count($result) > 0) {
-				$out .= '<span>' . $result[0]['first_name'] . ' ' . 
-					$result[0]['last_name'] . '</span>';
-			}
-		}
-		else {
-			$out .= '<span>Unknown Rider</span>';			
-		}
-		return $out;
-	}
-
-	public static function shortcode_rider_mileage($atts) {
-    	$a = shortcode_atts(array('type' => 'year2date'), $atts);
-		$out = '';
-		$id = pwtc_mileage_get_member_id();
-		if ($id != null) {
-			if ($a['type'] == 'year2date') {
-				$out .= '<span>' . PwtcMileage_DB::get_ytd_rider_mileage($id) . '</span>';
-			}
-			else if ($a['type'] == 'lastyear') {
-				$out .= '<span>' . PwtcMileage_DB::get_ly_rider_mileage($id) . '</span>';
-			}
-			else if ($a['type'] == 'lifetime') {
-				$out .= '<span>' . PwtcMileage_DB::get_lt_rider_mileage($id) . '</span>';
-			}
-		}
-		else {
-			$out .= '<span>0</span>';			
-		}
-		return $out;
-	}
-
-	public static function shortcode_rider_led($atts) {
-    	$a = shortcode_atts(array('type' => 'year2date'), $atts);
-		$out = '';
-		$id = pwtc_mileage_get_member_id();
-		if ($id != null) {
-			if ($a['type'] == 'year2date') {
-				$out .= '<span>' . PwtcMileage_DB::get_ytd_rider_led($id) . '</span>';
-			}
-			else if ($a['type'] == 'lastyear') {
-				$out .= '<span>' . PwtcMileage_DB::get_ly_rider_led($id) . '</span>';
-			}
-		}
-		else {
-			$out .= '<span>0</span>';						
-		}
-		return $out;
-	}
-*/
-
 	// Generates the [pwtc_achievement_last_year] shortcode.
+/*
 	public static function shortcode_ly_lt_achvmnt($atts, $content = null) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return "<div>Please log in to see TBD</div>";
+		}	
 		$a = self::normalize_atts($atts);
 		$sort = self::build_mileage_sort($a);
 		$meta = PwtcMileage_DB::meta_ly_lt_achvmnt();
@@ -829,9 +771,14 @@ class PwtcMileage {
 		$out = self::shortcode_build_table($meta, $data, $a, $content);
 		return $out;
 	}
+*/
 
 	// Generates the [pwtc_mileage_year_to_date] shortcode.
 	public static function shortcode_ytd_miles($atts, $content = null) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return "<div>Please log in to see the year-to-date mileage report.</div>";
+		}	
 		$a = self::normalize_atts($atts);
 		$sort = self::build_mileage_sort($a);
 		$min = self::get_minimum_val($a);
@@ -843,6 +790,10 @@ class PwtcMileage {
 
 	// Generates the [pwtc_mileage_last_year] shortcode.
 	public static function shortcode_ly_miles($atts, $content = null) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return "<div>Please log in to see the last year mileage report.</div>";
+		}	
 		$a = self::normalize_atts($atts);
 		$sort = self::build_mileage_sort($a);
 		$min = self::get_minimum_val($a);
@@ -854,6 +805,10 @@ class PwtcMileage {
 
 	// Generates the [pwtc_mileage_lifetime] shortcode.
 	public static function shortcode_lt_miles($atts, $content = null) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return "<div>Please log in to see the lifetime mileage report.</div>";
+		}	
 		$a = self::normalize_atts($atts);
 		$sort = self::build_mileage_sort($a);
 		$min = self::get_minimum_val($a);
@@ -865,6 +820,10 @@ class PwtcMileage {
 
 	// Generates the [pwtc_rides_led_year_to_date] shortcode.
 	public static function shortcode_ytd_led($atts, $content = null) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return "<div>Please log in to see the year-to-date number of rides led report.</div>";
+		}	
 		$a = self::normalize_atts($atts);
 		$sort = self::build_rides_led_sort($a);
 		$min = self::get_minimum_val($a);
@@ -876,6 +835,10 @@ class PwtcMileage {
 
 	// Generates the [pwtc_rides_led_last_year] shortcode.
 	public static function shortcode_ly_led($atts, $content = null) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return "<div>Please log in to see the last year number of rides led report.</div>";
+		}	
 		$a = self::normalize_atts($atts);
 		$sort = self::build_rides_led_sort($a);
 		$min = self::get_minimum_val($a);
@@ -1007,6 +970,10 @@ class PwtcMileage {
 
 	// Generates the [pwtc_posted_rides_wo_sheets] shortcode.
 	public static function shortcode_rides_wo_sheets($atts, $content = null) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return "<div>Please log in to see the posted rides that are missing ridesheets report.</div>";
+		}	
 		$a = self::normalize_atts($atts);
 		$meta = PwtcMileage_DB::meta_posts_without_rides2();
 		$data = PwtcMileage_DB::fetch_posts_without_rides2();
