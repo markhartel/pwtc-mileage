@@ -73,7 +73,6 @@ then the existing rider's information is only updated. Returns null if
 successful, otherwise returns an error message string. Before this
 function is used you must first initialize the CiviCRM API by calling civicrm_initialize().
 */
-//TODO: use email instead of contact ID for lookup?
 function pwtc_mileage_civi_update_rider($contact_id, $update_only=false) {
     $errormsg = null;
     if (function_exists('civicrm_api3')) {
@@ -125,7 +124,7 @@ function pwtc_mileage_civi_update_rider($contact_id, $update_only=false) {
                                 $status = PwtcMileage_DB::insert_rider(
                                     $member_id, $lastname, $firstname, $expdate);
                                 if (false === $status or 0 === $status) {
-                                    $errormsg = "Cannot insert new rider into mileage database.";
+                                    $errormsg = "Cannot insert new rider ID " . $member_id . " for contact " . $contact_id . " into mileage DB.";
                                 }
                                 else {
                                     $result = civicrm_api3('CustomValue', 'create', array(
@@ -136,11 +135,11 @@ function pwtc_mileage_civi_update_rider($contact_id, $update_only=false) {
                                 }
                             }
                             else {
-                                $errormsg = "Generated rider ID already in mileage database.";
+                                $errormsg = "Generated rider ID " . $member_id . " for contact " . $contact_id . " already in mileage DB.";
                             }
                         }
                         else {
-                            $errormsg = "Generated rider ID not valid.";
+                            $errormsg = "Generated rider ID " . $member_id . " for contact " . $contact_id . " not valid.";
                         }
                     }
                 }
@@ -152,20 +151,20 @@ function pwtc_mileage_civi_update_rider($contact_id, $update_only=false) {
                                 $member_id, $lastname, $firstname, $expdate);
                         }
                         else {
-                            $errormsg = "Rider ID not found in mileage database.";
+                            $errormsg = "Rider ID " . $member_id . " for contact " . $contact_id . " not found in mileage DB.";
                         }
                     }
                     else {
-                        $errormsg = "CiviCRM rider ID not valid.";
+                        $errormsg = "Rider ID " . $member_id . " for contact " . $contact_id . " not valid.";
                     }
                 }
             }
             else {
-                $errormsg = "Rider detail information not valid.";
+                $errormsg = "Rider detail info for contact " . $contact_id . " not valid.";
             }
         }
         else {
-            $errormsg = "CiviCRM contact not found.";  
+            $errormsg = "Contact " . $contact_id . " not found.";  
         }
     }
     else {
