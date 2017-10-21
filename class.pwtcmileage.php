@@ -60,6 +60,8 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'shortcode_rides_wo_sheets'));
 		add_shortcode('pwtc_riderid_download', 
 			array( 'PwtcMileage', 'shortcode_riderid_download'));
+		add_shortcode('pwtc_ridecal_download', 
+			array( 'PwtcMileage', 'shortcode_ridecal_download'));
 
 		// Register background action task callbacks 
 		add_action( 'pwtc_mileage_consolidation', 
@@ -75,7 +77,10 @@ class PwtcMileage {
 	}
 
 	public static function download_riderid() {
-		if (isset($_POST['download_riderid'])) {
+		if (isset($_POST['download_riderid']) and
+			isset($_POST['rider_name']) and
+			isset($_POST['rider_id']) and
+			isset($_POST['expire_date'])) {
 			header('Content-Description: File Transfer');
 			header("Content-type: application/pdf");
 			header("Content-Disposition: attachment; filename=rider_card.pdf");
@@ -981,9 +986,47 @@ class PwtcMileage {
 		return $out;
 	}
 
+	// Generates the [pwtc_ridecal_download] shortcode.
+	public static function shortcode_ridecal_download($atts, $content = null) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return "";
+		}	
+    	$a = shortcode_atts(array(
+			'month' => 'current',
+			'file' => 'pdf'
+		), $atts);
+		$time = current_time('timestamp');
+		if ($a['month'] == 'next') {
+			$time2 = strtotime('+1 day', strtotime(date('Y-m-t', $time)));
+			$start = date('Y-m-01', $time2);
+			$end = date('Y-m-t', $time2);
+			$monthname = date('M', $time2);
+		}
+		else {
+			$start = date('Y-m-01', $time);
+			$end = date('Y-m-t', $time);
+			$monthname = date('M', $time);	
+		}
+		if ($a['file'] == 'csv') {
+			$file = 'csv';
+		}
+		else {
+			$file = 'pdf';
+		}
+		$label = $monthname . " Rides (" . $file . ")";	
+		$out = '<form style="display: inline" method="POST">';
+		$out .= '<input class="dark button" type="submit" name="download_ridecal" value="' . $label . '"/>';
+		$out .= '<input type="hidden" name="start" value="' . $start . '"/>';
+		$out .= '<input type="hidden" name="end" value="' . $end . '"/>';
+		$out .= '<input type="hidden" name="file" value="' . $file . '"/>';
+		$out .= '</form>';
+		return $out;
+	}
+		
 	// Generates the [pwtc_riderid_download] shortcode.
 	public static function shortcode_riderid_download($atts, $content = null) {
-		$out = '<div>';
+		$out = '';
 		try {
 			$member_id = pwtc_mileage_get_member_id();
 			$result = PwtcMileage_DB::fetch_rider($member_id);
@@ -996,8 +1039,8 @@ class PwtcMileage {
 				$firstname = $result[0]['first_name'];
 				$exp_date = $result[0]['expir_date'];
 				$fmtdate = date('M Y', strtotime($exp_date));
-				$out .= '<form method="POST">';
-				$out .= '<input class="dark button" type="submit" name="download_riderid" value="Download ID"/>';
+				$out .= '<form style="display: inline" method="POST">';
+				$out .= '<input class="dark button" type="submit" name="download_riderid" value="Rider ID"/>';
 				$out .= '<input type="hidden" name="rider_id" value="' . $member_id . '"/>';
 				$out .= '<input type="hidden" name="rider_name" value="' . $firstname . ' ' . $lastname . '"/>';
 				$out .= '<input type="hidden" name="expire_date" value="' . $fmtdate . '"/>';
@@ -1007,7 +1050,7 @@ class PwtcMileage {
 		catch (Exception $e) {
 			switch ($e->getMessage()) {
 				case "notloggedin":
-					$out .= 'Please log in to download your rider ID card.';
+					//$out = '<span title="log in to download your rider ID card">Error!</span>';
 					break;
 				case "idnotfound":
 					$out .= 'Cannot download rider ID card, rider ID not found.';
@@ -1019,7 +1062,6 @@ class PwtcMileage {
 					$out .= 'Cannot download rider ID card, unknown error.';
 			}
 		}
-		$out .= '</div>';
 		return $out;
 	}
 
