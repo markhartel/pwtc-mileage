@@ -582,9 +582,16 @@ class PwtcMileage_Admin {
 					else {
 						$status = PwtcMileage_DB::insert_rider($memberid, $lastname, $firstname, $expdate);	
 						if (false === $status or 0 === $status) {
-							$response = array(
-								'error' => 'Could not insert rider into database.'
-							);
+							if ($mode == 'update') {							
+								$response = array(
+									'error' => 'Did not update rider info, it might not have changed.'
+								);
+							}
+							else {
+								$response = array(
+									'error' => 'Could not insert rider into database.'
+								);
+							}
 							echo wp_json_encode($response);
 						}
 						else {
@@ -842,20 +849,29 @@ class PwtcMileage_Admin {
 					echo wp_json_encode($response);
 				}
 				else {
-					$status = PwtcMileage_DB::insert_ride_leader(intval($rideid), $memberid);
-					if (false === $status or 0 === $status) {
+					if (count(PwtcMileage_DB::fetch_ride_member_leaders(
+						$memberid, intval($rideid))) > 0) {
 						$response = array(
-							'error' => 'Could not insert ride leader into database.'
+							'error' => 'Ride leader already exists.'
 						);
 						echo wp_json_encode($response);
 					}
 					else {
-						$leaders = PwtcMileage_DB::fetch_ride_leaders(intval($rideid));
-						$response = array(
-							'ride_id' => $rideid,
-							'leaders' => $leaders
-						);
-						echo wp_json_encode($response);
+						$status = PwtcMileage_DB::insert_ride_leader(intval($rideid), $memberid);
+						if (false === $status or 0 === $status) {
+							$response = array(
+								'error' => 'Could not insert ride leader into database.'
+							);
+							echo wp_json_encode($response);
+						}
+						else {
+							$leaders = PwtcMileage_DB::fetch_ride_leaders(intval($rideid));
+							$response = array(
+								'ride_id' => $rideid,
+								'leaders' => $leaders
+							);
+							echo wp_json_encode($response);
+						}
 					}
 				}
 			}
@@ -871,7 +887,7 @@ class PwtcMileage_Admin {
 			echo wp_json_encode($response);
 		}
 		else if (!isset($_POST['ride_id']) or !isset($_POST['member_id']) or 
-			!isset($_POST['mileage']) or !isset($_POST['nonce'])) {
+			!isset($_POST['mileage']) or !isset($_POST['mode']) or !isset($_POST['nonce'])) {
 			$response = array(
 				'error' => 'Input parameters needed to add mileage to a ridesheet are missing.'
 			);
@@ -881,6 +897,7 @@ class PwtcMileage_Admin {
 			$rideid = trim($_POST['ride_id']);
 			$memberid = trim($_POST['member_id']);
 			$mileage = trim($_POST['mileage']);
+			$mode = trim($_POST['mode']);
 			$nonce = $_POST['nonce'];	
 			if (!wp_verify_nonce($nonce, 'pwtc_mileage_add_mileage')) {
 				$response = array(
@@ -910,20 +927,36 @@ class PwtcMileage_Admin {
 						echo wp_json_encode($response);
 					}
 					else {
-						$status = PwtcMileage_DB::insert_ride_mileage(intval($rideid), $memberid, intval($mileage));
-						if (false === $status or 0 === $status) {
+						if ($mode == 'add' and count(PwtcMileage_DB::fetch_ride_member_mileage(
+							$memberid, intval($rideid))) > 0) {
 							$response = array(
-								'error' => 'Could not insert ride mileage into database.'
+								'error' => 'Rider mileage already exists.'
 							);
 							echo wp_json_encode($response);
 						}
 						else {
-							$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
-							$response = array(
-								'ride_id' => $rideid,
-								'mileage' => $mileage
-							);
-							echo wp_json_encode($response);
+							$status = PwtcMileage_DB::insert_ride_mileage(intval($rideid), $memberid, intval($mileage));
+							if (false === $status or 0 === $status) {
+								if ($mode == 'modify') {
+									$response = array(
+										'error' => 'Did not update ride mileage, it might not have changed.'
+									);
+								}
+								else {
+									$response = array(
+										'error' => 'Could not insert ride mileage into database.'
+									);
+								}
+								echo wp_json_encode($response);
+							}
+							else {
+								$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
+								$response = array(
+									'ride_id' => $rideid,
+									'mileage' => $mileage
+								);
+								echo wp_json_encode($response);
+							}
 						}
 					}
 				}

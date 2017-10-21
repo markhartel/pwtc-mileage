@@ -556,15 +556,33 @@ class PwtcMileage_DB {
 		return $results;
 	}
 
+	public static function fetch_ride_member_mileage($memberid, $rideid) {
+    	global $wpdb;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+    	$results = $wpdb->get_results($wpdb->prepare('select member_id, ride_id, mileage' . 
+			' from ' . $mileage_table . ' where ride_id = %d and member_id = %s', 
+			$rideid, $memberid), ARRAY_A);
+		return $results;
+	}		
+
 	public static function fetch_ride_leaders($rideid) {
     	global $wpdb;
 		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
-    	$results = $wpdb->get_results($wpdb->prepare('select' . 
+		$results = $wpdb->get_results($wpdb->prepare('select' . 
 			' c.member_id, c.first_name, c.last_name' . 
 			' from ' . $member_table . ' as c inner join ' . $leader_table . ' as l' . 
 			' on c.member_id = l.member_id where l.ride_id = %d order by c.last_name, c.first_name', 
 			$rideid), ARRAY_A);
+		return $results;
+	}
+
+	public static function fetch_ride_member_leaders($memberid, $rideid) {
+    	global $wpdb;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+    	$results = $wpdb->get_results($wpdb->prepare('select member_id, ride_id, rides_led' . 
+			' from ' . $leader_table . ' where ride_id = %d and member_id = %s', 
+			$rideid, $memberid), ARRAY_A);
 		return $results;
 	}
 

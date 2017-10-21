@@ -232,6 +232,7 @@ jQuery(document).ready(function($) {
 				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='riderid']").val(
 					$(this).parent().parent().attr('memberid')
 				);
+				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mode']").val('modify');
 				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='ridername']").val(
 					$(this).parent().parent().find('td').eq(1).html()
 				);
@@ -596,6 +597,7 @@ if ($create_mode) {
 			'action': 'pwtc_mileage_add_mileage',
 			'member_id': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='riderid']").val(),
 			'ride_id': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='rideid']").val(),
+			'mode': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='mode']").val(),
 			'mileage': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(),
 			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_add_mileage'); ?>'
 		};
@@ -625,6 +627,7 @@ if ($create_mode) {
         lookup_pwtc_riders(function(riderid, name) {
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[type='submit']").val('Add Mileage');
             $("#ridesheet-sheet-page .mileage-section .add-frm input[name='riderid']").val(riderid);
+			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mode']").val('add');
             $("#ridesheet-sheet-page .mileage-section .add-frm input[name='ridername']").val(name); 
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(''); 
 			$("#ridesheet-sheet-page .mileage-section .lookup-btn").hide('fast', function() {
@@ -798,6 +801,7 @@ if ($running_jobs > 0) {
 						<span>Mileage</span>
 						<input name="mileage" type="text" required/>
 						<input name="rideid" type="hidden"/>
+						<input name="mode" type="hidden" value="add"/>
 						<input class="button button-primary" type="submit" value="Add Mileage"/>
 						<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 					</form>
