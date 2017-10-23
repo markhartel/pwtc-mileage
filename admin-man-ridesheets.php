@@ -42,7 +42,6 @@ jQuery(document).ready(function($) {
 	function populate_posts_table(posts) {
 		$('#ridesheet-ride-page .posts-div').empty();
 		if (posts.length > 0) {
-			$('#ridesheet-ride-page .posts-div').append('<strong>Posted rides that are missing ridesheets.</strong>');
 			$('#ridesheet-ride-page .posts-div').append('<table class="rwd-table"></table>');
 			if (show_ride_id) {
 				$('#ridesheet-ride-page .posts-div table').append(
@@ -57,21 +56,23 @@ jQuery(document).ready(function($) {
 				var fmtdate = getPrettyDate(post[2]);
 				guidlink = '';
 				if (show_guid) {
-					guidlink = '<a href="' + post[3] + '" target="_blank">View</a> ';
+					guidlink = '<a title="View this posted ride." href="' + 
+						post[3] + '" target="_blank">View</a> ';
 				}
+				createlink = '<a title="Create a ridesheet for this posted ride." class="create-btn">Create</a>'
 				if (show_ride_id) {
 					$('#ridesheet-ride-page .posts-div table').append(
 						'<tr postid="' + post[0] + '" ridedate="' + post[2] + '"><td data-th="Ride">' +
 						post[1] + '</td><td data-th="Date">' + fmtdate + '</td><td data-th="ID">' + post[0] + '</td>' +
-						' <td data-th="Actions">' + guidlink +
-						'<a class="create-btn">Create</a>' + '</td></tr>');
+						' <td data-th="Actions">' + guidlink + ' ' +
+						createlink + '</td></tr>');
 				}
 				else {
 					$('#ridesheet-ride-page .posts-div table').append(
 						'<tr postid="' + post[0] + '" ridedate="' + post[2] + '"><td data-th="Ride">' +
 						post[1] + '</td><td data-th="Date">' + fmtdate + '</td>' + 
-						' <td data-th="Actions">' + guidlink +
-						'<a class="create-btn">Create</a>' + '</td></tr>');
+						' <td data-th="Actions">' + guidlink + ' ' +
+						createlink + '</td></tr>');
 				} 
 			});
 			$('#ridesheet-ride-page .posts-div .create-btn').on('click', function(evt) {
@@ -85,7 +86,7 @@ jQuery(document).ready(function($) {
 					'nonce': '<?php echo wp_create_nonce('pwtc_mileage_create_ride_from_event'); ?>'
 				};
 				open_confirm_dialog(
-					'Are you sure you want to create a ridesheet for ride titled "' + data.title + '"?', 
+					'Are you sure you want to create a ridesheet for posted ride "' + data.title + '"?', 
 					function() {
 						$('body').addClass('waiting');
 						$.post(action, data, lookup_ridesheet_cb);
@@ -95,7 +96,7 @@ jQuery(document).ready(function($) {
 		}
 		else {
 			$('#ridesheet-ride-page .posts-div').append(
-				'<span class="empty-tbl">No missing ridesheets!</span>');
+				'<span class="empty-tbl">No missing ridesheets.</span>');
 		}
 	}
 
@@ -114,20 +115,22 @@ jQuery(document).ready(function($) {
 			var fmt = new DateFormatter();
 			rides.forEach(function(item) {
 				var fmtdate = getPrettyDate(item.date);
+				editlink = '<a title="Edit this ridesheet." class="edit-btn">Edit</a>';
+				deletelink = '<a title="Delete this ridesheet." class="remove-btn">Delete</a>';
 				if (show_ride_id) {
 					$('#ridesheet-ride-page .rides-div table').append(
 						'<tr rideid="' + item.ID + '" ridedate="' + item.date + '"><td data-th="Ride">' +
 						item.title + '</td><td data-th="Date">' + fmtdate + '</td><td data-th="ID">' + 
 						item.ID + '</td><td data-th="Post ID">' + 
-						item.post_id + '</td><td data-th="Actions"><a class="edit-btn">Edit</a>' + ' ' +
-						'<a class="remove-btn">Delete</a></td></tr>'); 
+						item.post_id + '</td><td data-th="Actions">' + editlink + ' ' +
+						deletelink + '</td></tr>'); 
 				}
 				else {
 					$('#ridesheet-ride-page .rides-div table').append(
 						'<tr rideid="' + item.ID + '" ridedate="' + item.date + '"><td data-th="Ride">' +
 						item.title + '</td><td data-th="Date">' + fmtdate + '</td><td data-th="Actions">' + 
-						'<a class="edit-btn">Edit</a>' + ' ' +
-						'<a class="remove-btn">Delete</a></td></tr>'); 
+						editlink + ' ' + deletelink +
+						'</td></tr>'); 
 				}   
 			});
 			$('#ridesheet-ride-page .rides-div .edit-btn').on('click', function(evt) {
@@ -166,7 +169,7 @@ jQuery(document).ready(function($) {
 		}
 		else {
 			$('#ridesheet-ride-page .rides-div').append(
-				'<span class="empty-tbl">No ridesheets found!</span>');
+				'<span class="empty-tbl">No ridesheets found.</span>');
 		}
 	}
 
@@ -175,12 +178,13 @@ jQuery(document).ready(function($) {
 		if (leaders.length) {
 			$('#ridesheet-sheet-page .leader-div').append(
 				'<table class="rwd-table"><tr><th>ID</th><th>Name</th><th>Actions</th></tr></table>');
+			deletelink = '<a title="Delete this ride leader." class="remove-btn">Delete</a>'
 			leaders.forEach(function(item) {
 				$('#ridesheet-sheet-page .leader-div table').append(
 					'<tr rideid="' + ride_id + '" memberid="' + item.member_id + '">' + 
 					'<td data-th="ID">' + item.member_id + '</td>' +
 					'<td data-th="Name">' + item.first_name + ' ' + item.last_name + '</td>' + 
-					'<td data-th="Actions"><a class="remove-btn">Delete</a></td></tr>');    
+					'<td data-th="Actions">' + deletelink + '</td></tr>');    
 			});
 			$('#ridesheet-sheet-page .leader-div .remove-btn').on('click', function(evt) {
 				evt.preventDefault();
@@ -208,7 +212,7 @@ jQuery(document).ready(function($) {
 		}
 		else {
 			$('#ridesheet-sheet-page .leader-div').append(
-				'<span class="empty-tbl">No leaders entered!</span>');
+				'<span class="empty-tbl">No leaders entered.</span>');
 		}
 	}
 
@@ -217,14 +221,16 @@ jQuery(document).ready(function($) {
 		if (mileage.length > 0) {
 			$('#ridesheet-sheet-page .mileage-div').append(
 				'<table class="rwd-table"><tr><th>ID</th><th>Name</th><th>Mileage</th><th>Actions</th></tr></table>');
+			editlink = '<a title="Edit this rider\'s mileage." class="edit-btn">Edit</a>';
+			deletelink = '<a title="Delete this rider\'s mileage." class="remove-btn">Delete</a>';
 			mileage.forEach(function(item) {
 				$('#ridesheet-sheet-page .mileage-div table').append(
 					'<tr rideid="' + ride_id + '" memberid="' + item.member_id + '">' + 
 					'<td data-th="ID">' + item.member_id + '</td>' +
 					'<td data-th="Name">' + item.first_name + ' ' + item.last_name + '</td>' + 
 					'<td data-th="Mileage">' + item.mileage + '</td>' +
-					'<td data-th="Actions"><a class="edit-btn">Edit</a>' + ' ' +
-					'<a class="remove-btn">Delete</a></td></tr>');    
+					'<td data-th="Actions">' + editlink + ' ' + deletelink + 
+					'</td></tr>');    
 			});
 			$('#ridesheet-sheet-page .mileage-div .edit-btn').on('click', function(evt) {
 				evt.preventDefault();
@@ -270,7 +276,7 @@ jQuery(document).ready(function($) {
 		}
 		else {
 			$('#ridesheet-sheet-page .mileage-div').append(
-				'<span class="empty-tbl">No mileage entered!</span>');
+				'<span class="empty-tbl">No mileage entered.</span>');
 		}
 	}
 
@@ -302,7 +308,7 @@ jQuery(document).ready(function($) {
 		$('#ridesheet-sheet-page .sheet-date').html(fmtdate);
 		if (show_guid && post_guid) {
 			$('#ridesheet-sheet-page .sheet-guid').html(
-				'<a href="' + post_guid + '" target="_blank">view</a>');
+				'<a title="View associated posted ride." href="' + post_guid + '" target="_blank">view ride</a>');
 		}
 		else {
 			$('#ridesheet-sheet-page .sheet-guid').html('');
@@ -494,12 +500,17 @@ if ($create_mode) {
 		});
 
 		$("#ridesheet-ride-page .add-btn").on('click', function(evt) {
-			$("#ridesheet-ride-page .add-blk .add-frm input[type='text']").val(''); 
-			$("#ridesheet-ride-page .add-blk .add-frm input[type='hidden']").val(''); 
-			$("#ridesheet-ride-page .add-btn").hide('fast', function() {
-				$('#ridesheet-ride-page .add-blk').show('slow'); 
-				$("#ridesheet-ride-page .add-blk .add-frm input[name='title']").focus();          
-			});
+			open_confirm_dialog(
+				'WARNING: this creates a ridesheet that is NOT associated with any posted rides. Do you want to continue?', 
+				function() {
+					$("#ridesheet-ride-page .add-blk .add-frm input[type='text']").val(''); 
+					$("#ridesheet-ride-page .add-blk .add-frm input[type='hidden']").val(''); 
+					$("#ridesheet-ride-page .add-btn").hide('fast', function() {
+						$('#ridesheet-ride-page .add-blk').show('slow'); 
+						$("#ridesheet-ride-page .add-blk .add-frm input[name='title']").focus();          
+					});
+				}
+			);
 		});
 	
 		$("#ridesheet-ride-page .add-blk .cancel-btn").on('click', function(evt) {
@@ -547,6 +558,7 @@ if ($create_mode) {
 			  changeYear: true
 		}).on( "change", function() {
 			toDate.datepicker("option", "minDate", getDate(this));
+			toDate.datepicker("setDate", getDate(this));
 		});
 	
 		var toDate = $("#ridesheet-ride-page .ride-search-frm input[name='todate']").datepicker({
@@ -556,7 +568,7 @@ if ($create_mode) {
 			changeMonth: true,
 			  changeYear: true
 		}).on( "change", function() {
-			fromDate.datepicker("option", "maxDate", getDate(this));
+			//fromDate.datepicker("option", "maxDate", getDate(this));
 		});	
 
 		$("#ridesheet-ride-page .ride-search-frm input[type='text']").val(''); 
@@ -719,12 +731,15 @@ if ($running_jobs > 0) {
 	<?php
 	if ($create_mode) {
 	?>
-		<p><div class="posts-div"></div></p>
+		<p>When you receive a rider signup sheet from the ride leader, use this page to choose the appropriate posted ride and create a ridesheet for it.</p>
+		<h2>Posted Rides Without Ridesheets</h2>
+		<div class="posts-div"></div>
 	<?php
 	} else {
 	?>
+		<p>When you need to update an already existing ridesheet, use this page to find it.</p>
         <div class='search-sec'>
-		<p><strong>Enter search parameters to lookup ridesheets.</strong>
+		<p><strong>Enter search parameters to find ridesheets.</strong>
 		<form class="ride-search-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 			<span>Title</span>
 			<input type="text" name="title"/>
@@ -757,10 +772,11 @@ if ($running_jobs > 0) {
 	?>
 	</div>
 	<div id='ridesheet-sheet-page' class="initially-hidden">
+		<p>Use this page to identify the ride leaders and enter the rider mileages from the rider signup sheet.</p>
 		<p><button class='back-btn button button-primary button-large'>Back</button></p>
 		<div class='report-sec'>
-		<h3>Ridesheet</h3>
-		<h3><span class="sheet-title"></span> - <span class="sheet-date"></span> <span class="sheet-guid"></span></h3>
+		<h3>Ridesheet Title - Date&nbsp;<span class="sheet-guid"></span></h3>
+		<h3><span class="sheet-title"></span> - <span class="sheet-date"></span></h3>
 		<p><div><button class="rename-btn button button-primary">Rename</button>
 		<span class="rename-blk popup-frm initially-hidden">
 			<form class="rename-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
