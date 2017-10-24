@@ -194,7 +194,7 @@ if ($show_buttons) {
                 class="button button-primary button-large"/>
         </form></div><br>
 <?php } ?>
-        <p>Synchronize rider list with contents of UPDMEMBS.DBF file. This file is provided by the membership secretary.</p>
+        <p>Synchronize the rider list with the contents of the UPDMEMBS.DBF file. This file is provided by the membership secretary.</p>
         <div>
             <button class="updmembs-btn button button-primary button-large">Synchronize</button>
             <span class="updmembs-blk popup-frm initially-hidden">
@@ -216,14 +216,14 @@ if ($show_buttons) {
                 class="button button-primary button-large"/>
         </form></div><br>
  <?php } ?>
-       <p>Consolidate all <?php echo(intval(date('Y'))-2); ?> club rides to single entry.</p>
+       <p>Consolidate all <?php echo(intval(date('Y'))-2); ?> club rides to a single entry. This will remove all obsolete entries from the mileage database.</p>
         <div><form class="consol-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_consolidate'); ?>
             <input type="submit" name="consolidate" value="Consolidate" 
                 class="button button-primary button-large" 
                 <?php if ($rides_to_consolidate <= 1) { echo 'disabled'; } ?>/>
         </form></div><br>
-        <p>Export mileage database to CSV files. Be certain to download all four tables.</p>
+        <p>Export the mileage database to CSV files. Be certain to download all four files.</p>
         <div><form class="export-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_export'); ?>
             <input type="submit" name="export_members" 
@@ -239,7 +239,7 @@ if ($show_buttons) {
                 value="Leaders (<?php echo $leader_count; ?>)" 
                 class="button button-primary button-large"/>
         </form></div><br>
-        <p>Restore mileage database from exported CSV files.</p>
+        <p>Restore the mileage database from the four exported CSV files.</p>
         <div>
             <button class="restore-btn button button-primary button-large">Restore</button>
             <span class="restore-blk popup-frm initially-hidden">

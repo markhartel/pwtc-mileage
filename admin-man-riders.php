@@ -232,7 +232,7 @@ if ($running_jobs > 0) {
 } else {
 ?>
     <div id='rider-inspect-section'>
-        <p>A rider that is a recent new member may not be in the database, use this page to add them. These changes could be updated when a new UPDMEMBS.DBF file from the membership secretary is uploaded.</p>
+        <p>A rider that is a recent new member may not be in the rider list, use this page to add them. These changes will be updated when a new UPDMEMBS.DBF file from the membership secretary is uploaded.</p>
         <div class='search-sec'>
         <p><strong>Enter search parameters to find riders.</strong>
         	<form class="search-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
