@@ -237,6 +237,29 @@ function pwtc_mileage_fetch_posted_rides($start_date, $end_date, $exclude_sql=""
 }
 
 /*
+Returns an array of arrays that contains the posted ride. 
+The interor array contains a posted ride record structured thus:
+array[0] - post ID (string)
+array[1] - title (string)
+array[2] - start date (string with PHP date format 'Y-m-d')
+*/
+function pwtc_mileage_fetch_posted_ride($post_id) {
+    global $wpdb;
+    //$ride_post_type = 'rideevent';
+    //$ride_date_metakey = 'start_date';
+    $ride_post_type = 'scheduled_rides';
+    $ride_date_metakey = 'date';
+    $sql_stmt = $wpdb->prepare(
+        'select p.ID, p.post_title, date_format(m.meta_value, %s) as start_date' . 
+        ' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
+        ' as m on p.ID = m.post_id where p.ID = %d and p.post_type = %s' . 
+        ' and p.post_status = \'publish\' and m.meta_key = %s order by m.meta_value', 
+        '%Y-%m-%d', $post_id, $ride_post_type, $ride_date_metakey);
+    $results = $wpdb->get_results($sql_stmt, ARRAY_N);
+    return $results;
+}
+
+/*
 Returns an array that contains the rider ids of the ride leaders of the posted ride. 
 */
 function pwtc_mileage_fetch_ride_leader_ids($post_id) {

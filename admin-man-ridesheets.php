@@ -333,7 +333,12 @@ jQuery(document).ready(function($) {
 		$("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='rideid']").val(ride_id); 
 		populate_ride_leader_table(ride_id, leaders);
 		populate_ride_mileage_table(ride_id, mileage);
-		$("#ridesheet-sheet-page .rename-btn").show();
+		if (post_guid) {
+			$("#ridesheet-sheet-page .rename-btn").hide();
+		}
+		else {
+			$("#ridesheet-sheet-page .rename-btn").show();
+		}
 		$("#ridesheet-sheet-page .rename-blk").hide(); 
 		$("#ridesheet-sheet-page .leader-section .lookup-btn").show();
 		$("#ridesheet-sheet-page .leader-section .add-blk").hide(); 
@@ -405,6 +410,8 @@ if ($create_mode) {
 		}
 		else {
 			$('#ridesheet-sheet-page .sheet-title').html(res.title);
+			$('#ridesheet-sheet-page .sheet-date').html(getPrettyDate(res.date));
+			$('#ridesheet-sheet-page .sheet-guid').html('');
 			$("#ridesheet-sheet-page .rename-btn").show();
 			$("#ridesheet-sheet-page .rename-blk").hide(); 
 		}
@@ -417,6 +424,21 @@ if ($create_mode) {
 			open_error_dialog(res.error);
 		}
 		else {
+			if (res.title && res.date && res.post_url) {
+				$('#ridesheet-sheet-page .sheet-title').html(res.title);
+				$('#ridesheet-sheet-page .sheet-date').html(getPrettyDate(res.date));
+				if (show_guid) {
+					$('#ridesheet-sheet-page .sheet-guid').html(
+						'<a title="View associated posted ride." href="' + res.post_url + '" target="_blank">view ride</a>');
+				}
+				$("#ridesheet-sheet-page .rename-btn").hide();
+			}
+			else {
+				$('#ridesheet-sheet-page .sheet-guid').html('');
+				$("#ridesheet-sheet-page .rename-btn").show();
+			}
+			$("#ridesheet-sheet-page .reassoc-btn").show();
+			$("#ridesheet-sheet-page .reassoc-blk").hide(); 
 		}
 		$('body').removeClass('waiting');
 	}
@@ -560,11 +582,19 @@ if ($create_mode) {
 		});
 	
 		$("#ridesheet-ride-page .add-blk .add-frm input[name='date']").datepicker({
-			  dateFormat: 'D M d yy',
+			dateFormat: 'D M d yy',
 			altField: "#ridesheet-ride-page .add-blk .add-frm input[name='fmtdate']",
 			altFormat: 'yy-mm-dd',
 			changeMonth: true,
-			  changeYear: true
+			changeYear: true
+		});
+
+		$("#ridesheet-sheet-page .rename-blk .rename-frm input[name='date']").datepicker({
+			dateFormat: 'D M d yy',
+			altField: "#ridesheet-sheet-page .rename-blk .rename-frm input[name='fmtdate']",
+			altFormat: 'yy-mm-dd',
+			changeMonth: true,
+			changeYear: true
 		});
 
 		$("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='date']").datepicker({
@@ -602,22 +632,22 @@ if ($create_mode) {
 		}
 	
 		var fromDate = $("#ridesheet-ride-page .ride-search-frm input[name='date']").datepicker({
-			  dateFormat: 'D M d yy',
+			dateFormat: 'D M d yy',
 			altField: "#ridesheet-ride-page .ride-search-frm input[name='fmtdate']",
 			altFormat: 'yy-mm-dd',
 			changeMonth: true,
-			  changeYear: true
+			changeYear: true
 		}).on( "change", function() {
 			toDate.datepicker("option", "minDate", getDate(this));
 			toDate.datepicker("setDate", getDate(this));
 		});
 	
 		var toDate = $("#ridesheet-ride-page .ride-search-frm input[name='todate']").datepicker({
-			  dateFormat: 'D M d yy',
+			dateFormat: 'D M d yy',
 			altField: "#ridesheet-ride-page .ride-search-frm input[name='tofmtdate']",
 			altFormat: 'yy-mm-dd',
 			changeMonth: true,
-			  changeYear: true
+			changeYear: true
 		}).on( "change", function() {
 			//fromDate.datepicker("option", "maxDate", getDate(this));
 		});	
@@ -728,6 +758,7 @@ if ($create_mode) {
 			'action': 'pwtc_mileage_rename_ride',
 			'ride_id': $("#ridesheet-sheet-page .rename-blk .rename-frm input[name='rideid']").val(),
 			'title': $("#ridesheet-sheet-page .rename-blk .rename-frm input[name='title']").val(),
+			'date': $("#ridesheet-sheet-page .rename-blk .rename-frm input[name='fmtdate']").val(),
 			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_rename_ride'); ?>'
 		};
 		$('body').addClass('waiting');
@@ -856,18 +887,24 @@ if ($running_jobs > 0) {
 		<p>Use this page to identify the ride leaders and enter the rider mileages from the rider signup sheet.</p>
 		<p><button class='back-btn button button-primary button-large'>Back</button></p>
 		<div class='report-sec'>
-		<h3>Ridesheet Title - Date&nbsp;<span class="sheet-guid"></span></h3>
-		<h3><span class="sheet-title"></span> - <span class="sheet-date"></span></h3>
-		<p><div><button class="rename-btn button button-primary">Rename</button>
+		<h3>Ridesheet Title - Date</h3>
+		<h3>
+			<span class="sheet-title"></span> - <span class="sheet-date"></span>
+			&nbsp;&nbsp;&nbsp;<span class="sheet-guid"></span>
+		</h3>
+		<div><button class="rename-btn button button-primary">Rename</button>
 		<span class="rename-blk popup-frm initially-hidden">
 			<form class="rename-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 				<span>Ride Title</span>
 				<input name="title" type="text" required/>
+				<span>Ride Date</span>
+				<input name="date" type="text" required/>
 				<input type="hidden" name="rideid"/>
+				<input type="hidden" name="fmtdate"/>
 				<input class="button button-primary" type="submit" value="Rename"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
-		</span></div></p>
+		</span></div>
 		</div>
 		<div class="leader-section report-sec">
 			<h3>Ride Leaders</h3>
