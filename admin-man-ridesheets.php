@@ -291,6 +291,20 @@ jQuery(document).ready(function($) {
 		$('body').removeClass('waiting');
 	}   
 
+	function lookup_day_posts_cb(response) {
+        var res = JSON.parse(response);
+		if (res.error) {
+			open_error_dialog(res.error);
+		}
+		else {
+			res.posts.forEach(function(post) {
+				$('#ridesheet-sheet-page .reassoc-blk .reassoc-frm select').append(
+					'<option value="' + post[0] + '">' + post[1] + '</option>');
+			});
+		}
+		$('body').removeClass('waiting');
+	}   
+
 	function lookup_rides_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
@@ -316,6 +330,7 @@ jQuery(document).ready(function($) {
 		$("#ridesheet-sheet-page .rename-blk .rename-frm input[name='rideid']").val(ride_id); 
 		$("#ridesheet-sheet-page .leader-section .add-frm input[name='rideid']").val(ride_id); 
 		$("#ridesheet-sheet-page .mileage-section .add-frm input[name='rideid']").val(ride_id); 
+		$("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='rideid']").val(ride_id); 
 		populate_ride_leader_table(ride_id, leaders);
 		populate_ride_mileage_table(ride_id, mileage);
 		$("#ridesheet-sheet-page .rename-btn").show();
@@ -324,6 +339,8 @@ jQuery(document).ready(function($) {
 		$("#ridesheet-sheet-page .leader-section .add-blk").hide(); 
 		$("#ridesheet-sheet-page .mileage-section .lookup-btn").show();
 		$("#ridesheet-sheet-page .mileage-section .add-blk").hide(); 
+		$("#ridesheet-sheet-page .reassoc-btn").show();
+		$("#ridesheet-sheet-page .reassoc-blk").hide(); 
 		set_ridesheet_lock(title.startsWith('['));
 		$('#ridesheet-ride-page').hide('fast', function() {
 			$('#ridesheet-sheet-page').fadeIn('slow');
@@ -390,6 +407,16 @@ if ($create_mode) {
 			$('#ridesheet-sheet-page .sheet-title').html(res.title);
 			$("#ridesheet-sheet-page .rename-btn").show();
 			$("#ridesheet-sheet-page .rename-blk").hide(); 
+		}
+		$('body').removeClass('waiting');
+	}
+
+	function associate_ridesheet_cb(response) {
+        var res = JSON.parse(response);
+		if (res.error) {
+			open_error_dialog(res.error);
+		}
+		else {
 		}
 		$('body').removeClass('waiting');
 	}
@@ -539,6 +566,30 @@ if ($create_mode) {
 			changeMonth: true,
 			  changeYear: true
 		});
+
+		$("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='date']").datepicker({
+			dateFormat: 'D M d yy',
+			altField: "#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='fmtdate']",
+			altFormat: 'yy-mm-dd',
+			changeMonth: true,
+			changeYear: true
+		}).on( "change", function() {
+			var date = $("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='date']").val().trim();
+			var fmtdate = $("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='fmtdate']").val();
+			$('#ridesheet-sheet-page .reassoc-blk .reassoc-frm select').empty();
+			$('#ridesheet-sheet-page .reassoc-blk .reassoc-frm select').append(
+				'<option value="0" selected>-- None --</option>');
+			if (date.length > 0) {
+				var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+        		var data = {
+					'action': 'pwtc_mileage_lookup_posts',
+					'startdate': fmtdate,
+					'enddate': fmtdate
+				};
+				$('body').addClass('waiting');
+				$.post(action, data, lookup_day_posts_cb);
+			}
+		});
 	
 		function getDate( element ) {
 			var date;
@@ -683,6 +734,36 @@ if ($create_mode) {
 		$.post(action, data, rename_ridesheet_cb);
     });
 
+	$("#ridesheet-sheet-page .reassoc-btn").on('click', function(evt) {
+		$("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[type='text']").val(''); 
+		$("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='fmtdate']").val(''); 
+		$('#ridesheet-sheet-page .reassoc-blk .reassoc-frm select').empty();
+		$('#ridesheet-sheet-page .reassoc-blk .reassoc-frm select').append(
+			'<option value="0" selected>-- None --</option>');
+		$("#ridesheet-sheet-page .reassoc-btn").hide('fast', function() {
+			$('#ridesheet-sheet-page .reassoc-blk').show('slow'); 
+		});
+    });
+
+	$("#ridesheet-sheet-page .reassoc-blk .cancel-btn").on('click', function(evt) {
+		$('#ridesheet-sheet-page .reassoc-blk').hide('slow', function() {
+			$("#ridesheet-sheet-page .reassoc-btn").show('fast');
+		});
+    });
+	
+	$('#ridesheet-sheet-page .reassoc-blk .reassoc-frm').on('submit', function(evt) {
+        evt.preventDefault();
+        var action = $('#ridesheet-sheet-page .reassoc-blk .reassoc-frm').attr('action');
+        var data = {
+			'action': 'pwtc_mileage_associate_ride',
+			'ride_id': $("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='rideid']").val(),
+			'post_id': $("#ridesheet-sheet-page .reassoc-blk .reassoc-frm select").val(),
+			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_associate_ride'); ?>'
+		};
+		$('body').addClass('waiting');
+		$.post(action, data, associate_ridesheet_cb);
+    });
+
     if (history.pushState) {
 		$(window).on('popstate', function(evt) {
 			var state = evt.originalEvent.state;
@@ -825,6 +906,21 @@ if ($running_jobs > 0) {
 			</div>
 			<p><div class="mileage-div"></div></p>
 		</div>
+		<p><div><button class="reassoc-btn button button-primary">Associate</button>
+		<span class="reassoc-blk popup-frm initially-hidden">
+			<form class="reassoc-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+				<span>Date</span>
+				<input name="date" type="text"/>
+				<span>Associated Ride</span>
+				<select name="select">
+				  	<option value="0" selected>-- None --</option> 
+				</select>
+				<input type="hidden" name="fmtdate"/>
+				<input type="hidden" name="rideid"/>
+				<input class="button button-primary" type="submit" value="Associate"/>
+				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
+			</form>
+		</span></div></p>
 	</div>
 <?php
 	include('admin-rider-lookup.php');

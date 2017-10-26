@@ -215,19 +215,23 @@ array[0] - post ID (string)
 array[1] - title (string)
 array[2] - start date (string with PHP date format 'Y-m-d')
 */
-function pwtc_mileage_fetch_posts($select_sql, $lookback_date) {
+function pwtc_mileage_fetch_posted_rides($start_date, $end_date, $exclude_sql="") {
     global $wpdb;
     //$ride_post_type = 'rideevent';
     //$ride_date_metakey = 'start_date';
     $ride_post_type = 'scheduled_rides';
     $ride_date_metakey = 'date';
+    $select_sql = "";
+    if ($exclude_sql) {
+        $select_sql = " and p.ID not in (" . $exclude_sql . ")";
+    }
     $sql_stmt = $wpdb->prepare(
         'select p.ID, p.post_title, date_format(m.meta_value, %s) as start_date' . 
         ' from ' . $wpdb->posts . ' as p inner join ' . $wpdb->postmeta . 
         ' as m on p.ID = m.post_id where p.post_type = %s and p.post_status = \'publish\'' . 
-        ' and m.meta_key = %s and (cast(m.meta_value as date) between %s and curdate())' . 
-        ' and p.ID not in (' . $select_sql . ') order by m.meta_value', 
-        '%Y-%m-%d', $ride_post_type, $ride_date_metakey, $lookback_date);
+        ' and m.meta_key = %s and (cast(m.meta_value as date) between %s and %s)' . 
+        $select_sql . ' order by m.meta_value', 
+        '%Y-%m-%d', $ride_post_type, $ride_date_metakey, $start_date, $end_date);
     $results = $wpdb->get_results($sql_stmt, ARRAY_N);
     return $results;
 }

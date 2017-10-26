@@ -448,31 +448,38 @@ class PwtcMileage_DB {
 		return $results;
 	}
 
-	public static function fetch_posts_without_rides() {
+	public static function fetch_posts_without_rides($start="", $end="") {
 		global $wpdb;
-		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
-		$plugin_options = PwtcMileage::get_plugin_options();
-		$thisyear = date('Y', current_time('timestamp'));
-		$lastyear = intval($thisyear) - 1;
-		$lookback_date = '' . $lastyear . '-01-01';
-		if ($plugin_options['ride_lookback_date'] != '') {
-			$option_date = $plugin_options['ride_lookback_date'];
-			if (strtotime($option_date) > strtotime($lookback_date)) {
-				$lookback_date = $option_date;
+		if ($start) {
+			if (!$end) {
+				$end = $start;
 			}
 		}
+		else {
+			$plugin_options = PwtcMileage::get_plugin_options();
+			$thisyear = date('Y', current_time('timestamp'));
+			$lastyear = intval($thisyear) - 1;
+			$start = '' . $lastyear . '-01-01';
+			if ($plugin_options['ride_lookback_date'] != '') {
+				$option_date = $plugin_options['ride_lookback_date'];
+				if (strtotime($option_date) > strtotime($start)) {
+					$start = $option_date;
+				}
+			}
+			$end = date('Y-m-d', current_time('timestamp'));
+		}
+		$ride_table = $wpdb->prefix . self::RIDE_TABLE;
 		$sql_stmt = $wpdb->prepare(
-			'select post_id from ' . $ride_table . ' where post_id <> 0 and date >= %s',
-			$lookback_date);
-
-		$rides = pwtc_mileage_fetch_posts($sql_stmt, $lookback_date);
+			'select post_id from ' . $ride_table . 
+			' where post_id <> 0 and date between %s and %s',
+			$start, $end);
+		$rides = pwtc_mileage_fetch_posted_rides($start, $end, $sql_stmt);
     	$results = array();
 		foreach ($rides as $ride) {
 			$postid = $ride[0];
 			$url = get_permalink(intval($postid));
 			array_push($results, array($ride[0], $ride[1], $ride[2], $url));
 		}
-
 		return $results;
 	}
 
