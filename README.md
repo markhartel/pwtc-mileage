@@ -113,6 +113,21 @@ caption|show the table caption|on, off|on
 
 `[pwtc_riderid_download]` *enables download of logged-in user's rider ID card*
 
+## Usescases
+
+**Club statistician receives new rider signup sheet from ride leader.**
+* The statistician logs in to the _pwtc.com_ website.
+* Navigate to the admin menus page. 
+* Select the _Create Ride Sheets_ option under the _Rider Mileage_ submenu.
+* A page displays that shows a table of all the posted rides that are without ride sheets.
+* Find the appropriate ride based on the rider signup sheet's name and date.
+* Select the _Create_ link in the _Action_ column of the ride's table row.
+* Select _OK_ when the confirmation dialog pops up.
+* more...
+
+**Club statistician receives amended mileage from rider.**
+* more...
+
 ## Rider Mileage Database Schema
 The following MySQL database tables and views are created by this plugin.
 They are created in the same database instance as the Wordpress tables.
