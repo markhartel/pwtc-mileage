@@ -328,22 +328,32 @@ class PwtcMileage_Admin {
 				if ($postid != 0) {
 					$posts = pwtc_mileage_fetch_posted_ride($postid);
 					if ($posts) {
-						$status = PwtcMileage_DB::update_ride(
-							intval($ride_id), $posts[0][1], $posts[0][2], $postid);
-						if (false === $status or 0 === $status) {
+						$title = $posts[0][1];
+						$date = $posts[0][2];
+						if (!PwtcMileage::validate_ride_title_str($title)) {
 							$response = array(
-								'error' => 'Did not update ridesheet, it might not have changed.');
+								'error' => 'Title entry "' . $title . '" is invalid, must start with a letter or digit.'
+							);
 							echo wp_json_encode($response);
 						}
 						else {
-							$url = get_permalink($postid);
-							$response = array(
-								'ride_id' => $ride_id,
-								'title' => $posts[0][1],
-								'date' => $posts[0][2],
-								'post_id' => $post_id,
-								'post_url' => $url);
-							echo wp_json_encode($response);									
+							$status = PwtcMileage_DB::update_ride(
+								intval($ride_id), $title, $date , $postid);
+							if (false === $status or 0 === $status) {
+								$response = array(
+									'error' => 'Did not update ridesheet, it might not have changed.');
+								echo wp_json_encode($response);
+							}
+							else {
+								$url = get_permalink($postid);
+								$response = array(
+									'ride_id' => $ride_id,
+									'title' => $title,
+									'date' => $date ,
+									'post_id' => $post_id,
+									'post_url' => $url);
+								echo wp_json_encode($response);									
+							}
 						}
 					}
 					else {
