@@ -116,6 +116,7 @@ caption|show the table caption|on, off|on
 ## How do I...
 
 ###enter mileage from a rider signup sheet into the mileage database?
+
 1. The statistician logs in to the _pwtc.com_ website.
 1. Navigates to the administrator menus page. 
 1. Selects the _Create Ride Sheets_ option under the _Rider Mileage_ submenu.
@@ -127,6 +128,7 @@ caption|show the table caption|on, off|on
 1. more...
 
 ###amended a rider's mileage for a ride in the mileage database?
+
 1. The statistician logs in to the _pwtc.com_ website.
 1. Navigates to the administrator menus page. 
 1. Selects the _Manage Ride Sheets_ option under the _Rider Mileage_ submenu.
