@@ -1592,7 +1592,8 @@ class PwtcMileage_Admin {
 					wp_die('Nonce security check failed!'); 
 				}			
 				PwtcMileage_DB::job_set_status(PwtcMileage::RIDE_MERGE_ACT, PwtcMileage_DB::TRIGGERED_STATUS);
-				wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
+				//wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
+				do_action('pwtc_mileage_consolidation');
 			}
 
 			if (isset($_POST['member_sync'])) {
@@ -1601,7 +1602,8 @@ class PwtcMileage_Admin {
 					wp_die('Nonce security check failed!'); 
 				}			
 				PwtcMileage_DB::job_set_status(PwtcMileage::MEMBER_SYNC_ACT, PwtcMileage_DB::TRIGGERED_STATUS);
-				wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
+				//wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
+				do_action('pwtc_mileage_member_sync');
 			}
 			if (isset($_POST['purge_nonriders'])) {
 				if (!isset($_POST['_wpnonce']) or
@@ -1609,7 +1611,8 @@ class PwtcMileage_Admin {
 					wp_die('Nonce security check failed!'); 
 				}			
 				PwtcMileage_DB::job_set_status(PwtcMileage::RIDER_PURGE_ACT, PwtcMileage_DB::TRIGGERED_STATUS);
-				wp_schedule_single_event(time(), 'pwtc_mileage_purge_nonriders');
+				//wp_schedule_single_event(time(), 'pwtc_mileage_purge_nonriders');
+				do_action('pwtc_mileage_purge_nonriders');
 			}
 			if (isset($_POST['restore'])) {
 				if (!isset($_POST['_wpnonce']) or
@@ -1637,7 +1640,8 @@ class PwtcMileage_Admin {
 						PwtcMileage_DB::job_set_status(PwtcMileage::DB_RESTORE_ACT, PwtcMileage_DB::FAILED_STATUS, $error);
 					}
 					else {
-						wp_schedule_single_event(time(), 'pwtc_mileage_cvs_restore');
+						//wp_schedule_single_event(time(), 'pwtc_mileage_cvs_restore');
+						do_action('pwtc_mileage_cvs_restore');
 					}
 				}
 			}
@@ -1657,7 +1661,8 @@ class PwtcMileage_Admin {
 						PwtcMileage_DB::job_set_status(PwtcMileage::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, $error);
 					}
 					else {
-						wp_schedule_single_event(time(), 'pwtc_mileage_updmembs_load');
+						//wp_schedule_single_event(time(), 'pwtc_mileage_updmembs_load');
+						do_action('pwtc_mileage_updmembs_load');
 					}
 				}
 			}		

@@ -349,12 +349,12 @@ class PwtcMileage {
 
 			PwtcMileage_DB::job_set_status(self::DB_RESTORE_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
 				$delete_l . ' leaders deleted, ' . 
-				$delete_m . ' mileage deleted, ' . 
+				$delete_m . ' mileages deleted, ' . 
 				$delete_r . ' ridesheets deleted, ' . 
 				$delete_p . ' members deleted, ' . 
 				$load_p . ' members loaded, ' . 
 				$load_r . ' ridesheets loaded, ' . 
-				$load_m . ' mileage loaded, ' . 
+				$load_m . ' mileages loaded, ' . 
 				$load_l . ' leaders loaded');
 		}	
 	}
