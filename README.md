@@ -113,9 +113,8 @@ caption|show the table caption|on, off|on
 
 `[pwtc_riderid_download]` *enables download of logged-in user's rider ID card*
 
-## Usescases
-
-**Club statistician receives new rider signup sheet from a ride leader.**
+## How do I...
+###enter mileage from a rider signup sheet into the mileage database?
 1. The statistician logs in to the _pwtc.com_ website.
 1. Navigates to the administrator menus page. 
 1. Selects the _Create Ride Sheets_ option under the _Rider Mileage_ submenu.
@@ -125,18 +124,17 @@ caption|show the table caption|on, off|on
 1. Selects _OK_ when the confirmation dialog pops up.
 1. A page displays that is the ride sheet leader and mileage entry form.
 1. more...
-
-**Club statistician receives amended mileage from a rider about a ride.**
-* The statistician logs in to the _pwtc.com_ website.
-* Navigates to the administrator menus page. 
-* Selects the _Manage Ride Sheets_ option under the _Rider Mileage_ submenu.
-* A page displays that shows a search form for existing ride sheets.
-* Selects the _From Date_ field and choose the ride's date from the popup calendar.
-* A table displays that shows all the existing ride sheets for that day.
-* Finds the appropriate ride sheet based on the information given by the rider.
-* Selects the _Edit_ link in the _Action_ column of the ride sheet's table row.
-* A page displays that is the ride sheet leader and mileage entry form.
-* more...
+###amended a rider's mileage for a ride in the mileage database?
+1. The statistician logs in to the _pwtc.com_ website.
+1. Navigates to the administrator menus page. 
+1. Selects the _Manage Ride Sheets_ option under the _Rider Mileage_ submenu.
+1. A page displays that shows a search form for existing ride sheets.
+1. Selects the _From Date_ field and choose the ride's date from the popup calendar.
+1. A table displays that shows all the existing ride sheets for that day.
+1. Finds the appropriate ride sheet based on the information given by the rider.
+1. Selects the _Edit_ link in the _Action_ column of the ride sheet's table row.
+1. A page displays that is the ride sheet leader and mileage entry form.
+1. more...
 
 ## Rider Mileage Database Schema
 The following MySQL database tables and views are created by this plugin.
