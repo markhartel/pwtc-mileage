@@ -115,7 +115,7 @@ caption|show the table caption|on, off|on
 
 ## How do I...
 
-###enter mileage from a rider signup sheet into the mileage database?
+### enter mileage from a rider signup sheet into the mileage database?
 
 1. The statistician logs in to the _pwtc.com_ website.
 1. Navigates to the administrator menus page. 
@@ -127,7 +127,7 @@ caption|show the table caption|on, off|on
 1. A page displays that is the ride sheet leader and mileage entry form.
 1. more...
 
-###amended a rider's mileage for a ride in the mileage database?
+### amended a rider's mileage for a ride in the mileage database?
 
 1. The statistician logs in to the _pwtc.com_ website.
 1. Navigates to the administrator menus page. 
