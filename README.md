@@ -114,6 +114,7 @@ caption|show the table caption|on, off|on
 `[pwtc_riderid_download]` *enables download of logged-in user's rider ID card*
 
 ## How do I...
+
 ###enter mileage from a rider signup sheet into the mileage database?
 1. The statistician logs in to the _pwtc.com_ website.
 1. Navigates to the administrator menus page. 
@@ -124,6 +125,7 @@ caption|show the table caption|on, off|on
 1. Selects _OK_ when the confirmation dialog pops up.
 1. A page displays that is the ride sheet leader and mileage entry form.
 1. more...
+
 ###amended a rider's mileage for a ride in the mileage database?
 1. The statistician logs in to the _pwtc.com_ website.
 1. Navigates to the administrator menus page. 
