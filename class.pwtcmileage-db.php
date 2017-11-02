@@ -478,6 +478,9 @@ class PwtcMileage_DB {
 		foreach ($rides as $ride) {
 			$postid = $ride[0];
 			$url = get_permalink(intval($postid));
+			if (!$url) {
+				$url = "";
+			}
 			array_push($results, array($ride[0], $ride[1], $ride[2], $url));
 		}
 		return $results;

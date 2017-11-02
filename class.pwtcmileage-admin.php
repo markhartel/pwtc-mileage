@@ -345,13 +345,15 @@ class PwtcMileage_Admin {
 								echo wp_json_encode($response);
 							}
 							else {
-								$url = get_permalink($postid);
 								$response = array(
 									'ride_id' => $ride_id,
 									'title' => $title,
 									'date' => $date ,
-									'post_id' => $post_id,
-									'post_url' => $url);
+									'post_id' => $post_id);
+								$url = get_permalink($postid);
+								if ($url) {
+									$response['post_url'] = $url;
+								}
 								echo wp_json_encode($response);									
 							}
 						}
@@ -1585,6 +1587,7 @@ class PwtcMileage_Admin {
 
 	public static function page_manage_year_end() {
 		if (current_user_can(PwtcMileage::DB_OPS_CAP)) {
+			$use_cron = false;
 			$plugin_options = PwtcMileage::get_plugin_options();
 			if (isset($_POST['consolidate'])) {
 				if (!isset($_POST['_wpnonce']) or
@@ -1592,29 +1595,40 @@ class PwtcMileage_Admin {
 					wp_die('Nonce security check failed!'); 
 				}			
 				PwtcMileage_DB::job_set_status(PwtcMileage::RIDE_MERGE_ACT, PwtcMileage_DB::TRIGGERED_STATUS);
-				//wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
-				do_action('pwtc_mileage_consolidation');
+				if ($use_cron) {
+					wp_schedule_single_event(time(), 'pwtc_mileage_consolidation');
+				}
+				else {
+					do_action('pwtc_mileage_consolidation');
+				}
 			}
-
-			if (isset($_POST['member_sync'])) {
+			else if (isset($_POST['member_sync'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_member_sync')) {
 					wp_die('Nonce security check failed!'); 
 				}			
 				PwtcMileage_DB::job_set_status(PwtcMileage::MEMBER_SYNC_ACT, PwtcMileage_DB::TRIGGERED_STATUS);
-				//wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
-				do_action('pwtc_mileage_member_sync');
+				if ($use_cron) {
+					wp_schedule_single_event(time(), 'pwtc_mileage_member_sync');
+				}
+				else {
+					do_action('pwtc_mileage_member_sync');
+				}
 			}
-			if (isset($_POST['purge_nonriders'])) {
+			else if (isset($_POST['purge_nonriders'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_purge_nonriders')) {
 					wp_die('Nonce security check failed!'); 
 				}			
 				PwtcMileage_DB::job_set_status(PwtcMileage::RIDER_PURGE_ACT, PwtcMileage_DB::TRIGGERED_STATUS);
-				//wp_schedule_single_event(time(), 'pwtc_mileage_purge_nonriders');
-				do_action('pwtc_mileage_purge_nonriders');
+				if ($use_cron) {
+					wp_schedule_single_event(time(), 'pwtc_mileage_purge_nonriders');
+				}
+				else {
+					do_action('pwtc_mileage_purge_nonriders');
+				}
 			}
-			if (isset($_POST['restore'])) {
+			else if (isset($_POST['restore'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_restore')) {
 					wp_die('Nonce security check failed!'); 
@@ -1640,12 +1654,16 @@ class PwtcMileage_Admin {
 						PwtcMileage_DB::job_set_status(PwtcMileage::DB_RESTORE_ACT, PwtcMileage_DB::FAILED_STATUS, $error);
 					}
 					else {
-						//wp_schedule_single_event(time(), 'pwtc_mileage_cvs_restore');
-						do_action('pwtc_mileage_cvs_restore');
+						if ($use_cron) {
+							wp_schedule_single_event(time(), 'pwtc_mileage_cvs_restore');
+						}
+						else {
+							do_action('pwtc_mileage_cvs_restore');
+						}
 					}
 				}
 			}
-			if (isset($_POST['updmembs'])) {
+			else if (isset($_POST['updmembs'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_updmembs')) {
 					wp_die('Nonce security check failed!'); 
@@ -1661,12 +1679,16 @@ class PwtcMileage_Admin {
 						PwtcMileage_DB::job_set_status(PwtcMileage::MEMBER_SYNC_ACT, PwtcMileage_DB::FAILED_STATUS, $error);
 					}
 					else {
-						//wp_schedule_single_event(time(), 'pwtc_mileage_updmembs_load');
-						do_action('pwtc_mileage_updmembs_load');
+						if ($use_cron) {
+							wp_schedule_single_event(time(), 'pwtc_mileage_updmembs_load');
+						}
+						else {
+							do_action('pwtc_mileage_updmembs_load');
+						}
 					}
 				}
 			}		
-			if (isset($_POST['clear_errs'])) {
+			else if (isset($_POST['clear_errs'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_clear_errs')) {
 					wp_die('Nonce security check failed!'); 
@@ -1674,7 +1696,7 @@ class PwtcMileage_Admin {
 				PwtcMileage_DB::job_remove_failed();
 				PwtcMileage_DB::job_remove_success();
 			}
-			if (isset($_POST['clear_lock'])) {
+			else if (isset($_POST['clear_lock'])) {
 				if (!isset($_POST['_wpnonce']) or
 					!wp_verify_nonce($_POST['_wpnonce'], 'pwtc_mileage_clear_lock')) {
 					wp_die('Nonce security check failed!'); 

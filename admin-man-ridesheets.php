@@ -604,38 +604,6 @@ if ($create_mode) {
 			changeMonth: true,
 			changeYear: true
 		});
-
-		$("#ridesheet-sheet-page .rename-blk .rename-frm input[name='date']").datepicker({
-			dateFormat: 'D M d yy',
-			altField: "#ridesheet-sheet-page .rename-blk .rename-frm input[name='fmtdate']",
-			altFormat: 'yy-mm-dd',
-			changeMonth: true,
-			changeYear: true
-		});
-
-		$("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='date']").datepicker({
-			dateFormat: 'D M d yy',
-			altField: "#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='fmtdate']",
-			altFormat: 'yy-mm-dd',
-			changeMonth: true,
-			changeYear: true
-		}).on( "change", function() {
-			var date = $("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='date']").val().trim();
-			var fmtdate = $("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='fmtdate']").val();
-			$('#ridesheet-sheet-page .reassoc-blk .reassoc-frm select').empty();
-			$('#ridesheet-sheet-page .reassoc-blk .reassoc-frm select').append(
-				'<option value="0" selected>-- None --</option>');
-			if (date.length > 0) {
-				var action = '<?php echo admin_url('admin-ajax.php'); ?>';
-        		var data = {
-					'action': 'pwtc_mileage_lookup_posts',
-					'startdate': fmtdate,
-					'enddate': fmtdate
-				};
-				$('body').addClass('waiting');
-				$.post(action, data, lookup_day_posts_cb);
-			}
-		});
 	
 		function getDate( element ) {
 			var date;
@@ -675,6 +643,38 @@ if ($create_mode) {
 	function init_create_mode() {
 		load_posts_without_rides();	
 	}
+
+	$("#ridesheet-sheet-page .rename-blk .rename-frm input[name='date']").datepicker({
+		dateFormat: 'D M d yy',
+		altField: "#ridesheet-sheet-page .rename-blk .rename-frm input[name='fmtdate']",
+		altFormat: 'yy-mm-dd',
+		changeMonth: true,
+		changeYear: true
+	});
+
+	$("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='date']").datepicker({
+		dateFormat: 'D M d yy',
+		altField: "#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='fmtdate']",
+		altFormat: 'yy-mm-dd',
+		changeMonth: true,
+		changeYear: true
+	}).on( "change", function() {
+		var date = $("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='date']").val().trim();
+		var fmtdate = $("#ridesheet-sheet-page .reassoc-blk .reassoc-frm input[name='fmtdate']").val();
+		$('#ridesheet-sheet-page .reassoc-blk .reassoc-frm select').empty();
+		$('#ridesheet-sheet-page .reassoc-blk .reassoc-frm select').append(
+			'<option value="0" selected>-- None --</option>');
+		if (date.length > 0) {
+			var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+			var data = {
+				'action': 'pwtc_mileage_lookup_posts',
+				'startdate': fmtdate,
+				'enddate': fmtdate
+			};
+			$('body').addClass('waiting');
+			$.post(action, data, lookup_day_posts_cb);
+		}
+	});
 
 	$('#ridesheet-sheet-page .back-btn').on('click', function(evt) {
         //evt.preventDefault();
