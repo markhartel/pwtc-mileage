@@ -889,7 +889,7 @@ if ($running_jobs > 0) {
 	<?php
 	if ($create_mode) {
 	?>
-		<p>When you receive a rider signup sheet from the ride leader, use this page to create a ride sheet and link it to the appropriate posted ride.</p>
+		<p>When you receive a ride sign in sheet from the ride leader, use this page to create a ride sheet and link it to the appropriate posted ride.</p>
 		<h2>Posted Rides Without Ride Sheets</h2>
 		<div class="posts-div"></div>
 	<?php
@@ -930,7 +930,7 @@ if ($running_jobs > 0) {
 	?>
 	</div>
 	<div id='ridesheet-sheet-page' class="initially-hidden">
-		<p>Use this page to record the ride leaders and rider mileages entered on the rider signup sheet.</p>
+		<p>Use this page to record the ride leader and rider mileages entered on the ride sign in sheet.</p>
 		<p><button class='back-btn button button-primary button-large'>Back</button></p>
 		<div class='report-sec'>
 		<h3>Ride Sheet</h3>

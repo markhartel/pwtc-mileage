@@ -1356,6 +1356,13 @@ class PwtcMileage_Admin {
 		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 		add_action('load-' . $page, array('PwtcMileage_Admin','download_csv'));
 
+		$page_title = $plugin_options['plugin_menu_label'] . ' - User Guide';
+    	$menu_title = 'User Guide';
+    	$menu_slug = 'pwtc_mileage_user_guide';
+    	$capability = PwtcMileage::VIEW_MILEAGE_CAP;
+    	$function = array( 'PwtcMileage_Admin', 'page_user_guide');
+		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+
 		remove_submenu_page($parent_menu_slug, $parent_menu_slug);
 
 		$page_title = $plugin_options['plugin_menu_label'] . ' - Settings';
@@ -1725,6 +1732,11 @@ class PwtcMileage_Admin {
 
 			include('admin-man-yearend.php');
 		}	
+	}
+
+	public static function page_user_guide() {
+		$capability = PwtcMileage::VIEW_MILEAGE_CAP;
+		include('admin-user-guide.php');
 	}
 
 	public static function generate_file_record($id, $label, $suffix, $tblname) {
