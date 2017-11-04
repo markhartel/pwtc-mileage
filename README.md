@@ -43,6 +43,8 @@ Available operations are:
 - Consolidate all club rides older than two years to single entry
 - Export mileage database to CSV files
 - Restore mileage database from exported CSV files
+### User Guide
+This menu page allows a user to view the user guide for the mileage database.
 ### Settings
 This menu page allows a user to adjust the settings of this plugin. It is only
 available to users with the **administrator** role and is located under the **Settings** 
@@ -215,6 +217,7 @@ The following views are used to generate rider mileage and leader reports:
 - `admin-man-riders.php` *client-side logic for Manage Riders admin page*
 - `admin-man-ridesheets.php` *client-side logic for Manage Ride Sheets admin page*
 - `admin-man-yearend.php` *client-side logic for Database Ops admin page*
+- `admin-user-guide.php` *client-side logic for User Guide admin page*
 - `admin-man-settings.php` *client-side logic for Settings admin page*
 - `admin-rider-lookup.php` *client-side logic for rider lookup dialog*
 - `admin-scripts.js` *javascript utility functions for admin pages*
