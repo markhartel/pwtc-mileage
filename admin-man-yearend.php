@@ -200,7 +200,7 @@ if ($show_buttons) {
             <span class="updmembs-blk popup-frm initially-hidden">
 			<form class="updmembs-frm stacked-form" method="post" enctype="multipart/form-data">
                 <?php wp_nonce_field('pwtc_mileage_updmembs'); ?>
-                <span>Updmembs</span>
+                <span>UPDMEMBS File</span>
                 <input id="select-updmembs-file" class="inputfile" type="file" name="updmembs_file" multiple="false" accept=".dbf"/>
                 <label for="select-updmembs-file" class="button">Select file...</label>
 				<input class="button button-primary" type="submit" name="updmembs" value="Synchronize"/>
@@ -245,16 +245,16 @@ if ($show_buttons) {
             <span class="restore-blk popup-frm initially-hidden">
 			<form class="restore-frm stacked-form" method="post" enctype="multipart/form-data">
                 <?php wp_nonce_field('pwtc_mileage_restore'); ?>
-                <span>Members</span>
+                <span>Members File</span>
                 <input id="select-members-file" class="inputfile" type="file" name="members_file" multiple="false" accept=".csv"/>
                 <label for="select-members-file" class="button">Select file...</label>
-                <span>Rides</span>
+                <span>Rides File</span>
                 <input id="select-rides-file" class="inputfile" type="file" name="rides_file" multiple="false" accept=".csv"/>
                 <label for="select-rides-file" class="button">Select file...</label>
-                <span>Mileage</span>
+                <span>Mileage File</span>
                 <input id="select-mileage-file" class="inputfile" type="file" name="mileage_file" multiple="false" accept=".csv"/>
                 <label for="select-mileage-file" class="button">Select file...</label>
-                <span>Leaders</span>
+                <span>Leaders File</span>
                 <input id="select-leaders-file" class="inputfile" type="file" name="leaders_file" multiple="false" accept=".csv"/>
                 <label for="select-leaders-file" class="button">Select file...</label>
 				<input class="button button-primary" type="submit" name="restore" value="Restore"/>
