@@ -6,8 +6,11 @@ if (!current_user_can($capability)) {
 <script type="text/javascript" >
 jQuery(document).ready(function($) { 
     $('#user-guide-page h3 a').on('click', function(evt) {
+        var wasHidden = $(this).parent().next().is(':hidden');
         $('#user-guide-page div').hide('fast'); 
-        $(this).parent().next().show('fast');
+        if (wasHidden) {
+            $(this).parent().next().show('fast');
+        }
     }); 
 });
 </script>
