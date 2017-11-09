@@ -226,17 +226,22 @@ jQuery(document).ready(function($) {
 		$('#ridesheet-sheet-page .mileage-div').empty();
 		if (mileage.length > 0) {
 			$('#ridesheet-sheet-page .mileage-div').append(
-				'<table class="rwd-table"><tr><th>ID</th><th>Name</th><th>Mileage</th><th>Actions</th></tr></table>');
-			editlink = '<a title="Edit this rider\'s mileage." class="edit-btn">Edit</a>';
-			deletelink = '<a title="Delete this rider\'s mileage." class="remove-btn">Delete</a>';
+				'<table class="rwd-table"><tr><th>Line</th><th>ID</th><th>Name</th><th>Mileage</th><th>Actions</th></tr></table>');
+			var editlink = '<a title="Edit this rider\'s mileage." class="edit-btn">Edit</a>';
+			var deletelink = '<a title="Delete this rider\'s mileage." class="remove-btn">Delete</a>';
+			var count = 1;
 			mileage.forEach(function(item) {
 				$('#ridesheet-sheet-page .mileage-div table').append(
-					'<tr rideid="' + ride_id + '" memberid="' + item.member_id + '">' + 
+					'<tr rideid="' + ride_id + 
+					'" memberid="' + item.member_id + 
+					'" lineno="' + item.line_no + '">' + 
+					'<td data-th="Line">' + count + '</td>' +
 					'<td data-th="ID">' + item.member_id + '</td>' +
 					'<td data-th="Name">' + item.first_name + ' ' + item.last_name + '</td>' + 
 					'<td data-th="Mileage">' + item.mileage + '</td>' +
 					'<td data-th="Actions">' + editlink + ' ' + deletelink + 
-					'</td></tr>');    
+					'</td></tr>');   
+				count++; 
 			});
 			$('#ridesheet-sheet-page .mileage-div .edit-btn').on('click', function(evt) {
 				evt.preventDefault();
@@ -244,12 +249,15 @@ jQuery(document).ready(function($) {
 				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='riderid']").val(
 					$(this).parent().parent().attr('memberid')
 				);
+				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='lineno']").val(
+					$(this).parent().parent().attr('lineno')
+				);
 				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mode']").val('modify');
 				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='ridername']").val(
-					$(this).parent().parent().find('td').eq(1).html()
+					$(this).parent().parent().find('td').eq(2).html()
 				);
 				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(
-					$(this).parent().parent().find('td').eq(2).html()
+					$(this).parent().parent().find('td').eq(3).html()
 				); 
 				$('#ridesheet-sheet-page .mileage-section .lookup-btn').hide('fast', function() {
 					$('#ridesheet-sheet-page .mileage-section .add-blk').show('slow');  
@@ -263,6 +271,7 @@ jQuery(document).ready(function($) {
 					'action': 'pwtc_mileage_remove_mileage',
 					'ride_id': $(this).parent().parent().attr('rideid'),
 					'member_id': $(this).parent().parent().attr('memberid'),
+					'line_no': $(this).parent().parent().attr('lineno'),
 					'nonce': '<?php echo wp_create_nonce('pwtc_mileage_remove_mileage'); ?>'
 				};
 				if (disable_delete_confirm) {
@@ -706,6 +715,7 @@ if ($create_mode) {
 			'action': 'pwtc_mileage_add_mileage',
 			'member_id': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='riderid']").val(),
 			'ride_id': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='rideid']").val(),
+			'line_no': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='lineno']").val(),
 			'mode': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='mode']").val(),
 			'mileage': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(),
 			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_add_mileage'); ?>'
@@ -736,6 +746,7 @@ if ($create_mode) {
         lookup_pwtc_riders(function(riderid, name) {
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[type='submit']").val('Add Mileage');
             $("#ridesheet-sheet-page .mileage-section .add-frm input[name='riderid']").val(riderid);
+            $("#ridesheet-sheet-page .mileage-section .add-frm input[name='lineno']").val('');
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mode']").val('add');
             $("#ridesheet-sheet-page .mileage-section .add-frm input[name='ridername']").val(name); 
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(''); 
@@ -981,6 +992,7 @@ if ($running_jobs > 0) {
 						<span>Mileage</span>
 						<input name="mileage" type="text" required/>
 						<input name="rideid" type="hidden"/>
+						<input name="lineno" type="hidden"/>
 						<input name="mode" type="hidden" value="add"/>
 						<input class="button button-primary" type="submit" value="Add Mileage"/>
 						<input class="cancel-btn button button-primary" type="button" value="Cancel"/>

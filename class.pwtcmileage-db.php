@@ -568,9 +568,9 @@ class PwtcMileage_DB {
 		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
     	$results = $wpdb->get_results($wpdb->prepare('select' . 
-			' c.member_id, c.first_name, c.last_name, m.mileage' . 
+			' c.member_id, c.first_name, c.last_name, m.mileage, m.line_no' . 
 			' from ' . $member_table . ' as c inner join ' . $mileage_table . ' as m' . 
-			' on c.member_id = m.member_id where m.ride_id = %d order by c.last_name, c.first_name', 
+			' on c.member_id = m.member_id where m.ride_id = %d order by m.line_no', 
 			$rideid), ARRAY_A);
 		return $results;
 	}
@@ -578,7 +578,8 @@ class PwtcMileage_DB {
 	public static function fetch_ride_member_mileage($memberid, $rideid) {
     	global $wpdb;
 		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
-    	$results = $wpdb->get_results($wpdb->prepare('select member_id, ride_id, mileage' . 
+		$results = $wpdb->get_results($wpdb->prepare('select' . 
+			' member_id, ride_id, mileage, line_no' . 
 			' from ' . $mileage_table . ' where ride_id = %d and member_id = %s', 
 			$rideid, $memberid), ARRAY_A);
 		return $results;
@@ -664,11 +665,12 @@ class PwtcMileage_DB {
 		return $status;
 	}
 
-	public static function delete_ride_mileage($rideid, $memberid) {
+	public static function delete_ride_mileage($rideid, $memberid, $lineno) {
     	global $wpdb;
 		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
 		$status = $wpdb->query($wpdb->prepare('delete from ' . $mileage_table . 
-			' where member_id = %s and ride_id = %d', $memberid, $rideid));
+			' where member_id = %s and ride_id = %d and line_no = %d',
+			$memberid, $rideid, $lineno));
 		return $status;
 	}
 
@@ -715,11 +717,19 @@ class PwtcMileage_DB {
     	global $wpdb;
 		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
 		$status = $wpdb->query($wpdb->prepare('insert into ' . $mileage_table . 
-			' (member_id, ride_id, mileage) values (%s, %d, %d)' . 
-			' on duplicate key update mileage = %d', 
-			$memberid, $rideid, $mileage, $mileage));
+			' (member_id, ride_id, mileage) values (%s, %d, %d)', 
+			$memberid, $rideid, $mileage));
 		return $status;
 	}
+
+	public static function update_ride_mileage($rideid, $memberid, $lineno, $mileage) {
+    	global $wpdb;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		$status = $wpdb->query($wpdb->prepare('update ' . $mileage_table . 
+			' set mileage = %d where ride_id = %d and member_id = %s and line_no = %d', 
+			$mileage, $rideid, $memberid, $lineno));
+		return $status;
+	}	
 
 	public static function fetch_riders($lastname, $firstname, $memberid = '', $date = '') {
     	global $wpdb;
@@ -787,7 +797,7 @@ class PwtcMileage_DB {
 		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
 
 		$status1 = $wpdb->query($wpdb->prepare('insert into ' . $mileage_table .
-				'  (member_id, ride_id, mileage) select c.member_id, %d, SUM(m.mileage)' . 
+				' (member_id, ride_id, mileage) select c.member_id, %d, SUM(m.mileage)' . 
 				' from ((' . $mileage_table . ' as m inner join ' . $member_table . 
 				' as c on c.member_id = m.member_id) inner join ' . $ride_table . 
 				' as r on m.ride_id = r.ID) where r.ID <> %d and r.date <= %s' . 
@@ -917,7 +927,7 @@ class PwtcMileage_DB {
     	global $wpdb;
 		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
     	$results = $wpdb->get_results(
-			'select ride_id, member_id, mileage from ' . $mileage_table . 
+			'select ride_id, member_id, mileage, line_no from ' . $mileage_table . 
 			' order by ride_id', ARRAY_N);
 		return $results;
 	}
@@ -928,8 +938,8 @@ class PwtcMileage_DB {
 		$errcnt = 0;
 		foreach ( $data as $item ) {
 			$status = $wpdb->query($wpdb->prepare('insert into ' . $mileage_table . 
-				' (ride_id, member_id, mileage) values (%d, %s, %d)', 
-				intval($item[0]), $item[1], intval($item[2])));
+				' (ride_id, member_id, mileage, line_no) values (%d, %s, %d, %d)', 
+				intval($item[0]), $item[1], intval($item[2]), intval($item[3])));
 			if (false === $status or 0 === $status) {
 				$errcnt++;
 			}
@@ -950,7 +960,7 @@ class PwtcMileage_DB {
 		$status = $wpdb->query("LOAD DATA LOCAL INFILE '" . $filename . "'" . 
 			" INTO TABLE " . $mileage_table . " FIELDS TERMINATED BY ','" . 
 			" OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n'" . 
-			" (ride_id, member_id, mileage)");
+			" (ride_id, member_id, mileage, line_no)");
 		return $status;
 	}
 
@@ -1150,7 +1160,8 @@ class PwtcMileage_DB {
 			' (member_id VARCHAR(5) NOT NULL,' . 
 			' ride_id BIGINT UNSIGNED NOT NULL,' . 
 			' mileage INT UNSIGNED NOT NULL,' . 
-			' constraint pk_' . $mileage_table . ' PRIMARY KEY (member_id, ride_id)' . 
+			' line_no BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,'.
+			' constraint pk_' . $mileage_table . ' PRIMARY KEY (line_no, member_id, ride_id)' . 
 			//', constraint fk_' . $mileage_table . '_member_id FOREIGN KEY (member_id) REFERENCES ' . $member_table . ' (member_id)' . 
 			//', constraint fk_' . $mileage_table . '_ride_id FOREIGN KEY (ride_id) REFERENCES ' . $ride_table . ' (ID)' . 
 			')');

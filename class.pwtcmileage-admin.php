@@ -878,7 +878,8 @@ class PwtcMileage_Admin {
 			);
 			echo wp_json_encode($response);
 		}
-		else if (!isset($_POST['ride_id']) or !isset($_POST['member_id']) or !isset($_POST['nonce'])) {
+		else if (!isset($_POST['ride_id']) or !isset($_POST['member_id']) or 
+			!isset($_POST['line_no']) or !isset($_POST['nonce'])) {
 			$response = array(
 				'error' => 'Input parameters needed to remove mileage from a ridesheet are missing.'
 			);
@@ -887,6 +888,7 @@ class PwtcMileage_Admin {
 		else {
 			$rideid = trim($_POST['ride_id']);
 			$memberid = trim($_POST['member_id']);
+			$lineno = trim($_POST['line_no']);
 			$nonce = $_POST['nonce'];	
 			if (!wp_verify_nonce($nonce, 'pwtc_mileage_remove_mileage')) {
 				$response = array(
@@ -900,8 +902,15 @@ class PwtcMileage_Admin {
 				);
 				echo wp_json_encode($response);
 			}
+			else if (!PwtcMileage::validate_number_str($lineno)) {
+				$response = array(
+					'error' => 'Line number "' . $lineno . '" is invalid, must be nonnegative integer.'
+				);
+				echo wp_json_encode($response);
+			}
 			else {
-				$status = PwtcMileage_DB::delete_ride_mileage(intval($rideid), $memberid);
+				$status = PwtcMileage_DB::delete_ride_mileage(
+					intval($rideid), $memberid, intval($lineno));
 				if (false === $status or 0 === $status) {
 					$response = array(
 						'error' => 'Could not delete ride mileage from database.'
@@ -1016,7 +1025,8 @@ class PwtcMileage_Admin {
 			echo wp_json_encode($response);
 		}
 		else if (!isset($_POST['ride_id']) or !isset($_POST['member_id']) or 
-			!isset($_POST['mileage']) or !isset($_POST['mode']) or !isset($_POST['nonce'])) {
+			!isset($_POST['line_no']) or !isset($_POST['mileage']) or 
+			!isset($_POST['mode']) or !isset($_POST['nonce'])) {
 			$response = array(
 				'error' => 'Input parameters needed to add mileage to a ridesheet are missing.'
 			);
@@ -1025,6 +1035,7 @@ class PwtcMileage_Admin {
 		else {
 			$rideid = trim($_POST['ride_id']);
 			$memberid = trim($_POST['member_id']);
+			$lineno = trim($_POST['line_no']);
 			$mileage = trim($_POST['mileage']);
 			$mode = trim($_POST['mode']);
 			$nonce = $_POST['nonce'];	
@@ -1064,27 +1075,39 @@ class PwtcMileage_Admin {
 							echo wp_json_encode($response);
 						}
 						else {
-							$status = PwtcMileage_DB::insert_ride_mileage(intval($rideid), $memberid, intval($mileage));
-							if (false === $status or 0 === $status) {
-								if ($mode == 'modify') {
-									$response = array(
-										'error' => 'Did not update ride mileage, it might not have changed.'
-									);
+							$err = '';
+							if ($mode == 'add') {
+								$status = PwtcMileage_DB::insert_ride_mileage(
+									intval($rideid), $memberid, intval($mileage));
+								if (false === $status or 0 === $status) {
+									$err = 'Could not insert ride mileage into database.';
 								}
-								else {
-									$response = array(
-										'error' => 'Could not insert ride mileage into database.'
-									);
-								}
-								echo wp_json_encode($response);
 							}
 							else {
+								if (!PwtcMileage::validate_number_str($lineno)) {
+									$err = 'Line number "' . $lineno . '" is invalid, must be nonnegative integer.';
+								}
+								else {
+									$status = PwtcMileage_DB::update_ride_mileage(
+										intval($rideid), $memberid, intval($lineno), intval($mileage));
+									if (false === $status or 0 === $status) {
+										$err = 'Did not update ride mileage, it might not have changed.';
+									}
+								}
+							}
+							if ($err == '') {
 								$mileage = PwtcMileage_DB::fetch_ride_mileage(intval($rideid));
 								$response = array(
 									'ride_id' => $rideid,
 									'mileage' => $mileage
 								);
 								echo wp_json_encode($response);
+							}
+							else {
+								$response = array(
+									'error' => $err
+								);
+								echo wp_json_encode($response);	
 							}
 						}
 					}
@@ -1743,7 +1766,7 @@ class PwtcMileage_Admin {
 		return array(
 			'id' => $id,
 			'label' => $label,
-			'pattern' => '/' . '\d{4}-\d{2}-\d{2}' . $suffix . '\.csv' . '/',
+			'pattern' => '/' . '\d{4}-\d{2}-\d{2}' . $suffix . '.*\.csv' . '/',
 			'tblname' => $tblname
 		);
 	}
