@@ -25,6 +25,7 @@ jQuery(document).ready(function($) {
                 function() {
                     confirm_sync = false;
                     $('.sync-frm input[name="member_sync"]').click();
+                    $('body').addClass('waiting');
                 }
             );
         }
@@ -38,6 +39,7 @@ jQuery(document).ready(function($) {
                 function() {
                     confirm_purge = false;
                     $('.purge-frm input[name="purge_nonriders"]').click();
+                    $('body').addClass('waiting');
                 }
             );
         }
@@ -51,6 +53,7 @@ jQuery(document).ready(function($) {
                 function() {
                     confirm_consolidate = false;
                     $('.consol-frm input[name="consolidate"]').click();
+                    $('body').addClass('waiting');
                }
             );
         }
@@ -64,18 +67,23 @@ jQuery(document).ready(function($) {
                 function() {
                     confirm_restore = false;
                     $('.restore-frm input[name="restore"]').click();
+                    $('body').addClass('waiting');
                }
             );
         }
     });
 
     $(".restore-btn").on('click', function(evt) {
-		$(".restore-frm input[type='file']").val('');
+<?php if (current_user_can('manage_options')) { ?>
+        $(".restore-frm input[type='file']").val('');
         $(".restore-frm input[type='file']").next('label').html('Select file...'); 
         $(".restore-btn").hide('fast', function() {
             $('.restore-blk').show('slow'); 
             $(".restore-frm input[name='members_file']").focus();
-        })
+        });
+<?php } else { ?>
+        open_error_dialog('You must be an administrator to perform this operation.');
+<?php } ?>    
     });
 
 	$(".restore-blk .cancel-btn").on('click', function(evt) {
@@ -92,6 +100,7 @@ jQuery(document).ready(function($) {
                 function() {
                     confirm_updmembs = false;
                     $('.updmembs-frm input[name="updmembs"]').click();
+                    $('body').addClass('waiting');
                }
             );
         }

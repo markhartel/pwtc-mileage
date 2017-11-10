@@ -138,22 +138,27 @@ class PwtcMileage {
 		else {
 			$status = PwtcMileage_DB::insert_ride($title, $maxdate);
 			if (false === $status or 0 === $status) {
-				PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT,PwtcMileage_DB::FAILED_STATUS, 'could not insert new ridesheet');
+				PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT,PwtcMileage_DB::FAILED_STATUS, 'could not insert new ridesheet, mileage database may be corrupted. Contact administrator.');
 			}
 			else {
 				$rideid = PwtcMileage_DB::get_new_ride_id();
 				if (isset($rideid) and is_int($rideid)) {
 					$status = PwtcMileage_DB::rollup_ridesheets($rideid, $maxdate);
-					PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
-						$status['m_inserts'] . ' mileages inserted, ' . 
-						$status['m_deletes'] . ' mileages deleted, ' . 
-						$status['l_inserts'] . ' leaders inserted, ' . 
-						$status['l_deletes'] . ' leaders deleted, ' . 
-						'1 ridesheet inserted, ' . 
-						$status['r_deletes'] . ' ridesheets deleted');
+					if (isset($status['error'])) {
+						PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT,PwtcMileage_DB::FAILED_STATUS, $status['error'] . ', mileage database may be corrupted. Contact administrator.');
+					}
+					else {
+						PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT, PwtcMileage_DB::SUCCESS_STATUS, 
+							$status['m_inserts'] . ' mileages inserted, ' . 
+							$status['m_deletes'] . ' mileages deleted, ' . 
+							$status['l_inserts'] . ' leaders inserted, ' . 
+							$status['l_deletes'] . ' leaders deleted, ' . 
+							'1 ridesheet inserted, ' . 
+							$status['r_deletes'] . ' ridesheets deleted');
+					}
 				}
 				else {
-					PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT, PwtcMileage_DB::FAILED_STATUS, 'new ridesheet ID is invalid');
+					PwtcMileage_DB::job_set_status(self::RIDE_MERGE_ACT, PwtcMileage_DB::FAILED_STATUS, 'new ridesheet ID is invalid, mileage database may be corrupted. Contact administrator.');
 				}
 			}
 		}	
@@ -1222,6 +1227,13 @@ class PwtcMileage {
 		//self::delete_plugin_options();
 		self::remove_caps_admin_role();
 		pwtc_mileage_remove_stat_role();
+		/*
+		$plugin_options = self::get_plugin_options();
+		if ($plugin_options['drop_db_on_delete']) {
+			PwtcMileage_DB::drop_db_views();	
+			PwtcMileage_DB::drop_db_tables();				
+		}
+		*/
 	}
 
 	public static function plugin_uninstall() {

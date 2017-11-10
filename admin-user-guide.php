@@ -40,6 +40,7 @@ jQuery(document).ready(function($) {
             <li>Select the <em>Manage Ride Sheets</em> item under the <em>Rider Mileage</em> submenu.</li>
             <li>A page displays that shows a search form for existing ride sheets.</li>
             <li>Select the <em>From Date</em> field and choose the ride's date from the popup calendar.</li>
+            <li>Press the <em>Search</em> button.</li>
             <li>A table displays that shows all the existing ride sheets for that day.</li>
             <li>Find the appropriate ride sheet based on the information given by the rider.</li>
             <li>Select the <em>Edit</em> link in the <em>Action</em> column of the ride sheet's table row.</li>
@@ -65,14 +66,14 @@ jQuery(document).ready(function($) {
         reports that are used by the banquet organizers to identify the award receipents.
         These reports are based on rider activities for the previous year and should
         only be generated after the start of the new year and after all of the ride 
-        sign-up sheets have been entered for the previous year.</p>
+        sign-up sheets for the previous year have been entered.</p>
         <ol>
             <li>Select the <em>View Reports</em> option under the <em>Rider Mileage</em> submenu.</li>
             <li>A page displays that list the various reports that are available.</li>
             <li>more to come...</li>
         </ol>
         </div>
-        <h3><a href="#">upload a UPDMEMBS.DBF file from the membership secretary?</a></h3>
+        <h3><a href="#">upload an UPDMEMBS.DBF file from the membership secretary?</a></h3>
         <div class="initially-hidden">
         <p>Every month, the club membership secretary updates their membership database
         with new club members. A new UPDMEMBS.DBF file is then emailed to the club statistician
@@ -80,7 +81,7 @@ jQuery(document).ready(function($) {
         master membership database.</p>
         <ol>
             <li>Select the <em>Database Ops</em> item under the <em>Rider Mileage</em> submenu.</li>
-            <li>A page displays with buttons that trigger various database operations.</li>
+            <li>A page displays with buttons that execute various database operations.</li>
             <li>Press the <em>Synchronize</em> button.</li>
             <li>An <em>UPDMEMBS File</em> field appears, click on it.</li>
             <li>A file selection dialog pops up, use it to open the UPDMEMBS.DBF file on your computer.</li>
@@ -88,22 +89,25 @@ jQuery(document).ready(function($) {
             <li>Press <em>OK</em> when the confirmation dialog pops up.</li>
             <li>The synchronize process will begin, wait for it to complete.</li>
             <li>If successful, the following message will appear: <em>Synchronize action success</em>.</li>
-            <li>Press the <em>Clear Messages</em> button to remove status messages.</li>
+            <li>Press the <em>Clear Messages</em> button to clear the status message.</li>
        </ol>
         </div>
         <h3><a href="#">consolidate obsolete rides in the mileage database?</a></h3>
         <div class="initially-hidden">
         <p>Mileage data for only the current and last years are required, all older data 
         is obsolete and should be consolidated to save space. The club statistician performs
-        this function after the start of each new year.</p>
+        this function after the start of each new year. WARNING: this operation has the 
+        potential to corrupt the mileage database, you should first backup the mileage 
+        database before proceeding.</p>
         <ol>
             <li>Select the <em>Database Ops</em> item under the <em>Rider Mileage</em> submenu.</li>
-            <li>A page displays with buttons that trigger various database operations.</li>
+            <li>A page displays with buttons that execute various database operations.</li>
+            <li>Backup the mileage database.</li>
             <li>Press the <em>Consolidate</em> button.</li>
             <li>Press <em>OK</em> when the confirmation dialog pops up.</li>
             <li>The consolidate process will begin, wait for it to complete.</li>
             <li>If successful, the following message will appear: <em>Consolidate action success</em>.</li>
-            <li>Press the <em>Clear Messages</em> button to remove status messages.</li>
+            <li>Press the <em>Clear Messages</em> button to clear the status message.</li>
         </ol>
         </div>
         <h3><a href="#">backup the mileage database?</a></h3>
@@ -112,7 +116,7 @@ jQuery(document).ready(function($) {
         This involves exporting four CSV files to the local file system.</p>
         <ol>
             <li>Select the <em>Database Ops</em> item under the <em>Rider Mileage</em> submenu.</li>
-            <li>A page displays with buttons that trigger various database operations.</li>
+            <li>A page displays with buttons that execute various database operations.</li>
             <li>Press the <em>Members</em> button, a file will be downloaded.</li>
             <li>Press the <em>Rides</em> button, a file will be downloaded.</li>
             <li>Press the <em>Mileage</em> button, a file will be downloaded.</li>
@@ -123,10 +127,12 @@ jQuery(document).ready(function($) {
         <h3><a href="#">restore the mileage database?</a></h3>
         <div class="initially-hidden">
         <p>The club statistician may need to restore the mileage database from a 
-        saved backup. A saved backup consists of four archived CSV files.</p>
+        saved backup. A saved backup consists of four archived CSV files. WARNING: 
+        this operation will overwrite the current mileage database, proceed with 
+        caution.</p>
         <ol>
             <li>Select the <em>Database Ops</em> item under the <em>Rider Mileage</em> submenu.</li>
-            <li>A page displays with buttons that trigger various database operations.</li>
+            <li>A page displays with buttons that execute various database operations.</li>
             <li>Press the <em>Restore</em> button.</li>
             <li>more to come...</li>
         </ol>

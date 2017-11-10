@@ -810,24 +810,53 @@ class PwtcMileage_DB {
 				' as r on l.ride_id = r.ID) where r.ID <> %d and r.date <= %s' . 
 				' group by l.member_id', $rideid, $rideid, $maxdate));
 
-		$status3 = $wpdb->query($wpdb->prepare('delete from ' . $mileage_table . 
-				' where ride_id in (select ID from ' . $ride_table . 
-				' where ID <> %d and date <= %s)', $rideid, $maxdate));
+		if (false === $status1) {
+			$status = array(
+				'error' => 'could not insert new mileages'
+			);
+		}
+		else if (false === $status2) {
+			$status = array(
+				'error' => 'could not insert new leaders'
+			);
+		}
+		else {
+			$status3 = $wpdb->query($wpdb->prepare('delete from ' . $mileage_table . 
+					' where ride_id in (select ID from ' . $ride_table . 
+					' where ID <> %d and date <= %s)', $rideid, $maxdate));
 
-		$status4 = $wpdb->query($wpdb->prepare('delete from ' . $leader_table . 
-				' where ride_id in (select ID from ' . $ride_table . 
-				' where ID <> %d and date <= %s)', $rideid, $maxdate));
+			$status4 = $wpdb->query($wpdb->prepare('delete from ' . $leader_table . 
+					' where ride_id in (select ID from ' . $ride_table . 
+					' where ID <> %d and date <= %s)', $rideid, $maxdate));
 
-		$status5 = $wpdb->query($wpdb->prepare('delete from ' . $ride_table . 
-				' where ID <> %d and date <= %s', $rideid, $maxdate));	
+			$status5 = $wpdb->query($wpdb->prepare('delete from ' . $ride_table . 
+					' where ID <> %d and date <= %s', $rideid, $maxdate));
 
-		$status = array(
-			'm_inserts' => $status1,
-			'l_inserts' => $status2,
-			'm_deletes' => $status3,
-			'l_deletes' => $status4,
-			'r_deletes' => $status5
-		);
+			if (false === $status3) {
+				$status = array(
+					'error' => 'could not delete old mileages'
+				);
+			}
+			else if (false === $status4) {
+				$status = array(
+					'error' => 'could not delete old leaders'
+				);
+			}
+			else if (false === $status5 or 0 === $status5) {
+				$status = array(
+					'error' => 'could not delete old ridesheets'
+				);
+			}
+			else {
+				$status = array(
+					'm_inserts' => $status1,
+					'l_inserts' => $status2,
+					'm_deletes' => $status3,
+					'l_deletes' => $status4,
+					'r_deletes' => $status5
+				);
+			}
+		}
 		return $status;
 	}
 
