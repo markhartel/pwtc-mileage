@@ -1547,7 +1547,8 @@ class PwtcMileage_Admin {
 					$pdf = new FPDF();
 					self::write_export_pdf_file($pdf, $response['data'], $response['header'], 
 						$response['title'], $response['width'], $response['align']);
-					$pdf->Output();
+					//$pdf->Output();
+					$pdf->Output('F', 'php://output');
 				}
 				die;
 			}

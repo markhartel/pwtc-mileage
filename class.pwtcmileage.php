@@ -100,7 +100,8 @@ class PwtcMileage {
 			$pdf->SetFont('Arial', '', 5);
 			$pdf->Text(50, 38, 'MEMBER ID');
 			$pdf->Text(59, 54, 'EXPIRES');
-			$pdf->Output();
+			//$pdf->Output();
+			$pdf->Output('F', 'php://output');
 			die;
 		}
 	}
