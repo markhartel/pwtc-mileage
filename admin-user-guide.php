@@ -12,6 +12,10 @@ jQuery(document).ready(function($) {
             $(this).parent().next().show('fast');
         }
     }); 
+    $('#user-guide-page div a').on('click', function(evt) {
+        var topic = $(this).attr('topic');
+        $('#user-guide-page h3 a[topic="' + topic + '"]').click();
+    });
 });
 </script>
 <div class="wrap">
@@ -19,7 +23,7 @@ jQuery(document).ready(function($) {
     <div id="user-guide-page">
         <h1>How do I...</h1>
         <p>Click on your topic of interest to expand.</p>
-        <h3><a href="#">enter mileage from a ride sign-in sheet into the mileage database?</a></h3>
+        <h3><a href="#" topic="ridesheet">enter a ride sign-in sheet into the mileage database?</a></h3>
         <div class="initially-hidden">
         <p>After a ride is complete, the ride leader sends the ride sign-in sheet to the
         club statistician who enters the information into the club mileage database.</p>
@@ -29,10 +33,13 @@ jQuery(document).ready(function($) {
             <li>Find the appropriate ride based on the ride sign-in sheet's name and date.</li>
             <li>Select the <em>Create</em> link in the <em>Action</em> column of the ride's table row.</li>
             <li>Press <em>OK</em> when the confirmation dialog pops up.</li>
-            <li>A page displays that is the ride sheet leader and mileage entry form.</li>       <li>more to come...</li>
+            <li>A page displays that is the ride sheet leader and mileage entry form.</li>
+            <li>Log mileage and leader data for the ride (see <a href="#" topic="logdata">topic</a> for details.)</li>
+            <li>Press the <em>Back</em> button.</li>
+            <li>The page displaying the table of posted rides without ride sheets will return.</li>
         </ol>
         </div>
-        <h3><a href="#">amend a rider's mileage for a ride in the mileage database?</a></h3>
+        <h3><a href="#" topic="amendmiles">amend a rider's mileage for a ride in the mileage database?</a></h3>
         <div class="initially-hidden">
         <p>Occasionally, a rider wishes to amend their recorded mileage for a ride.
         To do so, they contact the club statistician who then makes the modification.</p>
@@ -45,6 +52,18 @@ jQuery(document).ready(function($) {
             <li>Find the appropriate ride sheet based on the information given by the rider.</li>
             <li>Select the <em>Edit</em> link in the <em>Action</em> column of the ride sheet's table row.</li>
             <li>A page displays that is the ride sheet leader and mileage entry form.</li>
+            <li>Log mileage and leader data for the ride (see <a href="#" topic="logdata">topic</a> for details.)</li>
+            <li>Press the <em>Back</em> button.</li>
+            <li>The page displaying the search form for ride sheets will return.</li>
+        </ol>
+        </div>
+        <h3><a href="#" topic="logdata">log mileage and leader data for a ride?</a></h3>
+        <div class="initially-hidden">
+        <p>The club statistician is responsible for logging mileage and leader data for 
+        rides into the mileage database. This task is part of entering ride sign-up sheets
+        (see <a href="#" topic="ridesheet">topic</a>) and amending rider mileage (see 
+        <a href="#" topic="amendmiles">topic</a>.)</p>
+        <ol>
             <li>more to come...</li>
         </ol>
         </div>
@@ -66,11 +85,17 @@ jQuery(document).ready(function($) {
         reports that are used by the banquet organizers to identify the award receipents.
         These reports are based on rider activities for the previous year and should
         only be generated after the start of the new year and after all of the ride 
-        sign-up sheets for the previous year have been entered.</p>
+        sign-up sheets for the previous year have been entered. The reports consist of 
+        two sets of four files: a CSV file set for spreadsheet applications and 
+        a PDF file set for printing hardcopies.</p>
         <ol>
             <li>Select the <em>View Reports</em> option under the <em>Rider Mileage</em> submenu.</li>
             <li>A page displays that list the various reports that are available.</li>
-            <li>more to come...</li>
+            <li>Choose the <em>CSV File</em> option from the <em>Download</em> selection box.</li>
+            <li>Click all four links in the <em>Award Reports</em> section, four CSV files will be downloaded.</li>
+            <li>Choose the <em>PDF File</em> option from the <em>Download</em> selection box.</li>
+            <li>Click all four links in the <em>Award Reports</em> section, four PDF files will be downloaded.</li>
+            <li>Collect the eight downloaded files and send to the banquet organizers.</li>
         </ol>
         </div>
         <h3><a href="#">upload an UPDMEMBS.DBF file from the membership secretary?</a></h3>
@@ -94,15 +119,15 @@ jQuery(document).ready(function($) {
         </div>
         <h3><a href="#">consolidate obsolete rides in the mileage database?</a></h3>
         <div class="initially-hidden">
-        <p>Mileage data for only the current and last years are required, all older data 
-        is obsolete and should be consolidated to save space. The club statistician performs
-        this function after the start of each new year. WARNING: this operation has the 
-        potential to corrupt the mileage database, you should first backup the mileage 
-        database before proceeding.</p>
+        <p><strong>WARNING: this operation has the potential to corrupt the mileage database, 
+        so you should first backup the mileage database before proceeding.</strong> Mileage data 
+        for only the current and last years are required, all older data is obsolete 
+        and should be consolidated to save space. The club statistician performs
+        this function after the start of each new year.</p>
         <ol>
             <li>Select the <em>Database Ops</em> item under the <em>Rider Mileage</em> submenu.</li>
             <li>A page displays with buttons that execute various database operations.</li>
-            <li>Backup the mileage database.</li>
+            <li>Backup the mileage database (see <a href="#" topic="backup">topic</a> for details.)</li>
             <li>Press the <em>Consolidate</em> button.</li>
             <li>Press <em>OK</em> when the confirmation dialog pops up.</li>
             <li>The consolidate process will begin, wait for it to complete.</li>
@@ -110,31 +135,45 @@ jQuery(document).ready(function($) {
             <li>Press the <em>Clear Messages</em> button to clear the status message.</li>
         </ol>
         </div>
-        <h3><a href="#">backup the mileage database?</a></h3>
+        <h3><a href="#" topic="backup">backup the mileage database?</a></h3>
         <div class="initially-hidden">
         <p>Occasionally, the club statistician should backup the mileage database.
         This involves exporting four CSV files to the local file system.</p>
         <ol>
             <li>Select the <em>Database Ops</em> item under the <em>Rider Mileage</em> submenu.</li>
             <li>A page displays with buttons that execute various database operations.</li>
-            <li>Press the <em>Members</em> button, a file will be downloaded.</li>
-            <li>Press the <em>Rides</em> button, a file will be downloaded.</li>
-            <li>Press the <em>Mileage</em> button, a file will be downloaded.</li>
-            <li>Press the <em>Leaders</em> button, a file will be downloaded.</li>
+            <li>Press the <em>Members</em> button, a CSV file will be downloaded.</li>
+            <li>Press the <em>Rides</em> button, a CSV file will be downloaded.</li>
+            <li>Press the <em>Mileage</em> button, a CSV file will be downloaded.</li>
+            <li>Press the <em>Leaders</em> button, a CSV file will be downloaded.</li>
             <li>Collect the four files that were downloaded and archive to a secure location.</li>
         </ol>
         </div>
         <h3><a href="#">restore the mileage database?</a></h3>
         <div class="initially-hidden">
-        <p>The club statistician may need to restore the mileage database from a 
-        saved backup. A saved backup consists of four archived CSV files. WARNING: 
-        this operation will overwrite the current mileage database, proceed with 
-        caution.</p>
+        <p><strong>WARNING: this operation will overwrite the current mileage database, 
+        therefore it should only be performed by the administrator.</strong> The 
+        administrator may need to restore the mileage database from a saved backup. 
+        A saved backup consists of four archived CSV files.</p>
         <ol>
+            <li>Obtain the four CSV files that are a mileage database backup.</li>
             <li>Select the <em>Database Ops</em> item under the <em>Rider Mileage</em> submenu.</li>
             <li>A page displays with buttons that execute various database operations.</li>
             <li>Press the <em>Restore</em> button.</li>
-            <li>more to come...</li>
+            <li>Four file upload fields appear.</li>
+            <li>Click on the <em>Members File</em> field.</li>
+            <li>A file selection dialog pops up, use it to open the members backup CSV file on your computer.</li>
+            <li>Click on the <em>Rides File</em> field.</li>
+            <li>A file selection dialog pops up, use it to open the rides backup CSV file on your computer.</li>
+            <li>Click on the <em>Mileage File</em> field.</li>
+            <li>A file selection dialog pops up, use it to open the mileage backup CSV file on your computer.</li>
+            <li>Click on the <em>Leaders File</em> field.</li>
+            <li>A file selection dialog pops up, use it to open the leaders backup CSV file on your computer.</li>
+            <li>Press the <em>Restore</em> button.</li>
+            <li>Press <em>OK</em> when the confirmation dialog pops up.</li>
+            <li>The restore process will begin, wait for it to complete.</li>
+            <li>If successful, the following message will appear: <em>Restore action success</em>.</li>
+            <li>Press the <em>Clear Messages</em> button to clear the status message.</li>
         </ol>
         </div>
     </div>
