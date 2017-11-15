@@ -940,9 +940,9 @@ if ($running_jobs > 0) {
 	}
 	?>
 	</div>
-	<div id='ridesheet-sheet-page' class="initially-hidden">
+	<div id="ridesheet-sheet-page" class="initially-hidden">
 		<p>Use this page to record the ride leader and rider mileages entered on the ride sign in sheet.</p>
-		<p><button class='back-btn button button-primary button-large'>Back</button></p>
+		<p><button class="back-btn button button-primary button-large"><i class="fa fa-chevron-left"></i> Back</button></p>
 		<div class='report-sec'>
 		<h3>Ride Sheet</h3>
 		<h3>

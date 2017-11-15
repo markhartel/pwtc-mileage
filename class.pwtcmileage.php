@@ -60,8 +60,10 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'shortcode_rides_wo_sheets'));
 		add_shortcode('pwtc_riderid_download', 
 			array( 'PwtcMileage', 'shortcode_riderid_download'));
+/*
 		add_shortcode('pwtc_ridecal_download', 
 			array( 'PwtcMileage', 'shortcode_ridecal_download'));
+*/
 
 		// Register background action task callbacks 
 		add_action( 'pwtc_mileage_consolidation', 
