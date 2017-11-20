@@ -313,7 +313,7 @@ if ($running_jobs > 0) {
         <div class='download'></div>
     </div>
     <div id="report-results-section" class="initially-hidden">
-        <p><button class="back-btn button button-primary button-large"><i class="fa fa-chevron-left"></i> Back</button></p>
+        <p><button class="back-btn button button-primary button-large">&lt; Back</button></p>
 		<p><h2></h2></p>
         <p><div class="results-div"></div></p>
     </div>
