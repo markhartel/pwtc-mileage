@@ -97,7 +97,9 @@ jQuery(document).ready(function($) {
         <em>Last Name</em> text fields. Enter text into those fields and press the 
         <em>Lookup</em> button. If only one match is found, the dialog will close and return 
         that rider. If multiple matches are found, they will be listed below and one can be 
-        choosen which will close the dialog and return that rider.</p>
+        selected which will close the dialog and return that rider.</p>
+        <p>You can also restrict the search results to riders who have current active 
+        membership by checking the <em>Active Members Only</em> checkbox.</p>
         </div>
         <h3><a href="#">add a new rider to the mileage database?</a></h3>
         <div class="initially-hidden report-sec">
