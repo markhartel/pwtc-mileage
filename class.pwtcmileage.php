@@ -758,13 +758,13 @@ class PwtcMileage {
 					$out .= 'Please log in to see your club rider report.';
 					break;
 				case "idnotfound":
-					$out .= 'Cannot show club rider report, rider ID not found.';
+					$out .= 'Cannot show club rider report, rider ID not found. Please contact administrator.';
 					break;
 				case "multidfound":
-					$out .= 'Cannot show club rider report, multiple rider IDs found.';
+					$out .= 'Cannot show club rider report, multiple rider IDs found. Please contact administrator.';
 					break;
 				default:
-					$out .= 'Cannot show club rider report, unknown error.';
+					$out .= 'Cannot show club rider report, unknown error. Please contact administrator.';
 			}
 		}
 		$out .= '</div>';
@@ -879,13 +879,13 @@ class PwtcMileage {
 					$out .= 'Please log in to view your year-to-date rides.';
 					break;
 				case "idnotfound":
-					$out .= 'Cannot view your year-to-date rides, rider ID not found.';
+					$out .= 'Cannot view your year-to-date rides, rider ID not found. Please contact administrator.';
 					break;
 				case "multidfound":
-					$out .= 'Cannot view your year-to-date rides, multiple rider IDs found.';
+					$out .= 'Cannot view your year-to-date rides, multiple rider IDs found. Please contact administrator.';
 					break;
 				default:
-					$out .= 'Cannot view your year-to-date rides, unknown error.';
+					$out .= 'Cannot view your year-to-date rides, unknown error. Please contact administrator.';
 			}
 		}
 		$out .= '</div>';
@@ -909,13 +909,13 @@ class PwtcMileage {
 					$out .= 'Please log in to view your last year rides.';
 					break;
 				case "idnotfound":
-					$out .= 'Cannot view your last year rides, rider ID not found.';
+					$out .= 'Cannot view your last year rides, rider ID not found. Please contact administrator.';
 					break;
 				case "multidfound":
-					$out .= 'Cannot view your last year rides, multiple rider IDs found.';
+					$out .= 'Cannot view your last year rides, multiple rider IDs found. Please contact administrator.';
 					break;
 				default:
-					$out .= 'Cannot view your last year rides, unknown error.';
+					$out .= 'Cannot view your last year rides, unknown error. Please contact administrator.';
 			}
 		}
 		$out .= '</div>';
@@ -939,13 +939,13 @@ class PwtcMileage {
 					$out .= 'Please log in to view your year-to-date rides led.';
 					break;
 				case "idnotfound":
-					$out .= 'Cannot view your year-to-date rides led, rider ID not found.';
+					$out .= 'Cannot view your year-to-date rides led, rider ID not found. Please contact administrator.';
 					break;
 				case "multidfound":
-					$out .= 'Cannot view your year-to-date rides led, multiple rider IDs found.';
+					$out .= 'Cannot view your year-to-date rides led, multiple rider IDs found. Please contact administrator.';
 					break;
 				default:
-					$out .= 'Cannot view your year-to-date rides led, unknown error.';
+					$out .= 'Cannot view your year-to-date rides led, unknown error. Please contact administrator.';
 			}
 		}
 		$out .= '</div>';
@@ -969,13 +969,13 @@ class PwtcMileage {
 					$out .= 'Please log in to view your last year rides led.';
 					break;
 				case "idnotfound":
-					$out .= 'Cannot view your last year rides led, rider ID not found.';
+					$out .= 'Cannot view your last year rides led, rider ID not found. Please contact administrator.';
 					break;
 				case "multidfound":
-					$out .= 'Cannot view your last year rides led, multiple rider IDs found.';
+					$out .= 'Cannot view your last year rides led, multiple rider IDs found. Please contact administrator.';
 					break;
 				default:
-					$out .= 'Cannot view your last year rides led, unknown error.';
+					$out .= 'Cannot view your last year rides led, unknown error. Please contact administrator.';
 			}
 		}
 		$out .= '</div>';
@@ -1146,6 +1146,7 @@ class PwtcMileage {
 
 	public static function create_default_plugin_options() {
 		$data = array(
+			'admin_maint_mode' => false,
 			'drop_db_on_delete' => false,
 			'plugin_menu_label' => 'Rider Mileage',
 			'plugin_menu_location' => 50,

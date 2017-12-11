@@ -1921,6 +1921,12 @@ class PwtcMileage_Admin {
 			}
     	} 
 		if ($form_submitted) {
+			if (isset($_POST['admin_maint_mode'])) {
+				$plugin_options['admin_maint_mode'] = true;
+			}
+			else {
+				$plugin_options['admin_maint_mode'] = false;
+			}
 			if (isset($_POST['drop_db_on_delete'])) {
 				$plugin_options['drop_db_on_delete'] = true;
 			}
