@@ -23,19 +23,6 @@ jQuery(document).ready(function($) {
     <div id="user-guide-page">
         <h1>How do I...</h1>
         <p>Click on your topic of interest to expand.</p>
-        <h3><a href="#">prepare the mileage database for the upcoming year's activities?</a></h3>
-        <div class="initially-hidden report-sec">
-        <p>After the start of the new year, a set of housekeeping actions must be performed 
-        on the mileage database before it can handle upcoming club activities. These actions 
-        should be executed in the specified order.</p>
-        <ol>
-            <li>Ensure that the latest UPDMEMBS.DBF file from the membership secretary has been uploaded (see <a href="#" topic="updmembs">topic</a> for details.)</li>
-            <li>Ensure that all the ride sign-up sheets for the previous year have been entered (see <a href="#" topic="ridesheet">topic</a> for details.)</li>
-            <li>Backup the mileage database (see <a href="#" topic="backup">topic</a> for details.) Collect the files that were downloaded and archive to a secure location.</li> 
-            <li>Generate the banquet award reports (see <a href="#" topic="awards">topic</a> for details.) Collect the files that were downloaded and archive to a secure location.</li>
-            <li>Consolidate the obsolete rides from the year before last (see <a href="#" topic="consolidate">topic</a> for details.)</li>
-        </ol>
-        </div>
         <h3><a href="#" topic="ridesheet">enter a ride sign-in sheet into the mileage database?</a></h3>
         <div class="initially-hidden report-sec">
         <p>After a ride is complete, the ride leader sends the ride sign-in sheet to the
@@ -121,6 +108,19 @@ jQuery(document).ready(function($) {
             <li>Enter the new rider's last name into the <em>Last Name</em> text field.</li>
             <li>Click on the <em>Expiration Date</em> field and select the new rider's membership expiration date from the popup calendar. (If not known, just use the current date.)</li>
             <li>Press the <em>Create</em> button.</li>
+        </ol>
+        </div>
+        <h3><a href="#">prepare the mileage database for the upcoming year's activities?</a></h3>
+        <div class="initially-hidden report-sec">
+        <p>After the start of the new year, a set of housekeeping actions must be performed 
+        on the mileage database before it can handle upcoming club activities. These actions 
+        should be executed in the specified order.</p>
+        <ol>
+            <li>Ensure that the latest UPDMEMBS.DBF file from the membership secretary has been uploaded (see <a href="#" topic="updmembs">topic</a> for details.)</li>
+            <li>Ensure that all the ride sign-up sheets for the previous year have been entered (see <a href="#" topic="ridesheet">topic</a> for details.)</li>
+            <li>Backup the mileage database (see <a href="#" topic="backup">topic</a> for details.) Collect the files that were downloaded and archive to a secure location.</li> 
+            <li>Generate the banquet award reports (see <a href="#" topic="awards">topic</a> for details.) Collect the files that were downloaded and archive to a secure location.</li>
+            <li>Consolidate the obsolete rides from the year before last (see <a href="#" topic="consolidate">topic</a> for details.)</li>
         </ol>
         </div>
         <h3><a href="#" topic="awards">generate the year-end banquet award reports?</a></h3>
