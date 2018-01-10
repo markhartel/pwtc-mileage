@@ -127,26 +127,34 @@ class PwtcMileage_DB {
 		return $meta;		
 	}
 
-	public static function fetch_annual_accum_miles($outtype) {
+	public static function fetch_annual_accum_miles($outtype, $min = 0) {
     	global $wpdb;
+		$where = 'where a.mileage > 0';
+		if ($min > 1) {
+			$where = 'where a.mileage >= ' . $min;
+		}
     	$results = $wpdb->get_results(
 			'select a.member_id as member_id,' . 
 			' concat(a.last_name, \', \', a.first_name) as name,' . 
 			' a.mileage as annual, b.mileage as accum' .
 			' from ' . self::LY_MILES_VIEW . ' as a inner join ' . self::LY_LT_MILES_VIEW . ' as b' . 
-			' on a.member_id = b.member_id where a.mileage > 0 ' . 
+			' on a.member_id = b.member_id ' . $where .
 			' order by a.last_name, a.first_name', $outtype);
 		return $results;
 	}
 
-	public static function meta_annual_accum_miles() {
+	public static function meta_annual_accum_miles($min = 0) {
 		$thisyear = date('Y', current_time('timestamp'));
     	$lastyear = intval($thisyear) - 1;
+		$title = $lastyear . ' Annual & Accumulative Mileage';
+		if ($min > 1) {
+			$title .= ' (' . $min . ' miles or more)';
+		}
 		$meta = array(
 			'header' => array('ID', 'Name', 'Annual', 'Accum'),
 			'width' => array(15, 55, 15, 15),
 			'align' => array('C', 'L', 'R', 'R'),
-			'title' => '' . $lastyear . ' Annual & Accumulative Mileage',
+			'title' => $title,
 			'date_idx' => -1,
 			'id_idx' => 0
 		);
@@ -315,14 +323,18 @@ class PwtcMileage_DB {
 		return $results;
 	}
 
-	public static function meta_ly_led() {
+	public static function meta_ly_led($min = 0) {
 		$thisyear = date('Y', current_time('timestamp'));
-    	$lastyear = intval($thisyear) - 1;
+		$lastyear = intval($thisyear) - 1;
+		$title = $lastyear . ' Ride Leaders';
+		if ($min > 1) {
+			$title .= ' (' . $min . ' rides or more)';
+		}
 		$meta = array(
 			'header' => array('ID', 'Name', 'Rides Led'),
 			'width' => array(20, 60, 20),
 			'align' => array('C', 'L', 'R'),
-			'title' => $lastyear . ' Ride Leaders',
+			'title' => $title,
 			'date_idx' => -1,
 			'id_idx' => 0
 		);

@@ -1256,6 +1256,8 @@ class PwtcMileage_Admin {
 				case "award_top_miles":
 				case "award_members":
 				case "award_leaders":
+				case "award_members_500":
+				case "award_leaders_12":
 					$state = array(
 						'action' => 'pwtc_mileage_generate_report',
 						'report_id' => $reportid
@@ -1276,6 +1278,14 @@ class PwtcMileage_Admin {
 						case "award_members":
 							$meta = PwtcMileage_DB::meta_annual_accum_miles();
 							$data = PwtcMileage_DB::fetch_annual_accum_miles(ARRAY_N);
+							break;
+						case "award_leaders_12":
+							$meta = PwtcMileage_DB::meta_ly_led(12);
+							$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, 'last_name, first_name', 12, true);
+							break;
+						case "award_members_500":
+							$meta = PwtcMileage_DB::meta_annual_accum_miles(500);
+							$data = PwtcMileage_DB::fetch_annual_accum_miles(ARRAY_N, 500);
 							break;
 					}			
 					break;
