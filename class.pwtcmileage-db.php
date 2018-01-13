@@ -127,59 +127,100 @@ class PwtcMileage_DB {
 		return $meta;		
 	}
 
-	public static function fetch_annual_accum_miles($outtype, $min = 0) {
+	public static function fetch_annual_accum_miles($outtype, $min = 0, $no_id = false) {
     	global $wpdb;
 		$where = 'where a.mileage > 0';
 		if ($min > 1) {
 			$where = 'where a.mileage >= ' . $min;
 		}
-    	$results = $wpdb->get_results(
-			'select a.member_id as member_id,' . 
-			' concat(a.last_name, \', \', a.first_name) as name,' . 
-			' a.mileage as annual, b.mileage as accum' .
-			' from ' . self::LY_MILES_VIEW . ' as a inner join ' . self::LY_LT_MILES_VIEW . ' as b' . 
-			' on a.member_id = b.member_id ' . $where .
-			' order by a.last_name, a.first_name', $outtype);
+		if ($no_id) {
+			$results = $wpdb->get_results(
+				'select concat(a.last_name, \', \', a.first_name) as name,' . 
+				' a.mileage as annual, b.mileage as accum' .
+				' from ' . self::LY_MILES_VIEW . ' as a inner join ' . self::LY_LT_MILES_VIEW . 
+				' as b on a.member_id = b.member_id ' . $where .
+				' order by a.last_name, a.first_name', $outtype);
+		}
+		else {
+			$results = $wpdb->get_results(
+				'select a.member_id as member_id,' . 
+				' concat(a.last_name, \', \', a.first_name) as name,' . 
+				' a.mileage as annual, b.mileage as accum' .
+				' from ' . self::LY_MILES_VIEW . ' as a inner join ' . self::LY_LT_MILES_VIEW . 
+				' as b on a.member_id = b.member_id ' . $where .
+				' order by a.last_name, a.first_name', $outtype);
+		}
 		return $results;
 	}
 
-	public static function meta_annual_accum_miles($min = 0) {
+	public static function meta_annual_accum_miles($min = 0, $no_id = false) {
 		$thisyear = date('Y', current_time('timestamp'));
     	$lastyear = intval($thisyear) - 1;
 		$title = $lastyear . ' Annual & Accumulative Mileage';
 		if ($min > 1) {
 			$title .= ' (' . $min . ' miles or more)';
 		}
-		$meta = array(
-			'header' => array('ID', 'Name', 'Annual', 'Accum'),
-			'width' => array(15, 55, 15, 15),
-			'align' => array('C', 'L', 'R', 'R'),
-			'title' => $title,
-			'date_idx' => -1,
-			'id_idx' => 0
-		);
+		if ($no_id) {
+			$meta = array(
+				'header' => array('Name', 'Annual', 'Accum'),
+				'width' => array(70, 15, 15),
+				'align' => array('L', 'R', 'R'),
+				'title' => $title,
+				'date_idx' => -1,
+				'id_idx' => -1
+			);
+		}
+		else {
+			$meta = array(
+				'header' => array('ID', 'Name', 'Annual', 'Accum'),
+				'width' => array(15, 55, 15, 15),
+				'align' => array('C', 'L', 'R', 'R'),
+				'title' => $title,
+				'date_idx' => -1,
+				'id_idx' => 0
+			);
+		}
 		return $meta;
 	}
 
-	public static function fetch_ly_lt_achvmnt($outtype, $sort) {
-    	global $wpdb;
-    	$results = $wpdb->get_results(
-			'select member_id, concat(first_name, \' \', last_name), mileage, achievement from ' . 
-			self::LY_LT_ACHVMNT_VIEW . ' order by ' . $sort, $outtype);
+	public static function fetch_ly_lt_achvmnt($outtype, $sort, $no_id = false) {
+		global $wpdb;
+		if ($no_id) {
+			$results = $wpdb->get_results(
+				'select concat(first_name, \' \', last_name), mileage, achievement from ' . 
+				self::LY_LT_ACHVMNT_VIEW . ' order by ' . $sort, $outtype);
+		}
+		else {
+			$results = $wpdb->get_results(
+				'select member_id, concat(first_name, \' \', last_name), mileage, achievement from ' . 
+				self::LY_LT_ACHVMNT_VIEW . ' order by ' . $sort, $outtype);
+		}
 		return $results;
 	}
 
-	public static function meta_ly_lt_achvmnt() {
+	public static function meta_ly_lt_achvmnt($no_id = false) {
 		$thisyear = date('Y', current_time('timestamp'));
-    	$lastyear = intval($thisyear) - 1;
-		$meta = array(
-			'header' => array('ID', 'Name', 'Mileage', 'Award'),
-			'width' => array(15, 55, 15, 15),
-			'align' => array('C', 'L', 'R', 'R'),
-			'title' => '' . $lastyear . ' Lifetime Mileage Achievement',
-			'date_idx' => -1,
-			'id_idx' => 0
-		);
+		$lastyear = intval($thisyear) - 1;
+		if ($no_id) {
+			$meta = array(
+				'header' => array('Name', 'Mileage', 'Award'),
+				'width' => array(70, 15, 15),
+				'align' => array('L', 'R', 'R'),
+				'title' => '' . $lastyear . ' Lifetime Mileage Achievement',
+				'date_idx' => -1,
+				'id_idx' => -1
+			);
+		}
+		else {
+			$meta = array(
+				'header' => array('ID', 'Name', 'Mileage', 'Award'),
+				'width' => array(15, 55, 15, 15),
+				'align' => array('C', 'L', 'R', 'R'),
+				'title' => '' . $lastyear . ' Lifetime Mileage Achievement',
+				'date_idx' => -1,
+				'id_idx' => 0
+			);
+		}
 		return $meta;
 	}
 
@@ -207,29 +248,48 @@ class PwtcMileage_DB {
 		return $meta;
 	}
 
-	public static function fetch_ly_miles($outtype, $sort, $min = 0) {
+	public static function fetch_ly_miles($outtype, $sort, $min = 0, $no_id = false) {
     	global $wpdb;
 		$where = '';
 		if ($min > 0) {
 			$where = ' where mileage >= ' . $min . ' ';
 		}
-    	$results = $wpdb->get_results(
-			'select member_id, concat(first_name, \' \', last_name), mileage from ' . 
-			self::LY_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
+		if ($no_id) {
+			$results = $wpdb->get_results(
+				'select concat(first_name, \' \', last_name), mileage from ' . 
+				self::LY_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
+		}
+		else {
+			$results = $wpdb->get_results(
+				'select member_id, concat(first_name, \' \', last_name), mileage from ' . 
+				self::LY_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
+		}
 		return $results;
 	}
 
-	public static function meta_ly_miles() {
+	public static function meta_ly_miles($no_id = false) {
 		$thisyear = date('Y', current_time('timestamp'));
-    	$lastyear = intval($thisyear) - 1;
-		$meta = array(
-			'header' => array('ID', 'Name', 'Mileage'),
-			'width' => array(20, 60, 20),
-			'align' => array('C', 'L', 'R'),
-			'title' => $lastyear . ' Rider Mileage',
-			'date_idx' => -1,
-			'id_idx' => 0
-		);
+		$lastyear = intval($thisyear) - 1;
+		if ($no_id) {
+			$meta = array(
+				'header' => array('Name', 'Mileage'),
+				'width' => array(80, 20),
+				'align' => array('L', 'R'),
+				'title' => $lastyear . ' Rider Mileage',
+				'date_idx' => -1,
+				'id_idx' => -1
+			);
+		}
+		else {
+			$meta = array(
+				'header' => array('ID', 'Name', 'Mileage'),
+				'width' => array(20, 60, 20),
+				'align' => array('C', 'L', 'R'),
+				'title' => $lastyear . ' Rider Mileage',
+				'date_idx' => -1,
+				'id_idx' => 0
+			);
+		}
 		return $meta;
 	}
 
@@ -307,7 +367,7 @@ class PwtcMileage_DB {
 		return $meta;
 	}
 
-	public static function fetch_ly_led($outtype, $sort, $min = 0, $lastname_first = false) {
+	public static function fetch_ly_led($outtype, $sort, $min = 0, $lastname_first = false, $no_id = false) {
     	global $wpdb;
 		$where = '';
 		if ($min > 0) {
@@ -317,27 +377,46 @@ class PwtcMileage_DB {
 		if ($lastname_first) {
 			$name = 'concat(last_name, \', \', first_name)';
 		}
-    	$results = $wpdb->get_results(
-			'select member_id, ' . $name . ', rides_led from ' . 
-			self::LY_LED_VIEW . $where . ' order by ' . $sort , $outtype);
+		if ($no_id) {
+			$results = $wpdb->get_results(
+				'select ' . $name . ', rides_led from ' . 
+				self::LY_LED_VIEW . $where . ' order by ' . $sort , $outtype);
+		}
+		else {
+			$results = $wpdb->get_results(
+				'select member_id, ' . $name . ', rides_led from ' . 
+				self::LY_LED_VIEW . $where . ' order by ' . $sort , $outtype);
+		}
 		return $results;
 	}
 
-	public static function meta_ly_led($min = 0) {
+	public static function meta_ly_led($min = 0, $no_id = false) {
 		$thisyear = date('Y', current_time('timestamp'));
 		$lastyear = intval($thisyear) - 1;
 		$title = $lastyear . ' Ride Leaders';
 		if ($min > 1) {
 			$title .= ' (' . $min . ' rides or more)';
 		}
-		$meta = array(
-			'header' => array('ID', 'Name', 'Rides Led'),
-			'width' => array(20, 60, 20),
-			'align' => array('C', 'L', 'R'),
-			'title' => $title,
-			'date_idx' => -1,
-			'id_idx' => 0
-		);
+		if ($no_id) {
+			$meta = array(
+				'header' => array('Name', 'Rides Led'),
+				'width' => array(80, 20),
+				'align' => array('L', 'R'),
+				'title' => $title,
+				'date_idx' => -1,
+				'id_idx' => -1
+			);
+		}
+		else {
+			$meta = array(
+				'header' => array('ID', 'Name', 'Rides Led'),
+				'width' => array(20, 60, 20),
+				'align' => array('C', 'L', 'R'),
+				'title' => $title,
+				'date_idx' => -1,
+				'id_idx' => 0
+			);
+		}
 		return $meta;
 	}
 

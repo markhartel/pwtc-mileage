@@ -1264,28 +1264,28 @@ class PwtcMileage_Admin {
 					);						
 					switch ($reportid) {
 						case "award_achvmnt":
-							$meta = PwtcMileage_DB::meta_ly_lt_achvmnt();
-							$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, 'nachievement, last_name, first_name');
+							$meta = PwtcMileage_DB::meta_ly_lt_achvmnt(true);
+							$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, 'nachievement, last_name, first_name', true);
 							break;
 						case "award_top_miles":
-							$meta = PwtcMileage_DB::meta_ly_miles();
-							$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, 'mileage desc');
+							$meta = PwtcMileage_DB::meta_ly_miles(true);
+							$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, 'mileage desc', 1, true);
 							break;
 						case "award_leaders":
-							$meta = PwtcMileage_DB::meta_ly_led();
-							$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, 'last_name, first_name', 0, true);
+							$meta = PwtcMileage_DB::meta_ly_led(0, true);
+							$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, 'last_name, first_name', 0, true, true);
 							break;
 						case "award_members":
-							$meta = PwtcMileage_DB::meta_annual_accum_miles();
-							$data = PwtcMileage_DB::fetch_annual_accum_miles(ARRAY_N);
+							$meta = PwtcMileage_DB::meta_annual_accum_miles(0, true);
+							$data = PwtcMileage_DB::fetch_annual_accum_miles(ARRAY_N, 0, true);
 							break;
 						case "award_leaders_12":
-							$meta = PwtcMileage_DB::meta_ly_led(12);
-							$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, 'last_name, first_name', 12, true);
+							$meta = PwtcMileage_DB::meta_ly_led(12, true);
+							$data = PwtcMileage_DB::fetch_ly_led(ARRAY_N, 'last_name, first_name', 12, true, true);
 							break;
 						case "award_members_500":
-							$meta = PwtcMileage_DB::meta_annual_accum_miles(500);
-							$data = PwtcMileage_DB::fetch_annual_accum_miles(ARRAY_N, 500);
+							$meta = PwtcMileage_DB::meta_annual_accum_miles(500, true);
+							$data = PwtcMileage_DB::fetch_annual_accum_miles(ARRAY_N, 500, true);
 							break;
 					}			
 					break;

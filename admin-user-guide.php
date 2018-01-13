@@ -136,9 +136,9 @@ jQuery(document).ready(function($) {
             <li>Select the <em>View Reports</em> option under the <em>Rider Mileage</em> submenu.</li>
             <li>A page displays that list the various reports that are available.</li>
             <li>Choose the <em>CSV File</em> option from the <em>Download</em> selection box.</li>
-            <li>Click all six links in the <em>Award Reports</em> section, four CSV files will be downloaded.</li>
+            <li>Click all six links in the <em>Award Reports</em> section, six CSV files will be downloaded.</li>
             <li>Choose the <em>PDF File</em> option from the <em>Download</em> selection box.</li>
-            <li>Click all six links in the <em>Award Reports</em> section, four PDF files will be downloaded.</li>
+            <li>Click all six links in the <em>Award Reports</em> section, six PDF files will be downloaded.</li>
             <li>Collect the twelve downloaded files and send to the banquet organizers.</li>
         </ol>
         </div>
