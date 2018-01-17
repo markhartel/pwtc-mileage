@@ -224,27 +224,46 @@ class PwtcMileage_DB {
 		return $meta;
 	}
 
-	public static function fetch_ytd_miles($outtype, $sort, $min = 0) {
+	public static function fetch_ytd_miles($outtype, $sort, $min = 0, $no_id = false) {
     	global $wpdb;
 		$where = '';
 		if ($min > 0) {
 			$where = ' where mileage >= ' . $min . ' ';
 		}
-    	$results = $wpdb->get_results(
-			'select member_id, concat(first_name, \' \', last_name), mileage from ' . 
-			self::YTD_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
+		if ($no_id) {
+			$results = $wpdb->get_results(
+				'select concat(first_name, \' \', last_name), mileage from ' . 
+				self::YTD_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
+		}
+		else {
+			$results = $wpdb->get_results(
+				'select member_id, concat(first_name, \' \', last_name), mileage from ' . 
+				self::YTD_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
+		}
 		return $results;
 	}
 
-	public static function meta_ytd_miles() {
-		$meta = array(
-			'header' => array('ID', 'Name', 'Mileage'),
-			'width' => array(20, 60, 20),
-			'align' => array('C', 'L', 'R'),
-			'title' => 'Year-to-date Rider Mileage',
-			'date_idx' => -1,
-			'id_idx' => 0
-		);
+	public static function meta_ytd_miles($no_id = false) {
+		if ($no_id) {
+			$meta = array(
+				'header' => array('Name', 'Mileage'),
+				'width' => array(80, 20),
+				'align' => array('L', 'R'),
+				'title' => 'Year-to-date Rider Mileage',
+				'date_idx' => -1,
+				'id_idx' => -1
+			);	
+		}
+		else {
+			$meta = array(
+				'header' => array('ID', 'Name', 'Mileage'),
+				'width' => array(20, 60, 20),
+				'align' => array('C', 'L', 'R'),
+				'title' => 'Year-to-date Rider Mileage',
+				'date_idx' => -1,
+				'id_idx' => 0
+			);
+		}
 		return $meta;
 	}
 
@@ -319,51 +338,89 @@ class PwtcMileage_DB {
 		return $meta;
 	}
 
-	public static function fetch_lt_miles($outtype, $sort, $min = 0) {
+	public static function fetch_lt_miles($outtype, $sort, $min = 0, $no_id = false) {
     	global $wpdb;
 		$where = '';
 		if ($min > 0) {
 			$where = ' where mileage >= ' . $min . ' ';
 		}
-    	$results = $wpdb->get_results(
-			'select member_id, concat(first_name, \' \', last_name), mileage from ' . 
-			self::LT_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
+		if ($no_id) {
+			$results = $wpdb->get_results(
+				'select concat(first_name, \' \', last_name), mileage from ' . 
+				self::LT_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
+		}
+		else {
+			$results = $wpdb->get_results(
+				'select member_id, concat(first_name, \' \', last_name), mileage from ' . 
+				self::LT_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
+		}
 		return $results;
 	}
 
-	public static function meta_lt_miles() {
-		$meta = array(
-			'header' => array('ID', 'Name', 'Mileage'),
-			'width' => array(20, 60, 20),
-			'align' => array('C', 'L', 'R'),
-			'title' => 'Lifetime Rider Mileage',
-			'date_idx' => -1,
-			'id_idx' => 0
-		);
+	public static function meta_lt_miles($no_id = false) {
+		if ($no_id) {
+			$meta = array(
+				'header' => array('Name', 'Mileage'),
+				'width' => array(80, 20),
+				'align' => array('L', 'R'),
+				'title' => 'Lifetime Rider Mileage',
+				'date_idx' => -1,
+				'id_idx' => -1
+			);
+		}
+		else {
+			$meta = array(
+				'header' => array('ID', 'Name', 'Mileage'),
+				'width' => array(20, 60, 20),
+				'align' => array('C', 'L', 'R'),
+				'title' => 'Lifetime Rider Mileage',
+				'date_idx' => -1,
+				'id_idx' => 0
+			);
+		}
 		return $meta;
 	}
 
-	public static function fetch_ytd_led($outtype, $sort, $min = 0) {
+	public static function fetch_ytd_led($outtype, $sort, $min = 0, $no_id = false) {
     	global $wpdb;
 		$where = '';
 		if ($min > 0) {
 			$where = ' where rides_led >= ' . $min . ' ';
 		}
-    	$results = $wpdb->get_results(
-			'select member_id, concat(first_name, \' \', last_name), rides_led from ' . 
-			self::YTD_LED_VIEW . $where . ' order by ' . $sort , $outtype);
+		if ($no_id) {
+			$results = $wpdb->get_results(
+				'select concat(first_name, \' \', last_name), rides_led from ' . 
+				self::YTD_LED_VIEW . $where . ' order by ' . $sort , $outtype);
+		}
+		else {
+			$results = $wpdb->get_results(
+				'select member_id, concat(first_name, \' \', last_name), rides_led from ' . 
+				self::YTD_LED_VIEW . $where . ' order by ' . $sort , $outtype);
+		}
 		return $results;
 	}
 
-	public static function meta_ytd_led() {
-		$meta = array(
-			'header' => array('ID', 'Name', 'Rides Led'),
-			'width' => array(20, 60, 20),
-			'align' => array('C', 'L', 'R'),
-			'title' => 'Year-to-date Ride Leaders',
-			'date_idx' => -1,
-			'id_idx' => 0
-		);
+	public static function meta_ytd_led($no_id = false) {
+		if ($no_id) {
+			$meta = array(
+				'header' => array('Name', 'Rides Led'),
+				'width' => array(80, 20),
+				'align' => array('L', 'R'),
+				'title' => 'Year-to-date Ride Leaders',
+				'date_idx' => -1,
+				'id_idx' => -1
+			);	
+		}
+		else {
+			$meta = array(
+				'header' => array('ID', 'Name', 'Rides Led'),
+				'width' => array(20, 60, 20),
+				'align' => array('C', 'L', 'R'),
+				'title' => 'Year-to-date Ride Leaders',
+				'date_idx' => -1,
+				'id_idx' => 0
+			);
+		}
 		return $meta;
 	}
 
@@ -420,29 +477,48 @@ class PwtcMileage_DB {
 		return $meta;
 	}
 
-	public static function fetch_pre_ly_led($outtype, $sort, $min = 0) {
+	public static function fetch_pre_ly_led($outtype, $sort, $min = 0, $no_id = false) {
     	global $wpdb;
 		$where = '';
 		if ($min > 0) {
 			$where = ' where rides_led >= ' . $min . ' ';
 		}
-    	$results = $wpdb->get_results(
-			'select member_id, concat(first_name, \' \', last_name), rides_led from ' . 
-			self::PRE_LY_LED_VIEW . $where . ' order by ' . $sort , $outtype);
+		if ($no_id) {
+			$results = $wpdb->get_results(
+				'select concat(first_name, \' \', last_name), rides_led from ' . 
+				self::PRE_LY_LED_VIEW . $where . ' order by ' . $sort , $outtype);
+		}
+		else {
+			$results = $wpdb->get_results(
+				'select member_id, concat(first_name, \' \', last_name), rides_led from ' . 
+				self::PRE_LY_LED_VIEW . $where . ' order by ' . $sort , $outtype);
+		}
 		return $results;
 	}
 
-	public static function meta_pre_ly_led() {
+	public static function meta_pre_ly_led($no_id = false) {
 		$thisyear = date('Y', current_time('timestamp'));
-    	$lastyear = intval($thisyear) - 1;
-		$meta = array(
-			'header' => array('ID', 'Name', 'Rides Led'),
-			'width' => array(20, 60, 20),
-			'align' => array('C', 'L', 'R'),
-			'title' => 'Pre-' . $lastyear . ' Ride Leaders',
-			'date_idx' => -1,
-			'id_idx' => 0
-		);
+		$lastyear = intval($thisyear) - 1;
+		if ($no_id) {
+			$meta = array(
+				'header' => array('Name', 'Rides Led'),
+				'width' => array(80, 20),
+				'align' => array('L', 'R'),
+				'title' => 'Pre-' . $lastyear . ' Ride Leaders',
+				'date_idx' => -1,
+				'id_idx' => -1
+			);
+		}
+		else {
+			$meta = array(
+				'header' => array('ID', 'Name', 'Rides Led'),
+				'width' => array(20, 60, 20),
+				'align' => array('C', 'L', 'R'),
+				'title' => 'Pre-' . $lastyear . ' Ride Leaders',
+				'date_idx' => -1,
+				'id_idx' => 0
+			);
+		}
 		return $meta;
 	}
 
