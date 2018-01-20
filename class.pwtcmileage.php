@@ -729,11 +729,11 @@ class PwtcMileage {
 			$id = pwtc_mileage_get_member_id();
 			$result = PwtcMileage_DB::fetch_rider($id);
 			if (count($result) > 0) {
-				$out .= $result[0]['first_name'] . ' ' . $result[0]['last_name'] . 
-					', your rider ID is ' . $id . '.'; 
+				$out .= '<strong>' . $result[0]['first_name'] . ' ' . $result[0]['last_name'] . 
+					'</strong>, your rider ID is <strong>' . $id . '</strong>.'; 
 			}
 			else {
-				$out .= 'Your rider ID is ' . $id . '.';
+				$out .= 'Your rider ID is <strong>' . $id . '</strong>.';
 			}
 			if ($a['type'] == 'mileage' or $a['type'] == 'both') {
 				$out .= ' You have ridden <strong>';
