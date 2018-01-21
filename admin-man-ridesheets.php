@@ -442,7 +442,7 @@ if ($create_mode) {
 			ridesheet_date = res.date;
 			$('#ridesheet-sheet-page .sheet-title').html(res.title);
 			$('#ridesheet-sheet-page .sheet-date').html(getPrettyDate(res.date));
-			$('#ridesheet-sheet-page .sheet-guid').html('');
+			$('#ridesheet-sheet-page .sheet-guid').html('Not linked to any ride.');
 			$("#ridesheet-sheet-page .rename-btn").show();
 			$("#ridesheet-sheet-page .rename-blk").hide(); 
 		}
