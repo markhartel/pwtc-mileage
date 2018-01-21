@@ -349,10 +349,10 @@ jQuery(document).ready(function($) {
 		$('#ridesheet-sheet-page .sheet-date').html(fmtdate);
 		if (show_guid && post_guid) {
 			$('#ridesheet-sheet-page .sheet-guid').html(
-				'<a title="View linked posted ride." href="' + post_guid + '" target="_blank">view ride</a>');
+				'Linked to this <a title="View linked posted ride." href="' + post_guid + '" target="_blank">ride</a>.');
 		}
 		else {
-			$('#ridesheet-sheet-page .sheet-guid').html('');
+			$('#ridesheet-sheet-page .sheet-guid').html('Not linked to any ride.');
 		}
 		$("#ridesheet-sheet-page .rename-blk .rename-frm input[name='rideid']").val(ride_id); 
 		$("#ridesheet-sheet-page .leader-section .add-frm input[name='rideid']").val(ride_id); 
@@ -462,13 +462,13 @@ if ($create_mode) {
 				$('#ridesheet-sheet-page .sheet-date').html(getPrettyDate(res.date));
 				if (show_guid) {
 					$('#ridesheet-sheet-page .sheet-guid').html(
-						'<a title="View linked posted ride." href="' + res.post_url + '" target="_blank">view ride</a>');
+						'Linked to this <a title="View linked posted ride." href="' + res.post_url + '" target="_blank">ride</a>.');
 				}
 				$("#ridesheet-sheet-page .rename-btn").hide();
 				linked_to_ride = true;
 			}
 			else {
-				$('#ridesheet-sheet-page .sheet-guid').html('');
+				$('#ridesheet-sheet-page .sheet-guid').html('Not linked to any ride.');
 				$("#ridesheet-sheet-page .rename-btn").show();
 				linked_to_ride = false;
 			}
@@ -955,7 +955,6 @@ if ($running_jobs > 0) {
 		<h3>Ride Sheet</h3>
 		<h3>
 			<span class="sheet-title"></span> - <span class="sheet-date"></span>
-			&nbsp;&nbsp;&nbsp;<span class="sheet-guid"></span>
 		</h3>
 		<div><button class="rename-btn button button-primary">Rename</button>
 		<span class="rename-blk popup-frm initially-hidden">
@@ -1009,7 +1008,9 @@ if ($running_jobs > 0) {
 			</div>
 			<p><div class="mileage-div"></div></p>
 		</div>
-		<p><div><button class="reassoc-btn button button-primary">Link to Ride</button>
+		<div class='report-sec'>
+		<p class="sheet-guid"></p>
+		<div><button class="reassoc-btn button button-primary">Change</button>
 		<span class="reassoc-blk popup-frm initially-hidden">
 			<form class="reassoc-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
 				<span>Date</span>
@@ -1023,7 +1024,8 @@ if ($running_jobs > 0) {
 				<input class="button button-primary" type="submit" name="reassoc" value="Link to Ride"/>
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
-		</span></div></p>
+		</span></div>
+		</div>
 	</div>
 <?php
 	include('admin-rider-lookup.php');
