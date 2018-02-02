@@ -655,7 +655,7 @@ class PwtcMileage_DB {
 
 	public static function meta_posts_without_rides() {
 		$meta = array(
-			'header' => array('ID', 'Title', 'Date', 'URL'),
+			'header' => array('ID', 'Title', 'Date', 'Actions'),
 			'width' => array(),
 			'align' => array(),
 			'title' => 'Posted Rides without Ride Sheets',
@@ -687,7 +687,7 @@ class PwtcMileage_DB {
 
 	public static function meta_posts_without_rides2() {
 		$meta = array(
-			'header' => array('ID', 'Title', 'Date', 'Leaders', 'URL'),
+			'header' => array('ID', 'Title', 'Date', 'Leaders', 'Actions'),
 			'width' => array(),
 			'align' => array(),
 			'title' => 'Posted Rides without Ride Sheets',
