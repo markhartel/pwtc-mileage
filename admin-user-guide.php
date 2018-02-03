@@ -23,7 +23,7 @@ jQuery(document).ready(function($) {
     <div id="user-guide-page">
         <h1>How do I...</h1>
         <p>Click on your topic of interest to expand.</p>
-        <h3><a href="#" topic="ridesheet">enter a ride sign-in sheet into the mileage database?</a></h3>
+        <h3><a href="#" topic="ridesheet">enter a new ride sign-in sheet?</a></h3>
         <div class="initially-hidden report-sec">
         <p>After a ride is complete, the ride leader sends the ride sign-in sheet to the
         club statistician who enters the information into the club mileage database.</p>
@@ -51,7 +51,7 @@ jQuery(document).ready(function($) {
             <li>The page displaying the table of posted rides without ride sheets will return. Notice that the posted ride for which you just created a ride sheet has disappeared from the table.</li>
         </ol>
         </div>
-        <h3><a href="#" topic="amendmiles">amend a rider's mileage for a ride in the mileage database?</a></h3>
+        <h3><a href="#" topic="amendmiles">amend a rider's mileage for a ride?</a></h3>
         <div class="initially-hidden report-sec">
         <p>Occasionally, a rider wishes to amend their recorded mileage for a ride.
         To do so, they contact the club statistician who then makes the modification.</p>
@@ -73,7 +73,16 @@ jQuery(document).ready(function($) {
             <li>The page displaying the search form for ride sheets will return.</li>
         </ol>
         </div>
-        <h3><a href="#" topic="lookup">use the Lookup Rider dialog box?</a></h3>
+        <h3><a href="#" topic="lookup">create a ride-less sign-in sheet?</a></h3>
+        <div class="initially-hidden report-sec">
+        <p>Occasionally, the club statistician needs to create a sign-in sheet for
+        a ride that is not posted in the ride calendar...</p>
+        </div>
+        <h3><a href="#" topic="lookup">change a sign-in sheet's linked ride?</a></h3>
+        <div class="initially-hidden report-sec">
+        <p>Under Construction</p>
+        </div>
+        <h3><a href="#" topic="lookup">lookup a registered rider?</a></h3>
         <div class="initially-hidden report-sec">
         <p>The club statistician needs to lookup riders in order to assign ride leaders
         and set rider mileages.</p>
@@ -88,7 +97,7 @@ jQuery(document).ready(function($) {
         <p>You can also restrict the search results to riders who have current active 
         membership by checking the <em>Active Members Only</em> checkbox.</p>
         </div>
-        <h3><a href="#">add a new rider to the mileage database?</a></h3>
+        <h3><a href="#">add a new rider?</a></h3>
         <div class="initially-hidden report-sec">
         <p>Occasionally, a rider who has just joined the club will not be in the mileage
         datebase. The club statistician will need to add them so that their mileage can
@@ -109,6 +118,31 @@ jQuery(document).ready(function($) {
             <li>Click on the <em>Expiration Date</em> field and select the new rider's membership expiration date from the popup calendar. (If not known, just use the current date.)</li>
             <li>Press the <em>Create</em> button.</li>
         </ol>
+        </div>
+        <h3><a href="#">change a rider's expiration date?</a></h3>
+        <div class="initially-hidden report-sec">
+        <p>Occasionally, a rider's membership may have expired but the statistician
+        still wishes to record their mileage for a ride. Normally, mileage cannot be
+        recorded for expired riders. To bypass this restriction, the statistician
+        would alter the rider's expiration date using the following steps.</p>
+        <ol>
+            <li>Select the <em>Manage Riders</em> item under the <em>Rider Mileage</em> submenu.</li>
+            <li>A page displays that shows a search form for existing riders.</li>
+            <li>Type the rider's ID number into the <em>ID</em> search field.</li>
+            <li>Make sure that the <em>Active Members Only</em> checkbox is unchecked.</li>
+            <li>Press the <em>Search</em> button.</li>
+            <li>A table should appear at the bottom of the page containing the rider's data record.</li>
+            <li>The rider's expiration date is listed in the table, to change it click the <em>Edit</em> link in the <em>Actions</em> column.</li>
+            <li>A entry form should appear above the table, click on the <em>Expiration Date</em> field.</li>
+            <li>A calendar will pop up, use it to select the desired date (today's date will suffice.)</li>
+            <li>Press the <em>Modify</em> button.</li>
+            <li>The expiration date in the ride's data record should update to reflect your change.</li>
+        </ol>
+        <p>After you update the expired rider's expiration date, you should be able to go 
+        back and add their ride mileage (see <a href="#" topic="amendmiles">topic</a> for
+        details.) Remember that this update is temporary, after you upload a new UPDMEMBS.DBF
+        file (see <a href="#" topic="updmembs">topic</a> for details,) the expiration date
+        will be changed to what is in the file.</p>
         </div>
         <h3><a href="#">prepare the mileage database for the upcoming year's activities?</a></h3>
         <div class="initially-hidden report-sec">
