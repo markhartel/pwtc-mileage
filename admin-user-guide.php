@@ -32,7 +32,7 @@ jQuery(document).ready(function($) {
             <li>A page displays that shows a table of all the posted rides that are without ride sheets.</li>
             <li>Find the desired ride in the table (based on the ride sign-in sheet's name and date) and click its <em>Create</em> link in the <em>Actions</em> column.</li>
             <li>Press <em>OK</em> when the confirmation dialog pops up.</li>
-            <li>A page displays that is the ride sheet's leader and mileage data entry form.</li>
+            <li>A page displays that is the ride sheet's data entry form.</li>
             <li>Scroll down to the <em>Ride Leaders</em> section. This shows a table that identifies the leaders of the posted ride.</li>
             <li>If leaders are listed that should not be, remove them from the table by clicking their <em>Delete</em> link in the <em>Actions</em> column.</li>
             <li>If leaders are missing, add them to the table by pressing the <em>Lookup Leader</em> button.</li>
@@ -62,7 +62,7 @@ jQuery(document).ready(function($) {
             <li>Press the <em>Search</em> button.</li>
             <li>A table displays that shows all the existing ride sheets for that day.</li>
             <li>Find the desired ride sheet in the table and click its <em>Edit</em> link in the <em>Actions</em> column.</li>
-            <li>A page displays that is the ride sheet's leader and mileage data entry form.</li>
+            <li>A page displays that is the ride sheet's data entry form.</li>
             <li>Scroll down to the <em>Rider Mileage</em> section.</li>
             <li>Find the desired rider in the table and click their <em>Edit</em> link in the <em>Actions</em> column.</li>
             <li>Three text fields appear, verify that the selected rider is correct.</li>
@@ -73,14 +73,55 @@ jQuery(document).ready(function($) {
             <li>The page displaying the search form for ride sheets will return.</li>
         </ol>
         </div>
-        <h3><a href="#" topic="lookup">create a ride-less sign-in sheet?</a></h3>
+        <h3><a href="#" topic="lookup">create an unlinked ride sign-in sheet?</a></h3>
         <div class="initially-hidden report-sec">
-        <p>Occasionally, the club statistician needs to create a sign-in sheet for
-        a ride that is not posted in the ride calendar...</p>
+        <p>Occasionally, the club statistician may need to create a sign-in sheet for
+        a ride that is not posted in the ride calendar. This involves creating a 
+        sign-in sheet that is not connected (or "unlinked") to any posted ride.</p>
+        <ol>
+            <li>Select the <em>Manage Ride Sheets</em> item under the <em>Rider Mileage</em> submenu.</li>
+            <li>A page displays that shows a search form for existing ride sheets.</li> 
+            <li>Press the <em>New</em> button that is below the search form.</li> 
+            <li>Press <em>OK</em> when the confirmation dialog pops up.</li>
+            <li>Two text fields appear.</li>
+            <li>Enter the new ride sheet's title into the <em>Title</em> text field.</li>
+            <li>Click on the <em>Date</em> field and select the new ride sheet's date from the popup calendar.</li>
+            <li>Press the <em>Create</em> button.</li>
+            <li>A page displays that is the ride sheet's data entry form.</li>
+            <li>Fill out this form in the same way that you would for a linked ride sheet (see <a href="#" topic="ridesheet">topic</a> for details.)</li>             
+        </ol>
         </div>
-        <h3><a href="#" topic="lookup">change a sign-in sheet's linked ride?</a></h3>
+        <h3><a href="#" topic="lookup">delete an empty ride sign-in sheet?</a></h3>
+        <div class="initially-hidden report-sec">
+        <p>Occasionally, the club statistician may need to delete a sign-in sheet that
+        was erroneously created for a ride from the <em>Create Ride Sheets</em> page.</p>
+        <ol>
+            <li>Select the <em>Manage Ride Sheets</em> item under the <em>Rider Mileage</em> submenu.</li>
+            <li>A page displays that shows a search form for existing ride sheets.</li> 
+            <li>Select the <em>From Date</em> field and choose the date of the ride sheet that you wish to delete from the popup calendar.</li>
+            <li>Press the <em>Search</em> button.</li>
+            <li>A table displays that shows all the existing ride sheets for that day.</li>
+            <li>Find the desired ride sheet in the table and click its <em>Delete</em> link in the <em>Actions</em> column.</li>
+            <li>Press <em>OK</em> when the confirmation dialog pops up.</li>
+        </ol>
+        <p>You will not be allowed to delete a ride sheet that has ride leaders or rider
+        mileage entered. You must first edit the ride sheet and remove any leaders 
+        or mileage.</p>
+        </div>        
+        <h3><a href="#" topic="lookup">change a ride sign-in sheet's linked ride?</a></h3>
         <div class="initially-hidden report-sec">
         <p>Under Construction</p>
+        <ol>
+            <li>Select the <em>Manage Ride Sheets</em> item under the <em>Rider Mileage</em> submenu.</li>
+            <li>A page displays that shows a search form for existing ride sheets.</li> 
+            <li>Select the <em>From Date</em> field and choose the ride's date from the popup calendar.</li>
+            <li>Press the <em>Search</em> button.</li>
+            <li>A table displays that shows all the existing ride sheets for that day.</li>
+            <li>Find the desired ride sheet in the table and click its <em>Edit</em> link in the <em>Actions</em> column.</li>
+            <li>A page displays that is the ride sheet's data entry form.</li>
+            <li>Scroll down to the bottom of the entry form.</li>
+            <li>more...</li>
+        </ol>
         </div>
         <h3><a href="#" topic="lookup">lookup a registered rider?</a></h3>
         <div class="initially-hidden report-sec">
@@ -124,7 +165,7 @@ jQuery(document).ready(function($) {
         <p>Occasionally, a rider's membership may have expired but the statistician
         still wishes to record their mileage for a ride. Normally, mileage cannot be
         recorded for expired riders. To bypass this restriction, the statistician
-        would alter the rider's expiration date using the following steps.</p>
+        would alter the rider's expiration date.</p>
         <ol>
             <li>Select the <em>Manage Riders</em> item under the <em>Rider Mileage</em> submenu.</li>
             <li>A page displays that shows a search form for existing riders.</li>
@@ -148,7 +189,7 @@ jQuery(document).ready(function($) {
         <div class="initially-hidden report-sec">
         <p>After the start of the new year, a set of housekeeping actions must be performed 
         on the mileage database before it can handle upcoming club activities. These actions 
-        should be executed in the specified order.</p>
+        must be executed in the specified order.</p>
         <ol>
             <li>Ensure that the latest UPDMEMBS.DBF file from the membership secretary has been uploaded (see <a href="#" topic="updmembs">topic</a> for details.)</li>
             <li>Ensure that all the ride sign-up sheets for the previous year have been entered (see <a href="#" topic="ridesheet">topic</a> for details.)</li>
