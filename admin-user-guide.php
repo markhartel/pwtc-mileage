@@ -110,7 +110,9 @@ jQuery(document).ready(function($) {
         </div>        
         <h3><a href="#" topic="lookup">change a ride sign-in sheet's linked ride?</a></h3>
         <div class="initially-hidden report-sec">
-        <p>Under Construction</p>
+        <p>A ride sign-in sheet is usually connected (or "linked") to a posted ride.
+        Occasionally, the club statistician may need to change the linkage of a sign-in 
+        sheet to a different posted ride.</p>
         <ol>
             <li>Select the <em>Manage Ride Sheets</em> item under the <em>Rider Mileage</em> submenu.</li>
             <li>A page displays that shows a search form for existing ride sheets.</li> 
@@ -119,14 +121,27 @@ jQuery(document).ready(function($) {
             <li>A table displays that shows all the existing ride sheets for that day.</li>
             <li>Find the desired ride sheet in the table and click its <em>Edit</em> link in the <em>Actions</em> column.</li>
             <li>A page displays that is the ride sheet's data entry form.</li>
-            <li>Scroll down to the bottom of the entry form.</li>
-            <li>more...</li>
+            <li>Scroll down to the <em>Ride Linkage</em> section.</li>
+            <li>When the ride sheet is not linked to a posted ride, the label "not linked 
+            to any ride" will appear. When it is linked to a posted ride, "linked to this 
+            ride" will appear and, when clicked, will open a view of the posted ride.</li>
+            <li>To change the linkage, press the <em>Change</em> button.</li>
+            <li>Two text fields appear.</li>
+            <li>Click on the <em>Date</em> field and select a date from the popup calendar.</li>
+            <li>The <em>Posted Ride</em> field always give you the option to select 
+            "None", this will unlink the ride sheet from its current ride.</li>
+            <li>The <em>Posted Ride</em> field will also list the rides (only those without
+            ride sheets) for the date selected in the <en>Date</em> field. Choosing one of 
+            these will link the ride sheet to that ride.</li>
+            <li>Press the <em>Link to Ride</em> button to complete the operation.</li>
+            <li>Press <em>OK</em> when the confirmation dialog pops up.</li>
         </ol>
         </div>
         <h3><a href="#" topic="lookup">lookup a registered rider?</a></h3>
         <div class="initially-hidden report-sec">
         <p>The club statistician needs to lookup riders in order to assign ride leaders
-        and set rider mileages.</p>
+        and set rider mileages. To do so, press the <em>Lookup Rider</em> button to display
+        the <em>Lookup Riders</em> dialog.</p>
         <p>If you know the rider ID, enter it into the <em>ID</em> text field and press 
         the <em>Lookup</em> button. If the ID is valid, the dialog will close and return 
         that rider.</p>

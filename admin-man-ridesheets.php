@@ -1009,6 +1009,7 @@ if ($running_jobs > 0) {
 			<p><div class="mileage-div"></div></p>
 		</div>
 		<div class='report-sec'>
+		<h3>Ride Linkage</h3>
 		<p class="sheet-guid"></p>
 		<div><button class="reassoc-btn button button-primary">Change</button>
 		<span class="reassoc-blk popup-frm initially-hidden">
