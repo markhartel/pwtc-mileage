@@ -1087,7 +1087,7 @@ class PwtcMileage {
 				$exp_date = $result[0]['expir_date'];
 				$fmtdate = date('M Y', strtotime($exp_date));
 				$out .= '<form style="display: inline" method="POST">';
-				$out .= '<input class="dark button" type="submit" name="download_riderid" value="Rider Card"/>';
+				$out .= '<input class="dark button" type="submit" name="download_riderid" value="Rider ID Card"/>';
 				$out .= '<input type="hidden" name="rider_id" value="' . $member_id . '"/>';
 				$out .= '<input type="hidden" name="rider_name" value="' . $firstname . ' ' . $lastname . '"/>';
 				$out .= '<input type="hidden" name="expire_date" value="' . $fmtdate . '"/>';
