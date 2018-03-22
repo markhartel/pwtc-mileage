@@ -95,10 +95,13 @@ class PwtcMileage {
 			$h_card = 60;
 			$pdf->Rect($x_off, $y_off, $w_card, $h_card);
 			$w_sub = (int)($w_card * 0.3);
-			//$pdf->Rect($x_off, $y_off, $w_sub, $h_card);
+			$pdf->SetFillColor(255, 0, 0);
+			$pdf->Rect($x_off, $y_off, $w_sub, $h_card, 'F');
 			$pdf->Image(PWTC_MILEAGE__PLUGIN_DIR . 'pwtc_logo.png', $x_off + 2, $y_off + 10, $w_sub - 2, $w_sub - 2);
 			$pdf->SetFont('Arial', 'B', 20);
+			$pdf->SetTextColor(255, 255, 255);
 			$pdf->Text($x_off + 4, $y_off + 45, 'PWTC');
+			$pdf->SetTextColor(0, 0, 0);
 			$pdf->SetXY($x_off + $w_sub, $y_off + 15);
 			$pdf->SetFont('Arial', 'I', 18);
 			$pdf->Cell($w_card - $w_sub, 10, $_POST['rider_name'], 0, 0,'C');
@@ -106,7 +109,7 @@ class PwtcMileage {
 			$pdf->Text($x_off + $w_sub + 25, $y_off + 34, $_POST['rider_id']);
 			$pdf->Text($x_off + $w_sub + 40, $y_off + 50, $_POST['expire_date']);
 			$pdf->SetFont('Arial', '', 5);
-			$pdf->Text($x_off + $w_sub + 25, $y_off + 38, 'MEMBER ID');
+			$pdf->Text($x_off + $w_sub + 25, $y_off + 38, 'RIDER ID');
 			$pdf->Text($x_off + $w_sub + 40, $y_off + 54, 'EXPIRES');
 			$pdf->Rect($x_off, $y_off + $h_card, $w_card, $h_card);
 			$pdf->SetXY($x_off, $y_off + $h_card + 5);
@@ -129,6 +132,10 @@ class PwtcMileage {
 			$pdf->SetFont('Arial', 'I', 12);
 			$pdf->SetTextColor(255, 0, 0);
 			$pdf->Cell($w_card, 6, 'Take Life By The Handlebars! ' . chr(174), 0, 0,'C');
+			$pdf->SetFont('Arial', 'I', 10);
+			$pdf->SetTextColor(0, 0, 0);
+			$pdf->SetXY($x_off, $y_off + $h_card*2);
+			$pdf->Cell($w_card, 10, 'To assemble card, cut out and fold', 0, 0,'C');
 			//$pdf->Output();
 			$pdf->Output('F', 'php://output');
 			die;
