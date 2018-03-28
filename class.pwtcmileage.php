@@ -34,6 +34,8 @@ class PwtcMileage {
 		// Register shortcode callbacks
 		add_shortcode('pwtc_rider_report', 
 			array( 'PwtcMileage', 'shortcode_rider_report'));
+		add_shortcode('pwtc_mileage_ridesheet', 
+			array( 'PwtcMileage', 'shortcode_mileage_ridesheet'));
 /*
 		add_shortcode('pwtc_achievement_last_year', 
 			array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
@@ -803,6 +805,85 @@ class PwtcMileage {
 		}
 		$out .= '';
 		return $out;
+	}
+
+	public static function shortcode_mileage_ridesheet($atts) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return "<p>Please log in to view the ride sheet.</p>";
+		}	
+		if (isset($_GET['postid']) && $_GET['postid']) {
+			$postid = $_GET['postid'];
+			if (is_numeric($postid) and intval($postid) > 0) {
+				$data = pwtc_mileage_fetch_posted_ride(intval($postid));
+				if (count($data) > 0) {
+					$post_title = $data[0][1];
+					$post_date = $data[0][2];
+					$data = PwtcMileage_DB::fetch_ride_by_post_id(intval($postid));
+					if (count($data) > 1) {
+						$out = '<p><strong>Error:</strong> multiple ride sheets are linked to this ride.<br/>';
+						foreach( $data as $row ):
+							$out .= '"' . $row['title'] . '" on ' . $row['date'] . '<br/>';
+						endforeach;
+						$out .= '</p>';		
+						return $out;
+					}
+					else if (count($data) > 0) {
+						$out = '';
+						$rideid = intval($data[0]['ID']);
+						$out .= '<h3>"' . $data[0]['title'] . '" on ' . $data[0]['date'] . '</h3>';
+						$leaders = PwtcMileage_DB::fetch_ride_leaders($rideid);
+						if (count($leaders)) {
+							$out .= '<p><strong>Ride Leaders:</strong><br/>';
+							$i = 0;
+							foreach( $leaders as $leader ):
+								if ($i > 0) {
+									$out .= ', ';
+								}
+								$out .= $leader['first_name'] . ' ' . $leader['last_name'];
+								$i++;
+							endforeach;	
+							$out .= '</p>';
+						}
+						else {
+							$out .= '<p><em>No ride leaders entered.</em></p>';
+						}	
+						$riders = PwtcMileage_DB::fetch_ride_mileage($rideid);
+						if (count($riders)) {
+							$out .= '<p><strong>Riders:</strong><br/>';
+							$i = 0;
+							foreach( $riders as $rider ):
+								if ($i > 0) {
+									$out .= ', ';
+								}
+								$out .= $rider['first_name'] . ' ' . $rider['last_name'];
+								$i++;
+							endforeach;	
+							$out .= '</p>';
+						}	
+						else {
+							$out .= '<p><em>No riders entered.</em></p>';
+						}
+						if ($post_date <> $data[0]['date'])	{
+							$out .= '<p><strong>Warning:</strong> date of ride (' . $post_date . ') does not match date of ride sheet (' . $data[0]['date'] . ').</p>';
+						}
+						return $out;
+					}
+					else {
+						return '<p>No ride sheet created yet for the ride "' . $post_title . '" on ' . $post_date . '.</p>';
+					}
+				}
+				else {
+					return '<p><strong>Error:</strong> cannot lookup ride sheet, ride post ID "' . $postid . '" is not found.</p>';
+				}
+			}
+			else {
+				return '<p><strong>Error:</strong> cannot lookup the ride sheet, ride post ID "' . $postid . '" is invalid.</p>';
+			}
+		}
+		else {
+			return '<p><strong>Error:</strong> cannot lookup the ride sheet, ride post ID is not specified.</p>';
+		}
 	}
 
 	// Generates the [pwtc_achievement_last_year] shortcode.
