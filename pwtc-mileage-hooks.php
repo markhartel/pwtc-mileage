@@ -378,7 +378,7 @@ function pwtc_mileage_remove_stat_role() {
 }
 
 function pwtc_mileage_ridesheet_status($post_id) {
-    $msg = '';
+    $msg = false;
     if (current_user_can(PwtcMileage::VIEW_MILEAGE_CAP)) {
         if ($post_id > 0) {
             $data = pwtc_mileage_fetch_posted_ride($post_id);
