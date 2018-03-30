@@ -34,8 +34,10 @@ class PwtcMileage {
 		// Register shortcode callbacks
 		add_shortcode('pwtc_rider_report', 
 			array( 'PwtcMileage', 'shortcode_rider_report'));
+/*
 		add_shortcode('pwtc_mileage_ridesheet', 
 			array( 'PwtcMileage', 'shortcode_mileage_ridesheet'));
+*/
 /*
 		add_shortcode('pwtc_achievement_last_year', 
 			array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
@@ -807,11 +809,11 @@ class PwtcMileage {
 		return $out;
 	}
 
+/*
 	public static function shortcode_mileage_ridesheet($atts) {
-		$current_user = wp_get_current_user();
-		if ( 0 == $current_user->ID ) {
-			return "<p>Please log in to view the ride sheet.</p>";
-		}	
+		if (!current_user_can(self::VIEW_MILEAGE_CAP)) {
+			return "<p>You are not permitted to view the ride sheet.</p>";
+		}
 		if (isset($_GET['postid']) && $_GET['postid']) {
 			$postid = $_GET['postid'];
 			if (is_numeric($postid) and intval($postid) > 0) {
@@ -885,6 +887,7 @@ class PwtcMileage {
 			return '<p><strong>Error:</strong> cannot lookup the ride sheet, ride post ID is not specified.</p>';
 		}
 	}
+*/
 
 	// Generates the [pwtc_achievement_last_year] shortcode.
 /*

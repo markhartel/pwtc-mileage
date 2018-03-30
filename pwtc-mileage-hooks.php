@@ -266,6 +266,7 @@ Returns an array that contains the rider ids of the ride leaders of the posted r
 function pwtc_mileage_fetch_ride_leader_ids($post_id) {
     $leaders_array = array();
     if (function_exists('get_field')) {
+
         $leaders = get_field('ride_leaders', $post_id);
         if ($leaders) {
             //pwtc_mileage_write_log($leaders);
@@ -291,6 +292,7 @@ function pwtc_mileage_fetch_ride_leader_ids($post_id) {
                 }                    
             }
         }
+
 /*
         $leaders = get_field('ride_leader', $post_id);
         if ($leaders) {
@@ -311,6 +313,7 @@ Returns an array that contains the names of the ride leaders of the posted ride.
 function pwtc_mileage_fetch_ride_leader_names($post_id) {
     $leaders_array = array();
     if (function_exists('get_field')) {
+
         $leaders = get_field('ride_leaders', $post_id);
         if ($leaders) {
             //pwtc_mileage_write_log($leaders);
@@ -323,7 +326,8 @@ function pwtc_mileage_fetch_ride_leader_names($post_id) {
                 array_push($leaders_array, $name);
             }
         }
-/*    
+
+/*
         $leaders = get_field('ride_leader', $post_id);
         if ($leaders) {
             //pwtc_mileage_write_log($leaders);
@@ -371,6 +375,41 @@ function pwtc_mileage_remove_stat_role() {
             pwtc_mileage_write_log('PWTC Mileage plugin removed statistician role');
         }
     }
+}
+
+function pwtc_mileage_ridesheet_status($post_id) {
+    $msg = '';
+    if (current_user_can(PwtcMileage::VIEW_MILEAGE_CAP)) {
+        if ($post_id > 0) {
+            $data = pwtc_mileage_fetch_posted_ride($post_id);
+            if (count($data) > 0) {
+                $post_title = $data[0][1];
+                $post_date = $data[0][2];
+                $data = PwtcMileage_DB::fetch_ride_by_post_id($post_id);
+                if (count($data) > 1) {
+                    $msg = 'Error - multiple ride sheets are linked to this ride:<br/>';
+                    foreach( $data as $row ):
+                        $msg .= '"' . $row['title'] . '" on ' . $row['date'] . '<br/>';
+                    endforeach;
+                }
+                else if (count($data) > 0) {
+                    if ($post_date <> $data[0]['date'])	{
+                        $msg = 'Warning - the date of this ride does not match date of linked ride sheet "' . $data[0]['title'] . '" on ' . $data[0]['date'] . '.';
+                    }
+                    else if ($post_title <> $data[0]['title'])	{
+                        $msg = 'Warning - the title of this ride does not match title of linked ride sheet "' . $data[0]['title'] . '" on ' . $data[0]['date'] . '.';
+                    }
+                    else {
+                        $msg = 'This ride has a linked ride sheet.';
+                    }
+                }
+                else {
+                    $msg = 'This ride is missing a ride sheet.';
+                }
+            }
+        }
+    }
+    return $msg;
 }
 
 if (!function_exists('pwtc_mileage_write_log')) {
