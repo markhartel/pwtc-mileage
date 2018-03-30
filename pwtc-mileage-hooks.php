@@ -389,18 +389,21 @@ function pwtc_mileage_ridesheet_status($post_id) {
                 if (count($data) > 1) {
                     $msg = 'Error - multiple ride sheets are linked to this ride:<br/>';
                     foreach( $data as $row ):
-                        $msg .= '"' . $row['title'] . '" on ' . $row['date'] . '<br/>';
+                        $msg .= '"' . $row['title'] . '" on ' . date('D M j Y', strtotime($row['date'])) . '<br/>';
                     endforeach;
                 }
                 else if (count($data) > 0) {
                     if ($post_date <> $data[0]['date'])	{
-                        $msg = 'Warning - the date of this ride does not match date of linked ride sheet "' . $data[0]['title'] . '" on ' . $data[0]['date'] . '.';
+                        $msg = 'Warning - the date of this ride does not match date of linked ride sheet "' . $data[0]['title'] . '" on ' . date('D M j Y', strtotime($data[0]['date'])) . '.';
                     }
                     else if ($post_title <> $data[0]['title'])	{
-                        $msg = 'Warning - the title of this ride does not match title of linked ride sheet "' . $data[0]['title'] . '" on ' . $data[0]['date'] . '.';
+                        $msg = 'Warning - the title of this ride does not match title of linked ride sheet "' . $data[0]['title'] . '" on ' . date('D M j Y', strtotime($data[0]['date'])) . '.';
                     }
                     else {
-                        $msg = 'This ride has a linked ride sheet.';
+                        $rideid = intval($data[0]['ID']);
+                        $mcnt = PwtcMileage_DB::fetch_ride_has_mileage($rideid);
+                        $lcnt = PwtcMileage_DB::fetch_ride_has_leaders($rideid);
+                        $msg = 'This ride has a linked ride sheet with ' . $lcnt . ' leaders and ' . $mcnt . ' riders.';
                     }
                 }
                 else {
