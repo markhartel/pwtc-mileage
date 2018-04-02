@@ -967,6 +967,10 @@ class PwtcMileage_Admin {
 		else {
 			$rideid = trim($_POST['ride_id']);
 			$memberid = trim($_POST['member_id']);
+			$override = 'false';
+			if (isset($_POST['override'])) {
+				$override = trim($_POST['override']);
+			}
 			$nonce = $_POST['nonce'];	
 			if (!wp_verify_nonce($nonce, 'pwtc_mileage_add_leader')) {
 				$response = array(
@@ -982,7 +986,7 @@ class PwtcMileage_Admin {
 			}
 			else {
 				$error = self::check_expir_date($memberid);
-				if ($error != null) {
+				if ($override == 'false' and $error != null) {
 					$response = array(
 						'error' => $error
 					);
@@ -1039,6 +1043,10 @@ class PwtcMileage_Admin {
 			$memberid = trim($_POST['member_id']);
 			$lineno = trim($_POST['line_no']);
 			$mileage = trim($_POST['mileage']);
+			$override = 'false';
+			if (isset($_POST['override'])) {
+				$override = trim($_POST['override']);
+			}
 			$mode = trim($_POST['mode']);
 			$nonce = $_POST['nonce'];	
 			if (!wp_verify_nonce($nonce, 'pwtc_mileage_add_mileage')) {
@@ -1055,7 +1063,7 @@ class PwtcMileage_Admin {
 			}
 			else {
 				$error = self::check_expir_date($memberid);
-				if ($error != null) {
+				if ($override == 'false' and $error != null) {
 					$response = array(
 						'error' => $error
 					);

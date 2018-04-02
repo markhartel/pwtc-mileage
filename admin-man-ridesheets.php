@@ -268,7 +268,8 @@ jQuery(document).ready(function($) {
 				);
 				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(
 					$(this).parent().parent().find('td').eq(3).html()
-				); 
+				);
+				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='override']").prop("checked", true); 
 				$('#ridesheet-sheet-page .mileage-section .lookup-btn').hide('fast', function() {
 					$('#ridesheet-sheet-page .mileage-section .add-blk').show('slow');  
 					$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").focus();         
@@ -708,10 +709,15 @@ if ($create_mode) {
     $('#ridesheet-sheet-page .leader-section .add-frm').on('submit', function(evt) {
         evt.preventDefault();
         var action = $('#ridesheet-sheet-page .leader-section .add-frm').attr('action');
+        var override = false;
+        if ($("#ridesheet-sheet-page .leader-section .add-frm input[name='override']").is(':checked')) {
+            override = true;
+        }
         var data = {
 			'action': 'pwtc_mileage_add_leader',
 			'member_id': $("#ridesheet-sheet-page .leader-section .add-frm input[name='riderid']").val(),
 			'ride_id': $("#ridesheet-sheet-page .leader-section .add-frm input[name='rideid']").val(),
+			'override': override,
 			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_add_leader'); ?>'
 		};
 		$('body').addClass('waiting');
@@ -721,6 +727,10 @@ if ($create_mode) {
     $('#ridesheet-sheet-page .mileage-section .add-frm').on('submit', function(evt) {
         evt.preventDefault();
         var action = $('#ridesheet-sheet-page .mileage-section .add-frm').attr('action');
+        var override = false;
+        if ($("#ridesheet-sheet-page .mileage-section .add-frm input[name='override']").is(':checked')) {
+            override = true;
+        }
         var data = {
 			'action': 'pwtc_mileage_add_mileage',
 			'member_id': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='riderid']").val(),
@@ -728,6 +738,7 @@ if ($create_mode) {
 			'line_no': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='lineno']").val(),
 			'mode': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='mode']").val(),
 			'mileage': $("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(),
+			'override': override,
 			'nonce': '<?php echo wp_create_nonce('pwtc_mileage_add_mileage'); ?>'
 		};
 		$('body').addClass('waiting');
@@ -738,6 +749,7 @@ if ($create_mode) {
         lookup_pwtc_riders(function(riderid, name) {
             $("#ridesheet-sheet-page .leader-section .add-frm input[name='riderid']").val(riderid);
             $("#ridesheet-sheet-page .leader-section .add-frm input[name='ridername']").val(name); 
+			$("#ridesheet-sheet-page .leader-section .add-frm input[name='override']").prop("checked", false);			
 			$("#ridesheet-sheet-page .leader-section .lookup-btn").hide('fast', function() {
 				$('#ridesheet-sheet-page .leader-section .add-blk').show('slow'); 
 				$("#ridesheet-sheet-page .leader-section .add-frm input[type='submit']").focus();          
@@ -760,6 +772,7 @@ if ($create_mode) {
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mode']").val('add');
             $("#ridesheet-sheet-page .mileage-section .add-frm input[name='ridername']").val(name); 
 			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").val(''); 
+			$("#ridesheet-sheet-page .mileage-section .add-frm input[name='override']").prop("checked", false); 
 			$("#ridesheet-sheet-page .mileage-section .lookup-btn").hide('fast', function() {
 				$('#ridesheet-sheet-page .mileage-section .add-blk').show('slow');  
 				$("#ridesheet-sheet-page .mileage-section .add-frm input[name='mileage']").focus();         
@@ -979,6 +992,10 @@ if ($running_jobs > 0) {
 						<input name="riderid" type="text" disabled/>
 						<span>Name</span>
 						<input name="ridername" type="text" disabled/>
+						<span>Ignore Expiration</span>
+		        		<span class="checkbox-wrap">
+			        		<input type="checkbox" name="override"/>
+		        		</span>
 						<input name="rideid" type="hidden"/>
 						<input class="button button-primary" type="submit" value="Add Leader"/>
 						<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
@@ -998,6 +1015,10 @@ if ($running_jobs > 0) {
 						<input name="ridername" type="text" disabled/>
 						<span>Mileage</span>
 						<input name="mileage" type="text" required/>
+						<span>Ignore Expiration</span>
+		        		<span class="checkbox-wrap">
+			        		<input type="checkbox" name="override"/>
+		        		</span>
 						<input name="rideid" type="hidden"/>
 						<input name="lineno" type="hidden"/>
 						<input name="mode" type="hidden" value="add"/>
