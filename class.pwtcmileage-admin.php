@@ -940,8 +940,9 @@ class PwtcMileage_Admin {
 			if (count($rider) > 0) {
 				$r = $rider[0];
 				if (strtotime($r['expir_date']) < strtotime(PwtcMileage::get_date_for_expir_check())) {
-					$errormsg = 'The membership of ' . $r['first_name'] . ' ' . $r['last_name'] .
-						' (' . $r['member_id'] . ') has expired.';
+					$errormsg = 'The membership of ' . $r['first_name'] . ' ' . 
+					$r['last_name'] .' (' . $r['member_id'] . ') has expired on ' . 
+					date('D M j Y', strtotime($r['expir_date'])) . '.';
 				}
 			}
 			else {

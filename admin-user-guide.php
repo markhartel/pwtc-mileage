@@ -175,6 +175,7 @@ jQuery(document).ready(function($) {
             <li>Press the <em>Create</em> button.</li>
         </ol>
         </div>
+        <!--
         <h3><a href="#">change a rider's expiration date?</a></h3>
         <div class="initially-hidden report-sec">
         <p>Occasionally, a rider's membership may have expired but the statistician
@@ -200,6 +201,7 @@ jQuery(document).ready(function($) {
         file (see <a href="#" topic="updmembs">topic</a> for details,) the expiration date
         will be changed to what is in the file.</p>
         </div>
+        -->
         <h3><a href="#">prepare the mileage database for the upcoming year's activities?</a></h3>
         <div class="initially-hidden report-sec">
         <p>After the start of the new year, a set of housekeeping actions must be performed 
