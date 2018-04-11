@@ -278,6 +278,8 @@ if ($running_jobs > 0) {
                 <option value="no" selected>No</option> 
                 <option value="export_pdf">PDF file</option> 
                 <option value="export_csv">CSV file</option>
+                <option value="export_html">HTML file</option>
+                <option value="export_txt">TXT file</option>
             </select>
         </p>
         <div class='report-sec'>

@@ -1408,6 +1408,8 @@ class PwtcMileage_Admin {
 		$page = add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_pdf'));
 		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_csv'));
+		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_html'));
+		add_action('load-' . $page, array('PwtcMileage_Admin','download_report_txt'));
 
     	$page_title = $plugin_options['plugin_menu_label'] . ' - Database Operations';
     	$menu_title = 'Database Ops';
@@ -1540,6 +1542,67 @@ class PwtcMileage_Admin {
 		}
 	}
 
+	public static function write_export_html_file($fp, $data, $header, $title) {
+		fwrite($fp, '<html><body><table>');
+		fwrite($fp, '<caption>');
+		fwrite($fp, $title);
+		fwrite($fp, '<caption>');
+		fwrite($fp, '<tr>');
+		foreach ( $header as $item ) {
+			fwrite($fp, '<th>');
+			fwrite($fp, $item);
+			fwrite($fp, '</th>');
+		}
+		fwrite($fp, '</tr>');
+		foreach ( $data as $datum ) {
+			fwrite($fp, '<tr>');
+			foreach ( $datum as $col ) {
+				fwrite($fp, '<td>');
+				fwrite($fp, $col);
+				fwrite($fp, '</td>');
+			}
+			fwrite($fp, '</tr>');
+		}
+		fwrite($fp, '</table></body></html>');
+	}
+
+	public static function write_export_txt_file($fp, $data, $header, $title, $width) {
+		fwrite($fp, $title);
+		fwrite($fp, "\r\n");
+		$col_count = 0;
+		foreach ( $header as $item ) {
+			$tcell_width = 75*($width[$col_count]/100.0);
+			fwrite($fp, $item);
+			fwrite($fp, self::create_string_pad(strlen($item), $tcell_width));
+			$col_count++;
+		}
+		fwrite($fp, "\r\n");
+		foreach ( $data as $datum ) {
+			$col_count = 0;
+			foreach ( $datum as $col ) {
+				$tcell_width = 75*($width[$col_count]/100.0);
+				fwrite($fp, $col);
+				fwrite($fp, self::create_string_pad(strlen($col), $tcell_width));
+				$col_count++;
+			}
+			fwrite($fp, "\r\n");
+		}
+	}
+
+	public static function create_string_pad($len, $total) {
+		$pad = '';
+		if ($len >= $total) {
+			$pad .= ' ';
+		}
+		else {
+			$count = $total - $len;
+			for ($i = 0; $i < $count; $i++) {
+				$pad .= ' ';
+			}
+		}
+		return $pad;
+	}
+
 	public static function download_report_csv() {
 		if (current_user_can(PwtcMileage::VIEW_MILEAGE_CAP)) {
 			if (isset($_POST['export_csv'])) {
@@ -1587,6 +1650,56 @@ class PwtcMileage_Admin {
 						$response['title'], $response['width'], $response['align']);
 					//$pdf->Output();
 					$pdf->Output('F', 'php://output');
+				}
+				die;
+			}
+		}
+	}
+
+	public static function download_report_html() {
+		if (current_user_can(PwtcMileage::VIEW_MILEAGE_CAP)) {
+			if (isset($_POST['export_html'])) {
+				$response = self::generate_report();
+				if (isset($response['error'])) {
+					header('Content-Description: File Transfer');
+					header("Content-type: text/txt");
+					header("Content-Disposition: attachment; filename=error.txt");
+					echo $response['error'];
+				}
+				else {
+					$today = date('Y-m-d', current_time('timestamp'));
+					$report_id = $response['report_id'];
+					header('Content-Description: File Transfer');
+					header("Content-type: text/html");
+					header("Content-Disposition: attachment; filename={$today}_{$report_id}.html");
+					$fh = fopen('php://output', 'w');
+					self::write_export_html_file($fh, $response['data'], $response['header'], $response['title']);
+					fclose($fh);
+				}
+				die;
+			}
+		}
+	}
+
+	public static function download_report_txt() {
+		if (current_user_can(PwtcMileage::VIEW_MILEAGE_CAP)) {
+			if (isset($_POST['export_txt'])) {
+				$response = self::generate_report();
+				if (isset($response['error'])) {
+					header('Content-Description: File Transfer');
+					header("Content-type: text/txt");
+					header("Content-Disposition: attachment; filename=error.txt");
+					echo $response['error'];
+				}
+				else {
+					$today = date('Y-m-d', current_time('timestamp'));
+					$report_id = $response['report_id'];
+					header('Content-Description: File Transfer');
+					header("Content-type: text/txt");
+					header("Content-Disposition: attachment; filename={$today}_{$report_id}.txt");
+					$fh = fopen('php://output', 'w');
+					self::write_export_txt_file($fh, $response['data'], $response['header'], $response['title'], $response['width']);
+					fclose($fh);
 				}
 				die;
 			}
