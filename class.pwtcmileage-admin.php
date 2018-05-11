@@ -1566,6 +1566,35 @@ class PwtcMileage_Admin {
 		fwrite($fp, '</table></body></html>');
 	}
 
+	public static function write_export_tab_file($fp, $data, $header, $title) {
+		fwrite($fp, $title);
+		fwrite($fp, "\r\n");
+		$firstpass = true;
+		foreach ( $header as $item ) {
+			if ($firstpass) {
+				$firstpass = false;
+			}
+			else {
+				fwrite($fp, "\t");
+			}
+			fwrite($fp, $item);
+		}
+		fwrite($fp, "\r\n");
+		foreach ( $data as $datum ) {
+			$firstpass = true;
+			foreach ( $datum as $col ) {
+				if ($firstpass) {
+					$firstpass = false;
+				}
+				else {
+					fwrite($fp, "\t");
+				}
+				fwrite($fp, $col);
+			}
+			fwrite($fp, "\r\n");
+		}
+	}
+
 	public static function write_export_txt_file($fp, $data, $header, $title, $width) {
 		fwrite($fp, $title);
 		fwrite($fp, "\r\n");
@@ -1698,7 +1727,8 @@ class PwtcMileage_Admin {
 					header("Content-type: text/txt");
 					header("Content-Disposition: attachment; filename={$today}_{$report_id}.txt");
 					$fh = fopen('php://output', 'w');
-					self::write_export_txt_file($fh, $response['data'], $response['header'], $response['title'], $response['width']);
+					//self::write_export_txt_file($fh, $response['data'], $response['header'], $response['title'], $response['width']);
+					self::write_export_tab_file($fh, $response['data'], $response['header'], $response['title']);
 					fclose($fh);
 				}
 				die;

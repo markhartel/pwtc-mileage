@@ -12,6 +12,8 @@ else if ($plugin_options['admin_maint_mode'] and !current_user_can('manage_optio
 <?php       
 }
 else {
+    $lastyear = intval(date('Y', current_time('timestamp')))-1;
+    $thisyear = intval(date('Y', current_time('timestamp')));
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
@@ -283,7 +285,7 @@ if ($running_jobs > 0) {
             </select>
         </p>
         <div class='report-sec'>
-        <h3><?php echo(intval(date('Y'))-1); ?> Award Reports</h3>
+        <h3><?php echo($lastyear); ?> Award Reports</h3>
         <p>Show ID:
             <input class="award-showid-chk" type="checkbox" name="showid">
         </p>
@@ -308,8 +310,8 @@ if ($running_jobs > 0) {
             <input class="mileage-showid-chk" type="checkbox" name="showid">
         </p>
         <div class='ride-mileage'>
-            <div><a href='#' report-id='ytd_miles'>Year-to-date mileage</a></div>
-            <div><a href='#' report-id='ly_miles'><?php echo(intval(date('Y'))-1); ?> mileage</a></div>
+            <div><a href='#' report-id='ytd_miles'><?php echo($thisyear); ?> Year-to-date mileage</a></div>
+            <div><a href='#' report-id='ly_miles'><?php echo($lastyear); ?> mileage</a></div>
             <div><a href='#' report-id='lt_miles'>Lifetime mileage</a></div>
         </div>
         </div>
@@ -325,9 +327,9 @@ if ($running_jobs > 0) {
             <input class="leader-showid-chk" type="checkbox" name="showid">
         </p>
         <div class='ride-leader'>
-            <div><a href='#' report-id='ytd_led'>Year-to-date ride leaders</a></div>
-            <div><a href='#' report-id='ly_led'><?php echo(intval(date('Y'))-1); ?> ride leaders</a></div>
-            <div><a href='#' report-id='pre_ly_led'>Pre-<?php echo(intval(date('Y'))-1); ?> ride leaders</a></div>
+            <div><a href='#' report-id='ytd_led'><?php echo($thisyear); ?> Year-to-date ride leaders</a></div>
+            <div><a href='#' report-id='ly_led'><?php echo($lastyear); ?> ride leaders</a></div>
+            <div><a href='#' report-id='pre_ly_led'>Pre-<?php echo($lastyear); ?> ride leaders</a></div>
         </div>
         </div>
         <div class='report-sec'>
@@ -337,10 +339,10 @@ if ($running_jobs > 0) {
             <strong><label class="riderid"/></label>&nbsp;<label class="ridername"></label></strong>
         </p>
         <div class='specific-rider'>
-            <div><a href='#' report-id='ytd_rides'>Year-to-date rides</a></div>
-            <div><a href='#' report-id='ly_rides'><?php echo(intval(date('Y'))-1); ?> rides</a></div>
-            <div><a href='#' report-id='ytd_rides_led'>Year-to-date rides led</a></div>
-            <div><a href='#' report-id='ly_rides_led'><?php echo(intval(date('Y'))-1); ?> rides led</a></div>
+            <div><a href='#' report-id='ytd_rides'><?php echo($thisyear); ?> Year-to-date rides</a></div>
+            <div><a href='#' report-id='ly_rides'><?php echo($lastyear); ?> rides</a></div>
+            <div><a href='#' report-id='ytd_rides_led'><?php echo($thisyear); ?> Year-to-date rides led</a></div>
+            <div><a href='#' report-id='ly_rides_led'><?php echo($lastyear); ?> rides led</a></div>
         </div>
         </div>
         <div class='report-sec'>

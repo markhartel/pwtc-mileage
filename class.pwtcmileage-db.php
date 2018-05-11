@@ -244,12 +244,13 @@ class PwtcMileage_DB {
 	}
 
 	public static function meta_ytd_miles($no_id = false) {
+		$timestamp = date('M j Y', current_time('timestamp'));
 		if ($no_id) {
 			$meta = array(
 				'header' => array('Name', 'Mileage'),
 				'width' => array(80, 20),
 				'align' => array('L', 'R'),
-				'title' => 'Year-to-date Rider Mileage',
+				'title' => 'Year-to-date Rider Mileage as of ' . $timestamp,
 				'date_idx' => -1,
 				'id_idx' => -1
 			);	
@@ -259,7 +260,7 @@ class PwtcMileage_DB {
 				'header' => array('ID', 'Name', 'Mileage'),
 				'width' => array(20, 60, 20),
 				'align' => array('C', 'L', 'R'),
-				'title' => 'Year-to-date Rider Mileage',
+				'title' => 'Year-to-date Rider Mileage as of ' . $timestamp,
 				'date_idx' => -1,
 				'id_idx' => 0
 			);
@@ -358,12 +359,13 @@ class PwtcMileage_DB {
 	}
 
 	public static function meta_lt_miles($no_id = false) {
+		$timestamp = date('M j Y', current_time('timestamp'));
 		if ($no_id) {
 			$meta = array(
 				'header' => array('Name', 'Mileage'),
 				'width' => array(80, 20),
 				'align' => array('L', 'R'),
-				'title' => 'Lifetime Rider Mileage',
+				'title' => 'Lifetime Rider Mileage as of ' . $timestamp,
 				'date_idx' => -1,
 				'id_idx' => -1
 			);
@@ -373,7 +375,7 @@ class PwtcMileage_DB {
 				'header' => array('ID', 'Name', 'Mileage'),
 				'width' => array(20, 60, 20),
 				'align' => array('C', 'L', 'R'),
-				'title' => 'Lifetime Rider Mileage',
+				'title' => 'Lifetime Rider Mileage as of ' . $timestamp,
 				'date_idx' => -1,
 				'id_idx' => 0
 			);
@@ -401,12 +403,13 @@ class PwtcMileage_DB {
 	}
 
 	public static function meta_ytd_led($no_id = false) {
+		$timestamp = date('M j Y', current_time('timestamp'));
 		if ($no_id) {
 			$meta = array(
 				'header' => array('Name', 'Rides Led'),
 				'width' => array(80, 20),
 				'align' => array('L', 'R'),
-				'title' => 'Year-to-date Ride Leaders',
+				'title' => 'Year-to-date Ride Leaders as of ' . $timestamp,
 				'date_idx' => -1,
 				'id_idx' => -1
 			);	
@@ -416,7 +419,7 @@ class PwtcMileage_DB {
 				'header' => array('ID', 'Name', 'Rides Led'),
 				'width' => array(20, 60, 20),
 				'align' => array('C', 'L', 'R'),
-				'title' => 'Year-to-date Ride Leaders',
+				'title' => 'Year-to-date Ride Leaders as of ' . $timestamp,
 				'date_idx' => -1,
 				'id_idx' => 0
 			);
@@ -531,11 +534,12 @@ class PwtcMileage_DB {
 	}
 
 	public static function meta_ytd_rides($name = '') {
+		$timestamp = date('M j Y', current_time('timestamp'));
 		$meta = array(
 			'header' => array('Title', 'Date', 'Mileage'),
 			'width' => array(60, 25, 15),
 			'align' => array('L', 'R', 'R'),
-			'title' => 'Year-to-date Rides Ridden by ' . $name,
+			'title' => 'Year-to-date Rides Ridden by ' . $name . ' as of ' . $timestamp,
 			'date_idx' => 1,
 			'id_idx' => -1
 		);
@@ -573,11 +577,12 @@ class PwtcMileage_DB {
 	}
 
 	public static function meta_ytd_rides_led($name = '') {
+		$timestamp = date('M j Y', current_time('timestamp'));
 		$meta = array(
 			'header' => array('Title', 'Date'),
 			'width' => array(70, 30),
 			'align' => array('L', 'R'),
-			'title' => 'Year-to-date Rides Led by ' . $name,
+			'title' => 'Year-to-date Rides Led by ' . $name . ' as of ' . $timestamp,
 			'date_idx' => 1,
 			'id_idx' => -1
 		);
