@@ -1175,6 +1175,9 @@ class PwtcMileage_Admin {
 						if ($sort == 'name') {
 							$sortby = 'last_name, first_name';
 						}
+						else if ($sort == 'rides' and $reportid != 'lt_miles') {
+							$sortby = 'rides desc';
+						}
 						switch ($reportid) {			
 							case "ytd_miles":
 								$meta = PwtcMileage_DB::meta_ytd_miles($hide_id);

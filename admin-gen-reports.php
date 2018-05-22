@@ -303,6 +303,7 @@ if ($running_jobs > 0) {
         <p>Sort by: 
             <select class='mileage-sort-slt'>
                 <option value="name">Name</option> 
+                <option value="rides">Rides</option>
                 <option value="mileage" selected>Mileage</option>
             </select>
         </p>

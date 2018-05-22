@@ -730,6 +730,21 @@ class PwtcMileage {
 		if ($atts['sort_by'] == 'name') {
 			$sort = 'last_name ' . $order . ', first_name ' . $order;
 		}
+		else if ($atts['sort_by'] == 'rides') {
+			$sort = 'rides ' . $order;
+		}
+		return $sort;
+	}
+
+	public static function build_mileage_sort2($atts) {
+		$order = 'asc';
+		if ($atts['sort_order'] == 'desc') {
+			$order = 'desc';
+		}
+		$sort = 'mileage ' . $order;
+		if ($atts['sort_by'] == 'name') {
+			$sort = 'last_name ' . $order . ', first_name ' . $order;
+		}
 		return $sort;
 	}
 
@@ -942,7 +957,7 @@ class PwtcMileage {
 			return "Please log in to see the lifetime mileage report.";
 		}	
 		$a = self::normalize_atts($atts);
-		$sort = self::build_mileage_sort($a);
+		$sort = self::build_mileage_sort2($a);
 		$min = self::get_minimum_val($a);
 		$meta = PwtcMileage_DB::meta_lt_miles();
 		$data = PwtcMileage_DB::fetch_lt_miles(ARRAY_N, $sort, $min);

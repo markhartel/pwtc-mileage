@@ -232,12 +232,12 @@ class PwtcMileage_DB {
 		}
 		if ($no_id) {
 			$results = $wpdb->get_results(
-				'select concat(first_name, \' \', last_name), mileage from ' . 
+				'select concat(first_name, \' \', last_name), rides, mileage from ' . 
 				self::YTD_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
 		}
 		else {
 			$results = $wpdb->get_results(
-				'select member_id, concat(first_name, \' \', last_name), mileage from ' . 
+				'select member_id, concat(first_name, \' \', last_name), rides, mileage from ' . 
 				self::YTD_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
 		}
 		return $results;
@@ -247,9 +247,9 @@ class PwtcMileage_DB {
 		$timestamp = date('M j Y', current_time('timestamp'));
 		if ($no_id) {
 			$meta = array(
-				'header' => array('Name', 'Mileage'),
-				'width' => array(80, 20),
-				'align' => array('L', 'R'),
+				'header' => array('Name', 'Rides', 'Mileage'),
+				'width' => array(60, 20, 20),
+				'align' => array('L', 'R', 'R'),
 				'title' => 'Year-to-date Rider Mileage as of ' . $timestamp,
 				'date_idx' => -1,
 				'id_idx' => -1
@@ -257,9 +257,9 @@ class PwtcMileage_DB {
 		}
 		else {
 			$meta = array(
-				'header' => array('ID', 'Name', 'Mileage'),
-				'width' => array(20, 60, 20),
-				'align' => array('C', 'L', 'R'),
+				'header' => array('ID', 'Name', 'Rides', 'Mileage'),
+				'width' => array(20, 40, 20, 20),
+				'align' => array('C', 'L', 'R', 'R'),
 				'title' => 'Year-to-date Rider Mileage as of ' . $timestamp,
 				'date_idx' => -1,
 				'id_idx' => 0
@@ -276,12 +276,12 @@ class PwtcMileage_DB {
 		}
 		if ($no_id) {
 			$results = $wpdb->get_results(
-				'select concat(first_name, \' \', last_name), mileage from ' . 
+				'select concat(first_name, \' \', last_name), rides, mileage from ' . 
 				self::LY_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
 		}
 		else {
 			$results = $wpdb->get_results(
-				'select member_id, concat(first_name, \' \', last_name), mileage from ' . 
+				'select member_id, concat(first_name, \' \', last_name), rides, mileage from ' . 
 				self::LY_MILES_VIEW . $where . ' order by ' . $sort , $outtype);
 		}
 		return $results;
@@ -292,9 +292,9 @@ class PwtcMileage_DB {
 		$lastyear = intval($thisyear) - 1;
 		if ($no_id) {
 			$meta = array(
-				'header' => array('Name', 'Mileage'),
-				'width' => array(80, 20),
-				'align' => array('L', 'R'),
+				'header' => array('Name', 'Rides', 'Mileage'),
+				'width' => array(60, 20, 20),
+				'align' => array('L', 'R', 'R'),
 				'title' => $lastyear . ' Rider Mileage',
 				'date_idx' => -1,
 				'id_idx' => -1
@@ -302,9 +302,9 @@ class PwtcMileage_DB {
 		}
 		else {
 			$meta = array(
-				'header' => array('ID', 'Name', 'Mileage'),
-				'width' => array(20, 60, 20),
-				'align' => array('C', 'L', 'R'),
+				'header' => array('ID', 'Name', 'Rides', 'Mileage'),
+				'width' => array(20, 40, 20, 20),
+				'align' => array('C', 'L', 'R', 'R'),
 				'title' => $lastyear . ' Rider Mileage',
 				'date_idx' => -1,
 				'id_idx' => 0
@@ -1417,8 +1417,8 @@ class PwtcMileage_DB {
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::YTD_MILES_VIEW . 
-			' (member_id, first_name, last_name, mileage)' . 
-			' as select c.member_id, c.first_name, c.last_name, SUM(m.mileage)' . 
+			' (member_id, first_name, last_name, mileage, rides)' . 
+			' as select c.member_id, c.first_name, c.last_name, SUM(m.mileage), COUNT(m.mileage)' . 
 			' from ((' . $mileage_table . ' as m inner join ' . $member_table . ' as c on c.member_id = m.member_id)' . 
 			' inner join ' . $ride_table . ' as r on m.ride_id = r.ID)' . 
 			' where r.date >= DATE_FORMAT(CURDATE(), \'%Y-01-01\')' . 
@@ -1429,8 +1429,8 @@ class PwtcMileage_DB {
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::LY_MILES_VIEW . 
-			' (member_id, first_name, last_name, mileage)' . 
-			' as select c.member_id, c.first_name, c.last_name, SUM(m.mileage)' . 
+			' (member_id, first_name, last_name, mileage, rides)' . 
+			' as select c.member_id, c.first_name, c.last_name, SUM(m.mileage), COUNT(m.mileage)' . 
 			' from ((' . $mileage_table . ' as m inner join ' . $member_table . ' as c on c.member_id = m.member_id)' . 
 			' inner join ' . $ride_table . ' as r on m.ride_id = r.ID)' . 
 			' where r.date between DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), \'%Y-01-01\')' . 
