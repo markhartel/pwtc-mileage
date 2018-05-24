@@ -224,6 +224,61 @@ class PwtcMileage_DB {
 		return $meta;
 	}
 
+	public static function fetch_ytd_attendence($outtype, $sort, $min = 0) {
+    	global $wpdb;
+		$where = '';
+		/*
+		if ($min > 0) {
+			$where = ' where riders >= ' . $min . ' ';
+		}
+		*/
+		$results = $wpdb->get_results(
+			'select title, date, COUNT(member_id) as riders from ' . 
+			self::YTD_RIDES_VIEW . $where . ' group by ride_id order by ' . $sort , $outtype);
+		return $results;
+	}
+
+	public static function meta_ytd_attendence() {
+		$timestamp = date('M j Y', current_time('timestamp'));
+		$meta = array(
+			'header' => array('Title', 'Date', 'Riders'),
+			'width' => array(60, 25, 15),
+			'align' => array('L', 'R', 'R'),
+			'title' => 'Year-to-date Ride Attendence as of ' . $timestamp,
+			'date_idx' => 1,
+			'id_idx' => -1
+		);
+		return $meta;
+	}
+
+	public static function fetch_ly_attendence($outtype, $sort, $min = 0) {
+    	global $wpdb;
+		$where = '';
+		/*
+		if ($min > 0) {
+			$where = ' where riders >= ' . $min . ' ';
+		}
+		*/
+		$results = $wpdb->get_results(
+			'select title, date, COUNT(member_id) as riders from ' . 
+			self::LY_RIDES_VIEW . $where . ' group by ride_id order by ' . $sort , $outtype);
+		return $results;
+	}
+
+	public static function meta_ly_attendence() {
+		$thisyear = date('Y', current_time('timestamp'));
+    	$lastyear = intval($thisyear) - 1;
+		$meta = array(
+			'header' => array('Title', 'Date', 'Riders'),
+			'width' => array(60, 25, 15),
+			'align' => array('L', 'R', 'R'),
+			'title' => $lastyear . ' Ride Attendence',
+			'date_idx' => 1,
+			'id_idx' => -1
+		);
+		return $meta;
+	}
+
 	public static function fetch_ytd_miles($outtype, $sort, $min = 0, $no_id = false) {
     	global $wpdb;
 		$where = '';
@@ -1537,8 +1592,8 @@ class PwtcMileage_DB {
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::YTD_RIDES_VIEW . 
-			' (title, date, mileage, member_id)' . 
-			' as select r.title, r.date, m.mileage, m.member_id' . 
+			' (title, date, mileage, member_id, ride_id)' . 
+			' as select r.title, r.date, m.mileage, m.member_id, r.ID' . 
 			' from ' . $ride_table . ' as r inner join ' . $mileage_table . ' as m on r.ID = m.ride_id' . 
 			' where r.date >= DATE_FORMAT(CURDATE(), \'%Y-01-01\')' . 
 			' order by r.date'); 
@@ -1548,8 +1603,8 @@ class PwtcMileage_DB {
 		}
 
 		$result = $wpdb->query('create or replace view ' . self::LY_RIDES_VIEW . 
-			' (title, date, mileage, member_id)' . 
-			' as select r.title, r.date, m.mileage, m.member_id' . 
+			' (title, date, mileage, member_id, ride_id)' . 
+			' as select r.title, r.date, m.mileage, m.member_id, r.ID' . 
 			' from ' . $ride_table . ' as r inner join ' . $mileage_table . ' as m on r.ID = m.ride_id' . 
 			' where r.date between DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), \'%Y-01-01\')' . 
 			' and DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), \'%Y-12-31\')' . 

@@ -84,6 +84,30 @@ jQuery(document).ready(function($) {
         $('body').removeClass('waiting');
 	}   
 
+    $('#report-main-section .ride-attendence a').on('click', function(evt) {
+        evt.preventDefault();
+        if ($('#report-main-section .download-slt').val() != 'no') {
+            $('#report-main-section .download').html(
+                '<form method="post">' + 
+                '<input type="hidden" name="' + $('#report-main-section .download-slt').val() + '"/>' +
+                '<input type="hidden" name="report_id" value="' + $(this).attr('report-id') + '"/>' +
+                '<input type="hidden" name="sort" value="' + 
+                    $('#report-main-section .attendence-sort-slt').val() + '"/>' +
+                '</form>');
+            $('#report-main-section .download form').submit();
+        }
+        else {
+            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+            var data = {
+                'action': 'pwtc_mileage_generate_report',
+                'report_id': $(this).attr('report-id'),
+                'sort': $('#report-main-section .attendence-sort-slt').val()
+            };
+            $('body').addClass('waiting');
+            $.post(action, data, generate_report_cb);
+        }
+    });
+
     $('#report-main-section .ride-mileage a').on('click', function(evt) {
         evt.preventDefault();
         var showid = false;
@@ -296,6 +320,20 @@ if ($running_jobs > 0) {
             <div><a href='#' report-id='award_members_500'>Member annual and accumulative mileage (500 miles or more)</a></div>
             <div><a href='#' report-id='award_leaders'>Ride leaders</a></div>
             <div><a href='#' report-id='award_leaders_12'>Ride leaders (12 rides or more)</a></div>
+        </div>
+        </div>
+        <div class='report-sec'>
+        <h3>Ride Attendence Reports</h3>
+        <p>Sort by: 
+            <select class='attendence-sort-slt'>
+                <option value="title">Title</option> 
+                <option value="date" selected>Date</option>
+                <option value="riders">Riders</option>
+            </select>
+        </p>
+        <div class='ride-attendence'>
+            <div><a href='#' report-id='ytd_attendence'><?php echo($thisyear); ?> Year-to-date ride attendence</a></div>
+            <div><a href='#' report-id='ly_attendence'><?php echo($lastyear); ?> ride attendence</a></div>
         </div>
         </div>
         <div class='report-sec'>

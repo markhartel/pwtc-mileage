@@ -1149,6 +1149,37 @@ class PwtcMileage_Admin {
 			$meta = null;
 			$state = null;
 			switch ($reportid) {
+				case "ytd_attendence":
+				case "ly_attendence":
+					if (!isset($_POST['sort'])) {
+						$error = 'Input parameters needed to generate an attendence report are missing.';
+					}
+					else {
+						$sort = $_POST['sort'];
+						$state = array(
+							'action' => 'pwtc_mileage_generate_report',
+							'report_id' => $reportid,
+							'sort' => $sort
+						);	
+						$sortby = 'date';
+						if ($sort == 'title') {
+							$sortby = 'title';
+						}
+						else if ($sort == 'riders') {
+							$sortby = 'riders desc';
+						}
+						switch ($reportid) {			
+							case "ytd_attendence":
+								$meta = PwtcMileage_DB::meta_ytd_attendence();
+								$data = PwtcMileage_DB::fetch_ytd_attendence(ARRAY_N, $sortby);
+								break;
+							case "ly_attendence":
+								$meta = PwtcMileage_DB::meta_ly_attendence();
+								$data = PwtcMileage_DB::fetch_ly_attendence(ARRAY_N, $sortby);
+								break;
+						}
+					}
+					break;
 				case "ytd_miles":
 				case "ly_miles":
 				case "lt_miles":
@@ -1525,6 +1556,7 @@ class PwtcMileage_Admin {
 					$pdf->SetFont('');
 					$row_count = 0;
 					$page_count++;
+					$fill = false;
 				}
 				$col_count = 0;
 				foreach ( $datum as $col ) {
@@ -1534,10 +1566,16 @@ class PwtcMileage_Admin {
 					if (count($align) > 0) {
 						$tcell_align = $align[$col_count];
 					}
-					$pdf->Cell($tcell_width,6,$col,'LR',0,$tcell_align,$fill);
+					$pdf->Cell($tcell_width,6,$col,'LR',0,$tcell_align,true);
 					$col_count++;
 				}
 				$pdf->Ln();
+				if ($fill) {
+					$pdf->SetFillColor(224,235,255);
+				}
+				else {
+					$pdf->SetFillColor(255,255,255);
+				}
 				$fill = !$fill;
 				$row_count++;
 			}

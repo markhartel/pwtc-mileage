@@ -42,6 +42,10 @@ class PwtcMileage {
 		add_shortcode('pwtc_achievement_last_year', 
 			array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
 */
+		add_shortcode('pwtc_attendence_year_to_date', 
+			array( 'PwtcMileage', 'shortcode_ytd_attendence'));
+		add_shortcode('pwtc_attendence_last_year', 
+			array( 'PwtcMileage', 'shortcode_ly_attendence'));
 		add_shortcode('pwtc_mileage_year_to_date', 
 			array( 'PwtcMileage', 'shortcode_ytd_miles'));
 		add_shortcode('pwtc_mileage_last_year', 
@@ -736,6 +740,21 @@ class PwtcMileage {
 		return $sort;
 	}
 
+	public static function build_attendence_sort($atts) {
+		$order = 'asc';
+		if ($atts['sort_order'] == 'desc') {
+			$order = 'desc';
+		}
+		$sort = 'date ' . $order;
+		if ($atts['sort_by'] == 'title') {
+			$sort = 'title ' . $order;
+		}
+		else if ($atts['sort_by'] == 'riders') {
+			$sort = 'riders ' . $order;
+		}
+		return $sort;
+	}
+
 	public static function build_mileage_sort2($atts) {
 		$order = 'asc';
 		if ($atts['sort_order'] == 'desc') {
@@ -919,6 +938,36 @@ class PwtcMileage {
 		return $out;
 	}
 */
+
+	// Generates the [pwtc_attendence_year_to_date] shortcode.
+	public static function shortcode_ytd_attendence($atts, $content = null) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return "Please log in to see the year-to-date attendence report.";
+		}	
+		$a = self::normalize_atts($atts);
+		$sort = self::build_attendence_sort($a);
+		$min = self::get_minimum_val($a);
+		$meta = PwtcMileage_DB::meta_ytd_attendence();
+		$data = PwtcMileage_DB::fetch_ytd_attendence(ARRAY_N, $sort, $min);
+		$out = self::shortcode_build_table($meta, $data, $a, $content);
+		return $out;
+	}
+
+	// Generates the [pwtc_attendence_last_year] shortcode.
+	public static function shortcode_ly_attendence($atts, $content = null) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return "Please log in to see last year's attendence report.";
+		}	
+		$a = self::normalize_atts($atts);
+		$sort = self::build_attendence_sort($a);
+		$min = self::get_minimum_val($a);
+		$meta = PwtcMileage_DB::meta_ly_attendence();
+		$data = PwtcMileage_DB::fetch_ly_attendence(ARRAY_N, $sort, $min);
+		$out = self::shortcode_build_table($meta, $data, $a, $content);
+		return $out;
+	}
 
 	// Generates the [pwtc_mileage_year_to_date] shortcode.
 	public static function shortcode_ytd_miles($atts, $content = null) {
