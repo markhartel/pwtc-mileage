@@ -54,7 +54,7 @@ jQuery(document).ready(function($) {
             'firstname': $("#rider-lookup-results .lookup-frm input[name='firstname']").val(),
             'active': active
 		};
-        $('#rider-lookup-results .error-msg').html('<i class="fa fa-spinner fa-pulse"></i> Loading...');
+        $('#rider-lookup-results .error-msg').html('<i class="fa fa-spinner fa-pulse"></i> Please wait...');
         $('#rider-lookup-results .lookup-tlb tr').remove();
         $.post(action, data, lookup_riders_cb);
     });
@@ -105,7 +105,7 @@ jQuery(document).ready(function($) {
 
 });
 </script>
-<div class="loading"><div><i class="fa fa-spinner fa-pulse"></i> Loading...</div></div>
+<div class="loading"><div><i class="fa fa-spinner fa-pulse"></i> Please wait...</div></div>
 <div id="rider-lookup-results" title="Lookup Riders">
 	<form class="lookup-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
         <span>ID</span>
