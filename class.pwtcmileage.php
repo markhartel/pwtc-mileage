@@ -1395,6 +1395,11 @@ class PwtcMileage {
 			deactivate_plugins(plugin_basename(__FILE__));
 			wp_die('PWTC Mileage plugin requires Wordpress version of at least ' . PWTC_MILEAGE__MINIMUM_WP_VERSION);
 		}
+		$errs = PwtcMileage_DB::handle_db_upgrade();
+		if ($errs > 0) {
+			deactivate_plugins(plugin_basename(__FILE__));
+			wp_die('PWTC Mileage plugin could not update database tables');			
+		}
 		$errs = PwtcMileage_DB::create_db_tables();
 		if ($errs > 0) {
 			deactivate_plugins(plugin_basename(__FILE__));
@@ -1405,6 +1410,7 @@ class PwtcMileage {
 			deactivate_plugins(plugin_basename(__FILE__));
 			wp_die('PWTC Mileage plugin could not create database views');			
 		}
+		PwtcMileage_DB::set_db_version();
 		if (self::get_plugin_options() === false) {
 			//self::delete_plugin_options();
 			self::create_default_plugin_options();
@@ -1432,7 +1438,8 @@ class PwtcMileage {
 		$plugin_options = self::get_plugin_options();
 		if ($plugin_options['drop_db_on_delete']) {
 			PwtcMileage_DB::drop_db_views();	
-			PwtcMileage_DB::drop_db_tables();				
+			PwtcMileage_DB::drop_db_tables();
+			PwtcMileage_DB::delete_db_version();				
 		}
 		self::delete_plugin_options();
 	}

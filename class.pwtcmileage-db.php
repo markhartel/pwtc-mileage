@@ -1641,5 +1641,42 @@ class PwtcMileage_DB {
 			pwtc_mileage_write_log( 'Could not drop views: ' . $wpdb->last_error);
 		}
 	}
+
+	public static function get_db_version() {
+		return get_option('pwtc_mileage_db_version');
+	}
+
+	public static function set_db_version() {
+		$installed_ver = get_option('pwtc_mileage_db_version');
+		if ($installed_ver == false) {
+			add_option('pwtc_mileage_db_version', PWTC_MILEAGE__DB_VERSION);
+		}
+		else {
+			update_option('pwtc_mileage_db_version', PWTC_MILEAGE__DB_VERSION);
+		}
+	}
+
+	public static function delete_db_version() {
+		delete_option('pwtc_mileage_db_version');
+	}
+
+	public static function handle_db_upgrade() {
+		global $wpdb;
+		$err_cnt = 0;
+		$installed_ver = self::get_db_version();
+		if ($installed_ver == false) {
+			pwtc_mileage_write_log( 'Upgrading PWTC Mileage DB version from 1.1 to 1.2');
+			$result = $wpdb->query('drop view if exists ' . self::LY_RIDES_VIEW . ', ' .
+				self::YTD_RIDES_VIEW . ', ' . self::LY_MILES_VIEW . ', ' . 
+				self::YTD_MILES_VIEW);
+			if (false === $result) {
+				pwtc_mileage_write_log( 'Could not drop views ' . self::LY_RIDES_VIEW . ', ' .
+				self::YTD_RIDES_VIEW . ', ' . self::LY_MILES_VIEW . ', ' . 
+				self::YTD_MILES_VIEW . ': ' . $wpdb->last_error);
+				$err_cnt++;
+			}
+		}
+		return $err_cnt;
+	}
    
 }
