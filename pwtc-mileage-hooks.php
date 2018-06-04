@@ -355,7 +355,12 @@ function pwtc_mileage_create_stat_role() {
         $stat->add_cap(PwtcMileage::EDIT_RIDERS_CAP);
         $stat->add_cap(PwtcMileage::DB_OPS_CAP);
         pwtc_mileage_write_log('PWTC Mileage plugin added capabilities to statistician role');
-    }    
+    } 
+    $captain = get_role('ride_captain'); 
+    if ($captain !== null) {
+        $captain->add_cap(PwtcMileage::VIEW_MILEAGE_CAP);
+        pwtc_mileage_write_log('PWTC Mileage plugin added capabilities to ride_captain role');
+    } 
 }
 
 function pwtc_mileage_remove_stat_role() {
@@ -375,6 +380,11 @@ function pwtc_mileage_remove_stat_role() {
             pwtc_mileage_write_log('PWTC Mileage plugin removed statistician role');
         }
     }
+    $captain = get_role('ride_captain'); 
+    if ($captain !== null) {
+        $captain->remove_cap(PwtcMileage::VIEW_MILEAGE_CAP);
+        pwtc_mileage_write_log('PWTC Mileage plugin removed capabilities to ride_captain role');
+    } 
 }
 
 function pwtc_mileage_ridesheet_status($post_id) {
