@@ -384,12 +384,14 @@ if ($running_jobs > 0) {
             <div><a href='#' report-id='ly_rides_led'><?php echo($lastyear); ?> rides led</a></div>
         </div>
         </div>
+        <!--
         <div class='report-sec'>
         <h3>Member Reports</h3>
         <div class='members'>
             <div><a href='#' report-id='dup_members'>Duplicate members</a></div>
         </div>
         </div>
+        -->
         <div class='download'></div>
     </div>
     <div id="report-results-section" class="initially-hidden">
