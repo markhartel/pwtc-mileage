@@ -1350,7 +1350,9 @@ class PwtcMileage_Admin {
 					}			
 					break;
 				case "dup_members":
-				case "rl_members":
+				case "ride_leaders":
+				case "road_captains":
+				case "statisticians":
 					$state = array(
 						'action' => 'pwtc_mileage_generate_report',
 						'report_id' => $reportid
@@ -1360,9 +1362,17 @@ class PwtcMileage_Admin {
 							$meta = PwtcMileage_DB::meta_member_duplicates();
 							$data = PwtcMileage_DB::fetch_member_duplicates();
 							break;
-						case "rl_members":
+						case "ride_leaders":
 							$meta = PwtcMileage_DB::meta_member_by_role('Current Ride Leaders');
 							$data = PwtcMileage_DB::fetch_member_by_role(['ride_leader']);
+							break;
+						case "road_captains":
+							$meta = PwtcMileage_DB::meta_member_by_role('Current Road Captains');
+							$data = PwtcMileage_DB::fetch_member_by_role(['ride_captain']);
+							break;
+						case "statisticians":
+							$meta = PwtcMileage_DB::meta_member_by_role('Current Statisticians');
+							$data = PwtcMileage_DB::fetch_member_by_role(['statistician']);
 							break;
 					}
 					break;
