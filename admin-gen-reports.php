@@ -389,8 +389,6 @@ if ($running_jobs > 0) {
         <div class='members'>
             <!--<div><a href='#' report-id='dup_members'>Duplicate members</a></div>-->
             <div><a href='#' report-id='ride_leaders'>Current Ride Leaders</a></div>
-            <div><a href='#' report-id='road_captains'>Current Road Captains</a></div>
-            <div><a href='#' report-id='statisticians'>Current Statisticians</a></div>
         </div>
         </div>
         <div class='download'></div>

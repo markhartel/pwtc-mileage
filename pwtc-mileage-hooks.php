@@ -260,6 +260,11 @@ function pwtc_mileage_fetch_posted_ride($post_id) {
     return $results;
 }
 
+function pwtc_mileage_posted_ride_canceled($post_id) {
+    $ride_canceled_metakey = 'is_canceled';
+    return get_field($ride_canceled_metakey, $post_id);
+}
+
 /*
 Returns an array that contains the rider ids of the ride leaders of the posted ride. 
 */
