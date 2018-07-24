@@ -1031,13 +1031,20 @@ class PwtcMileage_DB {
 		return $results;
 	}
 
-	public static function insert_rider($memberid, $lastname, $firstname, $expdate) {
+	public static function insert_rider($memberid, $lastname, $firstname, $expdate, $no_update = false) {
     	global $wpdb;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
-		$status = $wpdb->query($wpdb->prepare('insert into ' . $member_table .
-			' (member_id, last_name, first_name, expir_date) values (%s, %s, %s, %s)' . 
-			' on duplicate key update last_name = %s, first_name = %s, expir_date = %s',
-			$memberid, $lastname, $firstname, $expdate, $lastname, $firstname, $expdate));
+		if ($no_update) {
+			$status = $wpdb->query($wpdb->prepare('insert into ' . $member_table .
+				' (member_id, last_name, first_name, expir_date) values (%s, %s, %s, %s)',
+				$memberid, $lastname, $firstname, $expdate));
+		}
+		else {
+			$status = $wpdb->query($wpdb->prepare('insert into ' . $member_table .
+				' (member_id, last_name, first_name, expir_date) values (%s, %s, %s, %s)' . 
+				' on duplicate key update last_name = %s, first_name = %s, expir_date = %s',
+				$memberid, $lastname, $firstname, $expdate, $lastname, $firstname, $expdate));
+		}
 		return $status;
 	}
 

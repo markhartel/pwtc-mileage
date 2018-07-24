@@ -172,7 +172,73 @@ function pwtc_mileage_civi_update_rider($contact_id, $update_only=false) {
         $errormsg = "CiviCRM not installed.";
     }
     return $errormsg;
-}    
+}   
+
+function pwtc_mileage_insert_new_rider($lastname, $firstname, $expdate) {
+    if (PwtcMileage::validate_date_str($expdate) and 
+        PwtcMileage::validate_member_name_str($firstname) and 
+        PwtcMileage::validate_member_name_str($lastname)) {
+        $rider_id = PwtcMileage_DB::gen_new_member_id();
+        if (PwtcMileage::validate_member_id_str($rider_id)) {
+            $status = PwtcMileage_DB::insert_rider(
+                $rider_id, $lastname, $firstname, $expdate, true);
+            if (false === $status or 0 === $status) {
+                throw new Exception('inserterror');
+            }
+        }
+        else {
+            throw new Exception('idnotvalid');
+        }
+    }
+    else {
+        throw new Exception('paramsnotvalid');
+    }
+    return $rider_id;
+}
+
+function pwtc_mileage_update_rider($rider_id, $lastname, $firstname, $expdate) {
+    if (PwtcMileage::validate_member_id_str($rider_id) and
+        PwtcMileage::validate_date_str($expdate) and 
+        PwtcMileage::validate_member_name_str($firstname) and 
+        PwtcMileage::validate_member_name_str($lastname)) {
+        if (count(PwtcMileage_DB::fetch_rider($rider_id)) == 0) {
+            throw new Exception('norider');
+        }
+        else {
+            $status = PwtcMileage_DB::insert_rider(
+                $rider_id, $lastname, $firstname, $expdate);
+            if (false === $status or 0 === $status) {
+                throw new Exception('updateerror');
+            }
+        }
+    }
+    else {
+        throw new Exception('paramsnotvalid');
+    }
+}
+
+function pwtc_mileage_delete_rider($rider_id) {
+    if (PwtcMileage::validate_member_id_str($rider_id)) {
+        if (count(PwtcMileage_DB::fetch_rider($rider_id)) == 0) {
+            throw new Exception('norider');
+        }
+        else if (PwtcMileage_DB::fetch_member_has_mileage($rider_id) > 0) {
+            throw new Exception('hasmileage');
+        }
+        else if (PwtcMileage_DB::fetch_member_has_leaders($rider_id) > 0) {
+            throw new Exception('hasleaders');            
+        }
+        else {
+            $status = PwtcMileage_DB::delete_rider($rider_id);
+            if (false === $status or 0 === $status) {
+                throw new Exception('deleteerror');
+            }
+        }
+    }
+    else {
+        throw new Exception('paramsnotvalid');
+    }
+}
 
 /*
 Returns a string that contains the member ID of the logged on user.
