@@ -175,68 +175,78 @@ function pwtc_mileage_civi_update_rider($contact_id, $update_only=false) {
 }   
 
 function pwtc_mileage_insert_new_rider($lastname, $firstname, $expdate) {
-    if (PwtcMileage::validate_date_str($expdate) and 
-        PwtcMileage::validate_member_name_str($firstname) and 
-        PwtcMileage::validate_member_name_str($lastname)) {
+    if (!PwtcMileage::validate_date_str($expdate)) {
+        throw new Exception('Cannot create new rider, expiration date is invalid.');
+    }
+    else if (!PwtcMileage::validate_member_name_str($firstname)) {
+        throw new Exception('Cannot create new rider, first name must begin with letter.');
+    }
+    else if (!PwtcMileage::validate_member_name_str($lastname)) {
+        throw new Exception('Cannot create new rider, last name must begin with letter.');
+    }
+    else {
         $rider_id = PwtcMileage_DB::gen_new_member_id();
         if (PwtcMileage::validate_member_id_str($rider_id)) {
             $status = PwtcMileage_DB::insert_rider(
                 $rider_id, $lastname, $firstname, $expdate, true);
             if (false === $status or 0 === $status) {
-                throw new Exception('inserterror');
+                throw new Exception('Cannot create new rider, database insert failed.');
             }
         }
         else {
-            throw new Exception('idnotvalid');
+            throw new Exception('Cannot create new rider, generated rider ID is invalid.');
         }
-    }
-    else {
-        throw new Exception('paramsnotvalid');
     }
     return $rider_id;
 }
 
 function pwtc_mileage_update_rider($rider_id, $lastname, $firstname, $expdate) {
-    if (PwtcMileage::validate_member_id_str($rider_id) and
-        PwtcMileage::validate_date_str($expdate) and 
-        PwtcMileage::validate_member_name_str($firstname) and 
-        PwtcMileage::validate_member_name_str($lastname)) {
+    if (!PwtcMileage::validate_member_id_str($rider_id)) {
+        throw new Exception('Cannot update rider, rider ID is invalid.');
+    }
+    else if (!PwtcMileage::validate_date_str($expdate)) {
+        throw new Exception('Cannot update rider, expiration date is invalid.');
+    }
+    else if (!PwtcMileage::validate_member_name_str($firstname)) {
+        throw new Exception('Cannot update rider, first name must begin with letter.');
+    }
+    else if (!PwtcMileage::validate_member_name_str($lastname)) {
+        throw new Exception('Cannot update rider, last name must begin with letter.');
+    }
+    else {
         if (count(PwtcMileage_DB::fetch_rider($rider_id)) == 0) {
-            throw new Exception('norider');
+            throw new Exception('Cannot update rider, rider ' . $rider_id . ' not found.');
         }
         else {
             $status = PwtcMileage_DB::insert_rider(
                 $rider_id, $lastname, $firstname, $expdate);
             if (false === $status or 0 === $status) {
-                throw new Exception('updateerror');
+                throw new Exception('Cannot update rider, database update failed.');
             }
         }
-    }
-    else {
-        throw new Exception('paramsnotvalid');
     }
 }
 
 function pwtc_mileage_delete_rider($rider_id) {
     if (PwtcMileage::validate_member_id_str($rider_id)) {
         if (count(PwtcMileage_DB::fetch_rider($rider_id)) == 0) {
-            throw new Exception('norider');
+            throw new Exception('Cannot delete rider, rider ' . $rider_id . ' not found.');
         }
         else if (PwtcMileage_DB::fetch_member_has_mileage($rider_id) > 0) {
-            throw new Exception('hasmileage');
+            throw new Exception('Cannot delete rider, rider has recorded mileage.');
         }
         else if (PwtcMileage_DB::fetch_member_has_leaders($rider_id) > 0) {
-            throw new Exception('hasleaders');            
+            throw new Exception('Cannot delete rider, rider is a recorded ride leader.');            
         }
         else {
             $status = PwtcMileage_DB::delete_rider($rider_id);
             if (false === $status or 0 === $status) {
-                throw new Exception('deleteerror');
+                throw new Exception('Cannot delete rider, database delete failed.');
             }
         }
     }
     else {
-        throw new Exception('paramsnotvalid');
+        throw new Exception('Cannot delete rider, rider ID is invalid.');
     }
 }
 
@@ -456,6 +466,16 @@ function pwtc_mileage_remove_stat_role() {
         $captain->remove_cap(PwtcMileage::VIEW_MILEAGE_CAP);
         pwtc_mileage_write_log('PWTC Mileage plugin removed capabilities to ride_captain role');
     } 
+}
+
+function pwtc_mileage_ridesheet_exists($post_id) {
+    if ($post_id > 0) {
+        $data = PwtcMileage_DB::fetch_ride_by_post_id($post_id);
+        if (count($data) > 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function pwtc_mileage_ridesheet_status($post_id) {

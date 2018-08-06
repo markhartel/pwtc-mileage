@@ -85,7 +85,7 @@ class PwtcMileage {
 		add_action( 'pwtc_mileage_updmembs_load', 
 			array( 'PwtcMileage', 'updmembs_load_callback2') );  
 	}
-
+/*
 	public static function download_riderid() {
 		if (isset($_POST['download_riderid']) and
 			isset($_POST['rider_name']) and
@@ -147,6 +147,82 @@ class PwtcMileage {
 			//$pdf->Output();
 			$pdf->Output('F', 'php://output');
 			die;
+		}
+	}
+*/
+	public static function download_riderid() {
+		if (isset($_POST['pwtc_mileage_download_riderid']) and isset($_POST['rider_id'])) {
+			$current_user = wp_get_current_user();
+			if ( 0 == $current_user->ID ) {
+			}
+			else {	
+				$result = PwtcMileage_DB::fetch_rider($_POST['rider_id']);
+				if (count($result) == 0) {
+				}
+				else {
+					$lastname = $result[0]['last_name'];
+					$firstname = $result[0]['first_name'];
+					$name = $firstname . ' ' . $lastname;
+					$exp_date = $result[0]['expir_date'];
+					$fmtdate = date('M Y', strtotime($exp_date));
+					header('Content-Description: File Transfer');
+					header("Content-type: application/pdf");
+					header("Content-Disposition: attachment; filename=rider_card.pdf");
+					require('fpdf.php');	
+					$pdf = new FPDF();
+					$pdf->AddPage();
+					$x_off = 0;
+					$y_off = 0;
+					$w_card = 95;
+					$h_card = 60;
+					$pdf->Rect($x_off, $y_off, $w_card, $h_card);
+					$w_sub = (int)($w_card * 0.3);
+					$pdf->SetFillColor(255, 0, 0);
+					$pdf->Rect($x_off, $y_off, $w_sub, $h_card, 'F');
+					$pdf->Image(PWTC_MILEAGE__PLUGIN_DIR . 'pwtc_logo.png', $x_off + 2, $y_off + 10, $w_sub - 2, $w_sub - 2);
+					$pdf->SetFont('Arial', 'B', 20);
+					$pdf->SetTextColor(255, 255, 255);
+					$pdf->Text($x_off + 4, $y_off + 45, 'PWTC');
+					$pdf->SetTextColor(0, 0, 0);
+					$pdf->SetXY($x_off + $w_sub, $y_off + 15);
+					$pdf->SetFont('Arial', 'I', 18);
+					$pdf->Cell($w_card - $w_sub, 10, $name, 0, 0,'C');
+					$pdf->SetFont('Arial', '', 14);
+					$pdf->Text($x_off + $w_sub + 25, $y_off + 34, $_POST['rider_id']);
+					$pdf->Text($x_off + $w_sub + 40, $y_off + 50, $fmtdate);
+					$pdf->SetFont('Arial', '', 5);
+					$pdf->Text($x_off + $w_sub + 25, $y_off + 38, 'RIDER ID');
+					$pdf->Text($x_off + $w_sub + 40, $y_off + 54, 'EXPIRES');
+					$pdf->Rect($x_off, $y_off + $h_card, $w_card, $h_card);
+					$pdf->SetXY($x_off, $y_off + $h_card + 5);
+					$pdf->SetFont('Arial', 'I', 12);
+					$pdf->SetTextColor(255, 0, 0);
+					$pdf->Cell($w_card, 6, 'Portland Wheelmen Touring Club', 0, 2,'C');
+					$pdf->SetFont('Arial', 'U', 12);
+					$pdf->SetTextColor(0, 0, 255);
+					$pdf->Cell($w_card, 6, 'www.PWTC.com', 0, 2,'C');
+					$pdf->SetFont('Arial', '', 12);
+					$pdf->SetTextColor(0, 0, 0);
+					$pdf->Cell($w_card, 6, 'Information Hotline: 503.666.5796', 0, 2,'C');
+					$pdf->SetXY($x_off, $y_off + $h_card + 27);
+					$pdf->SetFont('Arial', '', 8);
+					$pdf->Cell($w_card, 4, 'Daily and multi-day rides', 0, 2,'C');
+					$pdf->Cell($w_card, 4, 'Cycling friendships', 0, 2,'C');
+					$pdf->Cell($w_card, 4, 'Volunteer opportunities', 0, 2,'C');
+					$pdf->Cell($w_card, 4, 'Bike shop discounts', 0, 2,'C');
+					$pdf->SetXY($x_off, $y_off + $h_card + 50);
+					$pdf->SetFont('Arial', 'I', 12);
+					$pdf->SetTextColor(255, 0, 0);
+					$pdf->Cell($w_card, 6, 'Take Life By The Handlebars! ' . chr(174), 0, 0,'C');
+					$pdf->SetFont('Arial', 'I', 10);
+					$pdf->SetTextColor(0, 0, 0);
+					$pdf->SetXY($x_off, $y_off + $h_card*2);
+					$pdf->Cell($w_card, 10, 'To assemble card, cut out and fold', 0, 0,'C');
+					//$pdf->Output();
+					$pdf->Output('F', 'php://output');
+					die;
+				}
+			}
 		}
 	}
 
@@ -1224,6 +1300,7 @@ class PwtcMileage {
 		$out = '';
 		try {
 			$member_id = pwtc_mileage_get_member_id();
+			/*
 			$result = PwtcMileage_DB::fetch_rider($member_id);
 			if (count($result) == 0) {
 				$out .= 'Cannot download rider ID card, fetch of details for rider ' . 
@@ -1233,14 +1310,19 @@ class PwtcMileage {
 				$lastname = $result[0]['last_name'];
 				$firstname = $result[0]['first_name'];
 				$exp_date = $result[0]['expir_date'];
-				$fmtdate = date('M Y', strtotime($exp_date));
+				//$fmtdate = date('M Y', strtotime($exp_date));
 				$out .= '<form style="display: inline" method="POST">';
 				$out .= '<input class="dark button" type="submit" name="download_riderid" value="Rider ID Card"/>';
 				$out .= '<input type="hidden" name="rider_id" value="' . $member_id . '"/>';
 				$out .= '<input type="hidden" name="rider_name" value="' . $firstname . ' ' . $lastname . '"/>';
-				$out .= '<input type="hidden" name="expire_date" value="' . $fmtdate . '"/>';
+				$out .= '<input type="hidden" name="expire_date" value="' . $exp_date . '"/>';
 				$out .= '</form>';
 			}
+			*/
+			$out .= '<form method="POST">';
+			$out .= '<button class="dark button" type="submit" name="pwtc_mileage_download_riderid"><i class="fa fa-download"></i> Rider Card</button>';
+			$out .= '<input type="hidden" name="rider_id" value="' . $member_id . '"/>';
+			$out .= '</form>';
 		}
 		catch (Exception $e) {
 			switch ($e->getMessage()) {
