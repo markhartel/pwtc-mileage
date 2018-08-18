@@ -96,6 +96,26 @@ jQuery(document).ready(function($) {
         }
     }   
 
+	function next_rider_id_cb(response) {
+        var res = JSON.parse(response);
+		if (res.error) {
+            open_error_dialog(res.error);
+		}
+		else {
+            $("#rider-inspect-section .add-blk .add-frm input[type='submit']").val('Create');
+            $("#rider-inspect-section .add-blk .add-frm input[type='text']").val(''); 
+            $("#rider-inspect-section .add-blk .add-frm input[type='hidden']").val(''); 
+            $("#rider-inspect-section .add-blk .add-frm input[name='mode']").val('insert');
+            $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").removeAttr("disabled");
+            $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").val(res.next_member_id);
+            $("#rider-inspect-section .add-btn").hide('fast', function() {
+                $('#rider-inspect-section .add-blk').show('slow'); 
+                $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").focus();
+            });
+        }
+        $('body').removeClass('waiting');
+    }
+
 	function modify_rider_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
@@ -178,20 +198,12 @@ jQuery(document).ready(function($) {
     });
 
     $("#rider-inspect-section .add-btn").on('click', function(evt) {
-        open_confirm_dialog(
-			'WARNING: to add a new rider, you must have a valid ID which is assigned by the membership secretary. Do you want to continue?', 
-			function() {
-                $("#rider-inspect-section .add-blk .add-frm input[type='submit']").val('Create');
-		        $("#rider-inspect-section .add-blk .add-frm input[type='text']").val(''); 
-		        $("#rider-inspect-section .add-blk .add-frm input[type='hidden']").val(''); 
-                $("#rider-inspect-section .add-blk .add-frm input[name='mode']").val('insert');
-                $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").removeAttr("disabled");
-                $("#rider-inspect-section .add-btn").hide('fast', function() {
-		            $('#rider-inspect-section .add-blk').show('slow'); 
-                    $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").focus();          
-                });
-			}
-		);
+        var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+        var data = {
+            'action': 'pwtc_mileage_next_rider_id'
+        };
+        $('body').addClass('waiting');
+        $.post(action, data, next_rider_id_cb); 
     });
 
 	$("#rider-inspect-section .add-blk .cancel-btn").on('click', function(evt) {

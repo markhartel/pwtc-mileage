@@ -38,6 +38,8 @@ class PwtcMileage_Admin {
 			array( 'PwtcMileage_Admin', 'remove_ride_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_ridesheet', 
 			array( 'PwtcMileage_Admin', 'lookup_ridesheet_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_next_rider_id', 
+			array( 'PwtcMileage_Admin', 'next_rider_id_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_riders', 
 			array( 'PwtcMileage_Admin', 'lookup_riders_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_create_rider', 
@@ -628,6 +630,30 @@ class PwtcMileage_Admin {
 				'firstname' => $firstname,
 				'members' => $members);
 			echo wp_json_encode($response);
+		}
+		wp_die();
+	}
+
+	public static function next_rider_id_callback() {
+		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+			$response = array(
+				'error' => 'You are not allowed to generate the next rider ID.'
+			);
+			echo wp_json_encode($response);
+		}
+		else {
+			$memberid = PwtcMileage_DB::gen_new_member_id();
+			if ($memberid == '') {
+				$response = array(
+					'error' => 'Cannot generate next rider ID.'
+				);
+				echo wp_json_encode($response);					
+			}
+			else {
+				$response = array(
+					'next_member_id' => $memberid);
+				echo wp_json_encode($response);
+			}
 		}
 		wp_die();
 	}
