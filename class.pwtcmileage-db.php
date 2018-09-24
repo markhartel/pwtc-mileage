@@ -127,6 +127,7 @@ class PwtcMileage_DB {
 		return $meta;		
 	}
 
+/*
 	public static function fetch_member_by_role($roles) {
         $results = array();
         $query_args = [
@@ -157,6 +158,7 @@ class PwtcMileage_DB {
 		);
 		return $meta;		
 	}
+*/
 
 	public static function fetch_annual_accum_miles($outtype, $min = 0, $no_id = false) {
     	global $wpdb;
