@@ -83,8 +83,70 @@ class PwtcMileage {
 		add_action( 'pwtc_mileage_cvs_restore', 
 			array( 'PwtcMileage', 'cvs_restore_callback') );  
 		add_action( 'pwtc_mileage_updmembs_load', 
-			array( 'PwtcMileage', 'updmembs_load_callback2') );  
+			array( 'PwtcMileage', 'updmembs_load_callback2') ); 
+			
+		add_action('wc_memberships_user_membership_saved', 
+			array('PwtcMileage', 'wc_memberships_user_membership_saved_callback'));
 	}
+
+	public static function wc_memberships_user_membership_saved_callback($membership_plan, $args = array()) {
+		$user_membership_id = isset($args['user_membership_id']) ? absint($args['user_membership_id']) : null;
+		$user_id = isset($args['user_id']) ? absint($args['user_id']) : null;
+		$is_update = isset($args['is_update']) ? $args['is_update'] : false;
+
+		if (!$user_membership_id) {
+			return;
+		}
+		if (!$user_id) {
+			return;
+		}
+
+		$user_membership = wc_memberships_get_user_membership($user_membership_id);
+		$user_data = get_userdata($user_id);
+
+		if (!in_array('current_member', $user_data->roles)) {
+			$user_data->add_role('current_member');
+		}
+		if (in_array('expired_member', $user_data->roles)) {
+			$user_data->remove_role('expired_member');
+		}
+
+		$generate_rider_id = false;
+		$rider_id = get_field('home_phone', 'user_'.$user_id);
+		if (empty($rider_id)) {
+			$generate_rider_id = true;
+		}
+		if ($generate_rider_id) {
+			if (function_exists('pwtc_mileage_insert_new_rider')) {
+				try {
+					//TODO: get expiration date from user membership record.
+					$expdate = '2019-10-01';
+					$new_rider_id = pwtc_mileage_insert_new_rider(
+						$user_data->last_name, $user_data->first_name, $expdate);
+					update_field('home_phone', $new_rider_id, 'user_'.$user_id);
+				}
+				catch (Exception $e) {
+					$msg = $e->getMessage();
+					error_log($msg);
+				}
+			}		
+		}
+		else {
+			if (function_exists('pwtc_mileage_update_rider')) {
+				try {
+					//TODO: get expiration date from user membership record.
+					$expdate = '2019-10-01';
+					pwtc_mileage_update_rider(
+						$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
+				}
+				catch (Exception $e) {
+					$msg = $e->getMessage();
+					error_log($msg);
+				}
+			}
+		}
+	}
+
 /*
 	public static function download_riderid() {
 		if (isset($_POST['download_riderid']) and
