@@ -86,7 +86,7 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'updmembs_load_callback2') ); 
 			
 		add_action('wc_memberships_user_membership_saved', 
-			array('PwtcMileage', 'wc_memberships_user_membership_saved_callback'));
+			array('PwtcMileage', 'wc_memberships_user_membership_saved_callback'), 10, 2);
 	}
 
 	public static function wc_memberships_user_membership_saved_callback($membership_plan, $args = array()) {
@@ -95,14 +95,25 @@ class PwtcMileage {
 		$is_update = isset($args['is_update']) ? $args['is_update'] : false;
 
 		if (!$user_membership_id) {
+			error_log('wc_memberships_user_membership_saved action: user membership id not set.');
 			return;
 		}
 		if (!$user_id) {
+			error_log('wc_memberships_user_membership_saved action: user id not set.');
 			return;
 		}
 
 		$user_membership = wc_memberships_get_user_membership($user_membership_id);
+		if (!$user_membership) {
+			error_log('wc_memberships_user_membership_saved action: cannot get user membership data for user membership id ' . $user_membership_id);
+			return;			
+		}
+		
 		$user_data = get_userdata($user_id);
+		if (!$user_data) {
+			error_log('wc_memberships_user_membership_saved action: cannot get user data for id ' . $user_id);
+			return;			
+		}
 
 		if (!in_array('current_member', $user_data->roles)) {
 			$user_data->add_role('current_member');
@@ -127,7 +138,7 @@ class PwtcMileage {
 				}
 				catch (Exception $e) {
 					$msg = $e->getMessage();
-					error_log($msg);
+					error_log('wc_memberships_user_membership_saved action: ' . $msg);
 				}
 			}		
 		}
@@ -141,11 +152,13 @@ class PwtcMileage {
 				}
 				catch (Exception $e) {
 					$msg = $e->getMessage();
-					error_log($msg);
+					error_log('wc_memberships_user_membership_saved action: ' . $msg);
 				}
 			}
 		}
 	}
+
+
 
 /*
 	public static function download_riderid() {
