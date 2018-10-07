@@ -115,11 +115,30 @@ class PwtcMileage {
 			return;			
 		}
 
-		if (!in_array('current_member', $user_data->roles)) {
-			$user_data->add_role('current_member');
+		if ($user_membership->get_status() == 'expired') {
+			if (!in_array('expired_member', $user_data->roles)) {
+				$user_data->add_role('expired_member');
+			}
+			if (in_array('current_member', $user_data->roles)) {
+				$user_data->remove_role('current_member');
+			}
 		}
-		if (in_array('expired_member', $user_data->roles)) {
-			$user_data->remove_role('expired_member');
+		else {
+			if (!in_array('current_member', $user_data->roles)) {
+				$user_data->add_role('current_member');
+			}
+			if (in_array('expired_member', $user_data->roles)) {
+				$user_data->remove_role('expired_member');
+			}
+		}
+
+		if ($user_membership->has_end_date()) {
+			$datetime = $user_membership->get_end_date('mysql', false);
+			$pieces = explode(' ', $datetime);
+			$expdate = $pieces[0];
+		}
+		else {
+			$expdate = '2099-01-01';
 		}
 
 		$generate_rider_id = false;
@@ -130,8 +149,6 @@ class PwtcMileage {
 		if ($generate_rider_id) {
 			if (function_exists('pwtc_mileage_insert_new_rider')) {
 				try {
-					//TODO: get expiration date from user membership record.
-					$expdate = '2019-10-01';
 					$new_rider_id = pwtc_mileage_insert_new_rider(
 						$user_data->last_name, $user_data->first_name, $expdate);
 					update_field('home_phone', $new_rider_id, 'user_'.$user_id);
@@ -145,8 +162,6 @@ class PwtcMileage {
 		else {
 			if (function_exists('pwtc_mileage_update_rider')) {
 				try {
-					//TODO: get expiration date from user membership record.
-					$expdate = '2019-10-01';
 					pwtc_mileage_update_rider(
 						$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
 				}
