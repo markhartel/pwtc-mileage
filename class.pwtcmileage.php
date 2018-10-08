@@ -87,6 +87,8 @@ class PwtcMileage {
 			
 		add_action('wc_memberships_user_membership_saved', 
 			array('PwtcMileage', 'wc_memberships_user_membership_saved_callback'), 10, 2);
+		add_action('wc_memberships_user_membership_deleted', 
+			array('PwtcMileage', 'wc_memberships_user_membership_deleted_callback'));
 	}
 
 	public static function wc_memberships_user_membership_saved_callback($membership_plan, $args = array()) {
@@ -133,7 +135,8 @@ class PwtcMileage {
 		}
 
 		if ($user_membership->has_end_date()) {
-			$datetime = $user_membership->get_end_date('mysql', false);
+			$datetime = $user_membership->get_local_end_date('mysql', false);
+//			$datetime = $user_membership->get_end_date('mysql', false);
 			$pieces = explode(' ', $datetime);
 			$expdate = $pieces[0];
 		}
@@ -173,7 +176,36 @@ class PwtcMileage {
 		}
 	}
 
+	public static function wc_memberships_user_membership_deleted_callback($user_membership) {
+		$user_id = $user_membership->get_user_id();
+		$user_data = get_userdata($user_id);
+		if (!$user_data) {
+			error_log('wc_memberships_user_membership_deleted action: cannot get user data for id ' . $user_id);
+			return;			
+		}
 
+		if (in_array('expired_member', $user_data->roles)) {
+			$user_data->remove_role('expired_member');
+		}
+		if (in_array('current_member', $user_data->roles)) {
+			$user_data->remove_role('current_member');
+		}
+
+		$rider_id = get_field('home_phone', 'user_'.$user_id);
+		if (!empty($rider_id)) {
+			if (function_exists('pwtc_mileage_update_rider')) {
+				$expdate = date('Y-m-d', current_time('timestamp'));
+				try {
+					pwtc_mileage_update_rider(
+						$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
+				}
+				catch (Exception $e) {
+					$msg = $e->getMessage();
+					error_log('wc_memberships_user_membership_deleted action: ' . $msg);
+				}
+			}
+		}
+	}
 
 /*
 	public static function download_riderid() {
