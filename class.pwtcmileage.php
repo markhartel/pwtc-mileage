@@ -85,8 +85,8 @@ class PwtcMileage {
 		add_action( 'pwtc_mileage_updmembs_load', 
 			array( 'PwtcMileage', 'updmembs_load_callback2') ); 
 			
-//		add_action('wc_memberships_user_membership_saved', 
-//			array('PwtcMileage', 'wc_memberships_user_membership_saved_callback'), 10, 2);
+		add_action('wc_memberships_user_membership_saved', 
+			array('PwtcMileage', 'pwtc_user_membership_created_callback'), 10, 2);
 		add_action('wc_memberships_user_membership_created', 
 			array('PwtcMileage', 'pwtc_user_membership_created_callback'), 10, 2);
 		add_action('wc_memberships_user_membership_status_changed', 
@@ -139,15 +139,6 @@ class PwtcMileage {
 	}
 */
 
-/*
-	public static function wc_memberships_user_membership_saved_callback($membership_plan, $args = array()) {
-		$is_update = isset($args['is_update']) ? $args['is_update'] : false;
-		if (is_update) {
-			self::wc_memberships_user_membership_created_callback($membership_plan, $args);
-		}
-	}
-*/
-
 	public static function pwtc_user_membership_created_callback($membership_plan, $args = array()) {
 		$user_membership_id = isset($args['user_membership_id']) ? absint($args['user_membership_id']) : null;
 		$user_id = isset($args['user_id']) ? absint($args['user_id']) : null;
@@ -172,6 +163,10 @@ class PwtcMileage {
 		if (!$user_data) {
 			error_log('pwtc_user_membership_created_callback: cannot get user data for id ' . $user_id);
 			return;			
+		}
+
+		if ($user_membership->get_status() == 'auto-draft' or $user_membership->get_status() == 'trash') {
+			return;
 		}
 
 		if ($user_membership->get_status() == 'expired') {
