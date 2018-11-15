@@ -74,6 +74,22 @@ if (count($error_msgs) > 0) {
 			<input type="checkbox" id="admin_maint_mode" name="admin_maint_mode" 
 			<?php if ($plugin_options['admin_maint_mode']) { echo 'checked'; } ?>/>
 		</span>
+		<span>User Lookup Mode</span>
+		<span class="checkbox-wrap">
+			<input type="radio" id="wordpress" name="user_lookup_mode" value="wordpress"
+			<?php if ($plugin_options['user_lookup_mode'] == 'wordpress') { echo 'checked'; } ?>/>
+  			<label for="wordpress">Wordpress</label>
+		</span>
+		<span class="checkbox-wrap">
+			<input type="radio" id="civicrm" name="user_lookup_mode" value="civicrm"
+			<?php if ($plugin_options['user_lookup_mode'] == 'civicrm') { echo 'checked'; } ?>/>
+  			<label for="civicrm">CiviCRM</label>
+		</span>
+		<span class="checkbox-wrap">
+			<input type="radio" id="woocommerce" name="user_lookup_mode" value="woocommerce"
+			<?php if ($plugin_options['user_lookup_mode'] == 'woocommerce') { echo 'checked'; } ?>/>
+  			<label for="woocommerce">WooCommerce</label>
+		</span>
 		<input type="submit" value="Save" class="button button-primary button-large"/>
 	</form>
 </div>

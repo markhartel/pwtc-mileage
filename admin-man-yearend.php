@@ -17,6 +17,7 @@ $notice_type = '';
 $show_buttons = true;
 $clear_button = false;
 $show_purge = false;
+$show_updmembs = $plugin_options['user_lookup_mode'] != 'woocommerce';
 ?>
 <script type="text/javascript">
 jQuery(document).ready(function($) { 
@@ -211,6 +212,7 @@ if ($show_buttons) {
                 class="button button-primary button-large"/>
         </form></div><br>
 <?php } ?>
+<?php if ($show_updmembs) { ?>
         <p>Synchronize the rider list with the contents of the UPDMEMBS.DBF file. This file is provided by the membership secretary.</p>
         <div>
             <button class="updmembs-btn button button-primary button-large">Synchronize</button>
@@ -225,14 +227,15 @@ if ($show_buttons) {
 			</form>
 		    </span>
         </div><br>
- <?php if ($show_purge) { ?>
+<?php } ?>
+<?php if ($show_purge) { ?>
        <p>Purge all non-riders from rider list.</p>
         <div><form class="purge-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_purge_nonriders'); ?>
             <input type="submit" name="purge_nonriders" value="Purge" 
                 class="button button-primary button-large"/>
         </form></div><br>
- <?php } ?>
+<?php } ?>
        <p>Consolidate all <?php echo(intval(date('Y'))-2); ?> club rides to a single entry. This will remove all obsolete entries from the mileage database.</p>
         <div><form class="consol-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_consolidate'); ?>

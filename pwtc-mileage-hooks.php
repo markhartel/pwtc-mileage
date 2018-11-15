@@ -29,7 +29,6 @@ Given the user's email address, this function looks up the CiviCRM contact recor
 and returns it's rider ID. Null is returned if no rider ID is set or is valid. Before this
 function is used you must first initialize the CiviCRM API by calling civicrm_initialize().
 */
-/*
 function pwtc_mileage_fetch_civi_member_id($email) {
     $member_id = null;
     if (function_exists('civicrm_api3')) {
@@ -66,7 +65,6 @@ function pwtc_mileage_fetch_civi_member_id($email) {
     }
     return $member_id;
 }
-*/
 
 /*
 Given a CiviCRM contact ID, this function looks up the contact record 
@@ -265,23 +263,30 @@ function pwtc_mileage_get_member_id() {
         throw new Exception('notloggedin');
     }
     else {
-        $rider_id = get_field('home_phone', 'user_'.$current_user->ID);
-        if (PwtcMileage::validate_member_id_str($rider_id)) {
-            $result = PwtcMileage_DB::fetch_rider($rider_id); 
-            if (count($result) == 0) {
-                throw new Exception('idnotfound');
+        $plugin_options = PwtcMileage::get_plugin_options();
+        $mode = $plugin_options['user_lookup_mode'];
+        if ($mode == 'woocommerce') {
+            $rider_id = get_field('rider_id', 'user_'.$current_user->ID);
+            if (PwtcMileage::validate_member_id_str($rider_id)) {
+                $result = PwtcMileage_DB::fetch_rider($rider_id); 
+                if (count($result) == 0) {
+                    throw new Exception('idnotfound');
+                } 
+                $id = $rider_id;
             } 
-            $id = $rider_id;
-        } 
-        else {
-            throw new Exception('idnotfound');
+            else {
+                throw new Exception('idnotfound');
+            }
         }
-
-        /*
-        if (function_exists('civicrm_initialize')) {
-            civicrm_initialize();
-            $id = pwtc_mileage_fetch_civi_member_id($current_user->user_email);
-            if (!$id) {
+        else if ($mode == 'civicrm') {
+            if (function_exists('civicrm_initialize')) {
+                civicrm_initialize();
+                $id = pwtc_mileage_fetch_civi_member_id($current_user->user_email);
+                if (!$id) {
+                    throw new Exception('idnotfound');
+                }
+            }
+            else {
                 throw new Exception('idnotfound');
             }
         }
@@ -298,7 +303,6 @@ function pwtc_mileage_get_member_id() {
             }
             $id = $result[0]['member_id'];
         }
-        */
     }
     return $id;
 }
@@ -368,23 +372,27 @@ function pwtc_mileage_fetch_ride_leader_ids($post_id) {
 
         $leaders = get_field('ride_leaders', $post_id);
         if ($leaders) {
-            foreach ($leaders as $leader) {
-                $rider_id = get_field('home_phone', 'user_'.$leader['ID']);
-                if (PwtcMileage::validate_member_id_str($rider_id)) {
-                    $result = PwtcMileage_DB::fetch_rider($rider_id); 
-                    if (count($result) > 0) {
-                        array_push($leaders_array, $rider_id);
-                    } 
-                } 
-            }
-            //pwtc_mileage_write_log($leaders);
-            /*
-            if (function_exists('civicrm_initialize')) {
-                civicrm_initialize();
+            $plugin_options = PwtcMileage::get_plugin_options();
+            $mode = $plugin_options['user_lookup_mode'];
+            if ($mode == 'woocommerce') {    
                 foreach ($leaders as $leader) {
-                    $id = pwtc_mileage_fetch_civi_member_id($leader['user_email']);
-                    if ($id) {
-                        array_push($leaders_array, $id);
+                    $rider_id = get_field('rider_id', 'user_'.$leader['ID']);
+                    if (PwtcMileage::validate_member_id_str($rider_id)) {
+                        $result = PwtcMileage_DB::fetch_rider($rider_id); 
+                        if (count($result) > 0) {
+                            array_push($leaders_array, $rider_id);
+                        } 
+                    } 
+                }
+            }
+            else if ($mode == 'civicrm') {
+                if (function_exists('civicrm_initialize')) {
+                    civicrm_initialize();
+                    foreach ($leaders as $leader) {
+                        $id = pwtc_mileage_fetch_civi_member_id($leader['user_email']);
+                        if ($id) {
+                            array_push($leaders_array, $id);
+                        }
                     }
                 }
             }
@@ -400,7 +408,6 @@ function pwtc_mileage_fetch_ride_leader_ids($post_id) {
                     }
                 }                    
             }
-            */
         }
 
 /*

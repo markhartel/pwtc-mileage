@@ -2,6 +2,7 @@
 if (!current_user_can($capability)) {
     return;
 }
+$show_updmembs = $plugin_options['user_lookup_mode'] != 'woocommerce';
 ?>
 <script type="text/javascript" >
 jQuery(document).ready(function($) { 
@@ -153,6 +154,7 @@ jQuery(document).ready(function($) {
         <p>You can also restrict the search results to riders who have current active 
         membership by checking the <em>Active Members Only</em> checkbox.</p>
         </div>
+        <?php if ($show_updmembs) { ?>
         <h3><a href="#">add a new rider?</a></h3>
         <div class="initially-hidden report-sec">
         <p>Occasionally, a rider who has just joined the club will not be in the mileage
@@ -175,6 +177,7 @@ jQuery(document).ready(function($) {
             <li>Press the <em>Create</em> button.</li>
         </ol>
         </div>
+        <?php } ?>
         <!--
         <h3><a href="#">change a rider's expiration date?</a></h3>
         <div class="initially-hidden report-sec">
@@ -208,7 +211,9 @@ jQuery(document).ready(function($) {
         on the mileage database before it can handle upcoming club activities. These actions 
         must be executed in the specified order.</p>
         <ol>
+            <?php if ($show_updmembs) { ?>
             <li>Ensure that the latest UPDMEMBS.DBF file from the membership secretary has been uploaded (see <a href="#" topic="updmembs">topic</a> for details.)</li>
+            <?php } ?>
             <li>Ensure that all the ride sign-up sheets for the previous year have been entered (see <a href="#" topic="ridesheet">topic</a> for details.)</li>
             <li>Backup the mileage database (see <a href="#" topic="backup">topic</a> for details.) Collect the files that were downloaded and archive to a secure location.</li> 
             <li>Generate the banquet award reports (see <a href="#" topic="awards">topic</a> for details.) Collect the files that were downloaded and archive to a secure location.</li>
@@ -222,8 +227,9 @@ jQuery(document).ready(function($) {
         These reports are based on rider activities for the previous year and should
         only be generated after the start of the new year and after all of the ride 
         sign-up sheets for the previous year have been entered. The reports consist of 
-        two sets of six files: a CSV file set for spreadsheet applications and 
-        a PDF file set for printing hardcopies.</p>
+        four sets of six files: a CSV file set for spreadsheet applications, 
+        a PDF file set for printing hardcopies, a HTML file set for website display and 
+        a text file set for cut and paste into wordprocessing applications.</p>
         <ol>
             <li>Select the <em>View Reports</em> option under the <em>Rider Mileage</em> submenu.</li>
             <li>A page displays that list the various reports that are available.</li>
@@ -231,9 +237,14 @@ jQuery(document).ready(function($) {
             <li>Click all six links in the <em>Award Reports</em> section, six CSV files will be downloaded.</li>
             <li>Choose the <em>PDF File</em> option from the <em>Download</em> selection box.</li>
             <li>Click all six links in the <em>Award Reports</em> section, six PDF files will be downloaded.</li>
-            <li>Collect the twelve downloaded files and send to the banquet organizers.</li>
+            <li>Choose the <em>HTML File</em> option from the <em>Download</em> selection box.</li>
+            <li>Click all six links in the <em>Award Reports</em> section, six HTML files will be downloaded.</li>
+            <li>Choose the <em>TXT File</em> option from the <em>Download</em> selection box.</li>
+            <li>Click all six links in the <em>Award Reports</em> section, six text files will be downloaded.</li>
+            <li>Collect the 24 downloaded files and send to the banquet organizers.</li>
         </ol>
         </div>
+        <?php if ($show_updmembs) { ?>
         <h3><a href="#" topic="updmembs">upload an UPDMEMBS.DBF file from the membership secretary?</a></h3>
         <div class="initially-hidden report-sec">
         <p>Every month, the club membership secretary updates their membership database
@@ -251,8 +262,9 @@ jQuery(document).ready(function($) {
             <li>The synchronize process will begin, wait for it to complete.</li>
             <li>If successful, the following message will appear: <em>Synchronize action success</em>.</li>
             <li>Press the <em>Clear Messages</em> button to clear the status message.</li>
-       </ol>
+        </ol>
         </div>
+        <?php } ?>
         <h3><a href="#" topic="consolidate">consolidate obsolete rides in the mileage database?</a></h3>
         <div class="initially-hidden report-sec">
         <p><strong>WARNING: this operation has the potential to corrupt the mileage database, 

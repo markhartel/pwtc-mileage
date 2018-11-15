@@ -2025,6 +2025,7 @@ class PwtcMileage_Admin {
 
 	public static function page_user_guide() {
 		$capability = PwtcMileage::VIEW_MILEAGE_CAP;
+		$plugin_options = PwtcMileage::get_plugin_options();
 		include('admin-user-guide.php');
 	}
 
@@ -2183,6 +2184,10 @@ class PwtcMileage_Admin {
 				$plugin_options['ride_lookback_date'] = $entry;
 			}
     	} 
+    	if (isset($_POST['user_lookup_mode'])) {
+			$form_submitted = true;
+			$plugin_options['user_lookup_mode'] = $_POST['user_lookup_mode'];
+		}
 		if ($form_submitted) {
 			if (isset($_POST['admin_maint_mode'])) {
 				$plugin_options['admin_maint_mode'] = true;

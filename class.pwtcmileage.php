@@ -84,7 +84,8 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'cvs_restore_callback') );  
 		add_action( 'pwtc_mileage_updmembs_load', 
 			array( 'PwtcMileage', 'updmembs_load_callback2') ); 
-			
+		
+/*
 		add_action('wc_memberships_user_membership_saved', 
 			array('PwtcMileage', 'pwtc_user_membership_created_callback'), 10, 2);
 		add_action('wc_memberships_user_membership_created', 
@@ -97,6 +98,7 @@ class PwtcMileage {
 			array('PwtcMileage', 'pwtc_user_membership_deleted_callback'));
 //		add_action('updated_post_meta', 
 //			array('PwtcMileage', 'updated_post_meta_callback', 10, 4 );
+*/
 	}
 
 /*
@@ -138,7 +140,7 @@ class PwtcMileage {
 		}
 	}
 */
-
+/*
 	public static function pwtc_user_membership_created_callback($membership_plan, $args = array()) {
 		$user_membership_id = isset($args['user_membership_id']) ? absint($args['user_membership_id']) : null;
 		$user_id = isset($args['user_id']) ? absint($args['user_id']) : null;
@@ -307,6 +309,7 @@ class PwtcMileage {
 			}
 		}
 	}
+*/
 
 /*
 	public static function download_riderid() {
@@ -1638,6 +1641,7 @@ class PwtcMileage {
 	public static function create_default_plugin_options() {
 		$data = array(
 			'admin_maint_mode' => false,
+			'user_lookup_mode' => 'wordpress',
 			'drop_db_on_delete' => false,
 			'plugin_menu_label' => 'Rider Mileage',
 			'plugin_menu_location' => 50,
