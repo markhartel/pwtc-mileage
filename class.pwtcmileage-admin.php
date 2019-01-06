@@ -2016,6 +2016,8 @@ class PwtcMileage_Admin {
 			$ride_count = PwtcMileage_DB::count_rides();
 			$mileage_count = PwtcMileage_DB::count_mileage();
 			$leader_count = PwtcMileage_DB::count_leaders();
+			$wordpress_timestamp = date('Y-m-d H:i:s', current_time('timestamp'));
+			$database_timestamp = PwtcMileage_DB::fetch_current_time();
 
 			$capability = PwtcMileage::DB_OPS_CAP;
 

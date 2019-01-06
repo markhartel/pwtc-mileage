@@ -900,6 +900,17 @@ class PwtcMileage_DB {
 		return $results;
 	}
 
+	public static function fetch_current_time() {
+    	global $wpdb;
+		$results = $wpdb->get_results('select NOW()', ARRAY_N);
+		if (count($results) > 0) {
+			return $results[0][0];
+		}
+		else {
+			return '';
+		}
+	}
+
 	public static function delete_all_nonriders() {
     	global $wpdb;
 		$member_table = $wpdb->prefix . self::MEMBER_TABLE;

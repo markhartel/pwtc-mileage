@@ -247,16 +247,16 @@ if ($show_buttons) {
         <div><form class="export-frm" method="POST">
             <?php wp_nonce_field('pwtc_mileage_export'); ?>
             <input type="submit" name="export_members" 
-                value="Members (<?php echo $member_count; ?>)" 
+                value="Members" 
                 class="button button-primary button-large"/>
             <input type="submit" name="export_rides" 
-                value="Rides (<?php echo $ride_count; ?>)" 
+                value="Rides" 
                 class="button button-primary button-large"/>
             <input type="submit" name="export_mileage" 
-                value="Mileage (<?php echo $mileage_count; ?>)" 
+                value="Mileage" 
                 class="button button-primary button-large"/>
             <input type="submit" name="export_leaders" 
-                value="Leaders (<?php echo $leader_count; ?>)" 
+                value="Leaders" 
                 class="button button-primary button-large"/>
         </form></div><br>
         <p>Restore the mileage database from the four exported CSV files.</p>
@@ -281,6 +281,17 @@ if ($show_buttons) {
 				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
 			</form>
 		    </span>
+        </div><br>
+        <p>Current status of the mileage database.</p>
+        <div>
+            <table>
+                <tr><td>Number of members:</td><td><?php echo $member_count; ?></td></tr>
+                <tr><td>Number of rides:</td><td><?php echo $ride_count; ?></td></tr>
+                <tr><td>Number of ride mileages:</td><td><?php echo $mileage_count; ?></td></tr>
+                <tr><td>Number of ride leaders:</td><td><?php echo $leader_count; ?></td></tr>
+                <tr><td>Current wordpress time:</td><td><?php echo $wordpress_timestamp; ?></td></tr>
+                <tr><td>Current database time:</td><td><?php echo $database_timestamp; ?></td></tr>
+            </table>
         </div><br>
 
 <?php
