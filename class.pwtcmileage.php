@@ -197,7 +197,7 @@ class PwtcMileage {
 		}
 
 		$generate_rider_id = false;
-		$rider_id = get_field('rider_id', 'user_'.$user_id);
+		$rider_id = trim(get_field('rider_id', 'user_'.$user_id));
 		if (empty($rider_id)) {
 			$generate_rider_id = true;
 		}
@@ -249,7 +249,7 @@ class PwtcMileage {
 			}
 		}
 
-		$rider_id = get_field('rider_id', 'user_'.$user_id);
+		$rider_id = trim(get_field('rider_id', 'user_'.$user_id));
 		if (!empty($rider_id)) {
 			if ($user_membership->has_end_date()) {
 				$datetime = $user_membership->get_local_end_date('mysql', false);
@@ -285,7 +285,7 @@ class PwtcMileage {
 			$user_data->remove_role('current_member');
 		}
 
-		$rider_id = get_field('rider_id', 'user_'.$user_id);
+		$rider_id = trim(get_field('rider_id', 'user_'.$user_id));
 		if (!empty($rider_id)) {
 			$expdate = date('Y-m-d', current_time('timestamp'));
 			try {
