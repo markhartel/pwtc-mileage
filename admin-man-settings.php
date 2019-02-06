@@ -66,7 +66,8 @@ if (count($error_msgs) > 0) {
 		</span>
 		<span>Drop Tables/Views Upon Plugin Delete</span>
 		<span class="checkbox-wrap">
-			<input type="checkbox" id="drop_db_on_delete" name="drop_db_on_delete" 
+			<input type="checkbox" id="drop_db_on_delete" name="drop_db_on_delete"
+			title="WARNING: checking this option will cause the mileage database tables (and any contained data) to be deleted if the PWTC Mileage plugin is deleted." 
 			<?php if ($plugin_options['drop_db_on_delete']) { echo 'checked'; } ?>/>
 		</span>
 		<span>Administrator Maintenance Mode</span>
@@ -74,7 +75,7 @@ if (count($error_msgs) > 0) {
 			<input type="checkbox" id="admin_maint_mode" name="admin_maint_mode" 
 			<?php if ($plugin_options['admin_maint_mode']) { echo 'checked'; } ?>/>
 		</span>
-		<span>User Lookup Mode</span>
+		<span>Rider Lookup Mode</span>
 		<span class="checkbox-wrap">
 			<input type="radio" id="wordpress" name="user_lookup_mode" value="wordpress"
 			<?php if ($plugin_options['user_lookup_mode'] == 'wordpress') { echo 'checked'; } ?>/>

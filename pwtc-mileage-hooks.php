@@ -267,6 +267,9 @@ function pwtc_mileage_get_member_id() {
         $mode = $plugin_options['user_lookup_mode'];
         if ($mode == 'woocommerce') {
             $rider_id = get_field('rider_id', 'user_'.$current_user->ID);
+            if (!$rider_id) {
+                $rider_id = '';
+            }
             if (PwtcMileage::validate_member_id_str($rider_id)) {
                 $result = PwtcMileage_DB::fetch_rider($rider_id); 
                 if (count($result) == 0) {
@@ -377,6 +380,9 @@ function pwtc_mileage_fetch_ride_leader_ids($post_id) {
             if ($mode == 'woocommerce') {    
                 foreach ($leaders as $leader) {
                     $rider_id = get_field('rider_id', 'user_'.$leader['ID']);
+                    if (!$rider_id) {
+                        $rider_id = '';
+                    }        
                     if (PwtcMileage::validate_member_id_str($rider_id)) {
                         $result = PwtcMileage_DB::fetch_rider($rider_id); 
                         if (count($result) > 0) {
