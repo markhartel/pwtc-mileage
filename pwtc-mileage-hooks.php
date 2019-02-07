@@ -222,7 +222,7 @@ function pwtc_mileage_update_rider($rider_id, $lastname, $firstname, $expdate) {
         else {
             $status = PwtcMileage_DB::insert_rider(
                 $rider_id, $lastname, $firstname, $expdate);
-            if (false === $status or 0 === $status) {
+            if (false === $status) {
                 throw new Exception('Cannot update rider, database update failed.');
             }
         }

@@ -208,11 +208,11 @@ class PwtcMileage {
 				$new_rider_id = pwtc_mileage_insert_new_rider(
 					$user_data->last_name, $user_data->first_name, $expdate);
 				update_field('rider_id', $new_rider_id, 'user_'.$user_id);
-				$user_membership->add_note('Assigned new Rider ID ' . $new_rider_id . ' to this member.');
+				$user_membership->add_note('PWTC Mileage plugin assigned new Rider ID ' . $new_rider_id . ' to this member.');
 			}
 			catch (Exception $e) {
 				$msg = $e->getMessage();
-				$user_membership->add_note('Error assigning new Rider ID to this member: ' . $msg);
+				$user_membership->add_note('PWTC Mileage plugin error assigning new Rider ID to this member: ' . $msg);
 				pwtc_mileage_write_log('membership_created_callback: ' . $msg);
 			}
 		}
@@ -220,11 +220,11 @@ class PwtcMileage {
 			try {
 				pwtc_mileage_update_rider(
 					$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
-				$user_membership->add_note('Updated information for Rider ID ' . $rider_id);
+				$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id);
 			}
 			catch (Exception $e) {
 				$msg = $e->getMessage();
-				$user_membership->add_note('Error updating information for Rider ID ' . $rider_id . ': ' . $msg);
+				$user_membership->add_note('PWTC Mileage plugin error updating information for Rider ID ' . $rider_id . ': ' . $msg);
 				pwtc_mileage_write_log('membership_created_callback: ' . $msg);
 			}
 		}
@@ -278,11 +278,11 @@ class PwtcMileage {
 			try {
 				pwtc_mileage_update_rider(
 					$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
-				$user_membership->add_note('Updated information for Rider ID ' . $rider_id);
+				$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id);
 			}
 			catch (Exception $e) {
 				$msg = $e->getMessage();
-				$user_membership->add_note('Error updating information for Rider ID ' . $rider_id . ': ' . $msg);
+				$user_membership->add_note('PWTC Mileage plugin error updating information for Rider ID ' . $rider_id . ': ' . $msg);
 				pwtc_mileage_write_log('membership_updated_callback: ' . $msg);
 			}
 		}
