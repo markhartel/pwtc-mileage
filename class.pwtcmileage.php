@@ -93,10 +93,10 @@ class PwtcMileage {
 				array('PwtcMileage', 'membership_created_callback'), 10, 2);
 			add_action('wc_memberships_user_membership_created', 
 				array('PwtcMileage', 'membership_created_callback'), 10, 2);
-			add_action('wc_memberships_user_membership_status_changed', 
-				array('PwtcMileage', 'membership_updated_callback'));
-			add_action('wc_memberships_csv_import_user_membership', 
-				array('PwtcMileage', 'membership_updated_callback'));
+			//add_action('wc_memberships_user_membership_status_changed', 
+			//	array('PwtcMileage', 'membership_updated_callback'));
+			//add_action('wc_memberships_csv_import_user_membership', 
+			//	array('PwtcMileage', 'membership_updated_callback'));
 			add_action('wc_memberships_user_membership_deleted', 
 				array('PwtcMileage', 'membership_deleted_callback'));
 			//add_action('updated_post_meta', 
@@ -208,7 +208,7 @@ class PwtcMileage {
 				$new_rider_id = pwtc_mileage_insert_new_rider(
 					$user_data->last_name, $user_data->first_name, $expdate);
 				update_field('rider_id', $new_rider_id, 'user_'.$user_id);
-				$user_membership->add_note('PWTC Mileage plugin assigned new Rider ID ' . $new_rider_id . ' to this member.');
+				$user_membership->add_note('PWTC Mileage plugin assigned new Rider ID ' . $new_rider_id . ' to this member.' . ' (is_update=' . $is_update . ')');
 			}
 			catch (Exception $e) {
 				$msg = $e->getMessage();
@@ -220,7 +220,7 @@ class PwtcMileage {
 			try {
 				pwtc_mileage_update_rider(
 					$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
-				$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id);
+				$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id  . ' (is_update=' . $is_update . ')');
 			}
 			catch (Exception $e) {
 				$msg = $e->getMessage();
