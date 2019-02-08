@@ -95,8 +95,8 @@ class PwtcMileage {
 				array('PwtcMileage', 'membership_created_callback'), 10, 2);
 			//add_action('wc_memberships_user_membership_status_changed', 
 			//	array('PwtcMileage', 'membership_updated_callback'));
-			//add_action('wc_memberships_csv_import_user_membership', 
-			//	array('PwtcMileage', 'membership_updated_callback'));
+			add_action('wc_memberships_csv_import_user_membership', 
+				array('PwtcMileage', 'membership_updated_callback'));
 			add_action('wc_memberships_user_membership_deleted', 
 				array('PwtcMileage', 'membership_deleted_callback'));
 			//add_action('updated_post_meta', 
