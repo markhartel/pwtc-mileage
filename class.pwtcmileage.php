@@ -99,6 +99,8 @@ class PwtcMileage {
 				array('PwtcMileage', 'membership_updated_callback'));
 			add_action('wc_memberships_user_membership_deleted', 
 				array('PwtcMileage', 'membership_deleted_callback'));
+			add_action('wc_memberships_for_teams_team_saved', 
+				array('PwtcMileage', 'membership_team_updated_callback'));
 			//add_action('updated_post_meta', 
 			//	array('PwtcMileage', 'updated_post_meta_callback', 10, 4 );
 		}
@@ -285,6 +287,65 @@ class PwtcMileage {
 				$user_membership->add_note('PWTC Mileage plugin error updating information for Rider ID ' . $rider_id . ': ' . $msg);
 				pwtc_mileage_write_log('membership_updated_callback: ' . $msg);
 			}
+		}
+	}
+
+	public static function membership_team_updated_callback($team) {
+		$datetime = $team->get_local_membership_end_date();
+		if ($datetime) {
+			$pieces = explode(' ', $datetime);
+			$expdate = $pieces[0];
+		}
+		else {
+			$expdate = '2099-01-01';
+		}
+		$expired = $team->is_membership_expired();
+		$user_memberships = $team->get_user_memberships();
+
+		foreach ( $user_memberships as $user_membership ) {
+			$user_id = $user_membership->get_user_id();
+			$user_data = get_userdata($user_id);
+			if (!$user_data) {
+				pwtc_mileage_write_log('membership_team_updated_callback: cannot get user data for id ' . $user_id);
+				continue;			
+			}
+
+			if ($expired) {
+				if (!in_array('expired_member', $user_data->roles)) {
+					$user_data->add_role('expired_member');
+				}
+				if (in_array('current_member', $user_data->roles)) {
+					$user_data->remove_role('current_member');
+				}	
+			}
+			else {
+				if (!in_array('current_member', $user_data->roles)) {
+					$user_data->add_role('current_member');
+				}
+				if (in_array('expired_member', $user_data->roles)) {
+					$user_data->remove_role('expired_member');
+				}	
+			}
+
+			$rider_id = get_field('rider_id', 'user_'.$user_id);
+			if ($rider_id) {
+				$rider_id = trim($rider_id);
+			}
+			else {
+				$rider_id = '';
+			}
+			if (!empty($rider_id)) {
+				try {
+					pwtc_mileage_update_rider(
+						$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
+					$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id . ' (for team)');
+				}
+				catch (Exception $e) {
+					$msg = $e->getMessage();
+					$user_membership->add_note('PWTC Mileage plugin error updating information for Rider ID ' . $rider_id . ': ' . $msg);
+					pwtc_mileage_write_log('membership_team_updated_callback: ' . $msg);
+				}
+			}	
 		}
 	}
 
