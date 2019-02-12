@@ -88,7 +88,6 @@ class PwtcMileage {
 		$plugin_options = self::get_plugin_options();
 		$mode = $plugin_options['user_lookup_mode'];
 		if ($mode == 'woocommerce') {
-			//pwtc_mileage_write_log('init_hooks: adding woocommerce membership action hooks.');
 			add_action('wc_memberships_user_membership_saved', 
 				array('PwtcMileage', 'membership_created_callback'), 10, 2);
 			add_action('wc_memberships_user_membership_created', 
@@ -101,51 +100,14 @@ class PwtcMileage {
 				array('PwtcMileage', 'membership_deleted_callback'));
 			add_action('wc_memberships_for_teams_team_saved', 
 				array('PwtcMileage', 'membership_team_updated_callback'));
-			//add_action('updated_post_meta', 
-			//	array('PwtcMileage', 'updated_post_meta_callback', 10, 4 );
 		}
 
 	}
-/*
-	public static function updated_post_meta_callback($meta_id, $post_id, $meta_key, $meta_value) {
-		if ('wc_user_membership' === get_post_type($post_id) && '_end_date' === $meta_key) {
-			$user_membership = wc_memberships_get_user_membership($post_id);
-			if (!$user_membership) {
-				pwtc_mileage_write_log('updated_post_meta_callback action: cannot get user membership data for user membership id ' . $post_id);
-				return;			
-			}
-			$user_id = $user_membership->get_user_id();
-			$user_data = get_userdata($user_id);
-			if (!$user_data) {
-				pwtc_mileage_write_log('updated_post_meta_callback action: cannot get user data for id ' . $user_id);
-				return;			
-			}		
-			$rider_id = get_field('rider_id', 'user_'.$user_id);
-			if (!empty($rider_id)) {
-				if ($user_membership->has_end_date()) {
-					$datetime = $user_membership->get_local_end_date('mysql', false);
-					$pieces = explode(' ', $datetime);
-					$expdate = $pieces[0];
-				}
-				else {
-					$expdate = '2099-01-01';
-				}
-				try {
-					pwtc_mileage_update_rider(
-						$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
-				}
-				catch (Exception $e) {
-					$msg = $e->getMessage();
-					pwtc_mileage_write_log('updated_post_meta_callback action: ' . $msg);
-				}
-			}
-		}
-	}
-*/
+
 	public static function membership_created_callback($membership_plan, $args = array()) {
+		$log_updates = true;
 		$user_membership_id = isset($args['user_membership_id']) ? absint($args['user_membership_id']) : null;
 		$user_id = isset($args['user_id']) ? absint($args['user_id']) : null;
-		$is_update = isset($args['is_update']) ? $args['is_update'] : false;
 
 		if (!$user_membership_id) {
 			pwtc_mileage_write_log('membership_created_callback: user membership id not set.');
@@ -210,7 +172,7 @@ class PwtcMileage {
 				$new_rider_id = pwtc_mileage_insert_new_rider(
 					$user_data->last_name, $user_data->first_name, $expdate);
 				update_field('rider_id', $new_rider_id, 'user_'.$user_id);
-				$user_membership->add_note('PWTC Mileage plugin assigned new Rider ID ' . $new_rider_id . ' to this member.' . ' (is_update=' . $is_update . ')');
+				$user_membership->add_note('PWTC Mileage plugin assigned new Rider ID ' . $new_rider_id . ' to this member.');
 			}
 			catch (Exception $e) {
 				$msg = $e->getMessage();
@@ -222,7 +184,9 @@ class PwtcMileage {
 			try {
 				pwtc_mileage_update_rider(
 					$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
-				$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id  . ' (is_update=' . $is_update . ')');
+				if ($log_updates) {
+					$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id);
+				}
 			}
 			catch (Exception $e) {
 				$msg = $e->getMessage();
@@ -233,6 +197,7 @@ class PwtcMileage {
 	}
 
 	public static function membership_updated_callback($user_membership) {
+		$log_updates = true;
 		$user_id = $user_membership->get_user_id();
 		$user_data = get_userdata($user_id);
 		if (!$user_data) {
@@ -280,7 +245,9 @@ class PwtcMileage {
 			try {
 				pwtc_mileage_update_rider(
 					$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
-				$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id);
+				if ($log_updates) {
+					$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id);
+				}
 			}
 			catch (Exception $e) {
 				$msg = $e->getMessage();
@@ -291,6 +258,7 @@ class PwtcMileage {
 	}
 
 	public static function membership_team_updated_callback($team) {
+		$log_updates = true;
 		$datetime = $team->get_local_membership_end_date();
 		if ($datetime) {
 			$pieces = explode(' ', $datetime);
@@ -310,6 +278,7 @@ class PwtcMileage {
 				continue;			
 			}
 
+			/*
 			if ($expired) {
 				if (!in_array('expired_member', $user_data->roles)) {
 					$user_data->add_role('expired_member');
@@ -326,6 +295,7 @@ class PwtcMileage {
 					$user_data->remove_role('expired_member');
 				}	
 			}
+			*/
 
 			$rider_id = get_field('rider_id', 'user_'.$user_id);
 			if ($rider_id) {
@@ -338,7 +308,9 @@ class PwtcMileage {
 				try {
 					pwtc_mileage_update_rider(
 						$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
-					$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id . ' (for team)');
+					if ($log_updates) {
+						$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id . ': ' . $expdate);
+					}
 				}
 				catch (Exception $e) {
 					$msg = $e->getMessage();
