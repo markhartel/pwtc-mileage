@@ -98,14 +98,14 @@ class PwtcMileage {
 				array('PwtcMileage', 'membership_updated_callback'));
 			add_action('wc_memberships_user_membership_deleted', 
 				array('PwtcMileage', 'membership_deleted_callback'));
-			add_action('wc_memberships_for_teams_team_saved', 
-				array('PwtcMileage', 'membership_team_updated_callback'));
+			//add_action('wc_memberships_for_teams_team_saved', 
+			//	array('PwtcMileage', 'membership_team_updated_callback'));
 		}
 
 	}
 
 	public static function membership_created_callback($membership_plan, $args = array()) {
-		$log_updates = true;
+		$log_updates = false;
 		$user_membership_id = isset($args['user_membership_id']) ? absint($args['user_membership_id']) : null;
 		$user_id = isset($args['user_id']) ? absint($args['user_id']) : null;
 
@@ -197,7 +197,7 @@ class PwtcMileage {
 	}
 
 	public static function membership_updated_callback($user_membership) {
-		$log_updates = true;
+		$log_updates = false;
 		$user_id = $user_membership->get_user_id();
 		$user_data = get_userdata($user_id);
 		if (!$user_data) {
