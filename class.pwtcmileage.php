@@ -359,7 +359,9 @@ class PwtcMileage {
 	}
 
 	public static function add_card_download_callback() {
-		echo '<p>This was added by the PWTC Mileage plugin.</p>';
+		echo '<p>Click the button below to download your rider ID card.';
+		echo do_shortcode('[pwtc_riderid_download]');
+		echo '</p>';
 	}
 
 /*
