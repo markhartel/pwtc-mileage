@@ -100,6 +100,8 @@ class PwtcMileage {
 				array('PwtcMileage', 'membership_deleted_callback'));
 			//add_action('wc_memberships_for_teams_team_saved', 
 			//	array('PwtcMileage', 'membership_team_updated_callback'));
+			add_action('woocommerce_account_dashboard',
+				array('PwtcMileage', 'add_card_download_callback'));
 		}
 
 	}
@@ -354,6 +356,10 @@ class PwtcMileage {
 				pwtc_mileage_write_log('membership_deleted_callback: ' . $msg);
 			}
 		}
+	}
+
+	public static function add_card_download_callback() {
+		echo '<p>This was added by the PWTC Mileage plugin.</p>';
 	}
 
 /*
