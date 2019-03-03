@@ -136,6 +136,10 @@ class PwtcMileage {
 			return;
 		}
 
+		if (!in_array('customer', $user_data->roles)) {
+			$user_data->add_role('customer');
+		}
+
 		if ($user_membership->get_status() == 'expired') {
 			if (!in_array('expired_member', $user_data->roles)) {
 				$user_data->add_role('expired_member');
@@ -209,6 +213,10 @@ class PwtcMileage {
 
 		if ($user_membership->get_status() == 'auto-draft' or $user_membership->get_status() == 'trash') {
 			return;
+		}
+
+		if (!in_array('customer', $user_data->roles)) {
+			$user_data->add_role('customer');
 		}
 
 		if ($user_membership->get_status() == 'expired') {
