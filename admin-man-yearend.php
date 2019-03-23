@@ -291,7 +291,7 @@ if ($show_buttons) {
                 <tr><td>Number of ride leaders:</td><td><?php echo $leader_count; ?></td></tr>
                 <tr><td>Current wordpress time:</td><td><?php echo $wordpress_timestamp; ?></td></tr>
                 <tr><td>Current database time:</td><td><?php echo $database_timestamp; ?></td></tr>
-                <tr><td>Mileage database version:</td><td><?php echo PwtcMileage_DB::get_db_version(); ?></td></tr>
+                <tr><td>Mileage database version:</td><td><?php echo $database_version; ?></td></tr>
             </table>
         </div><br>
 

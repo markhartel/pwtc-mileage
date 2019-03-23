@@ -2018,6 +2018,10 @@ class PwtcMileage_Admin {
 			$leader_count = PwtcMileage_DB::count_leaders();
 			$wordpress_timestamp = date('Y-m-d H:i:s', current_time('timestamp'));
 			$database_timestamp = PwtcMileage_DB::fetch_current_time();
+			$database_version = PwtcMileage_DB::get_db_version();
+			if ($database_version == false) {
+				$database_version = '1.1';
+			}
 
 			$capability = PwtcMileage::DB_OPS_CAP;
 
