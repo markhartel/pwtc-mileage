@@ -1136,6 +1136,9 @@ class PwtcMileage {
 				case "notloggedin":
 					$out .= 'Please log in to view your club rider report.';
 					break;
+				case "idnotset":
+					$out .= 'Cannot view your club rider report, rider ID not assigned.';
+					break;
 				case "idnotfound":
 					$out .= 'Cannot view your club rider report, rider ID not found - please contact administrator.';
 					break;
@@ -1367,6 +1370,9 @@ class PwtcMileage {
 				case "notloggedin":
 					$out .= '<div class="callout small warning"><p>Please log in to view this report.</p></div>';
 					break;
+				case "idnotset":
+					$out .= '<div class="callout small warning"><p>Cannot view this report, rider ID not assigned.</p></div>';
+					break;
 				case "idnotfound":
 					$out .= '<div class="callout small alert"><p>Cannot view this report, rider ID not found - please contact administrator.</p></div>';
 					break;
@@ -1396,6 +1402,9 @@ class PwtcMileage {
 			switch ($e->getMessage()) {
 				case "notloggedin":
 					$out .= '<div class="callout small warning"><p>Please log in to view this report.</p></div>';
+					break;
+				case "idnotset":
+					$out .= '<div class="callout small warning"><p>Cannot view this report, rider ID not assigned.</p></div>';
 					break;
 				case "idnotfound":
 					$out .= '<div class="callout small alert"><p>Cannot view this report, rider ID not found - please contact administrator.</p></div>';
@@ -1427,6 +1436,9 @@ class PwtcMileage {
 				case "notloggedin":
 					$out .= '<div class="callout small warning"><p>Please log in to view this report.</p></div>';
 					break;
+				case "idnotset":
+					$out .= '<div class="callout small warning"><p>Cannot view this report, rider ID not assigned.</p></div>';
+					break;
 				case "idnotfound":
 					$out .= '<div class="callout small alert"><p>Cannot view this report, rider ID not found - please contact administrator.</p></div>';
 					break;
@@ -1456,6 +1468,9 @@ class PwtcMileage {
 			switch ($e->getMessage()) {
 				case "notloggedin":
 					$out .= '<div class="callout small warning"><p>Please log in to view this report</p></div>';
+					break;
+				case "idnotset":
+					$out .= '<div class="callout small warning"><p>Cannot view this report, rider ID not assigned.</p></div>';
 					break;
 				case "idnotfound":
 					$out .= '<div class="callout small alert"><p>Cannot view this report, rider ID not found - please contact administrator.</p></div>';
@@ -1559,6 +1574,9 @@ class PwtcMileage {
 			switch ($e->getMessage()) {
 				case "notloggedin":
 					$out .= '<div class="callout small warning"><p>Please log in to download your rider card.</p></div>';
+					break;
+				case "idnotset":
+					$out .= '<div class="callout small warning"><p>Cannot download your rider card, rider ID not assigned.</p></div>';
 					break;
 				case "idnotfound":
 					$out .= '<div class="callout small alert"><p>Cannot download your rider card, rider ID not found - please contact administrator.</p></div>';

@@ -270,6 +270,9 @@ function pwtc_mileage_get_member_id() {
             if (!$rider_id) {
                 $rider_id = '';
             }
+            if (empty($rider_id)) {
+                throw new Exception('idnotset');
+            }
             if (PwtcMileage::validate_member_id_str($rider_id)) {
                 $result = PwtcMileage_DB::fetch_rider($rider_id); 
                 if (count($result) == 0) {
