@@ -24,6 +24,10 @@ jQuery(document).ready(function($) {
                 '</table>');
             editlink = '<a title="Edit this rider\'s information." class="modify-btn">Edit</a>';
             deletelink = '<a title="Delete this rider." class="remove-btn">Delete</a>';
+            synclink = '';
+    <?php if ($plugin_options['user_lookup_mode'] == 'woocommerce') { ?>
+            synclink = '<a title="Sync this rider with their user profile." class="sync-btn">Sync</a>';
+    <?php } ?>		
             members.forEach(function(item) {
                 var fmtdate = getPrettyDate(item.expir_date);
                 $('#rider-inspect-section .riders-div table').append(
@@ -32,7 +36,7 @@ jQuery(document).ready(function($) {
                     '<td data-th="First Name">' + item.first_name + 
                     '</td><td data-th="Last Name">' + item.last_name + '</td>' + 
                     '<td data-th="Expiration" date="' + item.expir_date + '">' + fmtdate + '</td>' + 
-                    '<td data-th="Actions">' + editlink + ' ' + deletelink +
+                    '<td data-th="Actions">' + editlink + ' ' + deletelink + ' ' + synclink +
                     '</td></tr>');    
             });
             $('#rider-inspect-section .riders-div .modify-btn').on('click', function(evt) {
@@ -65,6 +69,17 @@ jQuery(document).ready(function($) {
                     }
                 );
     <?php } ?>		
+            });
+            $('#rider-inspect-section .riders-div .sync-btn').on('click', function(evt) {
+                evt.preventDefault();
+                var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+                var data = {
+                    'action': 'pwtc_mileage_sync_rider',
+                    'member_id': $(this).parent().parent().attr('memberid'),
+                    'nonce': '<?php echo wp_create_nonce('pwtc_mileage_sync_rider'); ?>'
+                };
+                $('body').addClass('waiting');
+                $.post(action, data, sync_rider_cb);
             });
         }
         else {
@@ -151,6 +166,17 @@ jQuery(document).ready(function($) {
 	}   
 
 	function remove_rider_cb(response) {
+        $('body').removeClass('waiting');
+        var res = JSON.parse(response);
+		if (res.error) {
+            open_error_dialog(res.error);
+		}
+		else {
+            load_rider_table();
+        }
+	}   
+
+	function sync_rider_cb(response) {
         $('body').removeClass('waiting');
         var res = JSON.parse(response);
 		if (res.error) {

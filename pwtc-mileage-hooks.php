@@ -331,6 +331,8 @@ function pwtc_mileage_get_rider_card_info($user_id, $rider_id = '') {
             $memberships = wc_memberships_get_user_memberships($user_id);
             if (!empty($memberships)) {
                 $membership = $memberships[0];
+                $exp_date = pwtc_mileage_get_expiration_date($membership);
+                /*
                 $team = false;
                 if (function_exists('wc_memberships_for_teams_get_user_membership_team')) {
                     $team = wc_memberships_for_teams_get_user_membership_team($membership->get_id());
@@ -350,6 +352,7 @@ function pwtc_mileage_get_rider_card_info($user_id, $rider_id = '') {
                         $exp_date = '2099-01-01';
                     }
                 }
+                */
             }
         }
     }
@@ -371,6 +374,59 @@ function pwtc_mileage_get_rider_card_info($user_id, $rider_id = '') {
         'expir_date' => $exp_date
     );
     return $result;
+}
+
+function pwtc_mileage_get_expiration_date($membership) {
+    $team = false;
+    if (function_exists('wc_memberships_for_teams_get_user_membership_team')) {
+        $team = wc_memberships_for_teams_get_user_membership_team($membership->get_id());
+    }
+    if ($team) {
+        $datetime = $team->get_local_membership_end_date('mysql');
+        $pieces = explode(' ', $datetime);
+        $exp_date = $pieces[0];
+    }
+    else {
+        if ($membership->has_end_date()) {
+            $datetime = $membership->get_local_end_date('mysql', false);
+            $pieces = explode(' ', $datetime);
+            $exp_date = $pieces[0];
+        }
+        else {
+            $exp_date = '2099-01-01';
+        }
+    }
+    return $exp_date;
+}
+
+function pwtc_mileage_membership_is_expired($membership) {
+    $is_expired = false;
+    $team = false;
+    if (function_exists('wc_memberships_for_teams_get_user_membership_team')) {
+        $team = wc_memberships_for_teams_get_user_membership_team($membership->get_id());
+    }
+    if ($team) {
+        if ($team->is_membership_expired()) {
+            $is_expired = true;
+        }
+    }
+    else {
+        if ($membership->is_expired()) {
+            $is_expired = true;
+        }
+    }
+    return $is_expired;
+}
+
+function pwtc_mileage_lookup_user($rider_id) {
+    $query_args = array( 
+        'meta_key' => 'rider_id', 
+        'meta_value' => $rider_id, 
+        'meta_compare' => '=' 
+    );
+    $user_query = new WP_User_Query( $query_args );
+    $results = $user_query->get_results();
+    return $results;
 }
 
 /*

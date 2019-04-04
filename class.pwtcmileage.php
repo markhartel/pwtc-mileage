@@ -140,7 +140,8 @@ class PwtcMileage {
 			$user_data->add_role('customer');
 		}
 
-		if ($user_membership->get_status() == 'expired') {
+		if (pwtc_mileage_membership_is_expired($user_membership)) {
+		//if ($user_membership->get_status() == 'expired') {
 			if (!in_array('expired_member', $user_data->roles)) {
 				$user_data->add_role('expired_member');
 			}
@@ -157,6 +158,8 @@ class PwtcMileage {
 			}
 		}
 
+		$expdate = pwtc_mileage_get_expiration_date($user_membership);
+		/*
 		if ($user_membership->has_end_date()) {
 			$datetime = $user_membership->get_local_end_date('mysql', false);
 			$pieces = explode(' ', $datetime);
@@ -165,6 +168,7 @@ class PwtcMileage {
 		else {
 			$expdate = '2099-01-01';
 		}
+		*/
 
 		$rider_id = get_field('rider_id', 'user_'.$user_id);
 		if ($rider_id) {
@@ -219,7 +223,8 @@ class PwtcMileage {
 			$user_data->add_role('customer');
 		}
 
-		if ($user_membership->get_status() == 'expired') {
+		if (pwtc_mileage_membership_is_expired($user_membership)) {
+		//if ($user_membership->get_status() == 'expired') {
 			if (!in_array('expired_member', $user_data->roles)) {
 				$user_data->add_role('expired_member');
 			}
@@ -244,6 +249,8 @@ class PwtcMileage {
 			$rider_id = '';
 		}
 		if (!empty($rider_id)) {
+			$expdate = pwtc_mileage_get_expiration_date($user_membership);
+			/*
 			if ($user_membership->has_end_date()) {
 				$datetime = $user_membership->get_local_end_date('mysql', false);
 				$pieces = explode(' ', $datetime);
@@ -252,6 +259,7 @@ class PwtcMileage {
 			else {
 				$expdate = '2099-01-01';
 			}
+			*/
 			try {
 				pwtc_mileage_update_rider(
 					$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
@@ -267,6 +275,7 @@ class PwtcMileage {
 		}
 	}
 
+	/*
 	public static function membership_team_updated_callback($team) {
 		$log_updates = true;
 		$datetime = $team->get_local_membership_end_date();
@@ -287,25 +296,6 @@ class PwtcMileage {
 				pwtc_mileage_write_log('membership_team_updated_callback: cannot get user data for id ' . $user_id);
 				continue;			
 			}
-
-			/*
-			if ($expired) {
-				if (!in_array('expired_member', $user_data->roles)) {
-					$user_data->add_role('expired_member');
-				}
-				if (in_array('current_member', $user_data->roles)) {
-					$user_data->remove_role('current_member');
-				}	
-			}
-			else {
-				if (!in_array('current_member', $user_data->roles)) {
-					$user_data->add_role('current_member');
-				}
-				if (in_array('expired_member', $user_data->roles)) {
-					$user_data->remove_role('expired_member');
-				}	
-			}
-			*/
 
 			$rider_id = get_field('rider_id', 'user_'.$user_id);
 			if ($rider_id) {
@@ -330,6 +320,7 @@ class PwtcMileage {
 			}	
 		}
 	}
+	*/
 
 	public static function membership_deleted_callback($user_membership) {
 		$user_id = $user_membership->get_user_id();

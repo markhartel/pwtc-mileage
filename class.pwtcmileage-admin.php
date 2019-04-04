@@ -46,6 +46,8 @@ class PwtcMileage_Admin {
 			array( 'PwtcMileage_Admin', 'create_rider_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_rider', 
 			array( 'PwtcMileage_Admin', 'remove_rider_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_sync_rider', 
+			array( 'PwtcMileage_Admin', 'sync_rider_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_get_rider', 
 			array( 'PwtcMileage_Admin', 'get_rider_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_leader', 
@@ -807,6 +809,85 @@ class PwtcMileage_Admin {
 					}
 					else {
 						$response = array('member_id' => $memberid);
+						echo wp_json_encode($response);
+					}
+				}
+			}
+		}
+		wp_die();
+	}
+
+	public static function sync_rider_callback() {
+		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+			$response = array(
+				'error' => 'You are not allowed to sync a rider.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!isset($_POST['member_id']) or !isset($_POST['nonce'])){
+			$response = array(
+				'error' => 'Input parameters needed to sync a rider are missing.'
+			);
+			echo wp_json_encode($response);
+		}
+		else {
+			$memberid = sanitize_text_field($_POST['member_id']);	
+			$nonce = $_POST['nonce'];	
+			if (!wp_verify_nonce($nonce, 'pwtc_mileage_sync_rider')) {
+				$response = array(
+					'error' => 'Access security check failed.'
+				);
+				echo wp_json_encode($response);
+			}
+			else {
+				$users = pwtc_mileage_lookup_user($memberid);
+				if (empty($users)) {
+					$response = array(
+						'error' => 'No user profile found for rider ' . $memberid . '.'
+					);
+					echo wp_json_encode($response);
+				}
+				else if (count($users) > 1) {
+					$response = array(
+						'error' => 'Multiple user profiles found for rider ' . $memberid . '.'
+					);
+					echo wp_json_encode($response);
+				} 
+				else {
+					$user = $users[0];
+					if (function_exists('wc_memberships_get_user_memberships')) {
+						$memberships = wc_memberships_get_user_memberships($user->ID);
+						if (count($memberships) > 1) {
+							$response = array(
+								'error' => 'Multiple memberships found for rider ' . $memberid  . '.'
+							);
+							echo wp_json_encode($response);		
+						}
+						else {
+							$lastname = trim($user->last_name);
+							$firstname = trim($user->first_name);
+							$exp_date = date('Y-m-d', current_time('timestamp'));
+							if (!empty($memberships)) {
+								$exp_date = pwtc_mileage_get_expiration_date($memberships[0]);
+							}		
+							try {
+								pwtc_mileage_update_rider($memberid, $lastname, $firstname, $exp_date);
+								$response = array('member_id' => $memberid);
+								echo wp_json_encode($response);		
+							}
+							catch (Exception $e) {
+								$msg = $e->getMessage();
+								$response = array(
+									'error' => $msg
+								);
+								echo wp_json_encode($response);		
+							}
+						}
+					}
+					else {
+						$response = array(
+							'error' => 'Woocommerce membership plugin not active.'
+						);
 						echo wp_json_encode($response);
 					}
 				}
