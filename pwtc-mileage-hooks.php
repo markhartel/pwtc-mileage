@@ -313,6 +313,66 @@ function pwtc_mileage_get_member_id() {
     return $id;
 }
 
+function pwtc_mileage_get_rider_card_info($user_id, $rider_id = '') {
+    $plugin_options = PwtcMileage::get_plugin_options();
+    $mode = $plugin_options['user_lookup_mode'];
+    if ($mode == 'woocommerce') {
+        if ($user_id == 0) {
+            return false;
+        }
+        $userdata = get_userdata($user_id);
+        if ($userdata === false) {
+            return false;
+        }
+        $lastname = $userdata->last_name;
+        $firstname = $userdata->first_name;
+        $exp_date = date('Y-m-d', current_time('timestamp'));
+        if (function_exists('wc_memberships_get_user_memberships')) {
+            $memberships = wc_memberships_get_user_memberships($user_id);
+            if (!empty($memberships)) {
+                $membership = $memberships[0];
+                $team = false;
+                if (function_exists('wc_memberships_for_teams_get_user_membership_team')) {
+                    $team = wc_memberships_for_teams_get_user_membership_team($membership->get_id());
+                }
+                if ($team) {
+                    $datetime = $team->get_local_membership_end_date('mysql');
+                    $pieces = explode(' ', $datetime);
+                    $exp_date = $pieces[0];
+                }
+                else {
+                    if ($membership->has_end_date()) {
+                        $datetime = $membership->get_local_end_date('mysql', false);
+                        $pieces = explode(' ', $datetime);
+                        $exp_date = $pieces[0];
+                    }
+                    else {
+                        $exp_date = '2099-01-01';
+                    }
+                }
+            }
+        }
+    }
+    else {
+        if (empty($rider_id)) {
+            return false;
+        }
+        $result = PwtcMileage_DB::fetch_rider($rider_id);
+        if (count($result) == 0) {
+            return false;
+        }
+        $lastname = $result[0]['last_name'];
+        $firstname = $result[0]['first_name'];
+        $exp_date = $result[0]['expir_date'];
+    }
+    $result = array(
+        'last_name' => $lastname,
+        'first_name' => $firstname,
+        'expir_date' => $exp_date
+    );
+    return $result;
+}
+
 /*
 Returns an array of arrays that contains the posted rides without ridesheets. 
 The interor array contains a posted ride record structured thus:

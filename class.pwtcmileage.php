@@ -373,19 +373,19 @@ class PwtcMileage {
 	}
 
 	public static function download_riderid() {
-		if (isset($_POST['pwtc_mileage_download_riderid']) and isset($_POST['rider_id'])) {
+		if (isset($_POST['pwtc_mileage_download_riderid']) and isset($_POST['rider_id']) and isset($_POST['user_id'])) {
 			$current_user = wp_get_current_user();
 			if ( 0 == $current_user->ID ) {
 			}
 			else {	
-				$result = PwtcMileage_DB::fetch_rider($_POST['rider_id']);
-				if (count($result) == 0) {
+				$result = pwtc_mileage_get_rider_card_info(intval($_POST['user_id']), $_POST['rider_id']);
+				if ($result === false) {
 				}
 				else {
-					$lastname = $result[0]['last_name'];
-					$firstname = $result[0]['first_name'];
+					$lastname = $result['last_name'];
+					$firstname = $result['first_name'];
 					$name = $firstname . ' ' . $lastname;
-					$exp_date = $result[0]['expir_date'];
+					$exp_date = $result['expir_date'];
 					$fmtdate = date('M Y', strtotime($exp_date));
 					header('Content-Description: File Transfer');
 					header("Content-type: application/pdf");
@@ -1546,6 +1546,8 @@ class PwtcMileage {
 		$out = '';
 		try {
 			$member_id = pwtc_mileage_get_member_id();
+			$current_user = wp_get_current_user();
+			$user_id = $current_user->ID;
 			/*
 			$result = PwtcMileage_DB::fetch_rider($member_id);
 			if (count($result) == 0) {
@@ -1568,6 +1570,7 @@ class PwtcMileage {
 			$out .= '<form method="POST">';
 			$out .= '<button class="dark button" type="submit" name="pwtc_mileage_download_riderid"><i class="fa fa-download"></i> Rider Card</button>';
 			$out .= '<input type="hidden" name="rider_id" value="' . $member_id . '"/>';
+			$out .= '<input type="hidden" name="user_id" value="' . $user_id . '"/>';
 			$out .= '</form>';
 		}
 		catch (Exception $e) {
