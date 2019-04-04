@@ -848,8 +848,12 @@ class PwtcMileage_Admin {
 					echo wp_json_encode($response);
 				}
 				else if (count($users) > 1) {
+					$list = '';
+					foreach ( $users as $user ) {
+						$list .= $user->ID . ' ';
+					}
 					$response = array(
-						'error' => 'Multiple user profiles found for rider ' . $memberid . '.'
+						'error' => 'Multiple user profiles found for rider ' . $memberid . '. User IDs: ' . $list
 					);
 					echo wp_json_encode($response);
 				} 
