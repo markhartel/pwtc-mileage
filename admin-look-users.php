@@ -19,7 +19,7 @@ jQuery(document).ready(function($) {
 		$('#user-lookup-section .users-div').empty();
         if (users.length > 0) {
             $('#user-lookup-section .users-div').append('<table class="rwd-table">' +
-                '<tr><th>Email</th><th>First Name</th><th>Last Name</th><th>Expiration</th><th>Note</th></tr>' +
+                '<tr><th>Email</th><th>First Name</th><th>Last Name</th><th>Expiration Date</th><th>Note</th></tr>' +
                 '</table>');
             users.forEach(function(item) {
                 $('#user-lookup-section .users-div table').append(
@@ -86,7 +86,7 @@ if ($running_jobs > 0) {
 } else {
 ?>
     <div id='user-lookup-section'>
-        <p>Under Construction!</p>
+        <p>Lookup the profile of users by their assigned rider ID. The membership expiration date of a rider is determined from their user profile.</p>
         <div class='search-sec'>
         <p><strong>Enter search parameters to lookup users.</strong>
         	<form class="search-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">

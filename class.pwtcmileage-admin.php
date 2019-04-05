@@ -677,8 +677,8 @@ class PwtcMileage_Admin {
 					}
 					$item = array(
 						'userid' => $profile->ID,
-						'firstname' => trim($info->first_name),
-						'lastname' => trim($info->last_name),
+						'first_name' => trim($info->first_name),
+						'last_name' => trim($info->last_name),
 						'email' => trim($info->user_email),
 						'expir_date' => $expir_date,
 						'note' => $note
