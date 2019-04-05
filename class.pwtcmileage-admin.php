@@ -42,6 +42,8 @@ class PwtcMileage_Admin {
 			array( 'PwtcMileage_Admin', 'next_rider_id_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_riders', 
 			array( 'PwtcMileage_Admin', 'lookup_riders_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_lookup_users', 
+			array( 'PwtcMileage_Admin', 'lookup_users_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_create_rider', 
 			array( 'PwtcMileage_Admin', 'create_rider_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_rider', 
@@ -636,6 +638,62 @@ class PwtcMileage_Admin {
 		wp_die();
 	}
 
+	public static function lookup_users_callback() {
+		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+			$response = array(
+				'error' => 'You are not allowed to lookup a user.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!isset($_POST['memberid'])) {
+			$response = array(
+				'error' => 'Input parameters needed to lookup a rider are missing.'
+			);
+			echo wp_json_encode($response);
+		}
+		else {
+			$memberid = sanitize_text_field($_POST['memberid']);
+			$users = array();
+			if (!empty($memberid)) {
+				$profiles = pwtc_mileage_lookup_user($memberid);
+				foreach ($profiles as $profile) {
+					$info = get_userdata($profile->ID);
+					$note = '';
+					$expir_date = '';
+					if (function_exists('wc_memberships_get_user_memberships')) {
+						$memberships = wc_memberships_get_user_memberships($profile->ID);
+						if (empty($memberships)) {
+							$note = 'no membership';
+						}
+						else if (count($memberships) > 1) {
+							$note = 'multiple memberships';
+						}
+						else {
+							$expir_date = pwtc_mileage_get_expiration_date($memberships[0]);
+						}
+					}
+					else {
+						$note = 'cannot access membership';
+					}
+					$item = array(
+						'userid' => $profile->ID,
+						'firstname' => trim($info->first_name),
+						'lastname' => trim($info->last_name),
+						'email' => trim($info->user_email),
+						'expir_date' => $expir_date,
+						'note' => $note
+					);
+					$users[] = $item;
+				}
+			}
+			$response = array(
+				'memberid' => $memberid,
+				'users' => $users);
+			echo wp_json_encode($response);
+		}
+		wp_die();
+	}
+
 	public static function next_rider_id_callback() {
 		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
 			$response = array(
@@ -1050,10 +1108,44 @@ class PwtcMileage_Admin {
 			$rider = PwtcMileage_DB::fetch_rider($memberid);
 			if (count($rider) > 0) {
 				$r = $rider[0];
-				if (strtotime($r['expir_date']) < strtotime(PwtcMileage::get_date_for_expir_check())) {
-					$errormsg = 'The membership of ' . $r['first_name'] . ' ' . 
-					$r['last_name'] .' (' . $r['member_id'] . ') has expired on ' . 
-					date('D M j Y', strtotime($r['expir_date'])) . '.';
+				$name = $r['first_name'] . ' ' . $r['last_name'] . ' (' . $r['member_id'] . ')';
+				if ($plugin_options['user_lookup_mode'] == 'woocommerce') {
+					$users = pwtc_mileage_lookup_user($r['member_id']);
+					if (empty($users)) {
+						$errormsg = 'Cannot find user profile for ' . $name . '.';
+					}
+					else if (count($users) > 1) {
+						$errormsg = 'Found multiple user profiles for ' . $name . '.';
+					}
+					else {
+						$user = $users[0];
+						if (function_exists('wc_memberships_get_user_memberships')) {
+							$memberships = wc_memberships_get_user_memberships($user->ID);
+							if (empty($memberships)) {
+								$errormsg = $name . ' has no membership.';
+							}
+							else if (count($memberships) > 1) {
+								$errormsg = $name . ' has multiple memberships.';
+							}
+							else {
+								$exp_date = pwtc_mileage_get_expiration_date($memberships[0]);
+								if (strtotime($exp_date < strtotime(PwtcMileage::get_date_for_expir_check()))) {
+									$errormsg = 'The membership of ' . 
+									$name . ' has expired on ' . 
+									date('D M j Y', strtotime($exp_date)) . '.';
+								}
+							}
+						}
+						else {
+							$errormsg = 'Cannot access membership of ' . $name . '.';
+						}	
+					}
+				}
+				else {
+					if (strtotime($r['expir_date']) < strtotime(PwtcMileage::get_date_for_expir_check())) {
+						$errormsg = 'The membership of ' . $name . ' has expired on ' . 
+						date('D M j Y', strtotime($r['expir_date'])) . '.';
+					}
 				}
 			}
 			else {
@@ -1097,8 +1189,11 @@ class PwtcMileage_Admin {
 				echo wp_json_encode($response);
 			}
 			else {
-				$error = self::check_expir_date($memberid);
-				if ($override == 'false' and $error != null) {
+				$error = null;
+				if ($override == 'false') {
+					$error = self::check_expir_date($memberid);
+				}
+				if ($error != null) {
 					$response = array(
 						'error' => $error
 					);
@@ -1174,8 +1269,11 @@ class PwtcMileage_Admin {
 				echo wp_json_encode($response);
 			}
 			else {
-				$error = self::check_expir_date($memberid);
-				if ($override == 'false' and $error != null) {
+				$error = null;
+				if ($override == 'false') {
+					$error = self::check_expir_date($memberid);
+				}
+				if ($error != null) {
 					$response = array(
 						'error' => $error
 					);
@@ -1562,6 +1660,13 @@ class PwtcMileage_Admin {
     	$function = array( 'PwtcMileage_Admin', 'page_manage_riders');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
+		$page_title = $plugin_options['plugin_menu_label'] . ' - Lookup Users';
+    	$menu_title = 'Lookup Users';
+    	$menu_slug = 'pwtc_mileage_lookup_users';
+    	$capability = PwtcMileage::EDIT_RIDERS_CAP;
+    	$function = array( 'PwtcMileage_Admin', 'page_lookup_users');
+		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+
     	$page_title = $plugin_options['plugin_menu_label'] . ' - View Reports';
     	$menu_title = 'View Reports';
     	$menu_slug = 'pwtc_mileage_generate_reports';
@@ -1629,6 +1734,13 @@ class PwtcMileage_Admin {
 		$running_jobs = PwtcMileage_DB::num_running_jobs();
 		$capability = PwtcMileage::EDIT_RIDERS_CAP;
 		include('admin-man-riders.php');
+	}
+
+	public static function page_lookup_users() {
+		$plugin_options = PwtcMileage::get_plugin_options();
+		$running_jobs = PwtcMileage_DB::num_running_jobs();
+		$capability = PwtcMileage::EDIT_RIDERS_CAP;
+		include('admin-look-users.php');
 	}
 
 	public static function write_export_pdf_file($pdf, $data, $header, $title, $width, $align) {

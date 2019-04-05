@@ -34,14 +34,6 @@ class PwtcMileage {
 		// Register shortcode callbacks
 		add_shortcode('pwtc_rider_report', 
 			array( 'PwtcMileage', 'shortcode_rider_report'));
-/*
-		add_shortcode('pwtc_mileage_ridesheet', 
-			array( 'PwtcMileage', 'shortcode_mileage_ridesheet'));
-*/
-/*
-		add_shortcode('pwtc_achievement_last_year', 
-			array( 'PwtcMileage', 'shortcode_ly_lt_achvmnt'));
-*/
 		add_shortcode('pwtc_attendence_year_to_date', 
 			array( 'PwtcMileage', 'shortcode_ytd_attendence'));
 		add_shortcode('pwtc_attendence_last_year', 
@@ -68,10 +60,6 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'shortcode_rides_wo_sheets'));
 		add_shortcode('pwtc_riderid_download', 
 			array( 'PwtcMileage', 'shortcode_riderid_download'));
-/*
-		add_shortcode('pwtc_ridecal_download', 
-			array( 'PwtcMileage', 'shortcode_ridecal_download'));
-*/
 
 		// Register background action task callbacks 
 		add_action( 'pwtc_mileage_consolidation', 
@@ -98,8 +86,8 @@ class PwtcMileage {
 				array('PwtcMileage', 'membership_updated_callback'));
 			add_action('wc_memberships_user_membership_deleted', 
 				array('PwtcMileage', 'membership_deleted_callback'));
-			//add_action('wc_memberships_for_teams_team_saved', 
-			//	array('PwtcMileage', 'membership_team_updated_callback'));
+			add_action('wc_memberships_for_teams_team_saved', 
+				array('PwtcMileage', 'membership_team_created_callback'));
 			add_action('woocommerce_account_dashboard',
 				array('PwtcMileage', 'add_card_download_callback'));
 		}
@@ -275,10 +263,9 @@ class PwtcMileage {
 		}
 	}
 
-	/*
-	public static function membership_team_updated_callback($team) {
+	public static function membership_team_created_callback($team) {
 		$log_updates = true;
-		$datetime = $team->get_local_membership_end_date();
+		$datetime = $team->get_local_membership_end_date('mysql');
 		if ($datetime) {
 			$pieces = explode(' ', $datetime);
 			$expdate = $pieces[0];
@@ -297,6 +284,23 @@ class PwtcMileage {
 				continue;			
 			}
 
+			if ($expired) {
+				if (!in_array('expired_member', $user_data->roles)) {
+					$user_data->add_role('expired_member');
+				}
+				if (in_array('current_member', $user_data->roles)) {
+					$user_data->remove_role('current_member');
+				}
+			}
+			else {
+				if (!in_array('current_member', $user_data->roles)) {
+					$user_data->add_role('current_member');
+				}
+				if (in_array('expired_member', $user_data->roles)) {
+					$user_data->remove_role('expired_member');
+				}
+			}
+		
 			$rider_id = get_field('rider_id', 'user_'.$user_id);
 			if ($rider_id) {
 				$rider_id = trim($rider_id);
@@ -304,12 +308,25 @@ class PwtcMileage {
 			else {
 				$rider_id = '';
 			}
-			if (!empty($rider_id)) {
+			if (empty($rider_id)) {
+				try {
+					$new_rider_id = pwtc_mileage_insert_new_rider(
+						$user_data->last_name, $user_data->first_name, $expdate);
+					update_field('rider_id', $new_rider_id, 'user_'.$user_id);
+					$user_membership->add_note('PWTC Mileage plugin assigned new Rider ID ' . $new_rider_id . ' to this member.');
+				}
+				catch (Exception $e) {
+					$msg = $e->getMessage();
+					$user_membership->add_note('PWTC Mileage plugin error assigning new Rider ID to this member: ' . $msg);
+					pwtc_mileage_write_log('membership_created_callback: ' . $msg);
+				}
+			}
+			else {
 				try {
 					pwtc_mileage_update_rider(
 						$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
 					if ($log_updates) {
-						$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id . ': ' . $expdate);
+						$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id);
 					}
 				}
 				catch (Exception $e) {
@@ -320,7 +337,6 @@ class PwtcMileage {
 			}	
 		}
 	}
-	*/
 
 	public static function membership_deleted_callback($user_membership) {
 		$user_id = $user_membership->get_user_id();
@@ -1131,13 +1147,13 @@ class PwtcMileage {
 					$out .= 'Cannot view your club rider report, rider ID not assigned.';
 					break;
 				case "idnotfound":
-					$out .= 'Cannot view your club rider report, rider ID not found - please contact administrator.';
+					$out .= 'Cannot view your club rider report, rider ID not found - please contact website admin.';
 					break;
 				case "multidfound":
-					$out .= 'Cannot view your club rider report, multiple rider IDs found - please contact administrator.';
+					$out .= 'Cannot view your club rider report, multiple rider IDs found - please contact website admin.';
 					break;
 				default:
-					$out .= 'Cannot view your club rider report, unknown error - please contact administrator.';
+					$out .= 'Cannot view your club rider report, unknown error - please contact website admin.';
 			}
 		}
 		$out .= '';
@@ -1365,13 +1381,13 @@ class PwtcMileage {
 					$out .= '<div class="callout small warning"><p>Cannot view this report, rider ID not assigned.</p></div>';
 					break;
 				case "idnotfound":
-					$out .= '<div class="callout small alert"><p>Cannot view this report, rider ID not found - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot view this report, rider ID not found - please contact website admin.</p></div>';
 					break;
 				case "multidfound":
-					$out .= '<div class="callout small alert"><p>Cannot view this report, multiple rider IDs found - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot view this report, multiple rider IDs found - please contact website admin.</p></div>';
 					break;
 				default:
-					$out .= '<div class="callout small alert"><p>Cannot view this report, unknown error - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot view this report, unknown error - please contact website admin.</p></div>';
 			}
 		}
 		$out .= '';
@@ -1398,13 +1414,13 @@ class PwtcMileage {
 					$out .= '<div class="callout small warning"><p>Cannot view this report, rider ID not assigned.</p></div>';
 					break;
 				case "idnotfound":
-					$out .= '<div class="callout small alert"><p>Cannot view this report, rider ID not found - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot view this report, rider ID not found - please contact website admin.</p></div>';
 					break;
 				case "multidfound":
-					$out .= '<div class="callout small alert"><p>Cannot view this report, multiple rider IDs found - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot view this report, multiple rider IDs found - please contact website admin.</p></div>';
 					break;
 				default:
-					$out .= '<div class="callout small alert"><p>Cannot view this report, unknown error - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot view this report, unknown error - please contact website admin.</p></div>';
 			}
 		}
 		$out .= '';
@@ -1431,13 +1447,13 @@ class PwtcMileage {
 					$out .= '<div class="callout small warning"><p>Cannot view this report, rider ID not assigned.</p></div>';
 					break;
 				case "idnotfound":
-					$out .= '<div class="callout small alert"><p>Cannot view this report, rider ID not found - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot view this report, rider ID not found - please contact website admin.</p></div>';
 					break;
 				case "multidfound":
-					$out .= '<div class="callout small alert"><p>Cannot view this report, multiple rider IDs found - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot view this report, multiple rider IDs found - please contact website admin.</p></div>';
 					break;
 				default:
-					$out .= '<div class="callout small alert"><p>Cannot view this report, unknown error - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot view this report, unknown error - please contact website admin.</p></div>';
 			}
 		}
 		$out .= '';
@@ -1464,13 +1480,13 @@ class PwtcMileage {
 					$out .= '<div class="callout small warning"><p>Cannot view this report, rider ID not assigned.</p></div>';
 					break;
 				case "idnotfound":
-					$out .= '<div class="callout small alert"><p>Cannot view this report, rider ID not found - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot view this report, rider ID not found - please contact website admin.</p></div>';
 					break;
 				case "multidfound":
-					$out .= '<div class="callout small alert"><p>Cannot view this report, multiple rider IDs found - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot view this report, multiple rider IDs found - please contact website admin.</p></div>';
 					break;
 				default:
-					$out .= '<div class="callout small alert"><p>Cannot view this report, unknown error - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot view this report, unknown error - please contact website admin.</p></div>';
 			}
 		}
 		$out .= '';
@@ -1491,73 +1507,14 @@ class PwtcMileage {
 		$out = self::shortcode_build_table($meta, $data, $a, $content);
 		return $out;
 	}
-
-/*
-	// Generates the [pwtc_ridecal_download] shortcode.
-	public static function shortcode_ridecal_download($atts, $content = null) {
-		$current_user = wp_get_current_user();
-		if ( 0 == $current_user->ID ) {
-			return "";
-		}	
-    	$a = shortcode_atts(array(
-			'month' => 'current',
-			'file' => 'pdf'
-		), $atts);
-		$time = current_time('timestamp');
-		if ($a['month'] == 'next') {
-			$time2 = strtotime('+1 day', strtotime(date('Y-m-t', $time)));
-			$start = date('Y-m-01', $time2);
-			$end = date('Y-m-t', $time2);
-			$monthname = date('M', $time2);
-		}
-		else {
-			$start = date('Y-m-01', $time);
-			$end = date('Y-m-t', $time);
-			$monthname = date('M', $time);	
-		}
-		if ($a['file'] == 'csv') {
-			$file = 'csv';
-		}
-		else {
-			$file = 'pdf';
-		}
-		$label = $monthname . " Rides (" . $file . ")";	
-		$out = '<form style="display: inline" method="POST">';
-		$out .= '<input class="dark button" type="submit" name="download_ridecal" value="' . $label . '"/>';
-		$out .= '<input type="hidden" name="start" value="' . $start . '"/>';
-		$out .= '<input type="hidden" name="end" value="' . $end . '"/>';
-		$out .= '<input type="hidden" name="file" value="' . $file . '"/>';
-		$out .= '</form>';
-		return $out;
-	}
-*/
 		
 	// Generates the [pwtc_riderid_download] shortcode.
 	public static function shortcode_riderid_download($atts, $content = null) {
 		$out = '';
 		try {
-			$member_id = pwtc_mileage_get_member_id();
+			$member_id = pwtc_mileage_get_member_id(true);
 			$current_user = wp_get_current_user();
 			$user_id = $current_user->ID;
-			/*
-			$result = PwtcMileage_DB::fetch_rider($member_id);
-			if (count($result) == 0) {
-				$out .= 'Cannot download rider ID card, fetch of details for rider ' . 
-					$member_id . ' failed.';
-			}
-			else {
-				$lastname = $result[0]['last_name'];
-				$firstname = $result[0]['first_name'];
-				$exp_date = $result[0]['expir_date'];
-				//$fmtdate = date('M Y', strtotime($exp_date));
-				$out .= '<form style="display: inline" method="POST">';
-				$out .= '<input class="dark button" type="submit" name="download_riderid" value="Rider ID Card"/>';
-				$out .= '<input type="hidden" name="rider_id" value="' . $member_id . '"/>';
-				$out .= '<input type="hidden" name="rider_name" value="' . $firstname . ' ' . $lastname . '"/>';
-				$out .= '<input type="hidden" name="expire_date" value="' . $exp_date . '"/>';
-				$out .= '</form>';
-			}
-			*/
 			$out .= '<form method="POST">';
 			$out .= '<button class="dark button" type="submit" name="pwtc_mileage_download_riderid"><i class="fa fa-download"></i> Rider Card</button>';
 			$out .= '<input type="hidden" name="rider_id" value="' . $member_id . '"/>';
@@ -1569,17 +1526,23 @@ class PwtcMileage {
 				case "notloggedin":
 					$out .= '<div class="callout small warning"><p>Please log in to download your rider card.</p></div>';
 					break;
+				case "notmember":
+					$out .= '<div class="callout small warning"><p>Cannot download your rider card, you are not a member.</p></div>';
+					break;
 				case "idnotset":
 					$out .= '<div class="callout small warning"><p>Cannot download your rider card, rider ID not assigned.</p></div>';
 					break;
 				case "idnotfound":
-					$out .= '<div class="callout small alert"><p>Cannot download your rider card, rider ID not found - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot download your rider card, rider ID not found - please contact website admin.</p></div>';
+					break;
+				case "multimember":
+					$out .= '<div class="callout small alert"><p>Cannot download your rider card, you have multiple memberships - please contact website admin.</p></div>';
 					break;
 				case "multidfound":
-					$out .= '<div class="callout small alert"><p>Cannot download your rider card, multiple rider IDs found - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot download your rider card, multiple rider IDs found - please contact website admin.</p></div>';
 					break;
 				default:
-					$out .= '<div class="callout small alert"><p>Cannot download your rider card, unknown error - please contact administrator.</p></div>';
+					$out .= '<div class="callout small alert"><p>Cannot download your rider card, unknown error - please contact website admin.</p></div>';
 			}
 		}
 		return $out;

@@ -25,7 +25,7 @@ jQuery(document).ready(function($) {
             editlink = '<a title="Edit this rider\'s information." class="modify-btn">Edit</a>';
             deletelink = '<a title="Delete this rider." class="remove-btn">Delete</a>';
             synclink = '';
-    <?php if ($plugin_options['user_lookup_mode'] == 'woocommerce') { ?>
+    <?php if (false) { ?>
             synclink = '<a title="Sync this rider with their user profile." class="sync-btn">Sync</a>';
     <?php } ?>		
             members.forEach(function(item) {
@@ -192,9 +192,11 @@ jQuery(document).ready(function($) {
         var lastname = $("#rider-inspect-section .search-frm input[name='lastname']").val().trim();
         var firstname = $("#rider-inspect-section .search-frm input[name='firstname']").val().trim();
         var active = false;
+    <?php if ($plugin_options['user_lookup_mode'] != 'woocommerce') { ?>
         if ($("#rider-inspect-section .search-frm input[name='active']").is(':checked')) {
             active = true;
         }
+    <?php } ?>
         if (memberid.length > 0 || lastname.length > 0 || firstname.length > 0) {
             var action = $('#rider-inspect-section .search-frm').attr('action');
             var data = {
@@ -288,10 +290,12 @@ if ($running_jobs > 0) {
                 <input name="firstname" type="text"/>
                 <span>Last Name</span>
                 <input name="lastname" type="text"/>
+    <?php if ($plugin_options['user_lookup_mode'] != 'woocommerce') { ?>
 		        <span>Active Members Only</span>
 		        <span class="checkbox-wrap">
 			        <input type="checkbox" name="active"/>
 		        </span>
+    <?php } ?>
 				<input class="button button-primary" type="submit" value="Search"/>
 				<input class="reset-btn button button-primary" type="button" value="Reset"/>
 			</form>

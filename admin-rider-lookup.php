@@ -44,9 +44,11 @@ jQuery(document).ready(function($) {
         evt.preventDefault();
         var action = $('#rider-lookup-results .lookup-frm').attr('action');
         var active = false;
+    <?php if ($plugin_options['user_lookup_mode'] != 'woocommerce') { ?>
         if ($("#rider-lookup-results .lookup-frm input[name='active']").is(':checked')) {
             active = true;
         }
+    <?php } ?>
         var data = {
 			'action': 'pwtc_mileage_lookup_riders',
 			'memberid': $("#rider-lookup-results .lookup-frm input[name='riderid']").val(),
@@ -114,10 +116,12 @@ jQuery(document).ready(function($) {
         <input type="text" name="firstname"/>
         <span>Last Name</span>
         <input type="text" name="lastname"/>
+    <?php if ($plugin_options['user_lookup_mode'] != 'woocommerce') { ?>
         <span>Active Members Only</span>
         <span class="checkbox-wrap">
             <input type="checkbox" name="active" checked/>
         </span>
+    <?php } ?>
         <input class="button button-primary" type="submit" value="Lookup"/>       
     </form>
     <p>
