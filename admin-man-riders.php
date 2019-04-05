@@ -280,7 +280,7 @@ if ($running_jobs > 0) {
 } else {
 ?>
     <div id='rider-inspect-section'>
-        <p>Lookup riders registered in the mileage database. New riders are assigned rider IDs based on this list.</p>
+        <p>Manage riders registered in the mileage database. New riders are assigned rider IDs based on this list.</p>
         <div class='search-sec'>
         <p><strong>Enter search parameters to find riders.</strong>
         	<form class="search-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">

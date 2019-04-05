@@ -1129,7 +1129,7 @@ class PwtcMileage_Admin {
 							}
 							else {
 								$exp_date = pwtc_mileage_get_expiration_date($memberships[0]);
-								if (strtotime($exp_date < strtotime(PwtcMileage::get_date_for_expir_check()))) {
+								if (strtotime($exp_date) < strtotime(PwtcMileage::get_date_for_expir_check())) {
 									$errormsg = 'The membership of ' . 
 									$name . ' has expired on ' . 
 									date('D M j Y', strtotime($exp_date)) . '.';
