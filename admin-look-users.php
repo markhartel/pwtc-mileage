@@ -22,12 +22,16 @@ jQuery(document).ready(function($) {
                 '<tr><th>Email</th><th>First Name</th><th>Last Name</th><th>Expiration Date</th><th>Note</th></tr>' +
                 '</table>');
             users.forEach(function(item) {
+                var fmtdate = '';
+                if (item.expir_date.length > 0) {
+                    fmtdate = getPrettyDate(item.expir_date);
+                }
                 $('#user-lookup-section .users-div table').append(
                     '<tr userid="' + item.userid + '">' + 
                     '<td data-th="Email">' + item.email + '</td>' +
                     '<td data-th="First Name">' + item.first_name + '</td>' +
                     '<td data-th="Last Name">' + item.last_name + '</td>' + 
-                    '<td data-th="Expiration">' + item.expir_date + '</td>' + 
+                    '<td data-th="Expiration">' + fmtdate + '</td>' + 
                     '<td data-th="Note">' + item.note + '</td>' + 
                     '</tr>');    
             });

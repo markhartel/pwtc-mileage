@@ -86,8 +86,8 @@ class PwtcMileage {
 				array('PwtcMileage', 'membership_updated_callback'));
 			add_action('wc_memberships_user_membership_deleted', 
 				array('PwtcMileage', 'membership_deleted_callback'));
-			add_action('wc_memberships_for_teams_team_saved', 
-				array('PwtcMileage', 'membership_team_created_callback'));
+			//add_action('wc_memberships_for_teams_team_saved', 
+			//	array('PwtcMileage', 'membership_team_created_callback'));
 			add_action('woocommerce_account_dashboard',
 				array('PwtcMileage', 'add_card_download_callback'));
 		}
@@ -129,7 +129,6 @@ class PwtcMileage {
 		}
 
 		if (pwtc_mileage_membership_is_expired($user_membership)) {
-		//if ($user_membership->get_status() == 'expired') {
 			if (!in_array('expired_member', $user_data->roles)) {
 				$user_data->add_role('expired_member');
 			}
@@ -147,16 +146,6 @@ class PwtcMileage {
 		}
 
 		$expdate = pwtc_mileage_get_expiration_date($user_membership);
-		/*
-		if ($user_membership->has_end_date()) {
-			$datetime = $user_membership->get_local_end_date('mysql', false);
-			$pieces = explode(' ', $datetime);
-			$expdate = $pieces[0];
-		}
-		else {
-			$expdate = '2099-01-01';
-		}
-		*/
 
 		$rider_id = get_field('rider_id', 'user_'.$user_id);
 		if ($rider_id) {
@@ -212,7 +201,6 @@ class PwtcMileage {
 		}
 
 		if (pwtc_mileage_membership_is_expired($user_membership)) {
-		//if ($user_membership->get_status() == 'expired') {
 			if (!in_array('expired_member', $user_data->roles)) {
 				$user_data->add_role('expired_member');
 			}
@@ -238,16 +226,6 @@ class PwtcMileage {
 		}
 		if (!empty($rider_id)) {
 			$expdate = pwtc_mileage_get_expiration_date($user_membership);
-			/*
-			if ($user_membership->has_end_date()) {
-				$datetime = $user_membership->get_local_end_date('mysql', false);
-				$pieces = explode(' ', $datetime);
-				$expdate = $pieces[0];
-			}
-			else {
-				$expdate = '2099-01-01';
-			}
-			*/
 			try {
 				pwtc_mileage_update_rider(
 					$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
@@ -264,7 +242,7 @@ class PwtcMileage {
 	}
 
 	public static function membership_team_created_callback($team) {
-		$log_updates = true;
+		$log_updates = false;
 		$datetime = $team->get_local_membership_end_date('mysql');
 		if ($datetime) {
 			$pieces = explode(' ', $datetime);
