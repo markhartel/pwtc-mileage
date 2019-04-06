@@ -86,8 +86,8 @@ class PwtcMileage {
 				array('PwtcMileage', 'membership_updated_callback'));
 			add_action('wc_memberships_user_membership_deleted', 
 				array('PwtcMileage', 'membership_deleted_callback'));
-			//add_action('wc_memberships_for_teams_team_saved', 
-			//	array('PwtcMileage', 'membership_team_created_callback'));
+			add_action('wc_memberships_for_teams_team_saved', 
+				array('PwtcMileage', 'membership_team_created_callback'));
 			add_action('woocommerce_account_dashboard',
 				array('PwtcMileage', 'add_card_download_callback'));
 		}

@@ -659,6 +659,7 @@ class PwtcMileage_Admin {
 				foreach ($profiles as $profile) {
 					$info = get_userdata($profile->ID);
 					$note = '';
+					$role = '';
 					$expir_date = '';
 					if (function_exists('wc_memberships_get_user_memberships')) {
 						$memberships = wc_memberships_get_user_memberships($profile->ID);
@@ -675,13 +676,20 @@ class PwtcMileage_Admin {
 					else {
 						$note = 'cannot access membership';
 					}
+					if (in_array('expired_member', $info->roles)) {
+						$role .= 'expired_member ';
+					}
+					if (in_array('current_member', $info->roles)) {
+						$role .= 'current_member ';
+					}
 					$item = array(
 						'userid' => $profile->ID,
 						'first_name' => trim($info->first_name),
 						'last_name' => trim($info->last_name),
 						'email' => trim($info->user_email),
 						'expir_date' => $expir_date,
-						'note' => $note
+						'note' => $note,
+						'role' => $role
 					);
 					$users[] = $item;
 				}
