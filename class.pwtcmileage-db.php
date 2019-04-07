@@ -120,9 +120,43 @@ class PwtcMileage_DB {
 			'header' => array('First Name', 'Last Name', 'IDs'),
 			'width' => array(30, 30, 40),
 			'align' => array('L', 'L', 'L'),
-			'title' => 'Members With Duplicate Names',
+			'title' => 'Riders With Duplicate Names',
 			'date_idx' => -1,
 			'id_idx' => -1
+		);
+		return $meta;		
+	}
+
+	public static function fetch_member_list($outtype, $mode) {
+    	global $wpdb;
+		$member_table = $wpdb->prefix . self::MEMBER_TABLE;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		if ($mode == 2) {
+			$clause = 'member_id in (select distinct member_id from ' . $mileage_table . ')';
+		}
+		else if ($mode == 1) {
+			$clause = 'member_id in (select distinct member_id from ' . $leader_table . ')';
+		}
+		else {
+			$clause = 'member_id not in (select distinct member_id from ' . $leader_table . ') and' . ' member_id not in (select distinct member_id from ' . $mileage_table . ')';
+		}
+		$results = $wpdb->get_results(
+			'select member_id, first_name, last_name, expir_date' . 
+			' from ' . $member_table . ' where ' . $clause . 
+			' order by last_name, first_name', $outtype);
+
+		return $results;
+	}
+
+	public static function meta_member_list($title) {
+		$meta = array(
+			'header' => array('ID', 'First Name', 'Last Name', 'Expiration'),
+			'width' => array(15, 30, 30, 25),
+			'align' => array('C', 'L', 'L', 'R'),
+			'title' => $title,
+			'date_idx' => 3,
+			'id_idx' => 0
 		);
 		return $meta;		
 	}

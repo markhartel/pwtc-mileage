@@ -385,9 +385,12 @@ if ($running_jobs > 0) {
         </div>
         </div>
         <div class='report-sec'>
-        <h3>Member Reports</h3>
+        <h3>Rider Reports</h3>
         <div class='members'>
-            <div><a href='#' report-id='dup_members'>Duplicate members</a></div>
+            <div><a href='#' report-id='riders_nonactive'>Nonactive riders</a></div>
+            <div><a href='#' report-id='riders_w_mileage'>Riders with mileage</a></div>
+            <div><a href='#' report-id='riders_w_leaders'>Riders leading rides</a></div>
+            <div><a href='#' report-id='dup_members'>Duplicate rider names</a></div>
             <!--<div><a href='#' report-id='ride_leaders'>Current Ride Leaders</a></div>-->
         </div>
         </div>

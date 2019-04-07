@@ -52,7 +52,7 @@ jQuery(document).ready(function($) {
 
     function load_user_table() {
         var memberid = $("#user-lookup-section .search-frm input[name='memberid']").val().trim();
-        if (memberid.length > 0) {
+        //if (memberid.length > 0) {
             var action = $('#user-lookup-section .search-frm').attr('action');
             var data = {
                 'action': 'pwtc_mileage_lookup_users',
@@ -60,10 +60,10 @@ jQuery(document).ready(function($) {
             };
             $('body').addClass('waiting');
             $.post(action, data, lookup_users_cb); 
-        }
-        else {
-            $('#user-lookup-section .users-div').empty();  
-        }  
+        //}
+        //else {
+        //    $('#user-lookup-section .users-div').empty();  
+        //}  
     }
 
     $('#user-lookup-section .search-frm').on('submit', function(evt) {

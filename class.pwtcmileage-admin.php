@@ -654,7 +654,7 @@ class PwtcMileage_Admin {
 		else {
 			$memberid = sanitize_text_field($_POST['memberid']);
 			$users = array();
-			if (!empty($memberid)) {
+			//if (!empty($memberid)) {
 				$profiles = pwtc_mileage_lookup_user($memberid);
 				foreach ($profiles as $profile) {
 					$info = get_userdata($profile->ID);
@@ -693,7 +693,7 @@ class PwtcMileage_Admin {
 					);
 					$users[] = $item;
 				}
-			}
+			//}
 			$response = array(
 				'memberid' => $memberid,
 				'users' => $users);
@@ -1567,6 +1567,9 @@ class PwtcMileage_Admin {
 					}			
 					break;
 				case "dup_members":
+				case "riders_nonactive":
+				case "riders_w_mileage":
+				case "riders_w_leaders":
 				//case "ride_leaders":
 				//case "road_captains":
 				//case "statisticians":
@@ -1578,6 +1581,18 @@ class PwtcMileage_Admin {
 						case "dup_members":
 							$meta = PwtcMileage_DB::meta_member_duplicates();
 							$data = PwtcMileage_DB::fetch_member_duplicates();
+							break;
+						case "riders_nonactive":
+							$meta = PwtcMileage_DB::meta_member_list('Nonactive Riders');
+							$data = PwtcMileage_DB::fetch_member_list(ARRAY_N, 0);
+							break;
+						case "riders_w_mileage":
+							$meta = PwtcMileage_DB::meta_member_list('Riders With Mileage');
+							$data = PwtcMileage_DB::fetch_member_list(ARRAY_N, 2);
+							break;
+						case "riders_w_leaders":
+							$meta = PwtcMileage_DB::meta_member_list('Riders Leading Rides');
+							$data = PwtcMileage_DB::fetch_member_list(ARRAY_N, 1);
 							break;
 						/*
 						case "ride_leaders":
