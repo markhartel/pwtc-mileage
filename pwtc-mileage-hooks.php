@@ -286,12 +286,45 @@ function pwtc_mileage_membership_is_expired($membership) {
     return $is_expired;
 }
 
+/*
 function pwtc_mileage_lookup_user($rider_id) {
     $query_args = array( 
         'meta_key' => 'rider_id', 
         'meta_value' => $rider_id, 
         'meta_compare' => '=' 
     );
+    $user_query = new WP_User_Query( $query_args );
+    $results = $user_query->get_results();
+    return $results;
+}
+*/
+
+function pwtc_mileage_lookup_user($rider_id) {
+    $query_args = [
+        'meta_key' => 'last_name',
+        'orderby' => 'meta_value',
+        'order' => 'ASC'
+    ];
+    $query_args['meta_query'] = [];
+    if (empty($rider_id)) {
+        $query_args['meta_query'][] = [
+            'relation' => 'OR',
+            [
+                'key'     => 'rider_id',
+                'compare' => 'NOT EXISTS' 
+            ],
+            [
+                'key'     => 'rider_id',
+                'value'   => ''    
+            ] 
+        ];
+    }
+    else {
+        $query_args['meta_query'][] = [
+            'key'     => 'rider_id',
+            'value'   => $rider_id
+        ];
+    }
     $user_query = new WP_User_Query( $query_args );
     $results = $user_query->get_results();
     return $results;
