@@ -19,7 +19,7 @@ jQuery(document).ready(function($) {
 		$('#user-lookup-section .users-div').empty();
         if (users.length > 0) {
             $('#user-lookup-section .users-div').append('<table class="rwd-table">' +
-                '<tr><th>Email</th><th>First Name</th><th>Last Name</th><th>Expiration Date</th><th>Role</th><th>Note</th></tr>' +
+                '<tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Expiration Date</th><th>Role</th><th>Note</th></tr>' +
                 '</table>');
             users.forEach(function(item) {
                 var fmtdate = '';
@@ -28,9 +28,9 @@ jQuery(document).ready(function($) {
                 }
                 $('#user-lookup-section .users-div table').append(
                     '<tr userid="' + item.userid + '">' + 
-                    '<td data-th="Email">' + item.email + '</td>' +
                     '<td data-th="First Name">' + item.first_name + '</td>' +
                     '<td data-th="Last Name">' + item.last_name + '</td>' + 
+                    '<td data-th="Email">' + item.email + '</td>' +
                     '<td data-th="Expiration">' + fmtdate + '</td>' + 
                     '<td data-th="Role">' + item.role + '</td>' + 
                     '<td data-th="Note">' + item.note + '</td>' + 
