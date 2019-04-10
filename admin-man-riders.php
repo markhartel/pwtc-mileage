@@ -25,8 +25,8 @@ jQuery(document).ready(function($) {
             editlink = '<a title="Edit this rider\'s information." class="modify-btn">Edit</a>';
             deletelink = '<a title="Delete this rider." class="remove-btn">Delete</a>';
             synclink = '';
-    <?php if (false) { ?>
-            synclink = '<a title="Sync this rider with their user profile." class="sync-btn">Sync</a>';
+    <?php if ($plugin_options['user_lookup_mode'] == 'woocommerce') { ?>
+            synclink = '<a title="Sync this rider with their membership record." class="sync-btn">Sync</a>';
     <?php } ?>		
             members.forEach(function(item) {
                 var fmtdate = getPrettyDate(item.expir_date);
@@ -62,7 +62,7 @@ jQuery(document).ready(function($) {
                 $.post(action, data, remove_rider_cb);
     <?php } else { ?>
                 open_confirm_dialog(
-                    'Are you sure you want to delete rider ID ' + data.member_id + '?', 
+                    'Are you sure you want to delete rider ' + data.member_id + '?', 
                     function() {
                         $('body').addClass('waiting');
                         $.post(action, data, remove_rider_cb);
@@ -78,8 +78,13 @@ jQuery(document).ready(function($) {
                     'member_id': $(this).parent().parent().attr('memberid'),
                     'nonce': '<?php echo wp_create_nonce('pwtc_mileage_sync_rider'); ?>'
                 };
-                $('body').addClass('waiting');
-                $.post(action, data, sync_rider_cb);
+                open_confirm_dialog(
+                    'Are you sure you want to sync rider ' + data.member_id + ' with their membership record?', 
+                    function() {
+                        $('body').addClass('waiting');
+                        $.post(action, data, sync_rider_cb);
+                    }
+                );
             });
         }
         else {

@@ -909,17 +909,13 @@ class PwtcMileage_Admin {
 				$users = pwtc_mileage_lookup_user($memberid);
 				if (empty($users)) {
 					$response = array(
-						'error' => 'No user profile found for rider ' . $memberid . '.'
+						'error' => 'Cannot sync, no user profile found for rider ' . $memberid . '.'
 					);
 					echo wp_json_encode($response);
 				}
 				else if (count($users) > 1) {
-					$list = '';
-					foreach ( $users as $user ) {
-						$list .= $user->ID . ' ';
-					}
 					$response = array(
-						'error' => 'Multiple user profiles found for rider ' . $memberid . '. User IDs: ' . $list
+						'error' => 'Cannot sync, multiple user profiles found for rider ' . $memberid . '.'
 					);
 					echo wp_json_encode($response);
 				} 
@@ -927,19 +923,22 @@ class PwtcMileage_Admin {
 					$user = $users[0];
 					if (function_exists('wc_memberships_get_user_memberships')) {
 						$memberships = wc_memberships_get_user_memberships($user->ID);
-						if (count($memberships) > 1) {
+						if (empty($memberships)) {
 							$response = array(
-								'error' => 'Multiple memberships found for rider ' . $memberid  . '.'
+								'error' => 'Cannot sync, no membership found for rider ' . $memberid  . '.'
+							);
+							echo wp_json_encode($response);		
+						}
+						else if (count($memberships) > 1) {
+							$response = array(
+								'error' => 'Cannot sync, multiple memberships found for rider ' . $memberid  . '.'
 							);
 							echo wp_json_encode($response);		
 						}
 						else {
 							$lastname = trim($user->last_name);
 							$firstname = trim($user->first_name);
-							$exp_date = date('Y-m-d', current_time('timestamp'));
-							if (!empty($memberships)) {
-								$exp_date = pwtc_mileage_get_expiration_date($memberships[0]);
-							}		
+							$exp_date = pwtc_mileage_get_expiration_date($memberships[0]);
 							try {
 								pwtc_mileage_update_rider($memberid, $lastname, $firstname, $exp_date);
 								$response = array('member_id' => $memberid);
@@ -956,7 +955,7 @@ class PwtcMileage_Admin {
 					}
 					else {
 						$response = array(
-							'error' => 'Woocommerce membership plugin not active.'
+							'error' => 'Cannot sync, membership system is not active.'
 						);
 						echo wp_json_encode($response);
 					}
@@ -1120,20 +1119,20 @@ class PwtcMileage_Admin {
 				if ($plugin_options['user_lookup_mode'] == 'woocommerce') {
 					$users = pwtc_mileage_lookup_user($r['member_id']);
 					if (empty($users)) {
-						$errormsg = 'Cannot find user profile for ' . $name . '.';
+						$errormsg = $name . ' has no user profile and therefore no membership.';
 					}
 					else if (count($users) > 1) {
-						$errormsg = 'Found multiple user profiles for ' . $name . '.';
+						$errormsg = 'Found multiple user profiles for ' . $name . ', notify website admin to correct.';
 					}
 					else {
 						$user = $users[0];
 						if (function_exists('wc_memberships_get_user_memberships')) {
 							$memberships = wc_memberships_get_user_memberships($user->ID);
 							if (empty($memberships)) {
-								$errormsg = $name . ' has no membership.';
+								$errormsg = $name . ' has a user profile but no membership.';
 							}
 							else if (count($memberships) > 1) {
-								$errormsg = $name . ' has multiple memberships.';
+								$errormsg = $name . ' has multiple memberships, notify website admin to correct.';
 							}
 							else {
 								$exp_date = pwtc_mileage_get_expiration_date($memberships[0]);
@@ -1145,7 +1144,7 @@ class PwtcMileage_Admin {
 							}
 						}
 						else {
-							$errormsg = 'Cannot access membership of ' . $name . '.';
+							$errormsg = 'Membership system is not active, notify website admin to correct.';
 						}	
 					}
 				}
@@ -1157,7 +1156,7 @@ class PwtcMileage_Admin {
 				}
 			}
 			else {
-				$errormsg = 'Could not find rider ' + $memberid . ' in database.';
+				$errormsg = 'Cannot find rider ' + $memberid . ' in mileage database, notify website admin to correct.';
 			}
 		}
 		return $errormsg;
