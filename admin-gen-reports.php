@@ -21,6 +21,7 @@ jQuery(document).ready(function($) {
 	function populate_report_table(data, header) {
         $('#report-results-section .results-div').empty();
         if (data.length > 0) {
+            $('#report-results-section .results-div').append('<div>' + data.length + ' records found</div>');
             var str = '<table class="rwd-table"><tr>';
             header.forEach(function(item) {
                 str += '<th>' + item + '</th>';
