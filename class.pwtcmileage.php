@@ -95,7 +95,7 @@ class PwtcMileage {
 	}
 
 	public static function membership_created_callback($membership_plan, $args = array()) {
-		$update_rider = false;
+		$update_rider = true;
 		$log_updates = false;
 		$user_membership_id = isset($args['user_membership_id']) ? absint($args['user_membership_id']) : null;
 		$user_id = isset($args['user_id']) ? absint($args['user_id']) : null;
@@ -185,7 +185,7 @@ class PwtcMileage {
 	}
 
 	public static function membership_updated_callback($user_membership) {
-		$update_rider = false;
+		$update_rider = true;
 		$log_updates = false;
 		$user_id = $user_membership->get_user_id();
 		$user_data = get_userdata($user_id);
@@ -246,7 +246,7 @@ class PwtcMileage {
 	}
 
 	public static function membership_team_created_callback($team) {
-		$update_rider = false;
+		$update_rider = true;
 		$log_updates = false;
 		$datetime = $team->get_local_membership_end_date('mysql');
 		if ($datetime) {
