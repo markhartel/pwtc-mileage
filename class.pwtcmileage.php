@@ -379,6 +379,7 @@ class PwtcMileage {
 					$firstname = $result['first_name'];
 					$name = $firstname . ' ' . $lastname;
 					$exp_date = $result['expir_date'];
+					$family_id = $result['family_id'];
 					$fmtdate = date('M Y', strtotime($exp_date));
 					header('Content-Description: File Transfer');
 					header("Content-type: application/pdf");
@@ -413,6 +414,9 @@ class PwtcMileage {
 					$pdf->SetFont('Arial', '', 5);
 					$pdf->Text($x_off + $w_sub + 25, $y_off + 38, 'RIDER ID');
 					$pdf->Text($x_off + $w_sub + 40, $y_off + 54, 'EXPIRES');
+					if (!empty($family_id)) {
+						$pdf->Text($x_off + $w_sub + 5, $y_off + 54, $family_id);
+					}
 					$pdf->Rect($x_off, $y_off + $h_card, $w_card, $h_card);
 					$pdf->SetXY($x_off, $y_off + $h_card + 5);
 					$pdf->SetFont('Arial', 'I', 12);

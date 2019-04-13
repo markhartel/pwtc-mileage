@@ -216,11 +216,21 @@ function pwtc_mileage_get_rider_card_info($user_id, $rider_id = '') {
         $lastname = $userdata->last_name;
         $firstname = $userdata->first_name;
         $exp_date = date('Y-m-d', current_time('timestamp'));
+        $family_id = '';
         if (function_exists('wc_memberships_get_user_memberships')) {
             $memberships = wc_memberships_get_user_memberships($user_id);
             if (!empty($memberships)) {
                 $membership = $memberships[0];
                 $exp_date = pwtc_mileage_get_expiration_date($membership);
+                if (function_exists('wc_memberships_for_teams_get_user_membership_team')) {
+                    $team = wc_memberships_for_teams_get_user_membership_team($membership->get_id());
+                    if ($team) {
+                        $id = get_field('rider_id', 'user_'.$team->get_owner_id());
+                        if ($id) {
+                            $family_id = $id;
+                        }
+                    }
+                }
             }
         }
     }
@@ -235,11 +245,13 @@ function pwtc_mileage_get_rider_card_info($user_id, $rider_id = '') {
         $lastname = $result[0]['last_name'];
         $firstname = $result[0]['first_name'];
         $exp_date = $result[0]['expir_date'];
+        $family_id = '';
     }
     $result = array(
         'last_name' => $lastname,
         'first_name' => $firstname,
-        'expir_date' => $exp_date
+        'expir_date' => $exp_date,
+        'family_id' => $family_id
     );
     return $result;
 }
