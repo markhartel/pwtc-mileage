@@ -866,16 +866,32 @@ class PwtcMileage_Admin {
 					echo wp_json_encode($response);
 				}
 				else {
-					$status = PwtcMileage_DB::delete_rider($memberid);	
-					if (false === $status or 0 === $status) {
-						$response = array(
-							'error' => 'Could not delete rider from database.'
-						);
-						echo wp_json_encode($response);
+					$plugin_options = PwtcMileage::get_plugin_options();
+					$profile_found = true;
+					if ($plugin_options['user_lookup_mode'] == 'woocommerce') {
+						$users = pwtc_mileage_lookup_user($memberid);
+						if (!empty($users)) {
+							$profile_found = false;
+						}
+					}
+					if ($profile_found) {
+						$status = PwtcMileage_DB::delete_rider($memberid);	
+						if (false === $status or 0 === $status) {
+							$response = array(
+								'error' => 'Could not delete rider from database.'
+							);
+							echo wp_json_encode($response);
+						}
+						else {
+							$response = array('member_id' => $memberid);
+							echo wp_json_encode($response);
+						}
 					}
 					else {
-						$response = array('member_id' => $memberid);
-						echo wp_json_encode($response);
+						$response = array(
+							'error' => 'Cannot delete a rider that is referenced in a user profile.'
+						);
+						echo wp_json_encode($response);	
 					}
 				}
 			}
@@ -1566,7 +1582,7 @@ class PwtcMileage_Admin {
 					}			
 					break;
 				case "dup_members":
-				case "riders_nonactive":
+				case "riders_inactive":
 				case "riders_w_mileage":
 				case "riders_w_leaders":
 				//case "ride_leaders":
@@ -1581,8 +1597,8 @@ class PwtcMileage_Admin {
 							$meta = PwtcMileage_DB::meta_member_duplicates();
 							$data = PwtcMileage_DB::fetch_member_duplicates();
 							break;
-						case "riders_nonactive":
-							$meta = PwtcMileage_DB::meta_member_list('Nonactive Riders');
+						case "riders_inactive":
+							$meta = PwtcMileage_DB::meta_member_list('Inactive Riders');
 							$data = PwtcMileage_DB::fetch_member_list(ARRAY_N, 0);
 							break;
 						case "riders_w_mileage":
