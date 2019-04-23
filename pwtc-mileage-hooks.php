@@ -226,12 +226,12 @@ function pwtc_mileage_get_rider_card_info($user_id, $rider_id = '') {
                     $team = wc_memberships_for_teams_get_user_membership_team($membership->get_id());
                     if ($team) {
                         $owner_id = $team->get_owner_id();
-                        if ($owner_id != $user_id) {
+                        //if ($owner_id != $user_id) {
                             $id = get_field('rider_id', 'user_'.$owner_id);
                             if ($id) {
                                 $family_id = $id;
                             }
-                        }
+                        //}
                     }
                 }
             }

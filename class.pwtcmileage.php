@@ -398,7 +398,7 @@ class PwtcMileage {
 					$pdf->Image(PWTC_MILEAGE__PLUGIN_DIR . 'pwtc_logo.png', $x_off + 2, $y_off + 10, $w_sub - 2, $w_sub - 2);
 					$pdf->SetFont('Arial', 'B', 20);
 					$pdf->SetTextColor(255, 255, 255);
-					$pdf->Text($x_off + 4, $y_off + 45, 'PWTC');
+					$pdf->Text($x_off + 7, $y_off + 45, 'PBC');
 					$pdf->SetTextColor(0, 0, 0);
 					$pdf->SetXY($x_off + $w_sub, $y_off + 8);
 					$pdf->SetFont('Arial', 'I', 18);
@@ -415,16 +415,17 @@ class PwtcMileage {
 					$pdf->Text($x_off + $w_sub + 25, $y_off + 38, 'RIDER ID');
 					$pdf->Text($x_off + $w_sub + 40, $y_off + 54, 'EXPIRES');
 					if (!empty($family_id)) {
-						$pdf->Text($x_off + $w_sub + 5, $y_off + 54, $family_id);
+						$pdf->Text($x_off + $w_sub + 5, $y_off + 50, $family_id);
+						$pdf->Text($x_off + $w_sub + 5, $y_off + 54, 'FAMILY ID');
 					}
 					$pdf->Rect($x_off, $y_off + $h_card, $w_card, $h_card);
 					$pdf->SetXY($x_off, $y_off + $h_card + 5);
 					$pdf->SetFont('Arial', 'I', 12);
 					$pdf->SetTextColor(255, 0, 0);
-					$pdf->Cell($w_card, 6, 'Portland Wheelmen Touring Club', 0, 2,'C');
+					$pdf->Cell($w_card, 6, 'Portland Bicycling Club', 0, 2,'C');
 					$pdf->SetFont('Arial', 'U', 12);
 					$pdf->SetTextColor(0, 0, 255);
-					$pdf->Cell($w_card, 6, 'www.PWTC.com', 0, 2,'C');
+					$pdf->Cell($w_card, 6, 'portlandbicyclingclub.com', 0, 2,'C');
 					$pdf->SetFont('Arial', '', 12);
 					$pdf->SetTextColor(0, 0, 0);
 					$pdf->Cell($w_card, 6, 'Information Hotline: 503.666.5796', 0, 2,'C');
