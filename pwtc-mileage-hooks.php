@@ -215,7 +215,6 @@ function pwtc_mileage_get_rider_card_info($user_id, $rider_id = '') {
         }
         $lastname = $userdata->last_name;
         $firstname = $userdata->first_name;
-        $exp_date = date('Y-m-d', current_time('timestamp'));
         $family_id = '';
         if (function_exists('wc_memberships_get_user_memberships')) {
             $memberships = wc_memberships_get_user_memberships($user_id);
@@ -235,6 +234,12 @@ function pwtc_mileage_get_rider_card_info($user_id, $rider_id = '') {
                     }
                 }
             }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
         }
     }
     else {
