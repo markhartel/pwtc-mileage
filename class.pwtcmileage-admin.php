@@ -622,11 +622,24 @@ class PwtcMileage_Admin {
 				$members = array();
 			}
 			else {
+				$options = PwtcMileage::get_plugin_options();
 				$test_date = '';
-				if ($active == 'true') {
+				if ($active == 'true' and $options['user_lookup_mode'] != 'woocommerce') {
 					$test_date = PwtcMileage::get_date_for_expir_check();
 				}
-				$members = PwtcMileage_DB::fetch_riders($lastname, $firstname, $memberid, $test_date);
+				$results = PwtcMileage_DB::fetch_riders($lastname, $firstname, $memberid, $test_date);
+				if ($active == 'true' and $options['user_lookup_mode'] == 'woocommerce') {
+					$members = array();
+					foreach ($results as $item) {
+						$users = pwtc_mileage_lookup_user($item['member_id']);
+						if (!empty($users)) {
+							$members[] = $item;
+						}
+					}
+				}
+				else {
+					$members = $results;
+				}
 			}	
 			$response = array(
 				'memberid' => $memberid,
