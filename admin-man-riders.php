@@ -88,7 +88,7 @@ jQuery(document).ready(function($) {
                     'member_id': $(this).parent().parent().attr('memberid')
                 };
                 $('body').addClass('waiting');
-                $.post(action, data, modify_rider_cb);
+                $.post(action, data, modify_rider2_cb);
             });
             $('#rider-inspect-section .riders-div .remove-btn').on('click', function(evt) {
                 evt.preventDefault();
@@ -157,6 +157,22 @@ jQuery(document).ready(function($) {
         }
     }   
 
+	function modify_rider_cb(response) {
+        $('body').removeClass('waiting');
+        var res = JSON.parse(response);
+		if (res.error) {
+            open_error_dialog(res.error);
+		}
+		else {
+            var fmtdate = getPrettyDate(res.exp_date);
+		    $('#rider-edit-section .rider-name').html(res.firstname + ' ' + res.lastname);
+            $('#rider-edit-section .exp-date').html(fmtdate);
+            $('#rider-edit-section .modify-blk').hide('slow', function() {
+                $("#rider-edit-section .modify-btn").show('fast');     
+            });
+        }
+    }   
+
 	function next_rider_id_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
@@ -177,7 +193,7 @@ jQuery(document).ready(function($) {
         $('body').removeClass('waiting');
     }
 
-	function modify_rider_cb(response) {
+	function modify_rider2_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
             open_error_dialog(res.error);
@@ -206,6 +222,35 @@ jQuery(document).ready(function($) {
             $("#rider-inspect-section .add-btn").hide('fast', function() {
 		        $('#rider-inspect-section .add-blk').show('slow'); 
                 $("#rider-inspect-section .add-blk .add-frm input[name='firstname']").focus();          
+            });
+        }
+        $('body').removeClass('waiting');
+	}   
+
+    function modify_rider_setup_cb(response) {
+        var res = JSON.parse(response);
+		if (res.error) {
+            open_error_dialog(res.error);
+		}
+		else {
+			$("#rider-edit-section .modify-blk .modify-frm input[name='memberid']").val(
+                res.member_id
+            );
+			$("#rider-edit-section .modify-blk .modify-frm input[name='firstname']").val(
+                res.firstname
+            );
+			$("#rider-edit-section .modify-blk .modify-frm input[name='lastname']").val(
+                res.lastname
+            );
+			$("#rider-edit-section .modify-blk .modify-frm input[name='expdate']").val(
+                getPrettyDate(res.exp_date)
+            );
+			$("#rider-edit-section .modify-blk .modify-frm input[name='fmtdate']").val(
+                res.exp_date
+            );
+            $("#rider-edit-section .modify-btn").hide('fast', function() {
+		        $('#rider-edit-section .modify-blk').show('slow'); 
+                $("#rider-edit-section .modify-blk .modify-frm input[name='firstname']").focus();          
             });
         }
         $('body').removeClass('waiting');
@@ -297,18 +342,22 @@ jQuery(document).ready(function($) {
 		$('#rider-edit-section .rider-id').html(rider.member_id);
         $('#rider-edit-section .exp-date').html(fmtdate);
         if (rider.mileage_count == 0 && rider.leader_count == 0) {
-            $('#rider-edit-section .ridesheet-count').html('They do not appear on any ridesheets.');
+            $('#rider-edit-section .ridesheet-count').html('This rider does not appear on any ridesheets.');
         }
         else {
-            $('#rider-edit-section .ridesheet-count').html('They appears as a rider on <strong>' + rider.mileage_count + '</strong> ride sheets and as a ride leader on <strong>' + rider.leader_count + '</strong> ride sheets.');
+            $('#rider-edit-section .ridesheet-count').html('This rider appears as a rider on <strong>' + rider.mileage_count + '</strong> ride sheets and as a ride leader on <strong>' + rider.leader_count + '</strong> ride sheets.');
         }
         populate_users_table(rider.user_profiles);
         $('#rider-edit-section .profile-msg').empty();
         $('#rider-edit-section .sync-btn').hide();
         $('#rider-edit-section .purge-btn').hide();
+        $('#rider-edit-section .xfer-btn').hide();
+        $('#rider-edit-section .modify-blk').hide();
+		$('#rider-edit-section .modify-btn').show();
         if (rider.user_profiles.length == 0) {
             if (rider.mileage_count > 0 || rider.leader_count > 0) {
                 $('#rider-edit-section .purge-btn').show();
+                $('#rider-edit-section .xfer-btn').show();
             }
         }
         else if (rider.user_profiles.length == 1) {
@@ -318,6 +367,7 @@ jQuery(document).ready(function($) {
                     user.first_name !== rider.firstname ||
                     user.last_name !== rider.lastname) {
                     $('#rider-edit-section .sync-btn').show();
+                    $('#rider-edit-section .modify-btn').hide();
                 }
             }
         }
@@ -365,6 +415,23 @@ jQuery(document).ready(function($) {
         });
     });
 
+    $("#rider-edit-section .modify-btn").on('click', function(evt) {
+        var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+        var data = {
+            'action': 'pwtc_mileage_get_rider',
+            'mode' : 'edit',
+            'member_id': $('#rider-edit-section .rider-id').html()
+        };
+        $('body').addClass('waiting');
+        $.post(action, data, modify_rider_setup_cb);
+    });
+
+	$("#rider-edit-section .modify-blk .cancel-btn").on('click', function(evt) {
+		$('#rider-edit-section .modify-blk').hide('slow', function() {
+            $("#rider-edit-section .modify-btn").show('fast'); 
+        });
+    });
+
     $("#rider-inspect-section .add-blk .add-frm input[name='expdate']").datepicker({
   		dateFormat: 'D M d yy',
 		altField: "#rider-inspect-section .add-blk .add-frm input[name='fmtdate']",
@@ -372,6 +439,30 @@ jQuery(document).ready(function($) {
 		changeMonth: true,
       	changeYear: true
 	});
+
+    $("#rider-edit-section .modify-blk .modify-frm input[name='expdate']").datepicker({
+  		dateFormat: 'D M d yy',
+		altField: "#rider-edit-section .modify-blk .modify-frm input[name='fmtdate']",
+		altFormat: 'yy-mm-dd',
+		changeMonth: true,
+      	changeYear: true
+	});
+
+    $('#rider-edit-section .modify-blk .modify-frm').on('submit', function(evt) {
+        evt.preventDefault();
+        var action = $('#rider-edit-section .modify-blk .modify-frm').attr('action');
+        var data = {
+			'action': 'pwtc_mileage_create_rider',
+            'nonce': '<?php echo wp_create_nonce('pwtc_mileage_create_rider'); ?>',
+            'mode': $("#rider-edit-section .modify-blk .modify-frm input[name='mode']").val(),
+			'member_id': $("#rider-edit-section .modify-blk .modify-frm input[name='memberid']").val(),
+			'lastname': $("#rider-edit-section .modify-blk .modify-frm input[name='lastname']").val(),
+			'firstname': $("#rider-edit-section .modify-blk .modify-frm input[name='firstname']").val(),
+			'exp_date': $("#rider-edit-section .modify-blk .modify-frm input[name='fmtdate']").val()
+		};
+        $('body').addClass('waiting');
+        $.post(action, data, modify_rider_cb);
+    });
 
     $('#rider-inspect-section .add-blk .add-frm').on('submit', function(evt) {
         evt.preventDefault();
@@ -411,6 +502,37 @@ jQuery(document).ready(function($) {
             function() {
                 $('body').addClass('waiting');
                 $.post(action, data, sync_rider_cb);
+            }
+        );
+    });
+
+    $('#rider-edit-section .xfer-btn').on('click', function(evt) {
+        lookup_pwtc_riders(function(riderid, name) {
+            open_confirm_dialog(
+                "Are you sure you want to transfer this rider's ridesheet entries to rider <strong>" + riderid + "</strong> - <strong>" + name + "</strong>?", 
+                function() {
+                    alert('Not implemented!');
+                }
+            );
+        });
+    });
+
+    $('#rider-edit-section .chgid-btn').on('click', function(evt) {
+        lookup_pwtc_riders(function(riderid, name) {
+            open_confirm_dialog(
+                "Are you sure you want to transfer this rider's user profile to rider <strong>" + riderid + "</strong> - <strong>" + name + "</strong>?", 
+                function() {
+                    alert('Not implemented!');
+                }
+            );
+        });
+    });
+
+    $('#rider-edit-section .purge-btn').on('click', function(evt) {
+        open_confirm_dialog(
+            "Are you sure you want to purge this rider's ridesheet entries?", 
+            function() {
+                alert('Not implemented!');
             }
         );
     });
@@ -497,15 +619,36 @@ if ($running_jobs > 0) {
 		<p><button class="back-btn button button-primary button-large">&lt; Back</button></p>  
 		<div class="report-sec">
 		    <h3>Rider <span class="rider-id"></span> - <span class="rider-name"></span></h3>
-            <p>This rider expires on <strong><span class="exp-date"></span></strong>. <span class="ridesheet-count"></span></p>
+            <p>This rider expires on <strong><span class="exp-date"></span></strong>.</p> 
+            <p><div><button class="modify-btn button button-primary button-large">Modify</button>
+		    <span class="modify-blk popup-frm initially-hidden">
+			<form class="modify-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+                <span>First Name</span>
+                <input name="firstname" type="text" required/>
+                <span>Last Name</span>
+                <input name="lastname" type="text" required/>
+                <span>Expiration Date</span>
+                <input name="expdate" type="text" required/>
+                <input type="hidden" name="memberid"/>
+				<input type="hidden" name="fmtdate"/>
+				<input type="hidden" name="mode" value="update"/>
+				<input class="button button-primary" type="submit" value="Modify"/>
+				<input class="cancel-btn button button-primary" type="button" value="Cancel"/>
+			</form>
+		    </span></div></p>
+            <p><span class="ridesheet-count"></span></p>
             <p>
-                <button class="sync-btn button button-primary button-large">Synchronize</button>
                 <button class="purge-btn button button-primary button-large">Purge</button>
+                <button class="xfer-btn button button-primary button-large">Transfer</button>
             </p>
         </div>
 		<div class="report-sec">
 		    <h3>User Profile</h3>
             <p><span class="profile-msg"></span><div class="users-div"></div></p>
+            <p>
+                <button class="sync-btn button button-primary button-large">Synchronize</button>
+                <button class="chgid-btn button button-primary button-large">Change ID</button>
+            </p>
         </div>
     </div>
 <?php
