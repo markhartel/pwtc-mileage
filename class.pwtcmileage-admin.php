@@ -666,53 +666,59 @@ class PwtcMileage_Admin {
 		}
 		else {
 			$memberid = sanitize_text_field($_POST['memberid']);
-			$users = array();
-			//if (!empty($memberid)) {
-				$profiles = pwtc_mileage_lookup_user($memberid);
-				foreach ($profiles as $profile) {
-					$info = get_userdata($profile->ID);
-					$note = '';
-					$role = '';
-					$expir_date = '';
-					if (function_exists('wc_memberships_get_user_memberships')) {
-						$memberships = wc_memberships_get_user_memberships($profile->ID);
-						if (empty($memberships)) {
-							$note = 'no membership';
-						}
-						else if (count($memberships) > 1) {
-							$note = 'multiple memberships';
-						}
-						else {
-							$expir_date = pwtc_mileage_get_expiration_date($memberships[0]);
-						}
-					}
-					else {
-						$note = 'cannot access membership';
-					}
-					if (in_array('expired_member', $info->roles)) {
-						$role .= 'expired_member ';
-					}
-					if (in_array('current_member', $info->roles)) {
-						$role .= 'current_member ';
-					}
-					$item = array(
-						'userid' => $profile->ID,
-						'first_name' => trim($info->first_name),
-						'last_name' => trim($info->last_name),
-						'email' => trim($info->user_email),
-						'expir_date' => $expir_date,
-						'note' => $note,
-						'role' => $role
-					);
-					$users[] = $item;
-				}
-			//}
+			$users = self::lookup_user_memberships($memberid);
 			$response = array(
 				'memberid' => $memberid,
 				'users' => $users);
 			echo wp_json_encode($response);
 		}
 		wp_die();
+	}
+
+	public static function lookup_user_memberships($memberid) {
+		$users = array();
+		$profiles = pwtc_mileage_lookup_user($memberid);
+		foreach ($profiles as $profile) {
+			$info = get_userdata($profile->ID);
+			$note = '';
+			$expir_date = '';
+			if (function_exists('wc_memberships_get_user_memberships')) {
+				$memberships = wc_memberships_get_user_memberships($profile->ID);
+				if (empty($memberships)) {
+					$note = 'no membership';
+				}
+				else if (count($memberships) > 1) {
+					$note = 'multiple memberships';
+				}
+				else {
+					$expir_date = pwtc_mileage_get_expiration_date($memberships[0]);
+				}
+			}
+			else {
+				$note = 'cannot access membership';
+			}
+			/*
+			$role = '';
+			if (in_array('expired_member', $info->roles)) {
+				$role .= 'expired_member ';
+			}
+			if (in_array('current_member', $info->roles)) {
+				$role .= 'current_member ';
+			}
+			*/
+			$role = implode(",", $info->roles);
+			$item = array(
+				'userid' => $profile->ID,
+				'first_name' => trim($info->first_name),
+				'last_name' => trim($info->last_name),
+				'email' => trim($info->user_email),
+				'expir_date' => $expir_date,
+				'note' => $note,
+				'role' => $role
+			);
+			$users[] = $item;
+		}
+		return $users;
 	}
 
 	public static function next_rider_id_callback() {
@@ -970,7 +976,12 @@ class PwtcMileage_Admin {
 							$exp_date = pwtc_mileage_get_expiration_date($memberships[0]);
 							try {
 								pwtc_mileage_update_rider($memberid, $lastname, $firstname, $exp_date);
-								$response = array('member_id' => $memberid);
+								$response = array(
+									'member_id' => $memberid,
+									'firstname' => $firstname,
+									'lastname' => $lastname,
+									'exp_date' => $exp_date
+								);
 								echo wp_json_encode($response);		
 							}
 							catch (Exception $e) {
@@ -1001,7 +1012,7 @@ class PwtcMileage_Admin {
 			);
 			echo wp_json_encode($response);
 		}
-		else if (!isset($_POST['member_id'])){
+		else if (!isset($_POST['member_id']) or !isset($_POST['mode'])) {
 			$response = array(
 				'error' => 'Input parameters needed to fetch a rider are missing.'
 			);
@@ -1021,7 +1032,13 @@ class PwtcMileage_Admin {
 					'member_id' => $result[0]['member_id'],
 					'lastname' => $result[0]['last_name'],
 					'firstname' => $result[0]['first_name'],
-					'exp_date' => $result[0]['expir_date']);
+					'exp_date' => $result[0]['expir_date']
+				);
+				if ($_POST['mode'] == 'view') {
+					$response['mileage_count'] = PwtcMileage_DB::fetch_member_has_mileage($memberid);;
+					$response['leader_count'] = PwtcMileage_DB::fetch_member_has_leaders($memberid);
+					$response['user_profiles'] = self::lookup_user_memberships($memberid);
+				}
 				echo wp_json_encode($response);						
 			}
 		}	
