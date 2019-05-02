@@ -706,7 +706,7 @@ class PwtcMileage_Admin {
 				$role .= 'current_member ';
 			}
 			*/
-			$role = implode(",", $info->roles);
+			$role = implode(", ", $info->roles);
 			$item = array(
 				'userid' => $profile->ID,
 				'first_name' => trim($info->first_name),

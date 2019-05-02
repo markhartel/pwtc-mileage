@@ -295,18 +295,30 @@ jQuery(document).ready(function($) {
         var fmtdate = getPrettyDate(rider.exp_date);
 		$('#rider-edit-section .rider-name').html(rider.firstname + ' ' + rider.lastname);
 		$('#rider-edit-section .rider-id').html(rider.member_id);
-		$('#rider-edit-section .exp-date').html(fmtdate);
-		$('#rider-edit-section .mileage-count').html(rider.mileage_count);
-		$('#rider-edit-section .leader-count').html(rider.leader_count);
+        $('#rider-edit-section .exp-date').html(fmtdate);
+        if (rider.mileage_count == 0 && rider.leader_count == 0) {
+            $('#rider-edit-section .ridesheet-count').html('They do not appear on any ridesheets.');
+        }
+        else {
+            $('#rider-edit-section .ridesheet-count').html('They appears as a rider on <strong>' + rider.mileage_count + '</strong> ride sheets and as a ride leader on <strong>' + rider.leader_count + '</strong> ride sheets.');
+        }
         populate_users_table(rider.user_profiles);
         $('#rider-edit-section .profile-msg').empty();
         $('#rider-edit-section .sync-btn').hide();
-        if (rider.user_profiles.length == 1) {
+        $('#rider-edit-section .purge-btn').hide();
+        if (rider.user_profiles.length == 0) {
+            if (rider.mileage_count > 0 || rider.leader_count > 0) {
+                $('#rider-edit-section .purge-btn').show();
+            }
+        }
+        else if (rider.user_profiles.length == 1) {
             var user = rider.user_profiles[0];
-            if (user.expir_date !== rider.exp_date || 
-                user.first_name !== rider.firstname ||
-                user.last_name !== rider.lastname) {
-                $('#rider-edit-section .sync-btn').show();
+            if (user.expir_date.length > 0) {
+                if (user.expir_date !== rider.exp_date || 
+                    user.first_name !== rider.firstname ||
+                    user.last_name !== rider.lastname) {
+                    $('#rider-edit-section .sync-btn').show();
+                }
             }
         }
         else if (rider.user_profiles.length > 1) {
@@ -485,12 +497,15 @@ if ($running_jobs > 0) {
 		<p><button class="back-btn button button-primary button-large">&lt; Back</button></p>  
 		<div class="report-sec">
 		    <h3>Rider <span class="rider-id"></span> - <span class="rider-name"></span></h3>
-            <p>This rider expires on <strong><span class="exp-date"></span></strong>. They appears as a rider on <strong><span class="mileage-count"></span></strong> ride sheets and as a ride leader on <strong><span class="leader-count"></span></strong> ride sheets.</p>
+            <p>This rider expires on <strong><span class="exp-date"></span></strong>. <span class="ridesheet-count"></span></p>
+            <p>
+                <button class="sync-btn button button-primary button-large">Synchronize</button>
+                <button class="purge-btn button button-primary button-large">Purge</button>
+            </p>
         </div>
 		<div class="report-sec">
 		    <h3>User Profile</h3>
             <p><span class="profile-msg"></span><div class="users-div"></div></p>
-            <p><button class="sync-btn button button-primary button-large">Synchronize</button></p>
         </div>
     </div>
 <?php
