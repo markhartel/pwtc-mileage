@@ -52,6 +52,12 @@ class PwtcMileage_Admin {
 			array( 'PwtcMileage_Admin', 'sync_rider_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_get_rider', 
 			array( 'PwtcMileage_Admin', 'get_rider_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_xfer_ridesheets', 
+			array( 'PwtcMileage_Admin', 'xfer_ridesheets_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_xfer_user_profile', 
+			array( 'PwtcMileage_Admin', 'xfer_user_profile_callback') );
+		add_action( 'wp_ajax_pwtc_mileage_purge_rider', 
+			array( 'PwtcMileage_Admin', 'purge_rider_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_leader', 
 			array( 'PwtcMileage_Admin', 'remove_leader_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_mileage', 
@@ -1040,6 +1046,138 @@ class PwtcMileage_Admin {
 					$response['user_profiles'] = self::lookup_user_memberships($memberid);
 				}
 				echo wp_json_encode($response);						
+			}
+		}	
+		wp_die();
+	}
+
+	public static function xfer_ridesheets_callback() {
+		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+			$response = array(
+				'error' => 'You are not allowed to transfer ridesheets.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!isset($_POST['from_memberid']) or !isset($_POST['to_memberid']) or !isset($_POST['nonce'])){
+			$response = array(
+				'error' => 'Input parameters needed to transfer ridesheets are missing.'
+			);
+			echo wp_json_encode($response);
+		}
+		else {
+			$from_memberid = sanitize_text_field($_POST['from_memberid']);	
+			$to_memberid = sanitize_text_field($_POST['to_memberid']);	
+			$nonce = $_POST['nonce'];	
+			if (!wp_verify_nonce($nonce, 'pwtc_mileage_xfer_ridesheets')) {
+				$response = array(
+					'error' => 'Access security check failed.'
+				);
+				echo wp_json_encode($response);
+			}
+			else {
+				$response = array(
+					'error' => 'Operation currently not supported.'
+				);
+				echo wp_json_encode($response);
+			}
+		}	
+		wp_die();
+	}
+
+	public static function xfer_user_profile_callback() {
+		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+			$response = array(
+				'error' => 'You are not allowed to transfer user profiles.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!isset($_POST['from_memberid']) or !isset($_POST['to_memberid']) or !isset($_POST['nonce'])){
+			$response = array(
+				'error' => 'Input parameters needed to transfer user profiles are missing.'
+			);
+			echo wp_json_encode($response);
+		}
+		else {
+			$from_memberid = sanitize_text_field($_POST['from_memberid']);	
+			$to_memberid = sanitize_text_field($_POST['to_memberid']);	
+			$nonce = $_POST['nonce'];	
+			if (!wp_verify_nonce($nonce, 'pwtc_mileage_xfer_user_profile')) {
+				$response = array(
+					'error' => 'Access security check failed.'
+				);
+				echo wp_json_encode($response);
+			}
+			else {
+				$users = pwtc_mileage_lookup_user($from_memberid);
+				if (empty($users)) {
+					$response = array(
+						'error' => 'Cannot transfer, no user profile found for rider ' . $from_memberid . '.'
+					);
+					echo wp_json_encode($response);
+				}
+				else if (count($users) > 1) {
+					$response = array(
+						'error' => 'Cannot transfer, multiple user profiles found for rider ' . $from_memberid . '.'
+					);
+					echo wp_json_encode($response);
+				} 
+				else {
+					$from_user_id = $users[0]->ID;
+					$users = pwtc_mileage_lookup_user($to_memberid);
+					if (empty($users)) {
+						if (update_field('rider_id', $to_memberid, 'user_'.$from_user_id)) {
+							$response = array(
+								'from_memberid' => $from_memberid,
+								'to_memberid' => $to_memberid
+							);
+							echo wp_json_encode($response);	
+						}
+						else {
+							$response = array(
+								'error' => 'Cannot transfer, reset of user profile for rider ' . $from_memberid . ' failed.'
+							);
+							echo wp_json_encode($response);	
+						}
+					}
+					else {
+						$response = array(
+							'error' => 'Cannot transfer, rider ' . $$to_memberid . ' already has a user profile.'
+						);
+						echo wp_json_encode($response);	
+					}
+				}
+			}
+		}	
+		wp_die();
+	}
+
+	public static function purge_rider_callback() {
+		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+			$response = array(
+				'error' => 'You are not allowed to purge riders.'
+			);
+			echo wp_json_encode($response);
+		}
+		else if (!isset($_POST['member_id']) or !isset($_POST['nonce'])){
+			$response = array(
+				'error' => 'Input parameters needed to purge riders are missing.'
+			);
+			echo wp_json_encode($response);
+		}
+		else {
+			$memberid = sanitize_text_field($_POST['member_id']);	
+			$nonce = $_POST['nonce'];	
+			if (!wp_verify_nonce($nonce, 'pwtc_mileage_purge_rider')) {
+				$response = array(
+					'error' => 'Access security check failed.'
+				);
+				echo wp_json_encode($response);
+			}
+			else {
+				$response = array(
+					'error' => 'Operation currently not supported.'
+				);
+				echo wp_json_encode($response);
 			}
 		}	
 		wp_die();

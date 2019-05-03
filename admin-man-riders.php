@@ -309,6 +309,36 @@ jQuery(document).ready(function($) {
         }
 	}   
 
+	function xfer_ridersheets_cb(response) {
+        $('body').removeClass('waiting');
+        var res = JSON.parse(response);
+		if (res.error) {
+            open_error_dialog(res.error);
+		}
+		else {
+        }
+	}   
+
+	function xfer_user_profile_cb(response) {
+        $('body').removeClass('waiting');
+        var res = JSON.parse(response);
+		if (res.error) {
+            open_error_dialog(res.error);
+		}
+		else {
+        }
+	}   
+
+	function purge_rider_cb(response) {
+        $('body').removeClass('waiting');
+        var res = JSON.parse(response);
+		if (res.error) {
+            open_error_dialog(res.error);
+		}
+		else {
+        }
+	}   
+
     function load_rider_table() {
         var memberid = $("#rider-inspect-section .search-frm input[name='memberid']").val().trim();
         var lastname = $("#rider-inspect-section .search-frm input[name='lastname']").val().trim();
@@ -351,13 +381,13 @@ jQuery(document).ready(function($) {
         $('#rider-edit-section .profile-msg').empty();
         $('#rider-edit-section .sync-btn').hide();
         $('#rider-edit-section .purge-btn').hide();
-        $('#rider-edit-section .xfer-btn').hide();
+        $('#rider-edit-section .xfer-rs-btn').hide();
         $('#rider-edit-section .modify-blk').hide();
 		$('#rider-edit-section .modify-btn').show();
         if (rider.user_profiles.length == 0) {
             if (rider.mileage_count > 0 || rider.leader_count > 0) {
                 $('#rider-edit-section .purge-btn').show();
-                $('#rider-edit-section .xfer-btn').show();
+                $('#rider-edit-section .xfer-rs-btn').show();
             }
         }
         else if (rider.user_profiles.length == 1) {
@@ -506,33 +536,56 @@ jQuery(document).ready(function($) {
         );
     });
 
-    $('#rider-edit-section .xfer-btn').on('click', function(evt) {
+    $('#rider-edit-section .xfer-rs-btn').on('click', function(evt) {
         lookup_pwtc_riders(function(riderid, name) {
+            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+            var data = {
+                'action': 'pwtc_mileage_xfer_ridesheets',
+                'from_memberid': $('#rider-edit-section .rider-id').html(),
+                'to_memberid': riderid,
+                'nonce': '<?php echo wp_create_nonce('pwtc_mileage_xfer_ridesheets'); ?>'
+            };
             open_confirm_dialog(
                 "Are you sure you want to transfer this rider's ridesheet entries to rider <strong>" + riderid + "</strong> - <strong>" + name + "</strong>?", 
                 function() {
-                    alert('Not implemented!');
+                    $('body').addClass('waiting');
+                    $.post(action, data, xfer_ridersheets_cb);
                 }
             );
         });
     });
 
-    $('#rider-edit-section .chgid-btn').on('click', function(evt) {
+    $('#rider-edit-section .xfer-prof-btn').on('click', function(evt) {
         lookup_pwtc_riders(function(riderid, name) {
+            var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+            var data = {
+                'action': 'pwtc_mileage_xfer_user_profile',
+                'from_memberid': $('#rider-edit-section .rider-id').html(),
+                'to_memberid': riderid,
+                'nonce': '<?php echo wp_create_nonce('pwtc_mileage_xfer_user_profile'); ?>'
+            };
             open_confirm_dialog(
                 "Are you sure you want to transfer this rider's user profile to rider <strong>" + riderid + "</strong> - <strong>" + name + "</strong>?", 
                 function() {
-                    alert('Not implemented!');
+                    $('body').addClass('waiting');
+                    $.post(action, data, xfer_user_profile_cb);
                 }
             );
         });
     });
 
     $('#rider-edit-section .purge-btn').on('click', function(evt) {
+        var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+        var data = {
+            'action': 'pwtc_mileage_purge_rider',
+            'member_id': $('#rider-edit-section .rider-id').html(),
+            'nonce': '<?php echo wp_create_nonce('pwtc_mileage_purge_rider'); ?>'
+        };
         open_confirm_dialog(
             "Are you sure you want to purge this rider's ridesheet entries?", 
             function() {
-                alert('Not implemented!');
+                $('body').addClass('waiting');
+                $.post(action, data, purge_rider_cb);
             }
         );
     });
@@ -638,8 +691,8 @@ if ($running_jobs > 0) {
 		    </span></div></p>
             <p><span class="ridesheet-count"></span></p>
             <p>
-                <button class="purge-btn button button-primary button-large">Purge</button>
-                <button class="xfer-btn button button-primary button-large">Transfer</button>
+                <button class="purge-btn button button-primary button-large">Purge Rides</button>
+                <button class="xfer-rs-btn button button-primary button-large">Transfer Rides</button>
             </p>
         </div>
 		<div class="report-sec">
@@ -647,7 +700,7 @@ if ($running_jobs > 0) {
             <p><span class="profile-msg"></span><div class="users-div"></div></p>
             <p>
                 <button class="sync-btn button button-primary button-large">Synchronize</button>
-                <button class="chgid-btn button button-primary button-large">Change ID</button>
+                <button class="xfer-prof-btn button button-primary button-large">Transfer Profile</button>
             </p>
         </div>
     </div>
