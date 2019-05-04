@@ -845,11 +845,16 @@ class PwtcMileage_Admin {
 							echo wp_json_encode($response);
 						}
 						else {
+							$more_details = $mode === 'update';
+							$not_found_msg = 'Insert/Update completed, but access of information for rider ' . $memberid . ' failed.';
+							$response = self::get_rider_details($memberid, $not_found_msg, $more_details);
+							/*
 							$response = array(
 								'member_id' => $memberid,
 								'lastname' => $lastname,
 								'firstname' => $firstname,
 								'exp_date' => $expdate);
+							*/
 							echo wp_json_encode($response);
 						}
 					}
@@ -982,12 +987,16 @@ class PwtcMileage_Admin {
 							$exp_date = pwtc_mileage_get_expiration_date($memberships[0]);
 							try {
 								pwtc_mileage_update_rider($memberid, $lastname, $firstname, $exp_date);
+								$not_found_msg = 'Sync completed, but access of information for rider ' . $memberid . ' failed.';
+								$response = self::get_rider_details($memberid, $not_found_msg, true);
+								/*
 								$response = array(
 									'member_id' => $memberid,
 									'firstname' => $firstname,
 									'lastname' => $lastname,
 									'exp_date' => $exp_date
 								);
+								*/
 								echo wp_json_encode($response);		
 							}
 							catch (Exception $e) {
@@ -1169,7 +1178,7 @@ class PwtcMileage_Admin {
 					}
 					else {
 						$response = array(
-							'error' => 'Cannot transfer, rider ' . $$to_memberid . ' already has a user profile.'
+							'error' => 'Cannot transfer, rider ' . $to_memberid . ' already has a user profile.'
 						);
 						echo wp_json_encode($response);	
 					}

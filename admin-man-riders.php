@@ -53,10 +53,6 @@ jQuery(document).ready(function($) {
             viewlink = '<a title="View this rider\'s information." class="view-btn">View</a>';
             editlink = '<a title="Edit this rider\'s information." class="modify-btn">Edit</a>';
             deletelink = '<a title="Delete this rider." class="remove-btn">Delete</a>';
-            synclink = '';
-    <?php if ($plugin_options['user_lookup_mode'] == 'woocommerce') { ?>
-            synclink = ''; //'<a title="Sync this rider with their membership record." class="sync-btn">Sync</a>';
-    <?php } ?>		
             members.forEach(function(item) {
                 var fmtdate = getPrettyDate(item.expir_date);
                 $('#rider-inspect-section .riders-div table').append(
@@ -65,7 +61,7 @@ jQuery(document).ready(function($) {
                     '<td data-th="First Name">' + item.first_name + 
                     '</td><td data-th="Last Name">' + item.last_name + '</td>' + 
                     '<td data-th="Expiration" date="' + item.expir_date + '">' + fmtdate + '</td>' + 
-                    '<td data-th="Actions">' + viewlink + ' ' + editlink + ' ' + deletelink + ' ' + synclink +
+                    '<td data-th="Actions">' + viewlink + ' ' + editlink + ' ' + deletelink +
                     '</td></tr>');    
             });
             $('#rider-inspect-section .riders-div .view-btn').on('click', function(evt) {
@@ -111,22 +107,6 @@ jQuery(document).ready(function($) {
                 );
     <?php } ?>		
             });
-            $('#rider-inspect-section .riders-div .sync-btn').on('click', function(evt) {
-                evt.preventDefault();
-                var action = '<?php echo admin_url('admin-ajax.php'); ?>';
-                var data = {
-                    'action': 'pwtc_mileage_sync_rider',
-                    'member_id': $(this).parent().parent().attr('memberid'),
-                    'nonce': '<?php echo wp_create_nonce('pwtc_mileage_sync_rider'); ?>'
-                };
-                open_confirm_dialog(
-                    'Are you sure you want to sync rider ' + data.member_id + ' with their membership record?', 
-                    function() {
-                        $('body').addClass('waiting');
-                        $.post(action, data, sync_rider_cb);
-                    }
-                );
-            });
         }
         else {
             $('#rider-inspect-section .riders-div').append(
@@ -164,12 +144,15 @@ jQuery(document).ready(function($) {
             open_error_dialog(res.error);
 		}
 		else {
+            show_rider_section(res, true);
+            /*
             var fmtdate = getPrettyDate(res.exp_date);
 		    $('#rider-edit-section .rider-name').html(res.firstname + ' ' + res.lastname);
             $('#rider-edit-section .exp-date').html(fmtdate);
             $('#rider-edit-section .modify-blk').hide('slow', function() {
                 $("#rider-edit-section .modify-btn").show('fast');     
             });
+            */
         }
     }   
 
@@ -303,9 +286,12 @@ jQuery(document).ready(function($) {
             open_error_dialog(res.error);
 		}
 		else {
+            show_rider_section(res, true);
+            /*
             var fmtdate = getPrettyDate(res.exp_date);
 		    $('#rider-edit-section .rider-name').html(res.firstname + ' ' + res.lastname);
-		    $('#rider-edit-section .exp-date').html(fmtdate);
+            $('#rider-edit-section .exp-date').html(fmtdate);
+            */
         }
 	}   
 
@@ -396,11 +382,11 @@ jQuery(document).ready(function($) {
             $('#rider-edit-section .xfer-prof-btn').show();
             var user = rider.user_profiles[0];
             if (user.expir_date.length > 0) {
+                $('#rider-edit-section .modify-btn').hide();
                 if (user.expir_date !== rider.exp_date || 
                     user.first_name !== rider.firstname ||
                     user.last_name !== rider.lastname) {
                     $('#rider-edit-section .sync-btn').show();
-                    $('#rider-edit-section .modify-btn').hide();
                 }
             }
         }
