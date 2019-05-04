@@ -1011,6 +1011,29 @@ class PwtcMileage_Admin {
 		wp_die();
 	}
 
+	public static function get_rider_details($memberid, $not_found_msg, $more_details) {
+		$result = PwtcMileage_DB::fetch_rider($memberid);
+		if (count($result) == 0) {
+			$response = array(
+				'error' => $not_found_msg
+			);
+		}
+		else {
+			$response = array(
+				'member_id' => $result[0]['member_id'],
+				'lastname' => $result[0]['last_name'],
+				'firstname' => $result[0]['first_name'],
+				'exp_date' => $result[0]['expir_date']
+			);
+			if ($more_details) {
+				$response['mileage_count'] = PwtcMileage_DB::fetch_member_has_mileage($memberid);;
+				$response['leader_count'] = PwtcMileage_DB::fetch_member_has_leaders($memberid);
+				$response['user_profiles'] = self::lookup_user_memberships($memberid);
+			}
+		}
+		return $response;
+	}
+
 	public static function get_rider_callback() {
 		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
 			$response = array(
@@ -1027,32 +1050,17 @@ class PwtcMileage_Admin {
 		else {
 			$memberid = sanitize_text_field($_POST['member_id']);	
 			$result = PwtcMileage_DB::fetch_rider($memberid);
-			if (count($result) == 0) {
-				$response = array(
-					'error' => 'Could not find rider ' . $memberid . '.'
-				);
-				echo wp_json_encode($response);			
-			}
-			else {
-				$response = array(
-					'member_id' => $result[0]['member_id'],
-					'lastname' => $result[0]['last_name'],
-					'firstname' => $result[0]['first_name'],
-					'exp_date' => $result[0]['expir_date']
-				);
-				if ($_POST['mode'] == 'view') {
-					$response['mileage_count'] = PwtcMileage_DB::fetch_member_has_mileage($memberid);;
-					$response['leader_count'] = PwtcMileage_DB::fetch_member_has_leaders($memberid);
-					$response['user_profiles'] = self::lookup_user_memberships($memberid);
-				}
-				echo wp_json_encode($response);						
-			}
+			$more_details = $_POST['mode'] == 'view';
+			$not_found_msg = 'Could not find rider ' . $memberid . '.';
+			$response = self::get_rider_details($memberid, $not_found_msg, $more_details);
+			echo wp_json_encode($response);						
 		}	
 		wp_die();
 	}
 
 	public static function xfer_ridesheets_callback() {
-		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+		//if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+		if (!current_user_can('manage_options')) {
 			$response = array(
 				'error' => 'You are not allowed to transfer ridesheets.'
 			);
@@ -1074,18 +1082,34 @@ class PwtcMileage_Admin {
 				);
 				echo wp_json_encode($response);
 			}
-			else {
+			else if ($from_memberid === $to_memberid) {
 				$response = array(
-					'error' => 'Operation currently not supported.'
+					'error' => 'Cannot transfer, the transferee is the same as the transferer.'
 				);
 				echo wp_json_encode($response);
+			}
+			else {
+				$users = pwtc_mileage_lookup_user($from_memberid);
+				if (empty($users)) {
+					$response = array(
+						'error' => 'Operation currently not supported.'
+					);
+					echo wp_json_encode($response);
+				}
+				else {
+					$response = array(
+						'error' => 'Cannot transfer ridesheets, rider ' . $from_memberid . ' has a user profile.'
+					);
+					echo wp_json_encode($response);
+				}
 			}
 		}	
 		wp_die();
 	}
 
 	public static function xfer_user_profile_callback() {
-		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+		//if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+		if (!current_user_can('manage_options')) {
 			$response = array(
 				'error' => 'You are not allowed to transfer user profiles.'
 			);
@@ -1104,6 +1128,12 @@ class PwtcMileage_Admin {
 			if (!wp_verify_nonce($nonce, 'pwtc_mileage_xfer_user_profile')) {
 				$response = array(
 					'error' => 'Access security check failed.'
+				);
+				echo wp_json_encode($response);
+			}
+			else if ($from_memberid === $to_memberid) {
+				$response = array(
+					'error' => 'Cannot transfer, the transferee is the same as the transferer.'
 				);
 				echo wp_json_encode($response);
 			}
@@ -1126,10 +1156,8 @@ class PwtcMileage_Admin {
 					$users = pwtc_mileage_lookup_user($to_memberid);
 					if (empty($users)) {
 						if (update_field('rider_id', $to_memberid, 'user_'.$from_user_id)) {
-							$response = array(
-								'from_memberid' => $from_memberid,
-								'to_memberid' => $to_memberid
-							);
+							$not_found_msg = 'Transfer completed, but access of information for rider ' . $from_memberid . ' failed.';
+							$response = self::get_rider_details($from_memberid, $not_found_msg, true);		
 							echo wp_json_encode($response);	
 						}
 						else {
@@ -1152,15 +1180,16 @@ class PwtcMileage_Admin {
 	}
 
 	public static function purge_rider_callback() {
-		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+		//if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
+		if (!current_user_can('manage_options')) {
 			$response = array(
-				'error' => 'You are not allowed to purge riders.'
+				'error' => 'You are not allowed to purge ridesheets from riders.'
 			);
 			echo wp_json_encode($response);
 		}
 		else if (!isset($_POST['member_id']) or !isset($_POST['nonce'])){
 			$response = array(
-				'error' => 'Input parameters needed to purge riders are missing.'
+				'error' => 'Input parameters needed to purge ridesheets from riders are missing.'
 			);
 			echo wp_json_encode($response);
 		}
@@ -1174,10 +1203,19 @@ class PwtcMileage_Admin {
 				echo wp_json_encode($response);
 			}
 			else {
-				$response = array(
-					'error' => 'Operation currently not supported.'
-				);
-				echo wp_json_encode($response);
+				$users = pwtc_mileage_lookup_user($memberid);
+				if (empty($users)) {
+					$response = array(
+						'error' => 'Operation currently not supported.'
+					);
+					echo wp_json_encode($response);
+				}
+				else {
+					$response = array(
+						'error' => 'Cannot purge ridesheets, rider ' . $memberid . ' has a user profile.'
+					);
+					echo wp_json_encode($response);
+				}
 			}
 		}	
 		wp_die();

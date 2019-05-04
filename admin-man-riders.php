@@ -262,7 +262,7 @@ jQuery(document).ready(function($) {
             open_error_dialog(res.error);
 		}
 		else {
-			show_rider_section(res);
+			show_rider_section(res, false);
 			if (history.pushState) {
 				var state = {
 					'action': 'pwtc_mileage_get_rider',
@@ -280,7 +280,7 @@ jQuery(document).ready(function($) {
 			open_error_dialog(res.error);
 		}
 		else {
-			show_rider_section(res);
+			show_rider_section(res, false);
 		}
 		$('body').removeClass('waiting');
 	}
@@ -326,6 +326,7 @@ jQuery(document).ready(function($) {
             open_error_dialog(res.error);
 		}
 		else {
+            show_rider_section(res, true);
         }
 	}   
 
@@ -366,7 +367,7 @@ jQuery(document).ready(function($) {
         }  
     }
 
-    function show_rider_section(rider) {
+    function show_rider_section(rider, refresh_only) {
         var fmtdate = getPrettyDate(rider.exp_date);
 		$('#rider-edit-section .rider-name').html(rider.firstname + ' ' + rider.lastname);
 		$('#rider-edit-section .rider-id').html(rider.member_id);
@@ -382,6 +383,7 @@ jQuery(document).ready(function($) {
         $('#rider-edit-section .sync-btn').hide();
         $('#rider-edit-section .purge-btn').hide();
         $('#rider-edit-section .xfer-rs-btn').hide();
+        $('#rider-edit-section .xfer-prof-btn').hide();
         $('#rider-edit-section .modify-blk').hide();
 		$('#rider-edit-section .modify-btn').show();
         if (rider.user_profiles.length == 0) {
@@ -391,6 +393,7 @@ jQuery(document).ready(function($) {
             }
         }
         else if (rider.user_profiles.length == 1) {
+            $('#rider-edit-section .xfer-prof-btn').show();
             var user = rider.user_profiles[0];
             if (user.expir_date.length > 0) {
                 if (user.expir_date !== rider.exp_date || 
@@ -404,10 +407,12 @@ jQuery(document).ready(function($) {
         else if (rider.user_profiles.length > 1) {
             $('#rider-edit-section .profile-msg').html("Warning, this rider's ID is used in multiple user profiles! This should be corrected, only once is allowed.");
         }
-		$('#rider-inspect-section').hide('fast', function() {
-			$('#rider-edit-section').fadeIn('slow');
-			$('#rider-edit-section .back-btn').focus();
-		});
+        if (!refresh_only) {
+            $('#rider-inspect-section').hide('fast', function() {
+                $('#rider-edit-section').fadeIn('slow');
+                $('#rider-edit-section .back-btn').focus();
+            });
+        }
     }
 
 	function return_main_section() {
@@ -537,7 +542,7 @@ jQuery(document).ready(function($) {
     });
 
     $('#rider-edit-section .xfer-rs-btn').on('click', function(evt) {
-        lookup_pwtc_riders(function(riderid, name) {
+        lookup_pwtc_riders_all(function(riderid, name) {
             var action = '<?php echo admin_url('admin-ajax.php'); ?>';
             var data = {
                 'action': 'pwtc_mileage_xfer_ridesheets',
@@ -556,7 +561,7 @@ jQuery(document).ready(function($) {
     });
 
     $('#rider-edit-section .xfer-prof-btn').on('click', function(evt) {
-        lookup_pwtc_riders(function(riderid, name) {
+        lookup_pwtc_riders_all(function(riderid, name) {
             var action = '<?php echo admin_url('admin-ajax.php'); ?>';
             var data = {
                 'action': 'pwtc_mileage_xfer_user_profile',

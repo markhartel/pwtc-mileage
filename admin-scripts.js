@@ -7,6 +7,16 @@ function lookup_pwtc_riders(mycb) {
     window.pwtc_mileage_rider_cb = mycb;
 } 
 
+function lookup_pwtc_riders_all(mycb) {
+    jQuery("#rider-lookup-results .lookup-frm input[name='active']").prop('checked', false);
+    lookup_pwtc_riders(mycb);
+}
+
+function lookup_pwtc_riders_active(mycb) {
+    jQuery("#rider-lookup-results .lookup-frm input[name='active']").prop('checked', true);
+    lookup_pwtc_riders(mycb);
+}
+
 function open_confirm_dialog(msg, mycb) {
     window.pwtc_mileage_confirm_cb = mycb;
     jQuery("#confirm-dialog p").html(msg);
