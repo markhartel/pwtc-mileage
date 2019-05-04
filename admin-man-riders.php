@@ -40,7 +40,7 @@ jQuery(document).ready(function($) {
         }
         else {
             $('#rider-edit-section .users-div').append(
-                '<span class="empty-tbl">No user profile found for this rider.</span>');
+                '<span class="empty-tbl">No user account found for this rider.</span>');
         }
     }
 
@@ -50,9 +50,7 @@ jQuery(document).ready(function($) {
             $('#rider-inspect-section .riders-div').append('<table class="rwd-table">' +
                 '<tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Expiration Date</th><th>Actions</th></tr>' +
                 '</table>');
-            viewlink = '<a title="View this rider\'s information." class="view-btn">View</a>';
-            editlink = '<a title="Edit this rider\'s information." class="modify-btn">Edit</a>';
-            deletelink = '<a title="Delete this rider." class="remove-btn">Delete</a>';
+            editlink = '<a title="Edit this rider\'s information." class="edit-btn">Edit</a>';
             members.forEach(function(item) {
                 var fmtdate = getPrettyDate(item.expir_date);
                 $('#rider-inspect-section .riders-div table').append(
@@ -61,10 +59,10 @@ jQuery(document).ready(function($) {
                     '<td data-th="First Name">' + item.first_name + 
                     '</td><td data-th="Last Name">' + item.last_name + '</td>' + 
                     '<td data-th="Expiration" date="' + item.expir_date + '">' + fmtdate + '</td>' + 
-                    '<td data-th="Actions">' + viewlink + ' ' + editlink + ' ' + deletelink +
+                    '<td data-th="Actions">' + editlink +
                     '</td></tr>');    
             });
-            $('#rider-inspect-section .riders-div .view-btn').on('click', function(evt) {
+            $('#rider-inspect-section .riders-div .edit-btn').on('click', function(evt) {
                 evt.preventDefault();
                 var action = '<?php echo admin_url('admin-ajax.php'); ?>';
                 var data = {
@@ -73,39 +71,7 @@ jQuery(document).ready(function($) {
                     'member_id': $(this).parent().parent().attr('memberid')
                 };
                 $('body').addClass('waiting');
-                $.post(action, data, view_rider_cb);
-            });
-            $('#rider-inspect-section .riders-div .modify-btn').on('click', function(evt) {
-                evt.preventDefault();
-                var action = '<?php echo admin_url('admin-ajax.php'); ?>';
-                var data = {
-                    'action': 'pwtc_mileage_get_rider',
-                    'mode' : 'edit',
-                    'member_id': $(this).parent().parent().attr('memberid')
-                };
-                $('body').addClass('waiting');
-                $.post(action, data, modify_rider2_cb);
-            });
-            $('#rider-inspect-section .riders-div .remove-btn').on('click', function(evt) {
-                evt.preventDefault();
-                var action = '<?php echo admin_url('admin-ajax.php'); ?>';
-                var data = {
-                    'action': 'pwtc_mileage_remove_rider',
-                    'member_id': $(this).parent().parent().attr('memberid'),
-                    'nonce': '<?php echo wp_create_nonce('pwtc_mileage_remove_rider'); ?>'
-                };
-    <?php if ($plugin_options['disable_delete_confirm']) { ?>
-                $('body').addClass('waiting');
-                $.post(action, data, remove_rider_cb);
-    <?php } else { ?>
-                open_confirm_dialog(
-                    'Are you sure you want to delete rider ' + data.member_id + '?', 
-                    function() {
-                        $('body').addClass('waiting');
-                        $.post(action, data, remove_rider_cb);
-                    }
-                );
-    <?php } ?>		
+                $.post(action, data, edit_rider_cb);
             });
         }
         else {
@@ -145,14 +111,6 @@ jQuery(document).ready(function($) {
 		}
 		else {
             show_rider_section(res, true);
-            /*
-            var fmtdate = getPrettyDate(res.exp_date);
-		    $('#rider-edit-section .rider-name').html(res.firstname + ' ' + res.lastname);
-            $('#rider-edit-section .exp-date').html(fmtdate);
-            $('#rider-edit-section .modify-blk').hide('slow', function() {
-                $("#rider-edit-section .modify-btn").show('fast');     
-            });
-            */
         }
     }   
 
@@ -175,40 +133,6 @@ jQuery(document).ready(function($) {
         }
         $('body').removeClass('waiting');
     }
-
-	function modify_rider2_cb(response) {
-        var res = JSON.parse(response);
-		if (res.error) {
-            open_error_dialog(res.error);
-		}
-		else {
-			$("#rider-inspect-section .add-blk .add-frm input[type='submit']").val(
-                'Modify'
-            );
-			$("#rider-inspect-section .add-blk .add-frm input[name='memberid']").val(
-                res.member_id
-            );
-			$("#rider-inspect-section .add-blk .add-frm input[name='firstname']").val(
-                res.firstname
-            );
-			$("#rider-inspect-section .add-blk .add-frm input[name='lastname']").val(
-                res.lastname
-            );
-			$("#rider-inspect-section .add-blk .add-frm input[name='expdate']").val(
-                getPrettyDate(res.exp_date)
-            );
-			$("#rider-inspect-section .add-blk .add-frm input[name='fmtdate']").val(
-                res.exp_date
-            );
-            $("#rider-inspect-section .add-blk .add-frm input[name='mode']").val('update');
-            $("#rider-inspect-section .add-blk .add-frm input[name='memberid']").attr("disabled", "disabled");
-            $("#rider-inspect-section .add-btn").hide('fast', function() {
-		        $('#rider-inspect-section .add-blk').show('slow'); 
-                $("#rider-inspect-section .add-blk .add-frm input[name='firstname']").focus();          
-            });
-        }
-        $('body').removeClass('waiting');
-	}   
 
     function modify_rider_setup_cb(response) {
         var res = JSON.parse(response);
@@ -239,7 +163,7 @@ jQuery(document).ready(function($) {
         $('body').removeClass('waiting');
 	}   
 
-	function view_rider_cb(response) {
+	function edit_rider_cb(response) {
         var res = JSON.parse(response);
 		if (res.error) {
             open_error_dialog(res.error);
@@ -268,17 +192,6 @@ jQuery(document).ready(function($) {
 		$('body').removeClass('waiting');
 	}
 
-	function remove_rider_cb(response) {
-        $('body').removeClass('waiting');
-        var res = JSON.parse(response);
-		if (res.error) {
-            open_error_dialog(res.error);
-		}
-		else {
-            load_rider_table();
-        }
-	}   
-
 	function sync_rider_cb(response) {
         $('body').removeClass('waiting');
         var res = JSON.parse(response);
@@ -287,11 +200,6 @@ jQuery(document).ready(function($) {
 		}
 		else {
             show_rider_section(res, true);
-            /*
-            var fmtdate = getPrettyDate(res.exp_date);
-		    $('#rider-edit-section .rider-name').html(res.firstname + ' ' + res.lastname);
-            $('#rider-edit-section .exp-date').html(fmtdate);
-            */
         }
 	}   
 
@@ -302,6 +210,7 @@ jQuery(document).ready(function($) {
             open_error_dialog(res.error);
 		}
 		else {
+            //TODO: implement this!
         }
 	}   
 
@@ -323,6 +232,18 @@ jQuery(document).ready(function($) {
             open_error_dialog(res.error);
 		}
 		else {
+            //TODO: implement this!
+        }
+	}   
+
+	function delete_rider_cb(response) {
+        $('body').removeClass('waiting');
+        var res = JSON.parse(response);
+		if (res.error) {
+            open_error_dialog(res.error);
+		}
+		else {
+            return_main_section();
         }
 	}   
 
@@ -362,12 +283,13 @@ jQuery(document).ready(function($) {
             $('#rider-edit-section .ridesheet-count').html('This rider does not appear on any ridesheets.');
         }
         else {
-            $('#rider-edit-section .ridesheet-count').html('This rider appears as a rider on <strong>' + rider.mileage_count + '</strong> ride sheets and as a ride leader on <strong>' + rider.leader_count + '</strong> ride sheets.');
+            $('#rider-edit-section .ridesheet-count').html('This rider has mileage on <strong>' + rider.mileage_count + '</strong> ride sheets and appears as a ride leader on <strong>' + rider.leader_count + '</strong> ride sheets.');
         }
         populate_users_table(rider.user_profiles);
         $('#rider-edit-section .profile-msg').empty();
         $('#rider-edit-section .sync-btn').hide();
         $('#rider-edit-section .purge-btn').hide();
+        $('#rider-edit-section .delete-btn').hide();
         $('#rider-edit-section .xfer-rs-btn').hide();
         $('#rider-edit-section .xfer-prof-btn').hide();
         $('#rider-edit-section .modify-blk').hide();
@@ -376,6 +298,9 @@ jQuery(document).ready(function($) {
             if (rider.mileage_count > 0 || rider.leader_count > 0) {
                 $('#rider-edit-section .purge-btn').show();
                 $('#rider-edit-section .xfer-rs-btn').show();
+            }
+            else {
+                $('#rider-edit-section .delete-btn').show();
             }
         }
         else if (rider.user_profiles.length == 1) {
@@ -391,7 +316,7 @@ jQuery(document).ready(function($) {
             }
         }
         else if (rider.user_profiles.length > 1) {
-            $('#rider-edit-section .profile-msg').html("Warning, this rider's ID is used in multiple user profiles! This should be corrected, only once is allowed.");
+            $('#rider-edit-section .profile-msg').html("Warning, this rider's ID is used in multiple user accounts! This should be corrected, only once is allowed.");
         }
         if (!refresh_only) {
             $('#rider-inspect-section').hide('fast', function() {
@@ -581,6 +506,28 @@ jQuery(document).ready(function($) {
         );
     });
 
+    $('#rider-edit-section .delete-btn').on('click', function(evt) {
+        evt.preventDefault();
+        var action = '<?php echo admin_url('admin-ajax.php'); ?>';
+        var data = {
+            'action': 'pwtc_mileage_remove_rider',
+            'member_id': $('#rider-edit-section .rider-id').html(),
+            'nonce': '<?php echo wp_create_nonce('pwtc_mileage_remove_rider'); ?>'
+        };
+    <?php if ($plugin_options['disable_delete_confirm']) { ?>
+        $('body').addClass('waiting');
+        $.post(action, data, delete_rider_cb);
+    <?php } else { ?>
+        open_confirm_dialog(
+            'Are you sure you want to delete rider ' + data.member_id + '?', 
+            function() {
+                $('body').addClass('waiting');
+                $.post(action, data, delete_rider_cb);
+            }
+        );
+    <?php } ?>		
+    });
+
     if (history.pushState) {
 		$(window).on('popstate', function(evt) {
 			var state = evt.originalEvent.state;
@@ -659,12 +606,12 @@ if ($running_jobs > 0) {
         <p><div class="riders-div"></div></p>
     </div>
     <div id="rider-edit-section" class="initially-hidden">
-        <p>Use this page to inspect the ride sheet status and user profile of a rider.</p>
+        <p>Use this page to manage the identity information and user account linkage of a rider.</p>
 		<p><button class="back-btn button button-primary button-large">&lt; Back</button></p>  
 		<div class="report-sec">
 		    <h3>Rider <span class="rider-id"></span> - <span class="rider-name"></span></h3>
             <p>This rider expires on <strong><span class="exp-date"></span></strong>.</p> 
-            <p><div><button class="modify-btn button button-primary button-large">Modify</button>
+            <p><div><button class="modify-btn button button-primary button-large" title="Modify this rider's identity information.">Modify</button>
 		    <span class="modify-blk popup-frm initially-hidden">
 			<form class="modify-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
                 <span>First Name</span>
@@ -682,16 +629,17 @@ if ($running_jobs > 0) {
 		    </span></div></p>
             <p><span class="ridesheet-count"></span></p>
             <p>
+                <button class="delete-btn button button-primary button-large">Delete Rider</button>
                 <button class="purge-btn button button-primary button-large">Purge Rides</button>
-                <button class="xfer-rs-btn button button-primary button-large">Transfer Rides</button>
+                <button class="xfer-rs-btn button button-primary button-large" title="Transfer this rider's mileage to another rider.">Transfer Rides</button>
             </p>
         </div>
 		<div class="report-sec">
-		    <h3>User Profile</h3>
+		    <h3>User Account</h3>
             <p><span class="profile-msg"></span><div class="users-div"></div></p>
             <p>
-                <button class="sync-btn button button-primary button-large">Synchronize</button>
-                <button class="xfer-prof-btn button button-primary button-large">Transfer Profile</button>
+                <button class="sync-btn button button-primary button-large" title="Synchronize this rider's identity information with this user account.">Synchronize</button>
+                <button class="xfer-prof-btn button button-primary button-large" title="Transfer this user account to another rider.">Transfer User</button>
             </p>
         </div>
     </div>

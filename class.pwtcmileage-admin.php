@@ -703,15 +703,6 @@ class PwtcMileage_Admin {
 			else {
 				$note = 'cannot access membership';
 			}
-			/*
-			$role = '';
-			if (in_array('expired_member', $info->roles)) {
-				$role .= 'expired_member ';
-			}
-			if (in_array('current_member', $info->roles)) {
-				$role .= 'current_member ';
-			}
-			*/
 			$role = implode(", ", $info->roles);
 			$item = array(
 				'userid' => $profile->ID,
@@ -848,13 +839,6 @@ class PwtcMileage_Admin {
 							$more_details = $mode === 'update';
 							$not_found_msg = 'Insert/Update completed, but access of information for rider ' . $memberid . ' failed.';
 							$response = self::get_rider_details($memberid, $not_found_msg, $more_details);
-							/*
-							$response = array(
-								'member_id' => $memberid,
-								'lastname' => $lastname,
-								'firstname' => $firstname,
-								'exp_date' => $expdate);
-							*/
 							echo wp_json_encode($response);
 						}
 					}
@@ -955,13 +939,13 @@ class PwtcMileage_Admin {
 				$users = pwtc_mileage_lookup_user($memberid);
 				if (empty($users)) {
 					$response = array(
-						'error' => 'Cannot sync, no user profile found for rider ' . $memberid . '.'
+						'error' => 'Cannot sync, no user account found for rider ' . $memberid . '.'
 					);
 					echo wp_json_encode($response);
 				}
 				else if (count($users) > 1) {
 					$response = array(
-						'error' => 'Cannot sync, multiple user profiles found for rider ' . $memberid . '.'
+						'error' => 'Cannot sync, multiple user accounts found for rider ' . $memberid . '.'
 					);
 					echo wp_json_encode($response);
 				} 
@@ -989,14 +973,6 @@ class PwtcMileage_Admin {
 								pwtc_mileage_update_rider($memberid, $lastname, $firstname, $exp_date);
 								$not_found_msg = 'Sync completed, but access of information for rider ' . $memberid . ' failed.';
 								$response = self::get_rider_details($memberid, $not_found_msg, true);
-								/*
-								$response = array(
-									'member_id' => $memberid,
-									'firstname' => $firstname,
-									'lastname' => $lastname,
-									'exp_date' => $exp_date
-								);
-								*/
 								echo wp_json_encode($response);		
 							}
 							catch (Exception $e) {
@@ -1068,7 +1044,6 @@ class PwtcMileage_Admin {
 	}
 
 	public static function xfer_ridesheets_callback() {
-		//if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
 		if (!current_user_can('manage_options')) {
 			$response = array(
 				'error' => 'You are not allowed to transfer ridesheets.'
@@ -1107,7 +1082,7 @@ class PwtcMileage_Admin {
 				}
 				else {
 					$response = array(
-						'error' => 'Cannot transfer ridesheets, rider ' . $from_memberid . ' has a user profile.'
+						'error' => 'Cannot transfer ridesheets, rider ' . $from_memberid . ' has a user account.'
 					);
 					echo wp_json_encode($response);
 				}
@@ -1117,16 +1092,15 @@ class PwtcMileage_Admin {
 	}
 
 	public static function xfer_user_profile_callback() {
-		//if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
 		if (!current_user_can('manage_options')) {
 			$response = array(
-				'error' => 'You are not allowed to transfer user profiles.'
+				'error' => 'You are not allowed to transfer user accounts.'
 			);
 			echo wp_json_encode($response);
 		}
 		else if (!isset($_POST['from_memberid']) or !isset($_POST['to_memberid']) or !isset($_POST['nonce'])){
 			$response = array(
-				'error' => 'Input parameters needed to transfer user profiles are missing.'
+				'error' => 'Input parameters needed to transfer user accounts are missing.'
 			);
 			echo wp_json_encode($response);
 		}
@@ -1150,13 +1124,13 @@ class PwtcMileage_Admin {
 				$users = pwtc_mileage_lookup_user($from_memberid);
 				if (empty($users)) {
 					$response = array(
-						'error' => 'Cannot transfer, no user profile found for rider ' . $from_memberid . '.'
+						'error' => 'Cannot transfer, no user account found for rider ' . $from_memberid . '.'
 					);
 					echo wp_json_encode($response);
 				}
 				else if (count($users) > 1) {
 					$response = array(
-						'error' => 'Cannot transfer, multiple user profiles found for rider ' . $from_memberid . '.'
+						'error' => 'Cannot transfer, multiple user accounts found for rider ' . $from_memberid . '.'
 					);
 					echo wp_json_encode($response);
 				} 
@@ -1171,14 +1145,14 @@ class PwtcMileage_Admin {
 						}
 						else {
 							$response = array(
-								'error' => 'Cannot transfer, reset of user profile for rider ' . $from_memberid . ' failed.'
+								'error' => 'Cannot transfer, reset of user account for rider ' . $from_memberid . ' failed.'
 							);
 							echo wp_json_encode($response);	
 						}
 					}
 					else {
 						$response = array(
-							'error' => 'Cannot transfer, rider ' . $to_memberid . ' already has a user profile.'
+							'error' => 'Cannot transfer, rider ' . $to_memberid . ' already has a user account.'
 						);
 						echo wp_json_encode($response);	
 					}
@@ -1189,7 +1163,6 @@ class PwtcMileage_Admin {
 	}
 
 	public static function purge_rider_callback() {
-		//if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
 		if (!current_user_can('manage_options')) {
 			$response = array(
 				'error' => 'You are not allowed to purge ridesheets from riders.'
