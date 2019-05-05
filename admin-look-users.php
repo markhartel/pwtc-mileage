@@ -19,7 +19,7 @@ jQuery(document).ready(function($) {
 		$('#user-lookup-section .users-div').empty();
         if (users.length > 0) {
             $('#user-lookup-section .users-div').append('<table class="rwd-table">' +
-                '<tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Expiration Date</th><th>Role</th><th>Note</th></tr>' +
+                '<tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Role</th><th>Rider ID</th><th>Expiration Date</th><th>Note</th></tr>' +
                 '</table>');
             users.forEach(function(item) {
                 var fmtdate = '';
@@ -31,8 +31,9 @@ jQuery(document).ready(function($) {
                     '<td data-th="First Name">' + item.first_name + '</td>' +
                     '<td data-th="Last Name">' + item.last_name + '</td>' + 
                     '<td data-th="Email">' + item.email + '</td>' +
-                    '<td data-th="Expiration">' + fmtdate + '</td>' + 
                     '<td data-th="Role">' + item.role + '</td>' + 
+                    '<td data-th="Rider ID">' + item.riderid + '</td>' +
+                    '<td data-th="Expiration">' + fmtdate + '</td>' + 
                     '<td data-th="Note">' + item.note + '</td>' + 
                     '</tr>');    
             });
@@ -46,24 +47,22 @@ jQuery(document).ready(function($) {
 	function lookup_users_cb(response) {
         var res = JSON.parse(response);
         $("#user-lookup-section .search-frm input[name='memberid']").val(res.memberid);
+        $("#user-lookup-section .search-frm input[name='firstname']").val(res.firstname);
+        $("#user-lookup-section .search-frm input[name='lastname']").val(res.lastname);
 		populate_users_table(res.users);
         $('body').removeClass('waiting');
     }
 
     function load_user_table() {
-        var memberid = $("#user-lookup-section .search-frm input[name='memberid']").val().trim();
-        //if (memberid.length > 0) {
-            var action = $('#user-lookup-section .search-frm').attr('action');
-            var data = {
-                'action': 'pwtc_mileage_lookup_users',
-                'memberid': memberid
-            };
-            $('body').addClass('waiting');
-            $.post(action, data, lookup_users_cb); 
-        //}
-        //else {
-        //    $('#user-lookup-section .users-div').empty();  
-        //}  
+        var action = $('#user-lookup-section .search-frm').attr('action');
+        var data = {
+            'action': 'pwtc_mileage_lookup_users',
+            'memberid': $("#user-lookup-section .search-frm input[name='memberid']").val().trim(),
+            'firstname': $("#user-lookup-section .search-frm input[name='firstname']").val().trim(),
+            'lastname': $("#user-lookup-section .search-frm input[name='lastname']").val().trim()
+        };
+        $('body').addClass('waiting');
+        $.post(action, data, lookup_users_cb); 
     }
 
     $('#user-lookup-section .search-frm').on('submit', function(evt) {
@@ -91,12 +90,16 @@ if ($running_jobs > 0) {
 } else {
 ?>
     <div id='user-lookup-section'>
-        <p>Lookup the profile of users by their assigned rider ID. The membership expiration date of a rider is determined from their user profile.</p>
+        <p>Lookup user accounts by their first and last name or rider ID.</p>
         <div class='search-sec'>
         <p><strong>Enter search parameters to lookup users.</strong>
         	<form class="search-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
                 <span>Rider ID</span>
                 <input name="memberid" type="text"/>
+                <span>First Name</span>
+                <input name="firstname" type="text"/>
+                <span>Last Name</span>
+                <input name="lastname" type="text"/>
 				<input class="button button-primary" type="submit" value="Search"/>
 				<input class="reset-btn button button-primary" type="button" value="Reset"/>
 			</form>

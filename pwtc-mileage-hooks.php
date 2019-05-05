@@ -306,14 +306,35 @@ function pwtc_mileage_membership_is_expired($membership) {
     return $is_expired;
 }
 
-function pwtc_mileage_lookup_user($rider_id) {
+function pwtc_mileage_lookup_user($rider_id, $lastname = '', $firstname = '') {
     $query_args = [
         'meta_key' => 'last_name',
         'orderby' => 'meta_value',
         'order' => 'ASC'
     ];
     $query_args['meta_query'] = [];
-    if (empty($rider_id)) {
+    if (!empty($lastname) or !empty($firstname)) {
+        $query_args['meta_query'][] = [
+            'relation' => 'AND',
+            [
+                'key'     => 'first_name',
+                'value'   => $firstname,
+                'compare' => '=' 
+            ],
+            [
+                'key'     => 'last_name',
+                'value'   => $lastname,
+                'compare' => '='   
+            ] 
+        ];
+    }
+    if (!empty($rider_id)) {
+        $query_args['meta_query'][] = [
+            'key'     => 'rider_id',
+            'value'   => $rider_id
+        ];
+    }
+    else if (empty($lastname) and empty($firstname)) {
         $query_args['meta_query'][] = [
             'relation' => 'OR',
             [
@@ -324,12 +345,6 @@ function pwtc_mileage_lookup_user($rider_id) {
                 'key'     => 'rider_id',
                 'value'   => ''    
             ] 
-        ];
-    }
-    else {
-        $query_args['meta_query'][] = [
-            'key'     => 'rider_id',
-            'value'   => $rider_id
         ];
     }
     $user_query = new WP_User_Query( $query_args );

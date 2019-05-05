@@ -664,7 +664,7 @@ class PwtcMileage_Admin {
 			);
 			echo wp_json_encode($response);
 		}
-		else if (!isset($_POST['memberid'])) {
+		else if (!isset($_POST['memberid']) or !isset($_POST['firstname']) or !isset($_POST['lastname'])) {
 			$response = array(
 				'error' => 'Input parameters needed to lookup a rider are missing.'
 			);
@@ -672,18 +672,22 @@ class PwtcMileage_Admin {
 		}
 		else {
 			$memberid = sanitize_text_field($_POST['memberid']);
-			$users = self::lookup_user_memberships($memberid);
+			$firstname = sanitize_text_field($_POST['firstname']);
+			$lastname = sanitize_text_field($_POST['lastname']);
+			$users = self::lookup_user_memberships($memberid, $lastname, $firstname);
 			$response = array(
 				'memberid' => $memberid,
+				'firstname' => $firstname,
+				'lastname' => $lastname,
 				'users' => $users);
 			echo wp_json_encode($response);
 		}
 		wp_die();
 	}
 
-	public static function lookup_user_memberships($memberid) {
+	public static function lookup_user_memberships($memberid, $lastname = '', $firstname = '') {
 		$users = array();
-		$profiles = pwtc_mileage_lookup_user($memberid);
+		$profiles = pwtc_mileage_lookup_user($memberid, $lastname, $firstname);
 		foreach ($profiles as $profile) {
 			$info = get_userdata($profile->ID);
 			$note = '';
@@ -704,6 +708,10 @@ class PwtcMileage_Admin {
 				$note = 'cannot access membership';
 			}
 			$role = implode(", ", $info->roles);
+			$riderid = get_field('rider_id', 'user_'.$profile->ID);
+            if (!$riderid) {
+                $riderid = '';
+            }
 			$item = array(
 				'userid' => $profile->ID,
 				'first_name' => trim($info->first_name),
@@ -711,7 +719,8 @@ class PwtcMileage_Admin {
 				'email' => trim($info->user_email),
 				'expir_date' => $expir_date,
 				'note' => $note,
-				'role' => $role
+				'role' => $role,
+				'riderid' => $riderid
 			);
 			$users[] = $item;
 		}
