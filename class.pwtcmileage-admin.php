@@ -1075,10 +1075,29 @@ class PwtcMileage_Admin {
 			else {
 				$users = pwtc_mileage_lookup_user($from_memberid);
 				if (empty($users)) {
-					$response = array(
-						'error' => 'Operation currently not supported.'
-					);
-					echo wp_json_encode($response);
+					$status1 = PwtcMileage_DB::transfer_mileage_ownership($from_memberid, $to_memberid);
+					$status2 = PwtcMileage_DB::transfer_leader_ownership($from_memberid, $to_memberid);
+					if (false === $status1 and false === $status2) {
+						$response = array(
+							'error' => 'Transfer failed with a database error.'
+						);
+						echo wp_json_encode($response);
+					}
+					else {
+						$dberr = '';
+						if (false === $status1) {
+							$dberr = 'Transfer completed for ride leaders but failed for mileage.';
+						}
+						else if (false === $status2) {
+							$dberr = 'Transfer completed for mileage but failed for ride leaders.';
+						}
+						$not_found_msg = 'Transfer completed, but access of information for rider ' . $from_memberid . ' failed.';
+						$response = self::get_rider_details($from_memberid, $not_found_msg, true);
+						if (!empty($dberr)) {
+							$response['dberr'] = $dberr;
+						}
+						echo wp_json_encode($response);	
+					}
 				}
 				else {
 					$response = array(
@@ -1187,14 +1206,23 @@ class PwtcMileage_Admin {
 			else {
 				$users = pwtc_mileage_lookup_user($memberid);
 				if (empty($users)) {
-					$response = array(
-						'error' => 'Operation currently not supported.'
-					);
-					echo wp_json_encode($response);
+					$status1 = PwtcMileage_DB::purge_mileage($memberid);
+					$status2 = PwtcMileage_DB::purge_leaders($memberid);
+					if (false === $status1 or false === $status2) {
+						$response = array(
+							'error' => 'Purge failed with a database error.'
+						);
+						echo wp_json_encode($response);
+					}
+					else {
+						$not_found_msg = 'Purge completed, but access of information for rider ' . $memberid . ' failed.';
+						$response = self::get_rider_details($memberid, $not_found_msg, true);
+						echo wp_json_encode($response);	
+					}
 				}
 				else {
 					$response = array(
-						'error' => 'Cannot purge ridesheets, rider ' . $memberid . ' has a user profile.'
+						'error' => 'Cannot purge ridesheets, rider ' . $memberid . ' has a user account.'
 					);
 					echo wp_json_encode($response);
 				}

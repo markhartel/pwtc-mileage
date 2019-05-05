@@ -25,8 +25,9 @@ jQuery(document).ready(function($) {
 
     function lookup_riders_cb(response) {
         var res = JSON.parse(response);
-		var num_riders = populate_riders_table(res.members);
-        if (num_riders == 1) {
+        var num_riders = populate_riders_table(res.members);
+        var autoaccept = $("#rider-lookup-results .lookup-frm input[name='autoaccept']").val();
+        if (num_riders == 1 && autoaccept == 'yes') {
             $("#rider-lookup-results").dialog('close');
             if (window.pwtc_mileage_rider_cb) {
                 window.pwtc_mileage_rider_cb(res.members[0].member_id, 
@@ -108,6 +109,7 @@ jQuery(document).ready(function($) {
 <div class="loading"><div><i class="fa fa-spinner fa-pulse"></i> Please wait...</div></div>
 <div id="rider-lookup-results" title="Lookup Riders">
 	<form class="lookup-frm stacked-form" action="<?php echo admin_url('admin-ajax.php'); ?>" method="post">
+        <input type="hidden" name="autoaccept" value="yes"/>
         <span>ID</span>
         <input type="text" name="riderid"/>
         <span>First Name</span>

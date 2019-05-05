@@ -8,11 +8,13 @@ function lookup_pwtc_riders(mycb) {
 } 
 
 function lookup_pwtc_riders_all(mycb) {
+    jQuery("#rider-lookup-results .lookup-frm input[name='autoaccept']").val('no');
     jQuery("#rider-lookup-results .lookup-frm input[name='active']").prop('checked', false);
     lookup_pwtc_riders(mycb);
 }
 
 function lookup_pwtc_riders_active(mycb) {
+    jQuery("#rider-lookup-results .lookup-frm input[name='autoaccept']").val('no');
     jQuery("#rider-lookup-results .lookup-frm input[name='active']").prop('checked', true);
     lookup_pwtc_riders(mycb);
 }

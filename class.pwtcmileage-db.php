@@ -842,6 +842,45 @@ class PwtcMileage_DB {
 		return $results;
 	}
 
+	public static function transfer_mileage_ownership($from_memberid, $to_memberid) {
+		global $wpdb;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+	 	$status = $wpdb->query($wpdb->prepare('update ' . $mileage_table . 
+			 ' set member_id = %s where member_id = %s', $to_memberid, $from_memberid));
+	 	return $status;
+	}
+	
+	public static function purge_mileage($memberid) {
+    	global $wpdb;
+		$mileage_table = $wpdb->prefix . self::MILEAGE_TABLE;
+		$status = $wpdb->query($wpdb->prepare('delete from ' . $mileage_table . 
+			' where member_id = %s', $memberid));
+		return $status;
+	}
+
+	public static function transfer_leader_ownership($from_memberid, $to_memberid) {
+		global $wpdb;
+		$show_flag = $wpdb->show_errors;
+		if ($show_flag) {
+			$wpdb->hide_errors();
+		}
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+	 	$status = $wpdb->query($wpdb->prepare('update ' . $leader_table . 
+			 ' set member_id = %s where member_id = %s', $to_memberid, $from_memberid));
+		if ($show_flag) {
+			$wpdb->show_errors();
+		}
+	 	return $status;
+	}
+	
+	public static function purge_leaders($memberid) {
+    	global $wpdb;
+		$leader_table = $wpdb->prefix . self::LEADER_TABLE;
+		$status = $wpdb->query($wpdb->prepare('delete from ' . $leader_table . 
+			' where member_id = %s', $memberid));
+		return $status;
+	}
+
 	public static function update_ride($rideid, $title, $date, $postid=0) {
 		global $wpdb;
 		$ride_table = $wpdb->prefix . self::RIDE_TABLE;

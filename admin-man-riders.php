@@ -210,7 +210,7 @@ jQuery(document).ready(function($) {
             open_error_dialog(res.error);
 		}
 		else {
-            //TODO: implement this!
+            show_rider_section(res, true);
         }
 	}   
 
@@ -232,7 +232,7 @@ jQuery(document).ready(function($) {
             open_error_dialog(res.error);
 		}
 		else {
-            //TODO: implement this!
+            show_rider_section(res, true);
         }
 	}   
 
@@ -284,6 +284,9 @@ jQuery(document).ready(function($) {
         }
         else {
             $('#rider-edit-section .ridesheet-count').html('This rider has mileage on <strong>' + rider.mileage_count + '</strong> ride sheets and appears as a ride leader on <strong>' + rider.leader_count + '</strong> ride sheets.');
+        }
+        if (rider.dberr) {
+            $('#rider-edit-section .ridesheet-count').append(' <strong>Warning: ' + rider.dberr + '</strong>');
         }
         populate_users_table(rider.user_profiles);
         $('#rider-edit-section .profile-msg').empty();
