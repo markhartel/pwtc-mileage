@@ -18,13 +18,21 @@ jQuery(document).ready(function($) {
 	function populate_users_table(users) {
 		$('#user-lookup-section .users-div').empty();
         if (users.length > 0) {
+            var action_label = '';
+            if (users[0].editurl) {
+                action_label = '<th>Actions</th>';
+            }
             $('#user-lookup-section .users-div').append('<table class="rwd-table">' +
-                '<tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Role</th><th>Rider ID</th><th>Expiration Date</th><th>Note</th></tr>' +
+                '<tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Role</th><th>Rider ID</th><th>Expiration Date</th><th>Note</th>' + action_label + '</tr>' +
                 '</table>');
             users.forEach(function(item) {
                 var fmtdate = '';
                 if (item.expir_date.length > 0) {
                     fmtdate = getPrettyDate(item.expir_date);
+                }
+                var action_link = '';
+                if (item.editurl) {
+                    action_link = '<td data-th="Actions">' + item.editurl + '</td>';
                 }
                 $('#user-lookup-section .users-div table').append(
                     '<tr userid="' + item.userid + '">' + 
@@ -34,7 +42,7 @@ jQuery(document).ready(function($) {
                     '<td data-th="Role">' + item.role + '</td>' + 
                     '<td data-th="Rider ID">' + item.riderid + '</td>' +
                     '<td data-th="Expiration">' + fmtdate + '</td>' + 
-                    '<td data-th="Note">' + item.note + '</td>' + 
+                    '<td data-th="Note">' + item.note + '</td>' + action_link +
                     '</tr>');    
             });
         }
@@ -54,12 +62,17 @@ jQuery(document).ready(function($) {
     }
 
     function load_user_table() {
+        var exact = false;
+        if ($("#user-lookup-section .search-frm input[name='exact']").is(':checked')) {
+            exact = true;
+        }
         var action = $('#user-lookup-section .search-frm').attr('action');
         var data = {
             'action': 'pwtc_mileage_lookup_users',
             'memberid': $("#user-lookup-section .search-frm input[name='memberid']").val().trim(),
             'firstname': $("#user-lookup-section .search-frm input[name='firstname']").val().trim(),
-            'lastname': $("#user-lookup-section .search-frm input[name='lastname']").val().trim()
+            'lastname': $("#user-lookup-section .search-frm input[name='lastname']").val().trim(),
+            'exact': exact
         };
         $('body').addClass('waiting');
         $.post(action, data, lookup_users_cb); 
@@ -100,6 +113,10 @@ if ($running_jobs > 0) {
                 <input name="firstname" type="text"/>
                 <span>Last Name</span>
                 <input name="lastname" type="text"/>
+		        <span>Exact Match</span>
+		        <span class="checkbox-wrap">
+			        <input type="checkbox" name="exact" checked/>
+		        </span>
 				<input class="button button-primary" type="submit" value="Search"/>
 				<input class="reset-btn button button-primary" type="button" value="Reset"/>
 			</form>

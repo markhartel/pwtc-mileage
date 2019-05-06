@@ -19,22 +19,29 @@ jQuery(document).ready(function($) {
 	function populate_users_table(users) {
         $('#rider-edit-section .users-div').empty();
         if (users.length > 0) {
+            var action_label = '';
+            if (users[0].editurl) {
+                action_label = '<th>Actions</th>';
+            }
             $('#rider-edit-section .users-div').append('<table class="rwd-table">' +
-                '<tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Expiration Date</th><th>Role</th><th>Note</th></tr>' +
-                '</table>');
+                '<tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Role</th><th>Expiration Date</th><th>Note</th>' + action_label + '</tr></table>');
             users.forEach(function(item) {
                 var fmtdate = '';
                 if (item.expir_date.length > 0) {
                     fmtdate = getPrettyDate(item.expir_date);
+                }
+                var action_link = '';
+                if (item.editurl) {
+                    action_link = '<td data-th="Actions">' + item.editurl + '</td>';
                 }
                 $('#rider-edit-section .users-div table').append(
                     '<tr userid="' + item.userid + '">' + 
                     '<td data-th="First Name">' + item.first_name + '</td>' +
                     '<td data-th="Last Name">' + item.last_name + '</td>' + 
                     '<td data-th="Email">' + item.email + '</td>' +
-                    '<td data-th="Expiration">' + fmtdate + '</td>' + 
                     '<td data-th="Role">' + item.role + '</td>' + 
-                    '<td data-th="Note">' + item.note + '</td>' + 
+                    '<td data-th="Expiration">' + fmtdate + '</td>' + 
+                    '<td data-th="Note">' + item.note + '</td>' + action_link +
                     '</tr>');    
             });
         }
@@ -447,7 +454,7 @@ jQuery(document).ready(function($) {
             'nonce': '<?php echo wp_create_nonce('pwtc_mileage_sync_rider'); ?>'
         };
         open_confirm_dialog(
-            'Are you sure you want to sync rider ' + data.member_id + ' with their user profile record (first name, last name and expiration date?)', 
+            'Are you sure you want to sync rider ' + data.member_id + ' with their users account data (first name, last name and expiration date?)', 
             function() {
                 $('body').addClass('waiting');
                 $.post(action, data, sync_rider_cb);
@@ -465,7 +472,7 @@ jQuery(document).ready(function($) {
                 'nonce': '<?php echo wp_create_nonce('pwtc_mileage_xfer_ridesheets'); ?>'
             };
             open_confirm_dialog(
-                "Are you sure you want to transfer this rider's ridesheet entries to rider <strong>" + riderid + "</strong> - <strong>" + name + "</strong>?", 
+                "WARNING: this operation will transfer all of this rider's ridesheet entries to rider <strong>" + riderid + "</strong> - <strong>" + name + "</strong>. Do you want to continue?", 
                 function() {
                     $('body').addClass('waiting');
                     $.post(action, data, xfer_ridersheets_cb);
@@ -484,7 +491,7 @@ jQuery(document).ready(function($) {
                 'nonce': '<?php echo wp_create_nonce('pwtc_mileage_xfer_user_profile'); ?>'
             };
             open_confirm_dialog(
-                "Are you sure you want to transfer this rider's user profile to rider <strong>" + riderid + "</strong> - <strong>" + name + "</strong>?", 
+                "Are you sure you want to transfer this rider's user account to rider <strong>" + riderid + "</strong> - <strong>" + name + "</strong>?", 
                 function() {
                     $('body').addClass('waiting');
                     $.post(action, data, xfer_user_profile_cb);
@@ -501,7 +508,7 @@ jQuery(document).ready(function($) {
             'nonce': '<?php echo wp_create_nonce('pwtc_mileage_purge_rider'); ?>'
         };
         open_confirm_dialog(
-            "Are you sure you want to purge this rider's ridesheet entries?", 
+            "WARNING: this operation will delete all of this rider's ridesheet entries. Do you want to continue?", 
             function() {
                 $('body').addClass('waiting');
                 $.post(action, data, purge_rider_cb);

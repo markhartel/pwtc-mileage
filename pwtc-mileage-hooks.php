@@ -306,32 +306,36 @@ function pwtc_mileage_membership_is_expired($membership) {
     return $is_expired;
 }
 
-function pwtc_mileage_lookup_user($rider_id, $lastname = '', $firstname = '') {
+function pwtc_mileage_lookup_user($rider_id, $lastname = '', $firstname = '', $exact = true) {
+    $compare = 'LIKE';
+    if ($exact) {
+        $compare = '=';
+    }
     $query_args = [
         'meta_key' => 'last_name',
         'orderby' => 'meta_value',
         'order' => 'ASC'
     ];
     $query_args['meta_query'] = [];
-    if (!empty($lastname) or !empty($firstname)) {
+    if (!empty($lastname)) {
         $query_args['meta_query'][] = [
-            'relation' => 'AND',
-            [
-                'key'     => 'first_name',
-                'value'   => $firstname,
-                'compare' => '=' 
-            ],
-            [
-                'key'     => 'last_name',
-                'value'   => $lastname,
-                'compare' => '='   
-            ] 
+            'key'     => 'last_name',
+            'value'   => $lastname,
+            'compare' => $compare   
+        ];
+    }
+    if (!empty($firstname)) {
+        $query_args['meta_query'][] = [
+            'key'     => 'first_name',
+            'value'   => $firstname,
+            'compare' => $compare 
         ];
     }
     if (!empty($rider_id)) {
         $query_args['meta_query'][] = [
             'key'     => 'rider_id',
-            'value'   => $rider_id
+            'value'   => $rider_id,
+            'compare' => $compare 
         ];
     }
     else if (empty($lastname) and empty($firstname)) {

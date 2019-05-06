@@ -664,7 +664,7 @@ class PwtcMileage_Admin {
 			);
 			echo wp_json_encode($response);
 		}
-		else if (!isset($_POST['memberid']) or !isset($_POST['firstname']) or !isset($_POST['lastname'])) {
+		else if (!isset($_POST['memberid']) or !isset($_POST['firstname']) or !isset($_POST['lastname']) or !isset($_POST['exact'])) {
 			$response = array(
 				'error' => 'Input parameters needed to lookup a rider are missing.'
 			);
@@ -674,7 +674,8 @@ class PwtcMileage_Admin {
 			$memberid = sanitize_text_field($_POST['memberid']);
 			$firstname = sanitize_text_field($_POST['firstname']);
 			$lastname = sanitize_text_field($_POST['lastname']);
-			$users = self::lookup_user_memberships($memberid, $lastname, $firstname);
+			$exact = $_POST['exact'] == 'true' ? true : false;
+			$users = self::lookup_user_memberships($memberid, $lastname, $firstname, $exact);
 			$response = array(
 				'memberid' => $memberid,
 				'firstname' => $firstname,
@@ -685,9 +686,10 @@ class PwtcMileage_Admin {
 		wp_die();
 	}
 
-	public static function lookup_user_memberships($memberid, $lastname = '', $firstname = '') {
+	public static function lookup_user_memberships($memberid, $lastname = '', $firstname = '', $exact = true) {
+		$add_edit_link = current_user_can('manage_options');
 		$users = array();
-		$profiles = pwtc_mileage_lookup_user($memberid, $lastname, $firstname);
+		$profiles = pwtc_mileage_lookup_user($memberid, $lastname, $firstname, $exact);
 		foreach ($profiles as $profile) {
 			$info = get_userdata($profile->ID);
 			$note = '';
@@ -722,6 +724,11 @@ class PwtcMileage_Admin {
 				'role' => $role,
 				'riderid' => $riderid
 			);
+			if ($add_edit_link) {
+				$href = admin_url('user-edit.php?user_id=' . $profile->ID);
+				$edit_url = '<a title="Edit user account profile." target="_blank" href="' . $href . '">Edit</a>';
+				$item['editurl'] = $edit_url;
+			}
 			$users[] = $item;
 		}
 		return $users;
@@ -912,7 +919,7 @@ class PwtcMileage_Admin {
 					}
 					else {
 						$response = array(
-							'error' => 'Cannot delete a rider that is referenced in a user profile.'
+							'error' => 'Cannot delete a rider that is referenced in a user account.'
 						);
 						echo wp_json_encode($response);	
 					}
@@ -1360,17 +1367,17 @@ class PwtcMileage_Admin {
 				if ($plugin_options['user_lookup_mode'] == 'woocommerce') {
 					$users = pwtc_mileage_lookup_user($r['member_id']);
 					if (empty($users)) {
-						$errormsg = $name . ' has no user profile and therefore no membership.';
+						$errormsg = $name . ' has no user account and therefore no membership.';
 					}
 					else if (count($users) > 1) {
-						$errormsg = 'Found multiple user profiles for ' . $name . ', notify website admin to correct.';
+						$errormsg = 'Found multiple user accounts for ' . $name . ', notify website admin to correct.';
 					}
 					else {
 						$user = $users[0];
 						if (function_exists('wc_memberships_get_user_memberships')) {
 							$memberships = wc_memberships_get_user_memberships($user->ID);
 							if (empty($memberships)) {
-								$errormsg = $name . ' has a user profile but no membership.';
+								$errormsg = $name . ' has a user account but no membership.';
 							}
 							else if (count($memberships) > 1) {
 								$errormsg = $name . ' has multiple memberships, notify website admin to correct.';
