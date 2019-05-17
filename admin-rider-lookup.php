@@ -116,7 +116,7 @@ jQuery(document).ready(function($) {
         <input type="text" name="firstname"/>
         <span>Last Name</span>
         <input type="text" name="lastname"/>
-        <span>Active Members Only</span>
+        <span>Active Riders Only</span>
         <span class="checkbox-wrap">
             <input type="checkbox" name="active" checked/>
         </span>

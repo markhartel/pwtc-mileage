@@ -2,7 +2,7 @@
 /*
 Plugin Name: PWTC Mileage
 Description: Stores and manages the mileage of PWTC club members
-Version: 1.3
+Version: 1.4
 Author: Mark Hartel
 */
 

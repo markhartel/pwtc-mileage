@@ -454,7 +454,7 @@ jQuery(document).ready(function($) {
             'nonce': '<?php echo wp_create_nonce('pwtc_mileage_sync_rider'); ?>'
         };
         open_confirm_dialog(
-            'Are you sure you want to sync rider ' + data.member_id + ' with their users account data (first name, last name and expiration date?)', 
+            'Are you sure you want to sync rider ' + data.member_id + ' with their user account data (first name, last name and expiration date?)', 
             function() {
                 $('body').addClass('waiting');
                 $.post(action, data, sync_rider_cb);
@@ -584,7 +584,7 @@ if ($running_jobs > 0) {
                 <span>Last Name</span>
                 <input name="lastname" type="text"/>
     <?php if ($plugin_options['user_lookup_mode'] != 'woocommerce') { ?>
-		        <span>Active Members Only</span>
+		        <span>Active Riders Only</span>
 		        <span class="checkbox-wrap">
 			        <input type="checkbox" name="active"/>
 		        </span>

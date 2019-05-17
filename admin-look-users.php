@@ -62,20 +62,28 @@ jQuery(document).ready(function($) {
     }
 
     function load_user_table() {
+        var memberid = $("#user-lookup-section .search-frm input[name='memberid']").val().trim();
+        var firstname = $("#user-lookup-section .search-frm input[name='firstname']").val().trim();
+        var lastname = $("#user-lookup-section .search-frm input[name='lastname']").val().trim();
         var exact = false;
         if ($("#user-lookup-section .search-frm input[name='exact']").is(':checked')) {
             exact = true;
         }
-        var action = $('#user-lookup-section .search-frm').attr('action');
-        var data = {
-            'action': 'pwtc_mileage_lookup_users',
-            'memberid': $("#user-lookup-section .search-frm input[name='memberid']").val().trim(),
-            'firstname': $("#user-lookup-section .search-frm input[name='firstname']").val().trim(),
-            'lastname': $("#user-lookup-section .search-frm input[name='lastname']").val().trim(),
-            'exact': exact
-        };
-        $('body').addClass('waiting');
-        $.post(action, data, lookup_users_cb); 
+        if (memberid.length > 0 || lastname.length > 0 || firstname.length > 0) {
+            var action = $('#user-lookup-section .search-frm').attr('action');
+            var data = {
+                'action': 'pwtc_mileage_lookup_users',
+                'memberid': memberid,
+                'firstname': firstname,
+                'lastname': lastname,
+                'exact': exact
+            };
+            $('body').addClass('waiting');
+            $.post(action, data, lookup_users_cb);
+        }
+        else {
+            $('#user-lookup-section .users-div').empty();
+        } 
     }
 
     $('#user-lookup-section .search-frm').on('submit', function(evt) {

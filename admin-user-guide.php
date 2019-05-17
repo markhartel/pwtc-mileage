@@ -152,7 +152,7 @@ jQuery(document).ready(function($) {
         that rider. If multiple matches are found, they will be listed below and one can be 
         selected which will close the dialog and return that rider.</p>
         <p>You can also restrict the search results to riders who have current active 
-        membership by checking the <em>Active Members Only</em> checkbox.</p>
+        membership by checking the <em>Active Riders Only</em> checkbox.</p>
         </div>
         <?php if ($show_updmembs) { ?>
         <h3><a href="#">add a new rider?</a></h3>
@@ -189,7 +189,7 @@ jQuery(document).ready(function($) {
             <li>Select the <em>Manage Riders</em> item under the <em>Rider Mileage</em> submenu.</li>
             <li>A page displays that shows a search form for existing riders.</li>
             <li>Type the rider's ID number into the <em>ID</em> search field.</li>
-            <li>Make sure that the <em>Active Members Only</em> checkbox is unchecked.</li>
+            <li>Make sure that the <em>Active Riders Only</em> checkbox is unchecked.</li>
             <li>Press the <em>Search</em> button.</li>
             <li>A table should appear at the bottom of the page containing the rider's data record.</li>
             <li>The rider's expiration date is listed in the table, to change it click the <em>Edit</em> link in the <em>Actions</em> column.</li>
