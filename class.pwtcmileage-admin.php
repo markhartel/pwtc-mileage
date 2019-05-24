@@ -1930,12 +1930,14 @@ class PwtcMileage_Admin {
     	$function = array( 'PwtcMileage_Admin', 'page_manage_riders');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
+		/*
 		$page_title = $plugin_options['plugin_menu_label'] . ' - Lookup Users';
     	$menu_title = 'Lookup Users';
     	$menu_slug = 'pwtc_mileage_lookup_users';
     	$capability = PwtcMileage::EDIT_RIDERS_CAP;
     	$function = array( 'PwtcMileage_Admin', 'page_lookup_users');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
+		*/
 
     	$page_title = $plugin_options['plugin_menu_label'] . ' - View Reports';
     	$menu_title = 'View Reports';
