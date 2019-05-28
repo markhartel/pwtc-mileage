@@ -125,6 +125,7 @@ class PwtcMileage {
 			return;
 		}
 
+		/*
 		if (!in_array('customer', $user_data->roles)) {
 			$user_data->add_role('customer');
 		}
@@ -145,6 +146,7 @@ class PwtcMileage {
 				$user_data->remove_role('expired_member');
 			}
 		}
+		*/
 
 		$expdate = pwtc_mileage_get_expiration_date($user_membership);
 
@@ -198,6 +200,7 @@ class PwtcMileage {
 			return;
 		}
 
+		/*
 		if (!in_array('customer', $user_data->roles)) {
 			$user_data->add_role('customer');
 		}
@@ -218,6 +221,7 @@ class PwtcMileage {
 				$user_data->remove_role('expired_member');
 			}
 		}
+		*/
 
 		if ($update_rider) {
 			$rider_id = get_field('rider_id', 'user_'.$user_id);
@@ -267,6 +271,7 @@ class PwtcMileage {
 				continue;			
 			}
 
+			/*
 			if ($expired) {
 				if (!in_array('expired_member', $user_data->roles)) {
 					$user_data->add_role('expired_member');
@@ -283,6 +288,7 @@ class PwtcMileage {
 					$user_data->remove_role('expired_member');
 				}
 			}
+			*/
 		
 			$rider_id = get_field('rider_id', 'user_'.$user_id);
 			if ($rider_id) {
@@ -330,12 +336,14 @@ class PwtcMileage {
 			return;			
 		}
 
+		/*
 		if (in_array('expired_member', $user_data->roles)) {
 			$user_data->remove_role('expired_member');
 		}
 		if (in_array('current_member', $user_data->roles)) {
 			$user_data->remove_role('current_member');
 		}
+		*/
 
 		if ($update_rider) {
 			$rider_id = get_field('rider_id', 'user_'.$user_id);

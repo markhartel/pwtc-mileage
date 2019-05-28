@@ -42,8 +42,10 @@ class PwtcMileage_Admin {
 			array( 'PwtcMileage_Admin', 'next_rider_id_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_riders', 
 			array( 'PwtcMileage_Admin', 'lookup_riders_callback') );
+		/*
 		add_action( 'wp_ajax_pwtc_mileage_lookup_users', 
 			array( 'PwtcMileage_Admin', 'lookup_users_callback') );
+		*/
 		add_action( 'wp_ajax_pwtc_mileage_create_rider', 
 			array( 'PwtcMileage_Admin', 'create_rider_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_rider', 
@@ -657,6 +659,7 @@ class PwtcMileage_Admin {
 		wp_die();
 	}
 
+	/*
 	public static function lookup_users_callback() {
 		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
 			$response = array(
@@ -685,11 +688,14 @@ class PwtcMileage_Admin {
 		}
 		wp_die();
 	}
+	*/
 
-	public static function lookup_user_memberships($memberid, $lastname = '', $firstname = '', $exact = true) {
+	//public static function lookup_user_memberships($memberid, $lastname = '', $firstname = '', $exact = true) {
+	public static function lookup_user_memberships($memberid) {
 		$add_edit_link = current_user_can('manage_options');
 		$users = array();
-		$profiles = pwtc_mileage_lookup_user($memberid, $lastname, $firstname, $exact);
+		//$profiles = pwtc_mileage_lookup_user($memberid, $lastname, $firstname, $exact);
+		$profiles = pwtc_mileage_lookup_user($memberid);
 		foreach ($profiles as $profile) {
 			$info = get_userdata($profile->ID);
 			$note = '';
@@ -2008,12 +2014,14 @@ class PwtcMileage_Admin {
 		include('admin-man-riders.php');
 	}
 
+	/*
 	public static function page_lookup_users() {
 		$plugin_options = PwtcMileage::get_plugin_options();
 		$running_jobs = PwtcMileage_DB::num_running_jobs();
 		$capability = PwtcMileage::EDIT_RIDERS_CAP;
 		include('admin-look-users.php');
 	}
+	*/
 
 	public static function write_export_pdf_file($pdf, $data, $header, $title, $width, $align) {
 		$rows_per_page = 40;
