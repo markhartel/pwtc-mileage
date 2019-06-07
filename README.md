@@ -1,5 +1,5 @@
 # PWTC Mileage 
-This is a Wordpress plugin used to record, manage and report the mileage of riders in the [Portland Wheelmen Touring Club](http://pwtc.com).
+This is a Wordpress plugin used to record, manage and report the mileage of riders for the [Portland Bicycling Club](https://portlandbicyclingclub.com).
 
 ## Installation
 Download this distribution as a zip file, login to the pwtc.com Wordpress website as 
