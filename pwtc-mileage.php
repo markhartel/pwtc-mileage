@@ -2,7 +2,7 @@
 /*
 Plugin Name: PWTC Mileage
 Plugin URI: https://github.com/markhartel/pwtc-mileage
-Description: Stores and manages the mileage of Portland Bicycle Club members
+Description: Stores and manages the mileage of Portland Bicycling Club members.
 Version: 1.4
 Author: Mark Hartel
 */
