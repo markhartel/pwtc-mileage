@@ -401,21 +401,14 @@ class PwtcMileage {
 					$h_card = 60;
 					$pdf->Rect($x_off, $y_off, $w_card, $h_card);
 					$w_sub = (int)($w_card * 0.3);
-					$pdf->SetFillColor(255, 0, 0);
-					$pdf->Rect($x_off, $y_off, $w_sub, $h_card, 'F');
-					$pdf->Image(PWTC_MILEAGE__PLUGIN_DIR . 'pwtc_logo.png', $x_off + 2, $y_off + 10, $w_sub - 2, $w_sub - 2);
-					$pdf->SetFont('Arial', 'B', 20);
-					$pdf->SetTextColor(255, 255, 255);
-					$pdf->Text($x_off + 7, $y_off + 45, 'PBC');
-					$pdf->SetTextColor(0, 0, 0);
+					$pdf->Rect($x_off, $y_off, $w_sub, $h_card);
+					$pdf->Image(PWTC_MILEAGE__PLUGIN_DIR . 'pbc_logo.png', $x_off + 1, $y_off + 10, $w_sub - 2, $w_sub - 2);
+					$pdf->SetXY($x_off, $y_off + 38);
+					$pdf->SetFont('Arial', '', 12);
+					$pdf->MultiCell($w_sub, 5, 'Portland Bicycling Club', 0, 'C');
 					$pdf->SetXY($x_off + $w_sub, $y_off + 8);
 					$pdf->SetFont('Arial', 'I', 18);
 					$pdf->MultiCell($w_card - $w_sub, 10, $name, 0,'C');
-					/*
-					$pdf->Cell($w_card - $w_sub, 10, $firstname, 0, 0,'C');
-					$pdf->SetXY($x_off + $w_sub, $y_off + 15);
-					$pdf->Cell($w_card - $w_sub, 10, $lastname, 0, 0,'C');
-					*/
 					$pdf->SetFont('Arial', '', 14);
 					$pdf->Text($x_off + $w_sub + 25, $y_off + 34, $_POST['rider_id']);
 					$pdf->Text($x_off + $w_sub + 40, $y_off + 50, $fmtdate);
@@ -433,7 +426,7 @@ class PwtcMileage {
 					$pdf->Cell($w_card, 6, 'Portland Bicycling Club', 0, 2,'C');
 					$pdf->SetFont('Arial', 'U', 12);
 					$pdf->SetTextColor(0, 0, 255);
-					$pdf->Cell($w_card, 6, 'portlandbicyclingclub.com', 0, 2,'C');
+					$pdf->Cell($w_card, 6, 'PortlandBicyclingClub.com', 0, 2,'C');
 					$pdf->SetFont('Arial', '', 12);
 					$pdf->SetTextColor(0, 0, 0);
 					$pdf->Cell($w_card, 6, 'Information Hotline: 503.666.5796', 0, 2,'C');
