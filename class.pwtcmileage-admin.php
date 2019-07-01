@@ -70,6 +70,10 @@ class PwtcMileage_Admin {
 			array( 'PwtcMileage_Admin', 'add_mileage_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_generate_report', 
 			array( 'PwtcMileage_Admin', 'generate_report_callback') );
+
+		add_action( 'wc_memberships_for_teams_process_team_meta', 
+			array( 'PwtcMileage_Admin', 'process_team_meta_callback' ), 999, 2 );
+
     }    
 
 	/*************************************************************/
@@ -99,6 +103,16 @@ class PwtcMileage_Admin {
 	/*************************************************************/
 	/* Ajax callback functions
 	/*************************************************************/
+
+	public function process_team_meta_callback( $post_id, \WP_Post $post ) {
+		$team = wc_memberships_for_teams_get_team( $post->ID );
+		if ($team) {
+			$user_memberships = $team->get_user_memberships();
+			foreach ( $user_memberships as $user_membership ) {
+				PwtcMileage::adjust_team_member_data_callback(false, $team, $user_membership);
+			}	
+		}
+	}
 
 	public static function lookup_posts_callback() {
 		if (!current_user_can(PwtcMileage::EDIT_MILEAGE_CAP)) {
