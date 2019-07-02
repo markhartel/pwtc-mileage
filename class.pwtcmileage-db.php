@@ -161,39 +161,6 @@ class PwtcMileage_DB {
 		return $meta;		
 	}
 
-/*
-	public static function fetch_member_by_role($roles) {
-        $results = array();
-        $query_args = [
-            'meta_key' => 'last_name',
-            'orderby' => 'meta_value',
-			'order' => 'ASC',
-			'role__in' => $roles
-		];
-        $user_query = new WP_User_Query( $query_args );
-        $members = $user_query->get_results();
-        if ( !empty($members) ) {
-            foreach ( $members as $member ) {
-                $member_info = get_userdata( $member->ID );
-				array_push($results, array($member_info->last_name, $member_info->first_name, $member_info->user_email));
-            }
-		}
-		return $results;
-	}
-
-	public static function meta_member_by_role($title) {
-		$meta = array(
-			'header' => array('Last Name', 'First Name', 'Email'),
-			'width' => array(30, 30, 40),
-			'align' => array('L', 'L', 'L'),
-			'title' => $title,
-			'date_idx' => -1,
-			'id_idx' => -1
-		);
-		return $meta;		
-	}
-*/
-
 	public static function fetch_annual_accum_miles($outtype, $min = 0, $no_id = false) {
     	global $wpdb;
 		$where = 'where a.mileage > 0';

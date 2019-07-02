@@ -80,14 +80,10 @@ class PwtcMileage {
 				array('PwtcMileage', 'membership_created_callback'), 10, 2);
 			add_action('wc_memberships_user_membership_created', 
 				array('PwtcMileage', 'membership_created_callback'), 10, 2);
-			//add_action('wc_memberships_user_membership_status_changed', 
-			//	array('PwtcMileage', 'membership_updated_callback'));
 			add_action('wc_memberships_csv_import_user_membership', 
 				array('PwtcMileage', 'membership_updated_callback'));
 			add_action('wc_memberships_user_membership_deleted', 
 				array('PwtcMileage', 'membership_deleted_callback'));
-//			add_action('wc_memberships_for_teams_team_saved', 
-//				array('PwtcMileage', 'membership_team_created_callback'));
 			add_action('wc_memberships_for_teams_add_team_member', 
 				array('PwtcMileage', 'adjust_team_member_data_callback' ), 10, 3);
 			add_action('wc_memberships_for_teams_team_created', 
@@ -198,66 +194,6 @@ class PwtcMileage {
 			}
 		}
 	}
-/*
-	public static function membership_team_created_callback($team) {
-		$update_rider = true;
-		$log_updates = false;
-		$datetime = $team->get_local_membership_end_date('mysql');
-		if ($datetime) {
-			$pieces = explode(' ', $datetime);
-			$expdate = $pieces[0];
-		}
-		else {
-			$expdate = '2099-01-01';
-		}
-		$expired = $team->is_membership_expired();
-		$user_memberships = $team->get_user_memberships();
-
-		foreach ( $user_memberships as $user_membership ) {
-			$user_id = $user_membership->get_user_id();
-			$user_data = get_userdata($user_id);
-			if (!$user_data) {
-				pwtc_mileage_write_log('membership_team_created_callback: cannot get user data for id ' . $user_id);
-				continue;			
-			}
-		
-			$rider_id = get_field('rider_id', 'user_'.$user_id);
-			if ($rider_id) {
-				$rider_id = trim($rider_id);
-			}
-			else {
-				$rider_id = '';
-			}
-			if (empty($rider_id)) {
-				try {
-					$new_rider_id = pwtc_mileage_insert_new_rider(
-						$user_data->last_name, $user_data->first_name, $expdate);
-					update_field('rider_id', $new_rider_id, 'user_'.$user_id);
-					$user_membership->add_note('PWTC Mileage plugin assigned new Rider ID ' . $new_rider_id . ' to this member.');
-				}
-				catch (Exception $e) {
-					$msg = $e->getMessage();
-					$user_membership->add_note('PWTC Mileage plugin error assigning new Rider ID to this member: ' . $msg);
-					pwtc_mileage_write_log('membership_team_created_callback: ' . $msg);
-				}
-			}
-			else if ($update_rider) {
-				try {
-					pwtc_mileage_update_rider(
-						$rider_id, $user_data->last_name, $user_data->first_name, $expdate);
-					if ($log_updates) {
-						$user_membership->add_note('PWTC Mileage plugin updated information for Rider ID ' . $rider_id);
-					}
-				}
-				catch (Exception $e) {
-					$msg = $e->getMessage();
-					$user_membership->add_note('PWTC Mileage plugin error updating information for Rider ID ' . $rider_id . ': ' . $msg);
-					pwtc_mileage_write_log('membership_team_created_callback: ' . $msg);
-				}
-			}	
-		}
-	}
-*/
 
 	public static function membership_deleted_callback($user_membership) {
 		$update_rider = false;
@@ -423,7 +359,6 @@ class PwtcMileage {
 					$pdf->SetTextColor(0, 0, 0);
 					$pdf->SetXY($x_off, $y_off + $h_card*2);
 					$pdf->Cell($w_card, 10, 'To assemble card, cut out and fold', 0, 0,'C');
-					//$pdf->Output();
 					$pdf->Output('F', 'php://output');
 					die;
 				}
@@ -1211,22 +1146,6 @@ class PwtcMileage {
 	}
 */
 
-	// Generates the [pwtc_achievement_last_year] shortcode.
-/*
-	public static function shortcode_ly_lt_achvmnt($atts, $content = null) {
-		$current_user = wp_get_current_user();
-		if ( 0 == $current_user->ID ) {
-			return "<div>Please log in to see TBD</div>";
-		}	
-		$a = self::normalize_atts($atts);
-		$sort = self::build_mileage_sort($a);
-		$meta = PwtcMileage_DB::meta_ly_lt_achvmnt();
-		$data = PwtcMileage_DB::fetch_ly_lt_achvmnt(ARRAY_N, $sort);
-		$out = self::shortcode_build_table($meta, $data, $a, $content);
-		return $out;
-	}
-*/
-
 	// Generates the [pwtc_attendence_year_to_date] shortcode.
 	public static function shortcode_ytd_attendence($atts, $content = null) {
 		$current_user = wp_get_current_user();
@@ -1672,7 +1591,6 @@ class PwtcMileage {
 		}
 		PwtcMileage_DB::set_db_version();
 		if (self::get_plugin_options() === false) {
-			//self::delete_plugin_options();
 			self::create_default_plugin_options();
 		}
 		self::add_caps_admin_role();
@@ -1681,16 +1599,8 @@ class PwtcMileage {
 
 	public static function plugin_deactivation( ) {
 		pwtc_mileage_write_log( 'PWTC Mileage plugin deactivated' );
-		//self::delete_plugin_options();
 		self::remove_caps_admin_role();
 		pwtc_mileage_remove_stat_role();
-		/*
-		$plugin_options = self::get_plugin_options();
-		if ($plugin_options['drop_db_on_delete']) {
-			PwtcMileage_DB::drop_db_views();	
-			PwtcMileage_DB::drop_db_tables();				
-		}
-		*/
 	}
 
 	public static function plugin_uninstall() {

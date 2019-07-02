@@ -392,7 +392,6 @@ if ($running_jobs > 0) {
             <div><a href='#' report-id='riders_w_mileage'>Riders with mileage</a></div>
             <div><a href='#' report-id='riders_w_leaders'>Riders with led rides</a></div>
             <div><a href='#' report-id='dup_members'>Duplicate rider names</a></div>
-            <!--<div><a href='#' report-id='ride_leaders'>Current Ride Leaders</a></div>-->
         </div>
         </div>
         <div class='download'></div>

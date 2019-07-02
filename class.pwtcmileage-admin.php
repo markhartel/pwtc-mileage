@@ -42,10 +42,6 @@ class PwtcMileage_Admin {
 			array( 'PwtcMileage_Admin', 'next_rider_id_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_lookup_riders', 
 			array( 'PwtcMileage_Admin', 'lookup_riders_callback') );
-		/*
-		add_action( 'wp_ajax_pwtc_mileage_lookup_users', 
-			array( 'PwtcMileage_Admin', 'lookup_users_callback') );
-		*/
 		add_action( 'wp_ajax_pwtc_mileage_create_rider', 
 			array( 'PwtcMileage_Admin', 'create_rider_callback') );
 		add_action( 'wp_ajax_pwtc_mileage_remove_rider', 
@@ -673,42 +669,9 @@ class PwtcMileage_Admin {
 		wp_die();
 	}
 
-	/*
-	public static function lookup_users_callback() {
-		if (!current_user_can(PwtcMileage::EDIT_RIDERS_CAP)) {
-			$response = array(
-				'error' => 'You are not allowed to lookup a user.'
-			);
-			echo wp_json_encode($response);
-		}
-		else if (!isset($_POST['memberid']) or !isset($_POST['firstname']) or !isset($_POST['lastname']) or !isset($_POST['exact'])) {
-			$response = array(
-				'error' => 'Input parameters needed to lookup a rider are missing.'
-			);
-			echo wp_json_encode($response);
-		}
-		else {
-			$memberid = sanitize_text_field($_POST['memberid']);
-			$firstname = sanitize_text_field($_POST['firstname']);
-			$lastname = sanitize_text_field($_POST['lastname']);
-			$exact = $_POST['exact'] == 'true' ? true : false;
-			$users = self::lookup_user_memberships($memberid, $lastname, $firstname, $exact);
-			$response = array(
-				'memberid' => $memberid,
-				'firstname' => $firstname,
-				'lastname' => $lastname,
-				'users' => $users);
-			echo wp_json_encode($response);
-		}
-		wp_die();
-	}
-	*/
-
-	//public static function lookup_user_memberships($memberid, $lastname = '', $firstname = '', $exact = true) {
 	public static function lookup_user_memberships($memberid) {
 		$add_edit_link = current_user_can('manage_options');
 		$users = array();
-		//$profiles = pwtc_mileage_lookup_user($memberid, $lastname, $firstname, $exact);
 		$profiles = pwtc_mileage_lookup_user($memberid);
 		foreach ($profiles as $profile) {
 			$info = get_userdata($profile->ID);
@@ -832,11 +795,6 @@ class PwtcMileage_Admin {
 				echo wp_json_encode($response);
 			}
 			else {
-				/*
-				if ($memberid == '') {
-					$memberid = PwtcMileage_DB::gen_new_member_id();
-				}
-				*/
 				if ($memberid == '') {
 					$response = array(
 						'error' => 'Cannot generate new member id.'
@@ -1837,9 +1795,6 @@ class PwtcMileage_Admin {
 				case "riders_inactive":
 				case "riders_w_mileage":
 				case "riders_w_leaders":
-				//case "ride_leaders":
-				//case "road_captains":
-				//case "statisticians":
 					$state = array(
 						'action' => 'pwtc_mileage_generate_report',
 						'report_id' => $reportid
@@ -1861,20 +1816,6 @@ class PwtcMileage_Admin {
 							$meta = PwtcMileage_DB::meta_member_list('Riders Leading Rides');
 							$data = PwtcMileage_DB::fetch_member_list(ARRAY_N, 1);
 							break;
-						/*
-						case "ride_leaders":
-							$meta = PwtcMileage_DB::meta_member_by_role('Current Ride Leaders');
-							$data = PwtcMileage_DB::fetch_member_by_role(['ride_leader']);
-							break;
-						case "road_captains":
-							$meta = PwtcMileage_DB::meta_member_by_role('Current Road Captains');
-							$data = PwtcMileage_DB::fetch_member_by_role(['ride_captain']);
-							break;
-						case "statisticians":
-							$meta = PwtcMileage_DB::meta_member_by_role('Current Statisticians');
-							$data = PwtcMileage_DB::fetch_member_by_role(['statistician']);
-							break;
-						*/
 					}
 					break;
 				default:
@@ -1950,15 +1891,6 @@ class PwtcMileage_Admin {
     	$function = array( 'PwtcMileage_Admin', 'page_manage_riders');
 		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
-		/*
-		$page_title = $plugin_options['plugin_menu_label'] . ' - Lookup Users';
-    	$menu_title = 'Lookup Users';
-    	$menu_slug = 'pwtc_mileage_lookup_users';
-    	$capability = PwtcMileage::EDIT_RIDERS_CAP;
-    	$function = array( 'PwtcMileage_Admin', 'page_lookup_users');
-		add_submenu_page($parent_menu_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
-		*/
-
     	$page_title = $plugin_options['plugin_menu_label'] . ' - View Reports';
     	$menu_title = 'View Reports';
     	$menu_slug = 'pwtc_mileage_generate_reports';
@@ -2027,15 +1959,6 @@ class PwtcMileage_Admin {
 		$capability = PwtcMileage::EDIT_RIDERS_CAP;
 		include('admin-man-riders.php');
 	}
-
-	/*
-	public static function page_lookup_users() {
-		$plugin_options = PwtcMileage::get_plugin_options();
-		$running_jobs = PwtcMileage_DB::num_running_jobs();
-		$capability = PwtcMileage::EDIT_RIDERS_CAP;
-		include('admin-look-users.php');
-	}
-	*/
 
 	public static function write_export_pdf_file($pdf, $data, $header, $title, $width, $align) {
 		$rows_per_page = 40;
@@ -2302,7 +2225,6 @@ class PwtcMileage_Admin {
 					header("Content-type: text/txt");
 					header("Content-Disposition: attachment; filename={$today}_{$report_id}.txt");
 					$fh = fopen('php://output', 'w');
-					//self::write_export_txt_file($fh, $response['data'], $response['header'], $response['title'], $response['width']);
 					self::write_export_tab_file($fh, $response['data'], $response['header'], $response['title']);
 					fclose($fh);
 				}
@@ -2596,9 +2518,6 @@ class PwtcMileage_Admin {
 			else if ($_FILES['updmembs_file']['error'] != UPLOAD_ERR_OK) {
 				$errmsg = 'Updmembs file upload error code ' . $_FILES['updmembs_file']['error'];
 			}
-//			else if (preg_match('/UPDMEMBS\.DBF/', $_FILES['updmembs_file']['name']) !== 1) {
-//				$errmsg = 'Updmembs file name pattern mismatch';
-//			}
 		}
 		return $errmsg;
 	}

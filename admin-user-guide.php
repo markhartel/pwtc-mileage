@@ -178,33 +178,6 @@ jQuery(document).ready(function($) {
         </ol>
         </div>
         <?php } ?>
-        <!--
-        <h3><a href="#">change a rider's expiration date?</a></h3>
-        <div class="initially-hidden report-sec">
-        <p>Occasionally, a rider's membership may have expired but the statistician
-        still wishes to record their mileage for a ride. Normally, mileage cannot be
-        recorded for expired riders. To bypass this restriction, the statistician
-        would alter the rider's expiration date.</p>
-        <ol>
-            <li>Select the <em>Manage Riders</em> item under the <em>Rider Mileage</em> submenu.</li>
-            <li>A page displays that shows a search form for existing riders.</li>
-            <li>Type the rider's ID number into the <em>ID</em> search field.</li>
-            <li>Make sure that the <em>Active Riders Only</em> checkbox is unchecked.</li>
-            <li>Press the <em>Search</em> button.</li>
-            <li>A table should appear at the bottom of the page containing the rider's data record.</li>
-            <li>The rider's expiration date is listed in the table, to change it click the <em>Edit</em> link in the <em>Actions</em> column.</li>
-            <li>A entry form should appear above the table, click on the <em>Expiration Date</em> field.</li>
-            <li>A calendar will pop up, use it to select the desired date (today's date will suffice.)</li>
-            <li>Press the <em>Modify</em> button.</li>
-            <li>The expiration date in the ride's data record should update to reflect your change.</li>
-        </ol>
-        <p>After you update the expired rider's expiration date, you should be able to go 
-        back and add their ride mileage (see <a href="#" topic="amendmiles">topic</a> for
-        details.) Remember that this update is temporary, after you upload a new UPDMEMBS.DBF
-        file (see <a href="#" topic="updmembs">topic</a> for details,) the expiration date
-        will be changed to what is in the file.</p>
-        </div>
-        -->
         <h3><a href="#">prepare the mileage database for the upcoming year's activities?</a></h3>
         <div class="initially-hidden report-sec">
         <p>After the start of the new year, a set of housekeeping actions must be performed 

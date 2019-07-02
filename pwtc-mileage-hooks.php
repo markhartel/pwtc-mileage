@@ -287,79 +287,18 @@ function pwtc_mileage_get_expiration_date($membership) {
     return $exp_date;
 }
 
-/*
-function pwtc_mileage_membership_is_expired($membership) {
-    $is_expired = false;
-    $team = false;
-    if (function_exists('wc_memberships_for_teams_get_user_membership_team')) {
-        $team = wc_memberships_for_teams_get_user_membership_team($membership->get_id());
-    }
-    if ($team) {
-        if ($team->is_membership_expired()) {
-            $is_expired = true;
-        }
-    }
-    else {
-        if ($membership->is_expired()) {
-            $is_expired = true;
-        }
-    }
-    return $is_expired;
-}
-*/
-
-//function pwtc_mileage_lookup_user($rider_id, $lastname = '', $firstname = '', $exact = true) {
 function pwtc_mileage_lookup_user($rider_id) {
-    /*
-    $compare = 'LIKE';
-    if ($exact) {
-        $compare = '=';
-    }
-    */
     $query_args = [
         'meta_key' => 'last_name',
         'orderby' => 'meta_value',
         'order' => 'ASC'
     ];
     $query_args['meta_query'] = [];
-    /*
-    if (!empty($lastname)) {
-        $query_args['meta_query'][] = [
-            'key'     => 'last_name',
-            'value'   => $lastname,
-            'compare' => $compare   
-        ];
-    }
-    if (!empty($firstname)) {
-        $query_args['meta_query'][] = [
-            'key'     => 'first_name',
-            'value'   => $firstname,
-            'compare' => $compare 
-        ];
-    }
-    */
-    //if (!empty($rider_id)) {
-        $query_args['meta_query'][] = [
-            'key'     => 'rider_id',
-            'value'   => $rider_id,
-            'compare' => '=' //$compare 
-        ];
-    /*
-    }
-    else if (empty($lastname) and empty($firstname)) {
-        $query_args['meta_query'][] = [
-            'relation' => 'OR',
-            [
-                'key'     => 'rider_id',
-                'compare' => 'NOT EXISTS' 
-            ],
-            [
-                'key'     => 'rider_id',
-                'value'   => ''    
-            ] 
-        ];
-    }
-    */
+    $query_args['meta_query'][] = [
+        'key'     => 'rider_id',
+        'value'   => $rider_id,
+        'compare' => '='
+    ];
     $user_query = new WP_User_Query( $query_args );
     $results = $user_query->get_results();
     return $results;
@@ -493,8 +432,6 @@ function pwtc_mileage_fetch_ride_leader_names($post_id) {
 function pwtc_mileage_create_stat_role() {
     $stat = get_role('statistician');
     if ($stat === null) {
-        //$subscriber = get_role('subscriber');
-        //$stat = add_role('statistician', 'Statistician', $subscriber->capabilities);
         $stat = add_role('statistician', 'Statistician');
         pwtc_mileage_write_log('PWTC Mileage plugin added statistician role');
     }
