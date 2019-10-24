@@ -60,6 +60,12 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'shortcode_rides_wo_sheets'));
 		add_shortcode('pwtc_riderid_download', 
 			array( 'PwtcMileage', 'shortcode_riderid_download'));
+/*
+		add_shortcode('pwtc_mileage_rides_barchart', 
+			array( 'PwtcMileage', 'shortcode_rides_barchart'));
+		add_shortcode('pwtc_mileage_members_piechart', 
+			array( 'PwtcMileage', 'shortcode_members_piechart'));
+*/
 
 		// Register background action task callbacks 
 		add_action( 'pwtc_mileage_consolidation', 
@@ -374,6 +380,12 @@ class PwtcMileage {
 		wp_enqueue_style('pwtc_mileage_report_css', 
 			PWTC_MILEAGE__PLUGIN_URL . 'reports-style.css', array(),
 			filemtime(PWTC_MILEAGE__PLUGIN_DIR . 'reports-style.css'));
+/*
+		// https://github.com/apexcharts/apexcharts.js
+		wp_enqueue_script('pwtc_mileage_apexcharts', 
+			'https://cdn.jsdelivr.net/npm/apexcharts', array(), false, true);
+*/
+
 	}
 
 	/*************************************************************/
@@ -1438,6 +1450,132 @@ class PwtcMileage {
 		return $out;
 	}
 
+/*
+	// Generates the [pwtc_mileage_rides_barchart] shortcode.
+	public static function shortcode_rides_barchart($atts) {
+		$a = shortcode_atts(array('width' => 500, 'height' => 100), $atts);
+		ob_start();
+		?>
+		<script type="text/javascript">
+		jQuery(document).ready(function($) { 
+
+			var options = {
+				title: {
+    				text: '2018 Rides and Attendance',
+					align: 'center'
+				},
+				chart: {
+					type: 'bar',
+					height: <?php echo $a['height'] ?>,
+					width: '<?php echo $a['width'] ?>',
+					toolbar: {
+          				show: false
+					}
+				},
+				dataLabels: {
+        			enabled: false
+				},
+				plotOptions: {
+    				bar: {
+						dataLabels: {
+							position: 'top'
+						}
+					}
+				},
+				series: [{
+					name: 'rides',
+					data: [3, 4, 3, 5, 4, 6, 7, 9, 12, 3, 5, 1]
+				},
+				{
+					name: 'attendance',
+					data: [30, 40, 35, 50, 49, 60, 70, 91, 125, 30, 50, 10]
+				}],
+				xaxis: {
+					categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+				}
+			}
+
+			var chart = new ApexCharts(document.querySelector("#pwtc-mileage-rides-barchart"), options);
+			chart.render();
+
+		});
+		</script>
+		<div id="pwtc-mileage-rides-barchart"></div>
+		<?php
+		return ob_get_clean();
+	}
+
+	// Generates the [pwtc_mileage_members_piechart] shortcode.
+	public static function shortcode_members_piechart($atts) {
+		$a = shortcode_atts(array('width' => 500, 'height' => 100), $atts);
+		ob_start();
+		?>
+		<script type="text/javascript">
+		jQuery(document).ready(function($) { 
+
+			var options1 = {
+				title: {
+    				text: 'Active vs Expired Members',
+					align: 'left'
+				},
+				chart: {
+					width: '<?php echo $a['width'] ?>',
+					type: 'donut',
+				},
+				labels: ['Active', 'Expired', 'Other'],
+				series: [469, 147, 0],
+				plotOptions: {
+					pie: {
+						donut: {
+							labels: {
+								show: true
+							}
+						}
+					}
+				}
+			}
+
+			var chart1 = new ApexCharts(document.querySelector("#pwtc-mileage-members-piechart"), options1);
+			chart1.render();
+
+			var options2 = {
+				title: {
+    				text: 'Individual vs Family Members',
+					align: 'left'
+				},
+				chart: {
+					width: '<?php echo $a['width'] ?>',
+					type: 'pie',
+				},
+				labels: ['Individual', 'Family'],
+				series: [422, 194],
+				responsive: [{
+					breakpoint: 480,
+					options: {
+						chart: {
+							width: 200
+						},
+						legend: {
+							position: 'bottom'
+						}
+					}
+				}]
+			}
+
+			var chart2 = new ApexCharts(document.querySelector("#pwtc-mileage-members-piechart2"), options2);
+			chart2.render();
+
+		});
+		</script>
+		<div>
+		<div id="pwtc-mileage-members-piechart"></div>
+		<div id="pwtc-mileage-members-piechart2"></div>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+*/
+		
 	/*************************************************************/
 	/* User input validation functions
 	/*************************************************************/
