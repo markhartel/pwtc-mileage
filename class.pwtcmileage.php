@@ -854,7 +854,7 @@ class PwtcMileage {
 	}
 
 	// Generates the HTML for a shortcode report table.
-	public static function shortcode_build_table($meta, $data, $atts, $content = null) {
+	public static function shortcode_build_table_old($meta, $data, $atts, $content = null) {
 		$plugin_options = self::get_plugin_options();
 		$hide_id = true;
 		if ($atts['show_id'] == 'on') {
@@ -937,6 +937,96 @@ class PwtcMileage {
 		}
 		else {
 			$out .= '<tr><td data-th="Message">No records found.</td></tr>';
+		}
+		$out .= '</table>';
+		$out .= '';
+		return $out;
+	}
+
+	public static function shortcode_build_table($meta, $data, $atts, $content = null) {
+		$plugin_options = self::get_plugin_options();
+		$hide_id = true;
+		if ($atts['show_id'] == 'on') {
+			$hide_id = false;
+		}
+		$id = null;
+		if ($meta['id_idx'] >= 0 and $atts['highlight_user'] == 'on') {
+			try {
+				$id = pwtc_mileage_get_member_id();
+			}
+			catch (Exception $e) {
+			}
+		}
+		$out = '';  
+		if (count($data) == 0 and empty($content) and $atts['caption'] != 'on') {
+			$out .= '<div class="callout small warning"><p>No records found.</p></div>';
+			return $out;
+		}
+		$out .= '<table class="pwtc-mileage-rwd-table2">';
+		if (empty($content)) {
+			if ($atts['caption'] == 'on') {
+				$out .= '<caption>' . $meta['title'] . '</caption>';
+			}
+		}
+		else {
+			$out .= '<caption>' . do_shortcode($content) . '</caption>';
+		}
+		if (count($data) > 0) {
+			$out .= '<thead><tr>';
+			$i = 0;
+			foreach( $meta['header'] as $item ):
+				if ($meta['id_idx'] === $i) {
+					if (!$hide_id) {
+						$out .= '<th>' . $item . '</th>';						
+					}
+				} 
+				else {
+					$out .= '<th>' . $item . '</th>';
+				}
+				$i++;
+			endforeach;	
+			$out .= '</tr></thead><tbody>';
+			foreach( $data as $row ):
+				$outrow = '';
+				$i = 0;
+				$highlight = false;
+				foreach( $row as $item ):
+					$label = $meta['header'][$i];
+					$lbl_attr = '<span>' . $label . '</span>';
+					if ($meta['date_idx'] == $i) {
+						$fmtdate = date('D M j Y', strtotime($item));
+						$outrow .= '<td>' . $lbl_attr . ' ' . $fmtdate . '</td>';
+					}
+					else if ($meta['id_idx'] === $i) {
+						if ($id !== null and $id == $item) {
+							$highlight = true;
+						}
+						if (!$hide_id) {
+							$outrow .= '<td>' . $lbl_attr . ' ' . $item . '</td>';						
+						}
+					}
+					else {
+						if (0 === strpos($item, 'http://') or 0 === strpos($item, 'https://')) {
+							$outrow .= '<td>' . $lbl_attr . ' <a href="' . $item . 
+								'" target="_blank">View</a></td>';
+						}
+						else {
+							$outrow .= '<td>' . $lbl_attr . ' ' . $item . '</td>';
+						}
+					}
+					$i++;
+				endforeach;	
+				if ($highlight) {
+					$out .= '<tr class="highlight">' . $outrow . '</tr>';
+				}
+				else {
+					$out .= '<tr>' . $outrow . '</tr>';
+				}
+			endforeach;
+			$out .= '</tbody>';
+		}
+		else {
+			$out .= '<tbody><tr><td>No records found.</td></tr></tbody>';
 		}
 		$out .= '</table>';
 		$out .= '';
