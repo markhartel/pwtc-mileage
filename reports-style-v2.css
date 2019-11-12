@@ -1,0 +1,74 @@
+  .pwtc-mileage-rwd-table {
+    background: #34495E;
+    color: #fff;
+    border-radius: .4em;
+  }
+  
+  .pwtc-mileage-rwd-table a {
+    cursor: pointer;
+    text-decoration: underline;
+    color: #fff;
+  }
+  
+  .pwtc-mileage-rwd-table caption {
+    background: #34495E;
+    text-align: center;
+    font-weight: bold;
+    border-radius: .4em;
+  }
+  
+  .pwtc-mileage-rwd-table th {
+    color: #dd5;
+  }
+  
+  .pwtc-mileage-rwd-table th, .pwtc-mileage-rwd-table tr, .pwtc-mileage-rwd-table td { 
+    background: #34495E !important;
+  }
+  
+  .pwtc-mileage-rwd-table tr.highlight, .pwtc-mileage-rwd-table tr.highlight td { 
+    background: grey !important; 
+  }
+  
+  /* Default span styling - hidden on desktop, see uglyduck.ca/responsive-tables/ */
+  .pwtc-mileage-rwd-table td span {
+    color: #dd5;
+    display: none;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 5px;
+    position: absolute;
+    text-transform: uppercase;
+    top: 0;
+    left: 0;
+  }
+  
+  /* Simple CSS for flexbox table on mobile, see uglyduck.ca/responsive-tables/  */
+  @media(max-width: 800px) {
+    .pwtc-mileage-rwd-table {
+      background: #fff;
+    }
+    .pwtc-mileage-rwd-table thead {
+        left: -9999px;
+        position: absolute;
+        visibility: hidden;
+    }
+    .pwtc-mileage-rwd-table tr {
+        background: #34495E !important;
+        border-bottom: 0;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin-bottom: 40px;
+    }
+    .pwtc-mileage-rwd-table td {
+        border: 1px solid;
+        margin: 0 -1px -1px 0;
+        padding-top: 35px; /* additional padding to avoid heading overlap */
+        position: relative;
+        width: 50%;
+    }
+    /* Show the heading span */
+    .pwtc-mileage-rwd-table td span {
+        display: block;
+    }
+  }
