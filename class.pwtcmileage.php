@@ -377,9 +377,14 @@ class PwtcMileage {
 	/*************************************************************/
 
 	public static function load_report_scripts() {
+		/*
 		wp_enqueue_style('pwtc_mileage_report_css', 
 			PWTC_MILEAGE__PLUGIN_URL . 'reports-style.css', array(),
 			filemtime(PWTC_MILEAGE__PLUGIN_DIR . 'reports-style.css'));
+		*/
+		wp_enqueue_style('pwtc_mileage_report_css', 
+			PWTC_MILEAGE__PLUGIN_URL . 'reports-style.css', array(),
+			'xxxx');
 /*
 		// https://github.com/apexcharts/apexcharts.js
 		wp_enqueue_script('pwtc_mileage_apexcharts', 
