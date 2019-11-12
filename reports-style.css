@@ -97,6 +97,10 @@
   color: #dd5;
 }
 
+.pwtc-mileage-rwd-table2 th, .pwtc-mileage-rwd-table2 tr, .pwtc-mileage-rwd-table2 td { 
+  background: #34495E !important;
+}
+
 .pwtc-mileage-rwd-table2 tr.highlight, .pwtc-mileage-rwd-table2 tr.highlight td { 
   background: grey !important; 
 }
@@ -125,7 +129,7 @@
       visibility: hidden;
   }
   .pwtc-mileage-rwd-table2 tr {
-      background: #34495E;
+      background: #34495E !important;
       border-bottom: 0;
       display: flex;
       flex-direction: row;
