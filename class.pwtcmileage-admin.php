@@ -489,7 +489,10 @@ class PwtcMileage_Admin {
 								$memberid = get_field('rider_id', 'user_'.$userid);
 								$result = PwtcMileage_DB::fetch_rider($memberid);
 								if (count($result) > 0) {
-									PwtcMileage_DB::insert_ride_mileage($ride_id, $memberid, intval($mileage));
+									$error = self::check_expir_date($memberid);
+									if ($error != null) {
+										PwtcMileage_DB::insert_ride_mileage($ride_id, $memberid, intval($mileage));
+									}
 								}
 							}
 						}
