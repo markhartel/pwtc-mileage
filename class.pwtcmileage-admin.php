@@ -484,7 +484,8 @@ class PwtcMileage_Admin {
 							$arr = json_decode($item, true);
 							$userid = $arr['userid'];
 							$mileage = $arr['mileage'];
-							if (!empty($mileage)) {
+							$attended = $arr['attended'];
+							if ($attended and !empty($mileage)) {
 								$memberid = get_field('rider_id', 'user_'.$userid);
 								$result = PwtcMileage_DB::fetch_rider($memberid);
 								if (count($result) > 0) {
