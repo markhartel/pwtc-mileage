@@ -479,23 +479,6 @@ class PwtcMileage_Admin {
 								PwtcMileage_DB::insert_ride_leader($ride_id, $item);
 							}
 						}
-						$signup_list = get_post_meta(intval($postid), '_signup_user_id');
-						foreach ($signup_list as $item) {
-							$arr = json_decode($item, true);
-							$userid = $arr['userid'];
-							$mileage = $arr['mileage'];
-							$attended = $arr['attended'];
-							if ($attended and !empty($mileage)) {
-								$memberid = get_field('rider_id', 'user_'.$userid);
-								$result = PwtcMileage_DB::fetch_rider($memberid);
-								if (count($result) > 0) {
-									$error = self::check_expir_date($memberid);
-									if ($error != null) {
-										PwtcMileage_DB::insert_ride_mileage($ride_id, $memberid, intval($mileage));
-									}
-								}
-							}
-						}
 						$leaders = PwtcMileage_DB::fetch_ride_leaders($ride_id);
 						$mileage = PwtcMileage_DB::fetch_ride_mileage($ride_id);
 						$response = array(
