@@ -354,10 +354,13 @@ class PwtcMileage {
 					$pdf->Cell($w_card, 6, 'Information Hotline: 503.666.5796', 0, 2,'C');
 					$pdf->SetXY($x_off, $y_off + $h_card + 27);
 					$pdf->SetFont('Arial', '', 8);
-					$pdf->Cell($w_card, 4, 'Daily and multi-day rides', 0, 2,'C');
-					$pdf->Cell($w_card, 4, 'Cycling friendships', 0, 2,'C');
-					$pdf->Cell($w_card, 4, 'Volunteer opportunities', 0, 2,'C');
-					$pdf->Cell($w_card, 4, 'Bike shop discounts', 0, 2,'C');
+					//$pdf->Cell($w_card, 4, 'Daily and multi-day rides', 0, 2,'C');
+					//$pdf->Cell($w_card, 4, 'Cycling friendships', 0, 2,'C');
+					//$pdf->Cell($w_card, 4, 'Volunteer opportunities', 0, 2,'C');
+					//$pdf->Cell($w_card, 4, 'Bike shop discounts', 0, 2,'C');
+					$pdf->Cell($w_card, 4, 'Supplemental medical insurance:', 0, 2,'C');
+					$pdf->Cell($w_card, 4, 'Health Special Risk, Inc.', 0, 2,'C');
+					$pdf->Cell($w_card, 4, 'policy number SR2014DCP050467', 0, 2,'C');
 					$pdf->SetXY($x_off, $y_off + $h_card + 50);
 					$pdf->SetFont('Arial', 'I', 12);
 					$pdf->SetTextColor(255, 0, 0);
