@@ -376,6 +376,62 @@ class PwtcMileage {
 		}
 	}
 
+	public static function generate_riderid_card($pdf, $riderid, $name, $expdate, $familyid, $x_off=10, $y_off=10, $instructions=true) {
+		$fmtdate = date('M Y', strtotime($expdate));
+		$w_card = 95;
+		$h_card = 60;
+		$pdf->Rect($x_off, $y_off, $w_card, $h_card);
+		$w_sub = (int)($w_card * 0.3);
+		$pdf->Rect($x_off, $y_off, $w_sub, $h_card);
+		$pdf->Image(PWTC_MILEAGE__PLUGIN_DIR . 'pbc_logo.png', $x_off + 1, $y_off + 10, $w_sub - 2, $w_sub - 2);
+		$pdf->SetXY($x_off, $y_off + 38);
+		$pdf->SetFont('Arial', '', 12);
+		$pdf->MultiCell($w_sub, 5, 'Portland Bicycling Club', 0, 'C');
+		$pdf->SetXY($x_off + $w_sub, $y_off + 8);
+		$pdf->SetFont('Arial', 'I', 18);
+		$pdf->MultiCell($w_card - $w_sub, 10, $name, 0,'C');
+		$pdf->SetFont('Arial', '', 14);
+		$pdf->Text($x_off + $w_sub + 25, $y_off + 34, $riderid);
+		$pdf->Text($x_off + $w_sub + 40, $y_off + 50, $fmtdate);
+		$pdf->SetFont('Arial', '', 5);
+		$pdf->Text($x_off + $w_sub + 25, $y_off + 38, 'RIDER ID');
+		$pdf->Text($x_off + $w_sub + 40, $y_off + 54, 'EXPIRES');
+		if (!empty($familyid)) {
+			$pdf->Text($x_off + $w_sub + 5, $y_off + 50, $familyid);
+			$pdf->Text($x_off + $w_sub + 5, $y_off + 54, 'FAMILY ID');
+		}
+		$pdf->Rect($x_off, $y_off + $h_card, $w_card, $h_card);
+		$pdf->SetXY($x_off, $y_off + $h_card + 5);
+		$pdf->SetFont('Arial', 'I', 12);
+		$pdf->SetTextColor(255, 0, 0);
+		$pdf->Cell($w_card, 6, 'Portland Bicycling Club', 0, 2,'C');
+		$pdf->SetFont('Arial', 'U', 12);
+		$pdf->SetTextColor(0, 0, 255);
+		$pdf->Cell($w_card, 6, 'PortlandBicyclingClub.com', 0, 2,'C');
+		$pdf->SetFont('Arial', '', 12);
+		$pdf->SetTextColor(0, 0, 0);
+		$pdf->Cell($w_card, 6, 'Information Hotline: 503.666.5796', 0, 2,'C');
+		$pdf->SetXY($x_off, $y_off + $h_card + 27);
+		$pdf->SetFont('Arial', '', 8);
+		//$pdf->Cell($w_card, 4, 'Daily and multi-day rides', 0, 2,'C');
+		//$pdf->Cell($w_card, 4, 'Cycling friendships', 0, 2,'C');
+		//$pdf->Cell($w_card, 4, 'Volunteer opportunities', 0, 2,'C');
+		//$pdf->Cell($w_card, 4, 'Bike shop discounts', 0, 2,'C');
+		$pdf->Cell($w_card, 4, 'Supplemental medical insurance:', 0, 2,'C');
+		$pdf->Cell($w_card, 4, 'Health Special Risk, Inc.', 0, 2,'C');
+		$pdf->Cell($w_card, 4, 'policy number SR2014DCP050467', 0, 2,'C');
+		$pdf->SetXY($x_off, $y_off + $h_card + 50);
+		$pdf->SetFont('Arial', 'I', 12);
+		$pdf->SetTextColor(255, 0, 0);
+		$pdf->Cell($w_card, 6, 'Take Life By The Handlebars! ' . chr(174), 0, 0,'C');
+		if ($instructions) {
+			$pdf->SetFont('Arial', 'I', 10);
+			$pdf->SetTextColor(0, 0, 0);
+			$pdf->SetXY($x_off, $y_off + $h_card*2);
+			$pdf->Cell($w_card, 10, 'To assemble card, cut out and fold', 0, 0,'C');
+		}
+	}
+
 	/*************************************************************/
 	/* Script and style enqueue callback functions
 	/*************************************************************/
