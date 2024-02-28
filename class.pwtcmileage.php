@@ -317,6 +317,8 @@ class PwtcMileage {
 					require('fpdf.php');	
 					$pdf = new FPDF();
 					$pdf->AddPage();
+					self::generate_riderid_card($pdf, $_POST['rider_id'], $name, $exp_date, $family_id);
+					/*
 					$x_off = 0;
 					$y_off = 0;
 					$w_card = 95;
@@ -369,6 +371,7 @@ class PwtcMileage {
 					$pdf->SetTextColor(0, 0, 0);
 					$pdf->SetXY($x_off, $y_off + $h_card*2);
 					$pdf->Cell($w_card, 10, 'To assemble card, cut out and fold', 0, 0,'C');
+     					*/
 					$pdf->Output('F', 'php://output');
 					die;
 				}
