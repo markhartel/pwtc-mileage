@@ -388,6 +388,7 @@ class PwtcMileage {
 		$pdf->Rect($x_off, $y_off, $w_sub, $h_card);
 		$pdf->Image(PWTC_MILEAGE__PLUGIN_DIR . 'pbc_logo.png', $x_off + 1, $y_off + 10, $w_sub - 2, $w_sub - 2);
 		$pdf->SetXY($x_off, $y_off + 38);
+		$pdf->SetTextColor(0, 0, 0);
 		$pdf->SetFont('Arial', '', 12);
 		$pdf->MultiCell($w_sub, 5, 'Portland Bicycling Club', 0, 'C');
 		$pdf->SetXY($x_off + $w_sub, $y_off + 8);
