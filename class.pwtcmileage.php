@@ -60,6 +60,8 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'shortcode_rides_wo_sheets'));
 		add_shortcode('pwtc_riderid_download', 
 			array( 'PwtcMileage', 'shortcode_riderid_download'));
+		add_shortcode('pwtc_mileage_generate_rider_cards', 
+			array( 'PwtcMileage', 'shortcode_generate_rider_cards'));
 /*
 		add_shortcode('pwtc_mileage_rides_barchart', 
 			array( 'PwtcMileage', 'shortcode_rides_barchart'));
@@ -1638,6 +1640,13 @@ class PwtcMileage {
 			}
 		}
 		return $out;
+	}
+
+	// Generates the [pwtc_mileage_generate_rider_cards] shortcode.
+	public static function shortcode_generate_rider_cards($atts, $content) {
+        	ob_start();
+        	include('generate-rider-cards-form.php');
+        	return ob_get_clean();
 	}
 
 /*
