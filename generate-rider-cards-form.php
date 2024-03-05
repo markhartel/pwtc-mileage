@@ -122,7 +122,7 @@
             var searchstr = $('#pwtc-mileage-rider-card-div input[name="leader-pattern"]').val();
             var action = "<?php echo admin_url('admin-ajax.php'); ?>";
             var data = {
-                'action': 'pwtc_mapdb_lookup_ride_leaders',
+                'action': 'pwtc_mapdb_lookup_current_members',
 		        'limit': 10,
                 'search': searchstr,
                 'offset': offset,
