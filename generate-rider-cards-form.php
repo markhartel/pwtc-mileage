@@ -25,6 +25,11 @@
 </style>
 <script type="text/javascript">
     jQuery(document).ready(function($) { 
+
+	var leaderTimeoutID = 0;
+        var leaderSentCount = 0;
+        var leaderRecvCount = 0;
+	    
         function show_warning(msg) {
             $('#pwtc-mileage-rider-card-div .errmsg').html('<div class="callout small warning"><p>' + msg + '</p></div>');
         }
