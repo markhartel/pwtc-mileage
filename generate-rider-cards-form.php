@@ -209,6 +209,26 @@
                 }
             }
         });
+	    
+        $('#pwtc-mileage-rider-card-div form').on('keypress', function(evt) {
+            var keyPressed = evt.keyCode || evt.which; 
+            if (keyPressed === 13) { 
+                evt.preventDefault(); 
+                return false; 
+            } 
+        });
+
+        window.addEventListener('beforeunload', function(e) {
+            if (is_dirty) {
+                e.preventDefault();
+                e.returnValue = 'If you leave this page, any data you have entered will not be saved.';
+            }
+            else {
+                delete e['returnValue'];
+            }
+        });
+
+        var is_dirty = false;
     });
 </script>
 <div id='pwtc-mileage-rider-card-div'>
