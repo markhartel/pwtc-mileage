@@ -211,6 +211,7 @@
         });
 
 	$('#pwtc-mileage-rider-card-div .download_card').on('click', function(evt) {
+		show_warning('You must choose at least one member.');
             //$('#pwtc-mileage-rider-card-div .download-frm').submit();
         });
 
