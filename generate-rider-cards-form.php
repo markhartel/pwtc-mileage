@@ -218,6 +218,10 @@
             } 
         });
 
+	$('#pwtc-mileage-rider-card-div .download_card').on('click', function(evt) {
+            $('#pwtc-mileage-rider-card-div .download-frm').submit();
+        });
+
         window.addEventListener('beforeunload', function(e) {
             if (is_dirty) {
                 e.preventDefault();
@@ -252,6 +256,16 @@
                 <p class="help-text">Riders must have ride leader access on the website to be assigned as leader.</p>
             </div>
         </form>
+    	<div class="errmsg"></div>
+    	<div class="row column clearfix">
+		<div class="button-group float-left">
+			<a class="download_card dark button"><i class="fa fa-download"></i> Membership Cards</a>
+		</div>
+	</div>
+	<form class="download-frm" method="POST">
+        	<input type="hidden" name="pwtc_mapdb_download_signup" value="yes"/>
+        	<input type="hidden" name="user_id" value=""/>
+    	</form> 
     </div>
 </div>
 <?php 
