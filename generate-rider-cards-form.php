@@ -8,7 +8,7 @@
         cursor: pointer;
     }
     #pwtc-mileage-rider-card-div .leaders-div input {
-        width: 150px;
+        width: 200px;
         margin: 10px; 
         padding: 10px; 
         border: none;
@@ -242,7 +242,7 @@
                 </div>
         </div>
         <div class="row column" style="margin-top:15px;">
-                <p class="help-text">Membership cards can only be downloaded for active members.</p>
+                <p class="help-text">Membership cards can only be downloaded for active members. Downloaded file will be in PDF format with 4 cards displayed per page.</p>
         </div>
     	<div class="errmsg"></div>
     	<div class="row column clearfix">
