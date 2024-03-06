@@ -326,43 +326,51 @@ class PwtcMileage {
 					}
 				}
 				else {
+					$user_ids = json_decode($_POST['user_id']);
+					header('Content-Description: File Transfer');
+					header("Content-type: application/pdf");
+					header("Content-Disposition: attachment; filename=rider_card.pdf");
+					require('fpdf.php');	
+					$pdf = new FPDF();
+					$pdf->AddPage();
+					$card_count = 0;
+					foreach ($user_ids as $user_id) {
+						$result = pwtc_mileage_get_rider_card_info($user_id);
+						if ($result === false) {
+						}
+						else {
+							$rider_id = $result['rider_id'];
+							$lastname = $result['last_name'];
+							$firstname = $result['first_name'];
+							$name = $firstname . ' ' . $lastname;
+							$exp_date = $result['expir_date'];
+							$family_id = $result['family_id'];
+							if ($card_count > 3) {
+								$card_count = 0;
+								$pdf->AddPage();
+							}
+							if ($card_count == 0) {
+								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 0, 0, false);
+							}
+							else if ($card_count == 1) {
+								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 0, 0, false);
+							}
+							else if ($card_count == 2) {
+								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 0, 0, false);
+							}
+							else if ($card_count == 3) {
+								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 0, 0, true);
+							}
+							$card_count++;
+						}
+					}
+					$pdf->Output('F', 'php://output');
+					die;
 				}
 			}
 		}
 	}
-
-	public static function download_riderids() {
-		if (isset($_POST['pwtc_mileage_download_riderids']) and isset($_POST['user_ids'])) {
-			$current_user = wp_get_current_user();
-			if ( 0 == $current_user->ID ) {
-			}
-			else {	
-				$user_ids = [];
-				header('Content-Description: File Transfer');
-				header("Content-type: application/pdf");
-				header("Content-Disposition: attachment; filename=rider_card.pdf");
-				require('fpdf.php');	
-				$pdf = new FPDF();
-				$pdf->AddPage();
-				while () {
-					$user_id = null;
-					$result = pwtc_mileage_get_rider_card_info($user_id);
-					if ($result === false) {
-					}
-					else {
-						$rider_id = $result['rider_id'];
-						$lastname = $result['last_name'];
-						$firstname = $result['first_name'];
-						$name = $firstname . ' ' . $lastname;
-						$exp_date = $result['expir_date'];
-						$family_id = $result['family_id'];
-						
-					}
-				}
-			}
-		}
-	}
-
+	
 	public static function generate_riderid_card($pdf, $riderid, $name, $expdate, $familyid, $x_off=10, $y_off=10, $instructions=true) {
 		$fmtdate = date('M Y', strtotime($expdate));
 		$w_card = 95;
