@@ -211,7 +211,17 @@
         });
 
 	$('#pwtc-mileage-rider-card-div .download_card').on('click', function(evt) {
-		show_warning('You must choose at least one member.');
+		var new_leaders = [];
+            	$('#pwtc-mileage-rider-card-div .leaders-div div').each(function() {
+                	var userid = Number($(this).attr('userid'));
+                	new_leaders.push(userid); 
+            	});
+            	if (new_leaders.length == 0) {
+                	show_warning('You must choose at least one member.');
+                	return;
+            	}
+            	$('#pwtc-mileage-rider-card-div .download-frm input[name="user_id"]').val(JSON.stringify(new_leaders));
+		show_warning($('#pwtc-mileage-rider-card-div .download-frm input[name="user_id"]').val());
             //$('#pwtc-mileage-rider-card-div .download-frm').submit();
         });
 
