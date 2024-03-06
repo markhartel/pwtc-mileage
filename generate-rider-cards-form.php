@@ -34,10 +34,9 @@
             $('#pwtc-mileage-rider-card-div .errmsg').html('<div class="callout small warning"><p>' + msg + '</p></div>');
         }
 
-        function show_waiting() {
-            $('#pwtc-mileage-rider-card-div .errmsg').html('<div class="callout small"><i class="fa fa-spinner fa-pulse"></i> please wait...</div>');
+	function clear_warning() {
+            $('#pwtc-mileage-rider-card-div .errmsg').html('');
         }
-
 
         function has_user_id(id) {
             id = Number(id);
@@ -212,6 +211,7 @@
 
 	$('#pwtc-mileage-rider-card-div .download_card').on('click', function(evt) {
 		$('#pwtc-mileage-rider-card-div .leader-search-div').hide();
+		clear_warning();
 		var new_leaders = [];
             	$('#pwtc-mileage-rider-card-div .leaders-div div').each(function() {
                 	var userid = Number($(this).attr('userid'));
@@ -222,9 +222,9 @@
                 	return;
             	}
             	$('#pwtc-mileage-rider-card-div .download-frm input[name="user_id"]').val(JSON.stringify(new_leaders));
-		show_warning($('#pwtc-mileage-rider-card-div .download-frm input[name="user_id"]').val());
+		//show_warning($('#pwtc-mileage-rider-card-div .download-frm input[name="user_id"]').val());
 		is_dirty = false;
-            //$('#pwtc-mileage-rider-card-div .download-frm').submit();
+            	$('#pwtc-mileage-rider-card-div .download-frm').submit();
         });
 
         window.addEventListener('beforeunload', function(e) {
@@ -264,7 +264,7 @@
 		</div>
 	</div>
 	<form class="download-frm" method="POST">
-        	<input type="hidden" name="pwtc_mapdb_download_signup" value="yes"/>
+        	<input type="hidden" name="pwtc_mileage_download_riderid" value="yes"/>
         	<input type="hidden" name="user_id" value=""/>
     	</form> 
     </div>
