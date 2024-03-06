@@ -211,6 +211,7 @@
         });
 
 	$('#pwtc-mileage-rider-card-div .download_card').on('click', function(evt) {
+		$('#pwtc-mileage-rider-card-div .leader-search-div').hide();
 		var new_leaders = [];
             	$('#pwtc-mileage-rider-card-div .leaders-div div').each(function() {
                 	var userid = Number($(this).attr('userid'));
