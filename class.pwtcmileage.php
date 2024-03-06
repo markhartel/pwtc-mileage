@@ -353,13 +353,13 @@ class PwtcMileage {
 								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 0, 0, false);
 							}
 							else if ($card_count == 1) {
-								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 0, 0, false);
+								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 95, 0, false);
 							}
 							else if ($card_count == 2) {
-								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 0, 0, false);
+								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 0, 120, false);
 							}
 							else if ($card_count == 3) {
-								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 0, 0, true);
+								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 95, 120, true);
 							}
 							$card_count++;
 						}
@@ -371,7 +371,7 @@ class PwtcMileage {
 		}
 	}
 	
-	public static function generate_riderid_card($pdf, $riderid, $name, $expdate, $familyid, $x_off=10, $y_off=10, $instructions=true) {
+	public static function generate_riderid_card($pdf, $riderid, $name, $expdate, $familyid, $x_off=0, $y_off=0, $instructions=true) {
 		$fmtdate = date('M Y', strtotime($expdate));
 		$w_card = 95;
 		$h_card = 60;
