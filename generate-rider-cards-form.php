@@ -223,6 +223,7 @@
             	}
             	$('#pwtc-mileage-rider-card-div .download-frm input[name="user_id"]').val(JSON.stringify(new_leaders));
 		show_warning($('#pwtc-mileage-rider-card-div .download-frm input[name="user_id"]').val());
+		is_dirty = false;
             //$('#pwtc-mileage-rider-card-div .download-frm').submit();
         });
 
