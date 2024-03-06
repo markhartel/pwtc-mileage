@@ -209,17 +209,9 @@
                 }
             }
         });
-	    
-        $('#pwtc-mileage-rider-card-div form').on('keypress', function(evt) {
-            var keyPressed = evt.keyCode || evt.which; 
-            if (keyPressed === 13) { 
-                evt.preventDefault(); 
-                return false; 
-            } 
-        });
 
 	$('#pwtc-mileage-rider-card-div .download_card').on('click', function(evt) {
-            $('#pwtc-mileage-rider-card-div .download-frm').submit();
+            //$('#pwtc-mileage-rider-card-div .download-frm').submit();
         });
 
         window.addEventListener('beforeunload', function(e) {
@@ -237,25 +229,21 @@
 </script>
 <div id='pwtc-mileage-rider-card-div'>
     <div class="callout">
-        <form method="POST" novalidate>
-            <div class="row column">
-                <label>Ride Leaders
-                    <input type="hidden" name="leaders" value=""/>	
-                </label>
-            </div>
-            <div class="row column">
+        <div class="row column">
+        	<label>Current Members</label>
+        </div>
+        <div class="row column">
                 <div class= "leaders-div" style="min-height:40px; border:1px solid; display:flex; flex-wrap:wrap;">
-                    <input type="text" name="leader-pattern" placeholder="Enter leader">
+                    <input type="text" name="leader-pattern" placeholder="Enter member name">
                 </div>
-            </div>
-            <div class="row column">
+        </div>
+        <div class="row column">
                 <div class="leader-search-div" style="border:1px solid; border-top-width: 0 !important; overflow: auto; height: 100px; display:none;">
                 </div>
-            </div>
-            <div class="row column" style="margin-top:15px;">
-                <p class="help-text">Riders must have ride leader access on the website to be assigned as leader.</p>
-            </div>
-        </form>
+        </div>
+        <div class="row column" style="margin-top:15px;">
+                <p class="help-text">Membership cards can only be downloaded for active members.</p>
+        </div>
     	<div class="errmsg"></div>
     	<div class="row column clearfix">
 		<div class="button-group float-left">
