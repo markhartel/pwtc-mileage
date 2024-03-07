@@ -1602,6 +1602,15 @@ class PwtcMileage {
 
 	// Generates the [pwtc_mileage_generate_rider_cards] shortcode.
 	public static function shortcode_generate_rider_cards($atts, $content) {
+		$current_user = wp_get_current_user();
+		if ( 0 == $current_user->ID ) {
+			return '<div class="callout small warning"><p>Please <a href="/wp-login.php">log in</a> to download membership cards.</p></div>';
+		}
+		$user_info = get_userdata($current_user->ID);
+		$is_admin = in_array('administrator', $user_info->roles);
+		if ( !$is_admin ) {
+			return '<div class="callout small warning"><p>You must have administrator rights to download membership cards.</p></div>';
+		}
         	ob_start();
         	include('generate-rider-cards-form.php');
         	return ob_get_clean();
