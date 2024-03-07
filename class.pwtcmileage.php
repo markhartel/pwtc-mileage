@@ -359,7 +359,7 @@ class PwtcMileage {
 								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 0, 120, false);
 							}
 							else if ($card_count == 3) {
-								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 95, 120, true);
+								self::generate_riderid_card($pdf, $rider_id, $name, $exp_date, $family_id, 95, 120, false);
 							}
 							$card_count++;
 						}
