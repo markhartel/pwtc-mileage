@@ -50,10 +50,11 @@
             return found;
         }
 
-	    function remove_leader_event(evt) {
+	function remove_leader_event(evt) {
             is_dirty = true;
             $(this).parent().remove();
             $('#pwtc-mileage-rider-card-div .leader-search-div').hide();
+	    clear_warning();
             evt.stopPropagation();
         }
 
@@ -67,6 +68,7 @@
                 $('#pwtc-mileage-rider-card-div .leaders-div div[userid="' + userid + '"] .fa-times').on('click', remove_leader_event);
             }
             $('#pwtc-mileage-rider-card-div .leader-search-div').hide();
+	    clear_warning();
         }
 
         function leaders_lookup_cb(response) {
@@ -199,7 +201,7 @@
 
         $('#pwtc-mileage-rider-card-div .leaders-div .fa-times').on('click', remove_leader_event);
 	    
-	    $('#pwtc-mileage-rider-card-div .leader-search-div').on('scroll', function() {            
+	$('#pwtc-mileage-rider-card-div .leader-search-div').on('scroll', function() {            
             if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
                 var offset = $(this).attr('offset');
                 if (offset) {
@@ -218,7 +220,7 @@
                 	new_leaders.push(userid); 
             	});
             	if (new_leaders.length == 0) {
-                	show_warning('You must choose at least one member.');
+                	show_warning('You must choose at least one member card to download.');
                 	return;
             	}
             	$('#pwtc-mileage-rider-card-div .download-frm input[name="user_id"]').val(JSON.stringify(new_leaders));
@@ -243,7 +245,7 @@
 <div id='pwtc-mileage-rider-card-div'>
     <div class="callout">
         <div class="row column">
-        	<label>Current Members</label>
+        	<label>Member Cards to Download</label>
         </div>
         <div class="row column">
                 <div class= "leaders-div" style="min-height:40px; border:1px solid; display:flex; flex-wrap:wrap;">
