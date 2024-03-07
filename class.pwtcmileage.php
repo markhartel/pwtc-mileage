@@ -60,8 +60,8 @@ class PwtcMileage {
 			array( 'PwtcMileage', 'shortcode_rides_wo_sheets'));
 		add_shortcode('pwtc_riderid_download', 
 			array( 'PwtcMileage', 'shortcode_riderid_download'));
-		add_shortcode('pwtc_mileage_generate_rider_cards', 
-			array( 'PwtcMileage', 'shortcode_generate_rider_cards'));
+		add_shortcode('pwtc_mileage_download_membership_cards', 
+			array( 'PwtcMileage', 'shortcode_download_membership_cards'));
 /*
 		add_shortcode('pwtc_mileage_rides_barchart', 
 			array( 'PwtcMileage', 'shortcode_rides_barchart'));
@@ -1600,8 +1600,8 @@ class PwtcMileage {
 		return $out;
 	}
 
-	// Generates the [pwtc_mileage_generate_rider_cards] shortcode.
-	public static function shortcode_generate_rider_cards($atts, $content) {
+	// Generates the [pwtc_mileage_download_membership_cards] shortcode.
+	public static function shortcode_download_membership_cards($atts, $content) {
 		$current_user = wp_get_current_user();
 		if ( 0 == $current_user->ID ) {
 			return '<div class="callout small warning"><p>Please <a href="/wp-login.php">log in</a> to download membership cards.</p></div>';
