@@ -213,6 +213,7 @@ function pwtc_mileage_get_rider_card_info($user_id, $rider_id = '') {
         if ($userdata === false) {
             return false;
         }
+        $rider_id = get_field('rider_id', 'user_'.$user_id);
         $lastname = $userdata->last_name;
         $firstname = $userdata->first_name;
         $family_id = '';
@@ -256,6 +257,7 @@ function pwtc_mileage_get_rider_card_info($user_id, $rider_id = '') {
         $family_id = '';
     }
     $result = array(
+        'rider_id' => $rider_id,
         'last_name' => $lastname,
         'first_name' => $firstname,
         'expir_date' => $exp_date,
