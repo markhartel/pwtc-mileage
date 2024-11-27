@@ -317,6 +317,7 @@ if ($running_jobs > 0) {
         <div class='awards'>
             <div><a href='#' report-id='award_achvmnt'>Accumulative mileage achievement</a></div>
             <div><a href='#' report-id='award_top_miles'>Top annual mileage</a></div>
+	    <div><a href='#' report-id='award_top_attend'>Top annual attendance</a></div>
             <div><a href='#' report-id='award_members'>Member annual and accumulative mileage</a></div>
             <div><a href='#' report-id='award_members_500'>Member annual and accumulative mileage (500 miles or more)</a></div>
             <div><a href='#' report-id='award_leaders'>Ride leaders</a></div>
