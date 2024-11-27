@@ -402,6 +402,32 @@ class PwtcMileage_DB {
 		return $meta;
 	}
 
+	public static function meta_ly_attend($no_id = false) {
+		$thisyear = date('Y', current_time('timestamp'));
+		$lastyear = intval($thisyear) - 1;
+		if ($no_id) {
+			$meta = array(
+				'header' => array('Name', 'Attendance', 'Mileage'),
+				'width' => array(60, 20, 20),
+				'align' => array('L', 'R', 'R'),
+				'title' => $lastyear . ' Rider Attendance',
+				'date_idx' => -1,
+				'id_idx' => -1
+			);
+		}
+		else {
+			$meta = array(
+				'header' => array('ID', 'Name', 'Attendance', 'Mileage'),
+				'width' => array(20, 40, 20, 20),
+				'align' => array('C', 'L', 'R', 'R'),
+				'title' => $lastyear . ' Rider Attendance',
+				'date_idx' => -1,
+				'id_idx' => 0
+			);
+		}
+		return $meta;
+	}
+	
 	public static function fetch_pre_ly_miles($outtype, $sort, $min = 0) {
     	global $wpdb;
 		$where = '';
