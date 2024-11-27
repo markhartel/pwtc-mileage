@@ -1747,6 +1747,7 @@ class PwtcMileage_Admin {
 					break;
 				case "award_achvmnt":
 				case "award_top_miles":
+				case "award_top_attend":
 				case "award_members":
 				case "award_leaders":
 				case "award_members_500":
@@ -1772,6 +1773,10 @@ class PwtcMileage_Admin {
 						case "award_top_miles":
 							$meta = PwtcMileage_DB::meta_ly_miles($hide_id);
 							$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, 'mileage desc', 0, $hide_id);
+							break;
+						case "award_top_attend":
+							$meta = PwtcMileage_DB::meta_ly_miles($hide_id);
+							$data = PwtcMileage_DB::fetch_ly_miles(ARRAY_N, 'rides desc', 0, $hide_id);
 							break;
 						case "award_leaders":
 							$meta = PwtcMileage_DB::meta_ly_led(0, $hide_id);
